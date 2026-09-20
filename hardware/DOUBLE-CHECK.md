@@ -1,90 +1,75 @@
-# Hardware double-check — 2026-09-20
+# Hardware double-check — 2026-09-20 (Pi platform)
 
-Every component checked against the others and against the enclosure the
-user chose: a **Hammond 1590DD** die-cast aluminium box. Numbers from
-datasheets and shop listings, not memory; sources in [SOURCING.md](SOURCING.md).
+Every component checked against the others and against the **Hammond 1590DD**
+(inside 183 × 113 × 32 mm, aluminium). Sources in [SOURCING.md](SOURCING.md).
+Platform: Raspberry Pi + USB 4G stick ([ADR 0014](../docs/decisions/0014-raspberry-pi-zero-2w.md)).
 
-## The enclosure changes three things
+## The enclosure still changes three things
 
-**1590DD**: outside 187.5 × 119.5 × 37 mm, **inside 183 × 112.9 × 32 mm**,
-4 mm lid on six screws, IP54, ~0.5 kg empty
-([datasheet](https://www.hammfg.com/part/1590DD)).
+1. **Faraday cage.** The stick's internal antenna is dead inside; its TS-9
+   port goes to an SMA bulkhead and a hinged stub outside. Wi-Fi/BT dead too —
+   fine, both are off in the field.
+2. **32 mm inside.** No arcade button through the top (33–52 mm deep) → 33 mm
+   button through the side wall. 40 mm speaker (17 mm), not 50 mm (30 mm).
+   A Pi 3A+ (65 × 56 × ~12 mm with header) and a Zero 2 W (65 × 30 × 5) both fit
+   flat on the base; the stick lies beside them.
+3. **Drill, don't mill.** Round holes only.
 
-1. **It is a Faraday cage.** LTE, GPS, Wi-Fi and BLE are all dead inside it.
-   The LTE antenna goes *outside* through an SMA bulkhead; GPS/Wi-Fi/BLE we
-   don't need (and no Wi-Fi means no provisioning, which is a feature).
-2. **32 mm inside.** A 60 mm arcade button is 52.4 mm deep with its
-   microswitch; the 30/33 mm ones are ~33 mm. Nothing arcade-shaped fits
-   *through the top*. The play button mounts **through a side wall** — 24 mm
-   hole in a 37 mm wall — with its body running inward across the 113 mm
-   width. The 50 mm speaker (30 mm tall) is out; the 40 mm (17 mm) is in.
-3. **Drill, don't mill.** Round holes are easy in die-cast: step drill for
-   the button, hole saw for the ring window, hole pattern for the speaker,
-   a 6.5 mm for the SMA. Slots and rectangles are a jigsaw and an afternoon.
-   The design below uses only round holes.
-
-Weight: ~0.5 kg box + ~0.2 kg parts ≈ 0.7 kg. Heavy for a school bag; very
-much a thing that survives one. Heat: aluminium is the best case. Drops:
-the box will outlive the child's interest in it.
-
-## Layout in the 1590DD (proposal — see enclosure.md)
+## Layout in the 1590DD
 
 ```
- top (the hinged 4 mm plate)         front wall (120 × 37)          back wall
- ┌───────────────────────────┐       ┌──────────────────────┐       ┌─────────┐
- │   ◯ ring window (45 mm)   │       │ [●] play  · ·  [USB-C]│       │  SMA ⊙  │
- │   ⋮⋮⋮ speaker grille       │       │        LINK POWER    │       └─────────┘
+ top (hinged 4 mm plate)             front wall (120 × 37)        back wall
+ ┌───────────────────────────┐       ┌──────────────────────┐    ┌─────────┐
+ │   ◯ ring window (45 mm)   │       │ [●] play  · ·  [USB] │    │  SMA ⊙  │
+ │   ⋮⋮⋮ speaker grille       │       │        LINK POWER    │    └─────────┘
  └───────────────────────────┘       └──────────────────────┘
- inside, on the base: LILYGO (110 × 32 × 19.5) · 18650 · amp · mic (faces up, under the lid)
+ base: Pi · stick (on the Pi's USB-A, or a 10 cm OTG cable on a Zero) · PowerBoost
+       · 3–6 × 18650 along the back wall · amp · mic (faces up, under the lid)
  lid: piano hinge on the back edge · magnet catch front · reed contact = lid state = mic power
 ```
-
-Ring and speaker live on the lid plate; five wires cross the hinge (a short
-ribbon — guitar pedals do this for decades). Mic on the base, exposed when
-the lid is open — which is the gesture.
 
 ## Component by component
 
 | # | Component | Verdict | What was checked |
 | --- | --- | --- | --- |
-| 1 | **LILYGO T-A7670G R2** (Cat-1) replaces the T-SIM7080G-S3 (Cat-M) | **Switch** — [ADR 0013](../docs/decisions/0013-cat1-not-catm.md) | The user's SIM provider, Digital Republic, [does not support Cat-M1/NB-IoT](https://support.digitalrepublic.ch/en/support/solutions/articles/33000225329-do-digital-republic-sim-cards-support-lte-cat-m1-and-nb-iot-); the SIM7080G has no ordinary 4G. The R2: ESP32 **WROVER (classic LX6), 4 MB flash, 8 MB PSRAM**, A7670G **LTE Cat-1 (10/5 Mbps)** + GNSS, JST LiPo with charging, USB-C, micro/nano-SIM, u.FL for LTE and GPS, both antennas in the box. 111 × 35 × 22 mm — fits. `esp_modem` PPP works the same. CHF 37.90, in stock. |
-| 1a | — flash | **the real cost** | 4 MB. OTA wants two ~1.5 MB slots → <1 MB left. The never-lost outbox moves to the **TF card**; internal flash keeps only the latest message as fallback. SD becomes a dependency — name-brand card, sync-on-write, missing card = fault LED. **Confirm the R2 has the TF slot** (LILYGO says yes; Bastelgarage's listing is silent). |
-| 1b | — pins | **exactly enough** | Fixed on the R2: modem TX 26 / RX 27 / PWRKEY 4 / DTR 25 / RI 33 / RESET 5 / POWER_ON 12; TF 14/2/15/13; VBAT ADC 35. That leaves **six native outputs** (18 19 21 22 23 32) and three input-only pins (34 36 39). It fits: mic and amp **share one I2S port in full-duplex** (BCLK 18, WS 19, DOUT 23, DIN 34), I²C 21/22 to a **PCF8574** for LEDs, ring gate, amp shutdown and button LED, ring data on 32, lid on 36 and play on 39 (input-only → external 10 kΩ pull-ups). Pin map in `firmware/main/dadbox_config.h`. |
-| 1c | — battery | ✔ | The R2 has **both** an 18650 holder with charging and a JST LiPo connector (LILYGO/RandomNerd; Bastelgarage's listing shows only the connector). Same rule as before: protected 18650 with JST leads, strapped down; don't trust the spring holder in a bag. Charge rate unverified — assume ≤500 mA. |
-| 1d | — power | fine | A7670 sleeps at ~2 mA (vs µA for Cat-M). 60 h × 2 mA = 120 mAh = 4 % of the cell. Wake via DTR; no need to power-cycle the modem between check-ins, so the poll interval can be tighter for free. |
-| 1e | — GNSS | free bonus | Not needed, but the modem's cell ID (`AT+CPSI`) or a GNSS fix at check-in answers "which house" for ADR 0008 without a dock resistor. |
-| 1f | — alternative | if 1a/1b bite | **T-SIM7670G-S3**: ESP32-S3, 16 MB flash, SIM7670G Cat-1. Not stocked in CH, no TF slot, ~0.5 mA deep-sleep floor (harmless). 2–3 weeks by import. |
-| 2 | I2S mic MSM261S4030H0 (Bastelgarage) | ✔ | 3.3 V, 1 mA, 24-bit I2S. No enable pin — the reed contact switches its VDD directly (1 mA ≪ 3 W contact rating). That is the physical mic gate. INMP441 from Temu is the equivalent. |
-| 3 | MAX98357A amp | ✔ | 2.7–5.5 V. Feed from VBAT (3.7–4.2 V) → ~1.5 W into 4 Ω. Plenty for a bedroom; 3 W needs 5 V and a boost we don't want. SD pin for gating. Gain set by pin, volume in firmware. |
-| 4 | Speaker 40 mm 4 Ω 3 W, 17 mm tall | ✔ fits | Mounted under the lid plate, cone up through a hole pattern. The 50 mm (30 mm tall) does not fit. Visaton BF 45 is 61 × 45 mm rectangular and 4–6 weeks — skipped. |
-| 5 | NeoPixel ring 16, 44.5 mm OD | ✔ | "5 V, 4–7 V works": VBAT at 3.7–4.2 V is fine, and 3.3 V data clears the 0.7 × VDD threshold. Gate it (draws ~16 mA dark). 45 mm hole saw in the lid + 3 mm acrylic disc as diffuser. Only 2 in stock at Galaxus — order first. |
-| 6 | Play button: 33 mm illuminated (24 mm hole) | ✔ side wall | Depth ~33 mm runs inward along the width. Illuminated is a bonus: light it during *waiting* so the child knows which thing to press. 60 mm: **no** (52.4 mm deep). |
-| 7 | Lid sensor: magnetic door contact (reed + magnet) | ✔ | NO contact, 3 W, 330 mm lead. Doubles as the mic power switch. The 5 V hall module is the wrong voltage — skipped. |
-| 8 | Status LEDs: 2 × 3 mm | ✔ | Any. Through 3 mm holes in the front wall beside the button. |
-| 9 | LTE antenna | **changes** | The included IPEX antenna is useless inside aluminium. Pigtail U.FL → **bulkhead** SMA through the back wall, stub SMA antenna outside. Delock hinged LTE/GSM stub, or the 3 m-cable indoor antenna if the box's spot has bad signal. Confirm the LILYGO's connector is u.FL/IPEX-1 (2.0 mm), not MHF4. |
-| 10 | Battery: protected 18650 ~3000 mAh, JST-PH 2.0 | ✔ phase 3 | Protection at the cell ([ADR 0005](../docs/decisions/0005-battery-required.md)). 60 h target at ~40 mA average = 2.4 Ah — realistic if the ring, amp, mic and modem are gated. Measure first. |
-| 11 | USB-C PSU, one per house | ✔ | Any 5 V / 2 A. |
-| 12 | SIM: Digital Republic Flat 1 | ✔ | CHF 6/month, unlimited, Sunrise 4G, no contract. Flat 0.4 (CHF 4) works but a 5-min ADPCM message takes ~100 s at 0.2 Mbps up; Flat 1 halves it. Coverage question is now "Sunrise 4G in both bedrooms" — near-certain. |
-| 13 | ESP32-S3-DevKitC-1 N16R8 | dropped | Redundant with the LILYGO. Buy one (18.90) only if you want a second bench board. |
-| 14 | BQ24074 charger, level shifter, SIM7080G breakout | dropped | All on the LILYGO. |
-| 15 | 1000 µF at the modem | keep in the drawer | The LILYGO has its own decoupling. Add it only if uploads reset the board. |
+| 1 | **Raspberry Pi Zero 2 W** (deployment board) | right board, **not buyable this week** | Europe-wide shortage; all Swiss shops out or January 2027; supply expected to improve over the autumn. ~100 mA idle tuned. 65 × 30 mm. One micro-USB OTG port → the stick needs a short OTG cable; bench access is UART or Wi-Fi. |
+| 1a | **Raspberry Pi 3 Model A+** (development board, in stock) | **buy now** | Same BCM2837B0, 512 MB, 1.4 GHz, 65 × 56 mm, **USB-A** (stick plugs straight in), micro-USB power, dual-band Wi-Fi. Boots the *same* 64-bit Lite image; the overlay, the service, `dadboxctl` all carry over unchanged. Idle ~200 mA tuned (no USB hub chip, unlike the 3B+) — roughly **2× the Zero 2 W**. |
+| 1b | — power consequence | decide at M3 | With a 3A+ in the box the weekend needs ~5–6 × 18650 (~15 Ah, +0.3 kg); with a Zero 2 W ~3. Plan the pack around the Zero 2 W and treat the 3A+ as the bench board unless the Zero never arrives. |
+| 1c | — 3B+ / 4 / 5 | no | Distrelec has 3B+ (431) and Pi 5 in stock, but idle 400 mA–3 W. Wrong for a battery. |
+| 1d | — Radxa Zero 3W/3E | no | Only the Ethernet 3E at Digitec; Rockchip I2S/device-tree support is a rabbit hole versus the Pi's one-line overlay. |
+| 2 | **USB 4G stick, HiLink** | ✔ | `cdc_ether` USB Ethernet, DHCP from 192.168.8.1, no AT, no PPP. **Huawei E8372** in stock (Galaxus, 89.90): TS-9 ports, Wi-Fi hotspot disableable. E3372h-320 unavailable. Brovi E3372-325 / ZTE MF79U at Brack/Digitec unverified (pages didn't render for automated reading) — worth a manual look, Brack ships next day. |
+| 2a | — VBUS gating | ✔ design | A high-side P-FET on the stick's 5 V, GPIO-driven: off between check-ins. Boot ~20 s. Saves ~2.7 Ah per weekend versus always-on. On the 3A+ the USB port's power is switchable in software too (`uhubctl` works on 3B+; on 3A+ verify). |
+| 2b | — antenna | ✔ | TS-9 → SMA adapter (Delock, Digitec) → SMA bulkhead coupler through the back wall → hinged LTE stub (Delock, 20.90). |
+| 3 | I2S mic + MAX98357A | ✔ | The `googlevoicehat-soundcard` overlay is exactly this pair (Google AIY Voice HAT). BCLK 18, LRCLK 19, mic data 20, amp data 21, **amp SD-mode on GPIO 16** — wire it or the amp stays silent. Mic VDD through the reed contact = hardware gating. |
+| 4 | Speaker 40 mm / 17 mm | ✔ | Under the lid plate, cone up. |
+| 5 | NeoPixel ring 16 | ✔ with shifter | Now at the Pi's 5 V: WS2812 wants ≥3.5 V data from 3.3 V logic → **74AHCT125**. Driven over SPI MOSI (GPIO 10) with `rpi_ws281x`. Gate its 5 V. Only 2 in stock — order first. |
+| 6 | Play button 33 mm | ✔ side wall | `gpiozero.Button` with an external 10 kΩ; illuminated — light it during *waiting*. |
+| 7 | Reed contact + magnet | ✔ | Lid state on a GPIO (interrupt) and the mic's power switch (1 mA ≪ 3 W). |
+| 8 | Status LEDs | ✔ | Two GPIOs, two 3 mm LEDs. |
+| 9 | **PowerBoost 1000C** | ✔ phase 3 | 1 A charge (9 Ah ≈ 9–10 h — overnight), 1 A 5.2 V boost, load-sharing, low-battery cutoff. **Enough for a Zero 2 W + stick; marginal for a 3A+ + stick at peak** (a 3A+ can pull ~0.7 A on boot plus the stick's bursts). If the 3A+ stays in the box, use the 1000C for charging and a separate 5 V / 2 A boost, or a 2 A-class charger board. BerryBase CH: 15 in stock. The **500C at Distrelec (2-hour pickup) is too small**. |
+| 10 | Cells: protected 18650, 1S parallel | ✔ phase 3 | 3 for a Zero 2 W, 5–6 for a 3A+. Parallel *protected* cells are fine (each PCM trips independently). Strap them; no spring holders. Buy after measuring. |
+| 11 | Fuel gauge | ✔ | MAX17043 (SparkFun) or ADS1115 on I²C. The Pi has no ADC. |
+| 12 | microSD | ✔ | Name-brand A1, 32 GB. Read-only overlay root + `/data`. Second card imaged as the spare. |
+| 13 | SIM: Digital Republic Flat 1 | ✔ | CHF 6/month, unlimited, Sunrise 4G. Cat-M irrelevant now. |
+| 14 | PiJuice Zero | dropped | Discontinued at Distrelec. |
+| 15 | LILYGO boards, PCF8574, level-shifted modem breakouts | dropped | ESP32 era. See ADR 0013/0014. |
 
 ## What this does to the phases
 
-- **Phase 1 now includes the LILYGO** (it *is* the audio board), the box, the
-  mic, speaker, amp, ring, reed contact, button, LEDs, a microSD and the
-  expander. ~CHF 165. You prove audio *and* fit in the real enclosure at once.
-- **Phase 2** is the Digital Republic SIM, the pigtail and the stub antenna.
-  ~CHF 31 + CHF 6/month.
-- **Phase 3** is the cell and two PSUs. ~CHF 35.
-- **Phase 4** is hinge, acrylic, mesh, screws. Hardware store.
+- **Phase 1 orders today**: 3A+, 1590DD, mic, speaker, reed, button, SD, PSUs
+  (all in stock) + amp and ring from Galaxus (~1 week). ~CHF 150.
+- **Phase 2**: the stick (E8372 now, or a cheaper one from Brack), adapter,
+  coupler, antenna, SIM. ~CHF 65–125 + 6/month.
+- **Phase 3**: PowerBoost + cells + gauge after measuring. ~CHF 90–130.
+- **Zero 2 W**: when it lands, swap it in. Nothing else changes.
 
 ## Still to verify with parts in hand
 
-1. ~~That the R2 has its TF slot~~ — confirmed (SPI on 14/2/15/13). Still: that
-   the SD survives a power pull mid-write.
-2. Free GPIOs on the R2 headers after modem and TF. Expect to need the
-   PCF8574; confirm how many native pins remain for I2S ×2 + ring data.
-3. That the reed contact + magnet register reliably through the 4 mm lid
-   gap you end up with. Reed range is ~10–15 mm; should be fine.
-4. Idle current of every gated rail, before ordering the cell.
+1. Real idle current of the tuned 3A+ and, later, the Zero 2 W — and the
+   stick on/off — before choosing the cell count.
+2. That the stick stays in HiLink mode across reboots (some need
+   `usb_modeswitch` once).
+3. That the read-only overlay + `/data` survives a power pull mid-write.
+4. Whether the PowerBoost 1000C's 1 A holds the 3A+ + stick at peak; if not,
+   a separate boost.
+5. The reed contact registers reliably through the lid gap.

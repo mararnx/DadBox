@@ -1,19 +1,25 @@
 phase,qty,ref,part,description,why,price_chf,source,url,status,notes
-1,1,U1,LILYGO T-A7670G R2,ESP32 WROVER 4MB/8MB + A7670G LTE Cat-1 + GNSS + JST LiPo charging + SIM,Cat-1 because Digital Republic has no Cat-M - ADR 0013,37.90,bastelgarage,https://www.bastelgarage.ch/lilygo-t-a7670g-r2-esp32-4g-carte-de-developpement-avec-gps,not ordered,TF slot confirmed (SPI 14/2/15/13). 18650 holder + JST. Includes LTE + GPS antennas (u.FL)
-1,1,SD1,microSD 8-32GB name-brand,Outbox storage,4MB flash cannot hold OTA + outbox - ADR 0013,8.00,any,,not ordered,Mount with sync-on-write. Missing card = fault on status LEDs
-1,1,U6,PCF8574 I2C GPIO expander,Slow signals,WROVER pin budget after modem + TF - ADR 0013,3.00,bastelgarage,,not ordered,LEDs gates lid button
-1,1,ENC,Hammond 1590DD,Die-cast alu 188x120x37 inside 183x113x32,The box - ADR 0011,27.91,distrelec,https://www.distrelec.ch/en/die-cast-enclosure-1590-188x120x37mm-die-cast-aluminium-natural-ip54-hammond-1590dd/p/15011796,not ordered,8 in stock 1-2 days
-1,1,MK1,I2S MEMS mic module MSM261S4030H0,3.3V 1mA I2S,Reed contact switches its VDD directly,8.90,bastelgarage,https://www.bastelgarage.ch/i2s-mikrofon-modul,not ordered,INMP441 equivalent
-1,1,U4,Adafruit MAX98357A,I2S class-D amp,From VBAT ~1.5W into 4 ohm. SD pin for gating,9.95,galaxus,https://galaxus.ch/de/s1/product/adafruit-i2s-3w-class-d-amplifier-breakout-max98357a-erweiterung-elektronikmodul-5998646,not ordered,~1 week at supplier
+1,1,U1,Raspberry Pi 3 Model A+,BCM2837B0 512MB USB-A 40-pin,Dev board now - Zero 2 W later - ADR 0014,26.90,pi-shop.ch,https://www.pi-shop.ch/raspberry-pi-3-model-a,not ordered,In stock - immediate shipping
+1,1,U1b,Raspberry Pi Zero 2 W,Deployment board,Half the Pi's power draw - ADR 0014,17.15,berrybase.ch,https://www.berrybase.ch/raspberry-pi-zero-2-w,blocked,Europe-wide shortage until autumn - set notify
+1,1,ENC,Hammond 1590DD,Die-cast alu 188x120x37 inside 183x113x32,The box - ADR 0011,27.91,distrelec,https://www.distrelec.ch/en/die-cast-enclosure-1590-188x120x37mm-die-cast-aluminium-natural-ip54-hammond-1590dd/p/15011796,not ordered,8 in stock 1-2 days or pickup
+1,1,SD1,microSD 32GB A1 name-brand,Root (read-only overlay) + /data,The whole machine - ADR 0014,10.00,any,,not ordered,Buy a second later as the spare image
+1,1,MK1,I2S MEMS mic module MSM261S4030H0,3.3V 1mA I2S,googlevoicehat-soundcard overlay - reed contact switches its VDD,8.90,bastelgarage,https://www.bastelgarage.ch/i2s-mikrofon-modul,not ordered,INMP441/ICS-43434 equivalent
+1,1,U4,Adafruit MAX98357A,I2S class-D amp,Same overlay - the Voice HAT pair. SD pin gated,9.95,galaxus,https://galaxus.ch/de/s1/product/adafruit-i2s-3w-class-d-amplifier-breakout-max98357a-erweiterung-elektronikmodul-5998646,not ordered,~1 week at supplier
 1,1,LS1,Speaker 4ohm 3W 40mm,17mm tall,Only one that fits 32mm inside,8.90,bastelgarage,https://www.bastelgarage.ch/lautsprecher-4ohm-3w-40mm,not ordered,
-1,1,DS1,Adafruit NeoPixel ring 16,44.5mm OD WS2812,The child's display. Gate it,18.50,galaxus,https://www.galaxus.ch/en/s1/product/adafruit-neopixel-ring-16-x-ws2812-5050-rgb-led-diode-5998257,not ordered,ONLY 2 IN STOCK - order first
+1,1,DS1,Adafruit NeoPixel ring 16,44.5mm OD WS2812 at 5V,The child's display. Gate it,18.50,galaxus,https://www.galaxus.ch/en/s1/product/adafruit-neopixel-ring-16-x-ws2812-5050-rgb-led-diode-5998257,not ordered,ONLY 2 IN STOCK - order first
+1,1,U5,74AHCT125 level shifter,3.3V to 5V for WS2812 data,Ring runs at the Pi's 5V,3.00,any,,not ordered,
 1,1,SW1,Magnetic door contact reed + magnet,NO 3W 330mm lead,Lid sensor and mic power switch - ADR 0007,4.90,bastelgarage,https://www.bastelgarage.ch/magnetischer-tur-fenster-kontakt,not ordered,
-1,1,SW2,Illuminated arcade button 33mm,24mm hole ~33mm deep,Play button - side wall mount,14.90,galaxus,https://www.galaxus.ch/en/s1/product/purecrea-arcade-button-illuminated-33mm-green-buttons-switches-36704979,not ordered,Cheaper direct at bastelgarage
+1,1,SW2,Illuminated arcade button 33mm,24mm hole ~33mm deep,Play - side wall mount,14.90,galaxus,https://www.galaxus.ch/en/s1/product/purecrea-arcade-button-illuminated-33mm-green-buttons-switches-36704979,not ordered,
 1,2,DS2-3,3mm LED + 220R,LINK and POWER status LEDs,Adults' channel - ADR 0009,2.00,any,,not ordered,
-1,1,Q1,Logic-level MOSFET,Ring supply gate,~16mA dark otherwise,1.00,any,,not ordered,
-2,1,SIM1,Digital Republic Flat 1 data SIM,Unlimited 1/0.5 Mbps Sunrise 4G no contract,Works with Cat-1 - ADR 0013,6.00/month,digitalrepublic.ch,https://digitalrepublic.ch/en/smart-devices/,not ordered,Flat 0.4 (4/month) also works. Check Sunrise 4G in both bedrooms
-2,1,ANT1,Pigtail u.FL to bulkhead SMA female,30cm,Through the back wall,9.75,galaxus,https://www.galaxus.ch/en/s1/product/allnet-antenna-pigtail-ufl-to-sma-f-30cm-antenna-cable-antenna-satellite-cables-31824258,not ordered,Confirm it is a flange/bulkhead SMA
-2,1,ANT2,Delock LTE/HSPA/GSM stub antenna SMA male,Hinged 24cm up to 4dBi,Outside the box,20.90,digitec,https://www.digitec.ch/de/s1/product/delock-ltehspagsm-antenne-sma-stecker-mobilfunk-antenne-netzwerk-zubehoer-5833613,not ordered,Take the LTE variant not the 13.50 3G/GSM one
-3,1,BT1,Protected 18650 ~3000mAh with JST-PH 2.0 leads,NCR18650B-class,On the JST strapped down - ADR 0005,15.00,galaxus,https://www.galaxus.ch/de/s1/product/purecrea-li-ion-akku-3000ma-18650-mit-schutzelektronik-und-stecker-entwicklungsboard-kit-36169153,not ordered,Unavailable today - set notify. Buy after measuring idle current
-3,2,J1,USB-C PSU 5V 2A,Mains adapter,One per house,10.00,galaxus,,not ordered,
+1,2,R1-2,10k resistors,Pull-ups for lid and button,gpiozero inputs,0.50,any,,not ordered,
+1,2,Q1-2,Logic-level MOSFET,Ring supply gate; stick VBUS gate,Gating is the whole budget,2.00,any,,not ordered,
+1,2,J1,USB PSU 5V 2.5A,Mains adapter,One per house,10.00,any,,not ordered,micro-USB for the 3A+
+2,1,U2,USB 4G stick HiLink (Huawei E8372 / Brovi E3372-325 / ZTE MF79U),cdc_ether USB Ethernet,No AT no PPP - ADR 0014,30-90,galaxus/brack,https://www.galaxus.ch/de/s1/product/huawei-e8372-lte-3g-datenstick-router-8929882,not ordered,E8372 in stock at 89.90; cheaper sticks at Brack unverified
+2,1,SIM1,Digital Republic Flat 1 data SIM,Unlimited 1/0.5 Mbps Sunrise 4G,No contract - ADR 0013,6.00/month,digitalrepublic.ch,https://digitalrepublic.ch/en/smart-devices/,not ordered,Check Sunrise 4G in both bedrooms
+2,1,ANT1,Delock TS-9 to SMA adapter,Stick antenna port to the wall,Aluminium box,10.00,digitec,https://www.digitec.ch/de/s1/product/delock-antennenadapter-sma-ts-9-antennenkabel-antennenkabel-5829274,not ordered,
+2,1,ANT2,SMA bulkhead coupler,Through the wall,,3.00,any,,not ordered,
+2,1,ANT3,Delock LTE/HSPA/GSM stub antenna SMA male,Hinged 24cm,Outside the box,20.90,digitec,https://www.digitec.ch/de/s1/product/delock-ltehspagsm-antenne-sma-stecker-mobilfunk-antenne-netzwerk-zubehoer-5833613,not ordered,LTE variant not the 13.50 3G/GSM one
+3,1,U6,Adafruit PowerBoost 1000C,1A charge + 1A 5V boost load-share,Pack charger and Pi supply - ADR 0014,21.70,berrybase.ch,https://www.berrybase.ch/adafruit-powerboost-1000,not ordered,15 in stock 2-5 days. 500C at Distrelec is too small
+3,3-6,BT1,Protected 18650 ~3000mAh,1S parallel pack,Weekend unplugged - ADR 0005. 3 for a Zero 2 W ~5-6 for a 3A+,15.00,berrybase/conrad,,not ordered,Buy after measuring
+3,1,U7,LiPo fuel gauge MAX17043 or ADS1115,Battery % over I2C,App shows quiet vs dead,12.00,digitec,https://www.digitec.ch/de/s1/product/sparkfun-lipo-fuel-gauge-elektronikmodul-5999111,not ordered,
 4,1,HW,Piano hinge + M3 + catch magnet + acrylic disc + mesh + feet,Lid and windows,,15.00,hardware store,,not ordered,

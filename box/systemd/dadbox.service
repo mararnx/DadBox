@@ -1,0 +1,19 @@
+[Unit]
+Description=DadBox voice messaging box
+After=network.target sound.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=dadbox
+WorkingDirectory=/opt/dadbox
+ExecStart=/opt/dadbox/.venv/bin/python -m dadbox
+Restart=always
+RestartSec=3
+# The root is a read-only overlay; only /data is writable.
+ReadWritePaths=/data /run
+Environment=DADBOX_DATA=/data
+WatchdogSec=60
+
+[Install]
+WantedBy=multi-user.target

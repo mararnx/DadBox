@@ -3,19 +3,18 @@
 A voice messaging device for a parent and child who live apart. Open the lid,
 talk, close it — the other person hears it. No screen, no phone, no account.
 
-> **Status:** designed and reviewed, nothing built. Eight ADRs in `docs/decisions/`.
-> Next action: check Sunrise 4G in both bedrooms, order phase 1, build
-> `tools/fakebox`.
+> **Status:** designed and reviewed, nothing built. Fourteen ADRs in `docs/decisions/`.
+> Next action: find a Pi Zero 2 W, order phase 1, build `tools/fakebox`.
 
 ## Layout
 
 | Path | What lives here |
 | --- | --- |
 | `hardware/schematics` | Circuit schematics (KiCad, Fritzing, PDF exports) |
-| `hardware/pcb` | Only if a PCB ever happens — v1 is point-to-point on the LILYGO's headers |
+| `hardware/pcb` | Only if a PCB ever happens — v1 is point-to-point on the Pi's 40-pin header |
 | `hardware/cad` | Drill templates for the 1590DD lid and walls (PDF/DXF, 1:1) |
 | `hardware/bom` | Bills of materials, supplier links, cost tracking |
-| `firmware` | ESP32 firmware (ESP-IDF) for the LILYGO T-A7670G R2 |
+| `box` | The box's Python service (Raspberry Pi Zero 2 W, Linux) |
 | `server` | Backend: blob storage, APNs push, device telemetry |
 | `ios` | Parent's native iOS app (SwiftUI) |
 | `docs` | Brief, architecture, protocol, roadmap, build log |

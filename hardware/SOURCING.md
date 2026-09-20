@@ -1,128 +1,87 @@
 # Sourcing — Switzerland, ready to order
 
-Researched 2026-09-20. Prices in CHF incl. VAT as shown on the day; stock
-changes daily — re-check the links before paying. Component choices are
-justified in [DOUBLE-CHECK.md](DOUBLE-CHECK.md).
+Re-researched 2026-09-20 (evening) for the Pi platform ([ADR 0014](../docs/decisions/0014-raspberry-pi-zero-2w.md))
+with one constraint from the user: **immediate availability**. Prices CHF
+incl. VAT as shown that day; stock changes daily. Reasoning per part in
+[DOUBLE-CHECK.md](DOUBLE-CHECK.md).
 
-## The one thing to know about Galaxus
+## The situation with the Pi Zero 2 W
 
-The "third-party supplier" behind Galaxus's LILYGO, Waveshare and Purecrea
-listings **is bastelgarage.ch**. Same stock, same box, marked up:
+**Not buyable anywhere in Europe this week.** BerryBase CH 17.15 (notify only),
+Bastelgarage 29.90 (out), Pi-Shop (out), Digitec/Galaxus quoting
+**January 2027**, the official bundles out, Welectron DE "incoming", Pimoroni
+UK empty. Raspberry Pi expects supply to improve over the autumn.
 
-| Part | Galaxus | Bastelgarage direct |
-| --- | --- | --- |
-| LILYGO T-A7670G R2 | 54.90 | **37.90** |
-| LILYGO T-SIM7080G-S3 (superseded, ADR 0013) | 57.90 | 43.90 |
-| Waveshare ESP32-S3 N16R8 | 24.90 | **18.90** |
-| Hall sensor module | 8.90 | **3.90** |
+**What to do instead:** buy a **Raspberry Pi 3 Model A+** today — same
+BCM2837B0 silicon, 512 MB, a full-size USB-A port the LTE stick plugs straight
+into, and it boots the **identical OS image**. Develop on it, prove M0–M2,
+then drop a Zero 2 W into the box when one lands. Or keep the 3A+ and accept a
+larger pack (see DOUBLE-CHECK). Set a stock notify at BerryBase CH now.
 
-Galaxus is still right for the parts it stocks *itself* (Adafruit, Delock,
-Allnet). So: **two orders** — Bastelgarage direct for the maker modules,
-Galaxus for the rest — or one Galaxus order for ~CHF 40 more. Both ship in
-two days.
+## Order today
 
-## Order 1 — Bastelgarage direct · CHF 63.50 · all in stock
-
-| Qty | Part | CHF | Link |
+| Part | CHF | Stock / delivery | Link |
 | --- | --- | --- | --- |
-| 1 | **LILYGO T-A7670G R2** — ESP32 WROVER (4 MB / 8 MB PSRAM) + A7670G **LTE Cat-1** + GNSS + JST LiPo charging; LTE & GPS antennas included ([ADR 0013](../docs/decisions/0013-cat1-not-catm.md)) | 37.90 | [bastelgarage](https://www.bastelgarage.ch/lilygo-t-a7670g-r2-esp32-4g-carte-de-developpement-avec-gps) |
-| 1 | PCF8574 I²C GPIO expander module — the WROVER runs out of pins after modem + TF | ~3 | bastelgarage (search "PCF8574") |
-| 1 | microSD card 8–32 GB, name-brand — **the outbox lives here** (4 MB flash) | ~8 | Galaxus / any |
-| 1 | I2S MEMS microphone module (MSM261S4030H0, 3.3 V, 1 mA) | 8.90 | [bastelgarage](https://www.bastelgarage.ch/i2s-mikrofon-modul) |
-| 1 | Speaker 4 Ω 3 W **40 mm, 17 mm tall** | 8.90 | [bastelgarage](https://www.bastelgarage.ch/lautsprecher-4ohm-3w-40mm) |
-| 1 | Magnetic door/window contact (reed + magnet, 330 mm lead, NO) — the lid switch *and* the mic's power switch | 4.90 | [bastelgarage](https://www.bastelgarage.ch/magnetischer-tur-fenster-kontakt) |
+| **Raspberry Pi 3 Model A+** | 26.90 | **Sofort-Versand ab Lager** | [pi-shop.ch](https://www.pi-shop.ch/raspberry-pi-3-model-a) |
+| **Hammond 1590DD** | 27.91 | 8 in stock, 1–2 days, same-day pickup possible | [distrelec.ch](https://www.distrelec.ch/en/die-cast-enclosure-1590-188x120x37mm-die-cast-aluminium-natural-ip54-hammond-1590dd/p/15011796) |
+| I2S MEMS mic module (MSM261S4030H0) | 8.90 | in stock | [bastelgarage](https://www.bastelgarage.ch/i2s-mikrofon-modul) |
+| Speaker 4 Ω 3 W 40 mm (17 mm tall) | 8.90 | in stock | [bastelgarage](https://www.bastelgarage.ch/lautsprecher-4ohm-3w-40mm) |
+| Magnetic door contact (reed + magnet) — lid switch and mic power switch | 4.90 | in stock | [bastelgarage](https://www.bastelgarage.ch/magnetischer-tur-fenster-kontakt) |
+| Adafruit MAX98357A I2S amp | 9.95 | >10 at supplier, ~1 week | [galaxus](https://galaxus.ch/de/s1/product/adafruit-i2s-3w-class-d-amplifier-breakout-max98357a-erweiterung-elektronikmodul-5998646) |
+| Adafruit NeoPixel ring 16 | 18.50 | **2 left** at supplier, ~1 week | [galaxus](https://www.galaxus.ch/en/s1/product/adafruit-neopixel-ring-16-x-ws2812-5050-rgb-led-diode-5998257) |
+| Illuminated arcade button 33 mm | 14.90 | >10 (bastelgarage) | [galaxus](https://www.galaxus.ch/en/s1/product/purecrea-arcade-button-illuminated-33mm-green-buttons-switches-36704979) |
+| microSD 32 GB A1, name-brand | ~10 | any shop, today | — |
+| USB-C/micro-USB 5 V 2.5 A PSU ×2 | ~10 ea | any shop, today | — |
+| 74AHCT125 level shifter (ring data at 5 V) | ~3 | bastelgarage / any | — |
+| 2 × 3 mm LEDs, resistors, 2 × 10 kΩ | ~3 | any | — |
 
-Out of stock there today, so bought on Galaxus instead: MAX98357 clone
-(6.90), Neopixel ring sets (17.90 / 23.90), reed switch alone (1.30).
+MAX98357A and the ring are the only phase-1 parts with a ~1-week lead; the
+Bastelgarage MAX98357 clone (6.90) is out today. If a week is too long, the
+Distrelec search for "MAX98357" is worth a look — they had Adafruit stock at
+2-hour pickup for other items.
 
-## Order 2 — Galaxus / Digitec · CHF 74.– + PSUs · mostly "at supplier", ~1 week
+## LTE stick — phase 2, but here is what is in stock
 
-| Qty | Part | CHF | Stock | Link |
-| --- | --- | --- | --- | --- |
-| 1 | Adafruit MAX98357A I2S 3 W amp | 9.95 | >10 at supplier | [galaxus](https://galaxus.ch/de/s1/product/adafruit-i2s-3w-class-d-amplifier-breakout-max98357a-erweiterung-elektronikmodul-5998646) |
-| 1 | Adafruit NeoPixel Ring 16 (44.5 mm OD) | 18.50 | **only 2** at supplier | [galaxus](https://www.galaxus.ch/en/s1/product/adafruit-neopixel-ring-16-x-ws2812-5050-rgb-led-diode-5998257) |
-| 1 | Purecrea illuminated arcade button **33 mm** (24 mm hole) — side-wall mount, see DOUBLE-CHECK | 14.90 | >10 (bastelgarage) | [galaxus](https://www.galaxus.ch/en/s1/product/purecrea-arcade-button-illuminated-33mm-green-buttons-switches-36704979) |
-| 1 | Allnet pigtail U.FL → SMA female, 30 cm | 9.75 | 4 at supplier | [galaxus](https://www.galaxus.ch/en/s1/product/allnet-antenna-pigtail-ufl-to-sma-f-30cm-antenna-cable-antenna-satellite-cables-31824258) |
-| 1 | Delock LTE/HSPA/GSM stub antenna, SMA male, hinged, 24 cm, ≤4 dBi | 20.90 | 8 at supplier, 2 days | [digitec](https://www.digitec.ch/de/s1/product/delock-ltehspagsm-antenne-sma-stecker-mobilfunk-antenne-netzwerk-zubehoer-5833613) |
-| 2 | USB-C PSU 5 V / 2 A (one per house) — any | ~10 ea | | |
-
-Alternatives on Galaxus if the above slip: OEM 30 mm arcade button 11.90–12.70
-([link](https://www.galaxus.ch/de/s1/product/oem-arcade-button-30mm-rot-transparent-schalter-taster-5999314));
-Delock indoor LTE antenna with 3 m cable, 11.– — works, but a cable is not what
-a box wants ([link](https://www.galaxus.ch/de/s4/product/delock-lte-antenne-mit-sma-stecker-auto-antenne-5741667)).
-
-**Pigtail caveat:** the Allnet listing says "straight" and does not confirm a
-panel-mount (flange/bulkhead) SMA. The one that does — Varia SMA-Flanschbuchse
-→ U.FL 15 cm — is currently unavailable
-([digitec](https://www.digitec.ch/de/s1/product/varia-pigtail-sma-buchse-zu-ufl-stecker-15-cm-elektronikkabel-stecker-16175454)).
-A bulkhead SMA is what goes through an aluminium wall; if Allnet's isn't one,
-a bulkhead adapter is CHF 3 anywhere.
-
-## Order 3 — Distrelec · the enclosure
-
-| Qty | Part | CHF | Link |
+| Part | CHF | Stock / delivery | Notes |
 | --- | --- | --- | --- |
-| 1 | **Hammond 1590DD** die-cast aluminium, natural, 188 × 120 × 37 mm, IP54 — **8 in stock, 1–2 days** | **27.91** | [distrelec.ch](https://www.distrelec.ch/en/die-cast-enclosure-1590-188x120x37mm-die-cast-aluminium-natural-ip54-hammond-1590dd/p/15011796) |
+| **Huawei E8372 (HiLink, LTE + Wi-Fi)** | 89.90 | **1 in stock**, day after tomorrow | [galaxus](https://www.galaxus.ch/de/s1/product/huawei-e8372-lte-3g-datenstick-router-8929882). Linux `cdc_ether`, TS-9 antenna ports, Wi-Fi hotspot can be disabled. Works; over-priced for what we use. |
+| Huawei E3372h-320 | — | **unavailable** at Digitec | [digitec](https://www.digitec.ch/de/s1/product/huawei-e3372h-320-router-5837158) — the classic choice, out |
+| Brovi E3372-325 / ZTE MF79U | ~30–40 / 18.40 | **unverified** — Brack and Digitec result lists didn't render for automated reading | Check [brack.ch](https://www.brack.ch/search?query=surfstick) and Digitec by hand: Brack ships next day. Both are HiLink-class sticks. |
 
-Not on Galaxus/Digitec (they carry the taller 1590E and 1590D). Distrelec is
-the Swiss stockist; datasheet with inside dimensions at
-[hammfg.com/part/1590DD](https://www.hammfg.com/part/1590DD).
+Plus, for the aluminium box: **Delock TS-9 → SMA adapter** 
+([digitec](https://www.digitec.ch/de/s1/product/delock-antennenadapter-sma-ts-9-antennenkabel-antennenkabel-5829274), ~CHF 10)
+and the **Delock hinged LTE stub antenna** (20.90, [digitec](https://www.digitec.ch/de/s1/product/delock-ltehspagsm-antenne-sma-stecker-mobilfunk-antenne-netzwerk-zubehoer-5833613)).
+An SMA bulkhead coupler (CHF 3) carries it through the wall.
 
-## Order 4 — the SIM: Digital Republic
+SIM: **Digital Republic Flat 1**, CHF 6/month, unlimited, no contract —
+[digitalrepublic.ch/en/smart-devices](https://digitalrepublic.ch/en/smart-devices/).
+Does not support Cat-M/NB-IoT (their support page) — irrelevant now: the
+stick is ordinary LTE.
 
-| Plan | Speed (down/up) | CHF/month | Link |
+## Power — phase 3, buy after measuring
+
+| Part | CHF | Stock / delivery | Link |
 | --- | --- | --- | --- |
-| **Flat 1** (recommended) | 1 / 0.5 Mbps | 6.– | [digitalrepublic.ch/en/smart-devices](https://digitalrepublic.ch/en/smart-devices/) |
-| Flat 0.4 | 0.4 / 0.2 Mbps | 4.– | same |
-| Flat 10 | 10 / 5 Mbps | 10.– | same; also as a 365-day card at [Digitec](https://www.digitec.ch/en/s1/product/digital-republic-sim-karte-unlimitiert-internet-fuer-365-tage-medium-speed-unlimitiert-mobile-abo-si-14968386) (out of stock today) |
+| **Adafruit PowerBoost 1000C** (1 A charge, 1 A 5 V boost, load-share) | 21.70 | **15 in stock, 2–5 days** | [berrybase.ch](https://www.berrybase.ch/adafruit-powerboost-1000) |
+| — same, Digitec | 31.50 | 7 at supplier, ~1 week | [digitec](https://www.digitec.ch/en/s1/product/adafruit-powerboost-1000-charger-diode-5998514) |
+| Adafruit PowerBoost 500C | 11.63 | 44 in stock, **2-hour pickup** | [distrelec](https://www.distrelec.ch/en/search?q=adafruit%201944) — 500 mA output: **too small for a Pi + stick** |
+| Protected 18650 cells ×3–6 | ~15 ea | Conrad has Fenix ARB-L18 (branded, ~25–34, some "Oct 20"); Galaxus Purecrea unavailable; Distrelec search unhelpful | Consider ordering cells from BerryBase (DE, 2–5 days) with the PowerBoost |
+| Fuel gauge: SparkFun LiPo Fuel Gauge (MAX17043) or Adafruit ADS1115 | ~10–18 | Digitec | [SparkFun](https://www.digitec.ch/de/s1/product/sparkfun-lipo-fuel-gauge-elektronikmodul-5999111) · [ADS1115](https://www.digitec.ch/en/s1/product/adafruit-ads1115-16-bit-adc-4-ch-wgain-amplifier-add-on-electronics-modules-5998565) |
+| PiJuice Zero | — | **discontinued** at Distrelec | — |
 
-Unlimited data, Sunrise 4G/5G, no contract, cancel any month, SIM free.
-**Digital Republic does not support Cat-M1/NB-IoT**
-([their support page](https://support.digitalrepublic.ch/en/support/solutions/articles/33000225329-do-digital-republic-sim-cards-support-lte-cat-m1-and-nb-iot-)) —
-which is why the board is Cat-1. A 5-minute ADPCM message uploads in ~40 s on
-Flat 1, ~100 s on Flat 0.4, seconds on Flat 10.
-
-Superseded: 1NCE (Cat-M only; B2B ordering unconfirmed).
-
-## Battery — not yet in stock anywhere convenient
-
-Needed: a **protected** 18650 (≈3000 mAh, NCR18650B-class) **with JST-PH 2.0
-leads** to plug into the LILYGO's JST and be strapped down — not in its spring
-holder, which a school bag will bounce. The exact part exists — Purecrea
-18650 3000 mAh with protection and JST-PH — but is unavailable today
-([galaxus](https://www.galaxus.ch/de/s1/product/purecrea-li-ion-akku-3000ma-18650-mit-schutzelektronik-und-stecker-entwicklungsboard-kit-36169153),
-set a notify). Not needed until phase 3.
-
-## Temu / AliExpress
-
-Couldn't verify prices — their pages block automated fetch. From experience:
-INMP441 mic, MAX98357A clone, 16-pixel WS2812B ring all ~CHF 2–5 each, 2–4
-weeks, no Swiss warranty, and counterfeit ICs are common on the amp. Fine for
-**spares**; not for the one board (the LILYGO) the whole project sits on.
-If you want the cheap route for the modules: search Temu for `INMP441`,
-`MAX98357A`, `WS2812B 16 ring` and buy two of each.
+Bench power today: any 5 V / 2.5 A USB PSU. A USB power bank works for
+carrying a prototype around but most auto-off below ~100 mA and many drop the
+output when the charger is plugged in — not the final answer.
 
 ## Totals
 
 | | CHF |
 | --- | --- |
-| Bastelgarage (board, mic, speaker, reed, expander) | ~66 |
-| Galaxus / Digitec (incl. antenna 20.90, two PSUs ~20) | ~94 |
-| Distrelec 1590DD | 27.91 |
-| Digital Republic Flat 1 | 6 / month |
-| microSD 16 GB | ~8 |
-| Battery (phase 3) | ~15 |
-| **Total** | **~CHF 225 + CHF 6/month** |
+| Order today (3A+, box, audio, lid, button, SD, PSUs, small parts) | ~150 |
+| Phase 2 (stick 30–90, adapter, antenna, coupler) | ~65–125 + 6/month |
+| Phase 3 (PowerBoost, cells, gauge) | ~90–130 |
+| Zero 2 W when available | ~20–30 |
+| **Total** | **~CHF 330–430 + CHF 6/month** |
 
-The LILYGO replaces the DevKitC, the modem breakout, the level shifter and
-the charger. The T-A7670G R2's 4 MB flash is why a microSD joins the list.
-
-## Not sourced yet
-
-- Two 3 mm LEDs + resistors (status LEDs) — any assortment, CHF 2.
-- Bulkhead SMA (if Allnet's pigtail isn't one), CHF 3.
-- Delock's cheaper "3G, GSM" antenna variant (13.50) is *not* the one — it may
-  lack the LTE bands. Take the 20.90 LTE variant.
-- Piano hinge + M3 hardware for the lid, acrylic disc for the ring window,
-  speaker grille mesh — hardware store, phase 4.
-- 1000 µF cap at the modem — only if resets appear; the LILYGO has its own.
+More than the ESP32 plan (~225): the Pi itself is cheap, the cells and the
+stick are not. It buys a box you can SSH into.

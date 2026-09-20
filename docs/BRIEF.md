@@ -36,9 +36,10 @@ a child actually stays close to someone who isn't there.
 
 ## Hardware (decided — see [bom.csv](../hardware/bom/bom.csv))
 
-- **Compute:** LILYGO T-A7670G R2 — ESP32 (WROVER, 8 MB PSRAM) with the
-  Cat-1 modem, GNSS, charger and battery connector on the board
-  ([ADR 0013](decisions/0013-cat1-not-catm.md)). Outbox on a microSD.
+- **Compute:** Raspberry Pi Zero 2 W running Linux, with a read-only root and
+  a writable data partition ([ADR 0014](decisions/0014-raspberry-pi-zero-2w.md)).
+  Reachable over Tailscale from anywhere — the box in the other house is one
+  `ssh` away.
 - **Input:** a lid (open to talk, close to send —
   [ADR 0007](decisions/0007-lid-gesture.md)) and one recessed play button.
   A closed box has nothing a school bag can press.
@@ -47,12 +48,14 @@ a child actually stays close to someone who isn't there.
 - **Indicator:** WS2812 LED ring, power-gated — slow breathing glow means "a
   message is waiting", one lit segment per message. This is the whole
   notification system.
-- **Modem:** the A7670G LTE Cat-1 on that board, over PPP
-  ([ADR 0006](decisions/0006-bare-modem-not-notecard.md)); Digital Republic
-  unlimited data SIM, CHF 6/month; external SMA antenna because aluminium.
-- **Power:** internal protected LiPo + USB-C with power-path charging, sized
-  for **a weekend unplugged**. Everything is gated; the power budget is the
-  centre of the design ([ADR 0005](decisions/0005-battery-required.md)).
+- **Modem:** a USB 4G stick (HiLink — it's just an Ethernet interface), off
+  between check-ins; Digital Republic unlimited data SIM, CHF 6/month
+  ([ADR 0013](decisions/0013-cat1-not-catm.md)); external SMA antenna because
+  aluminium.
+- **Power:** three protected 18650s (~9 Ah) with a load-sharing charger and
+  5 V boost, sized for **a weekend unplugged** on a Pi that cannot sleep.
+  Everything that can be gated is, including the modem's USB power
+  ([ADR 0005](decisions/0005-battery-required.md), [ADR 0014](decisions/0014-raspberry-pi-zero-2w.md)).
 - **Enclosure:** Hammond 1590DD die-cast aluminium, 188 × 120 × 37 mm, with
   its plate hinged as the lid ([ADR 0011](decisions/0011-aluminium-1590dd-enclosure.md)).
   It lives in a bag between two houses — aluminium treats drops as weather.
@@ -64,18 +67,21 @@ changes network every few days would need credentials for both, re-provisioning
 after any router change in either house, and would fail silently in whichever
 home nobody is checking. It carries its own network instead.
 
-A bare LTE Cat-1 module driven over PPP, so the box speaks HTTPS straight to our
-server — nobody else in the path — with a flat-rate IoT SIM (one payment, ten
-years). The Notecard originally chosen is shaped for telemetry, not audio.
+A USB 4G stick on the Pi, appearing as an ordinary Ethernet interface, so the
+box speaks HTTPS straight to our server — nobody else in the path — on a
+Digital Republic unlimited data SIM (CHF 6/month, no contract). Powered off
+between check-ins.
 
 [ADR 0002](decisions/0002-cellular-not-wifi.md) for cellular,
-[ADR 0006](decisions/0006-bare-modem-not-notecard.md) for the module.
+[ADR 0006](decisions/0006-bare-modem-not-notecard.md) for "our own server,
+nobody in between", [ADR 0013](decisions/0013-cat1-not-catm.md) for the SIM,
+[ADR 0014](decisions/0014-raspberry-pi-zero-2w.md) for the stick.
 
 ## Software
 
-- **Firmware:** ESP-IDF with `esp_modem`. Lid open → ADPCM into PSRAM → lid
-  closed → trim, queue to flash → resumable HTTPS upload when there's a link.
-  Opus transcode is an M3 upgrade.
+- **Box software:** a Python service under `systemd`. Lid open → capture to
+  disk as it happens → lid closed → trim, Opus, queue → resumable HTTPS
+  upload when there's a link.
 - **Parent end:** a native iOS app (SwiftUI + APNs). Notification reliability
   is the product — a message you notice six hours late defeats the device
   ([ADR 0004](decisions/0004-native-ios-app.md)). A second box would later join
@@ -123,12 +129,13 @@ being heard. Everything else in the design serves that.
 - The ring is the child's; LINK and POWER LEDs are the adults' — [ADR 0009](decisions/0009-two-led-vocabularies.md)
 - Nothing recorded is ever lost; the outbox is never evicted — [ADR 0010](decisions/0010-nothing-is-lost.md)
 - Hammond 1590DD aluminium enclosure, plate hinged as the lid — [ADR 0011](decisions/0011-aluminium-1590dd-enclosure.md)
-- One board: LILYGO T-A7670G R2, LTE Cat-1, Digital Republic SIM — [ADR 0013](decisions/0013-cat1-not-catm.md) (supersedes 0012)
+- LTE Cat-1/Cat-4 on a Digital Republic SIM — [ADR 0013](decisions/0013-cat1-not-catm.md)
+- Raspberry Pi Zero 2 W + USB 4G stick, three-cell pack, Tailscale — [ADR 0014](decisions/0014-raspberry-pi-zero-2w.md) (supersedes the boards in 0012/0013)
 - The box travels with the child between both homes
 - The co-parent is on board: placement is flexible, consent is a conversation,
   and they get a mute that is visible in the app
 - Ages 6-9: lid + one button, message count, no text anywhere
-- **5 minutes** per message. ADPCM on the wire in v1, Opus later
+- **5 minutes** per message. Opus on the wire from day one
 - Building rather than buying — the making is part of the point
 
 ## Still open

@@ -5,6 +5,8 @@ bag, and make a 40 mm speaker sound like something.
 
 ## Current design
 
+> **Platform change 2026-09-20 — [ADR 0014](../decisions/0014-raspberry-pi-zero-2w.md):** inside the 1590DD: a Pi 3A+ (65 × 56) now or a Zero 2 W (65 × 30) later, the USB stick beside it (~90 × 30 × 12), three to six 18650s along the back wall (3 × = 56 × 65 × 19; 6 × = 112 × 65 × 19 — still fits), PowerBoost, amp, mic, level shifter. ~0.9–1.1 kg.
+
 > **Decided 2026-09-20:** there is a lid ([ADR 0007](../decisions/0007-lid-gesture.md)) and a cell sized for a weekend. Mechanism (Q3) still open: pin hinge + microswitch vs magnet + hall sensor. The lid switch is the mic gate; reliability beats cleverness.
 
 **Hammond 1590DD** die-cast aluminium ([ADR 0011](../decisions/0011-aluminium-1590dd-enclosure.md)):

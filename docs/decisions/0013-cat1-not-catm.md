@@ -1,7 +1,7 @@
 # ADR 0013 — LTE Cat-1, not Cat-M; Digital Republic, not 1NCE; T-A7670G R2
 
 **Date:** 2026-09-20
-**Status:** accepted — supersedes the module in [ADR 0012](0012-lilygo-t-sim7080g-s3.md); [ADR 0006](0006-bare-modem-not-notecard.md) (bare modem, PPP, own server) stands
+**Status:** accepted for Cat-1 and Digital Republic; the T-A7670G R2 board is superseded by [ADR 0014](0014-raspberry-pi-zero-2w.md) (Pi Zero 2 W + USB 4G stick)
 
 ## Context
 

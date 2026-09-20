@@ -5,13 +5,16 @@ houses every few days, without anyone in either house doing anything.
 
 ## Current design (ADR 0002, ADR 0006)
 
+> **Platform change 2026-09-20 — [ADR 0014](../decisions/0014-raspberry-pi-zero-2w.md):** the modem is a **USB 4G stick in HiLink mode** on the Zero's OTG port — a `cdc_ether` Ethernet interface, no AT, no PPP. Its VBUS is switched by a GPIO so it is off between check-ins. Cat-4, on the same Digital Republic Flat 1 SIM. External antenna via the stick's TS-9 ports → SMA bulkhead. Tailscale rides the same link.
+
 > **Decided 2026-09-20:** **bare LTE-M modem** (SIM7080G-class) over `esp_modem` PPP, flat-rate IoT SIM ([ADR 0006](../decisions/0006-bare-modem-not-notecard.md)). Poll, not push (Q3): check-in every `poll_minutes` (default 10, app-set) and after any upload. Q2: inbound latency = poll interval. Notecard remains the fallback.
 
-Cellular via the A7670G **LTE Cat-1** on the LILYGO T-A7670G R2
-([ADR 0013](../decisions/0013-cat1-not-catm.md)), `esp_modem` PPP giving the
-ESP32 an IP stack, plain HTTPS to our server. Resumable 32 KB chunks;
-check-in poll on an app-set interval. **Digital Republic Flat 1** data SIM
-(unlimited, Sunrise 4G, CHF 6/month, no contract).
+Cellular via a **USB 4G stick in HiLink mode** on the Pi
+([ADR 0014](../decisions/0014-raspberry-pi-zero-2w.md)) — a `cdc_ether`
+Ethernet interface, DHCP from the stick, no AT, no PPP — plain HTTPS to our
+server. Resumable 32 KB chunks; check-in poll on an app-set interval; the
+stick's 5 V is GPIO-gated between check-ins. **Digital Republic Flat 1** data
+SIM (unlimited, Sunrise 4G, CHF 6/month, no contract).
 
 Why not Cat-M: Digital Republic does not support Cat-M1/NB-IoT, Cat-M is
 ~100-300 kbps real-world (minutes per long message), and its power advantage
@@ -51,7 +54,7 @@ bedrooms, not the street; a hinged external antenna helps.
 
 ## Questions
 
-1. **Notecard or bare modem?** — gates phase 2 of the shopping list.
+1. ~~Notecard or bare modem?~~ — resolved: neither; a USB stick on a Linux box.
 2. **Acceptable latency, each direction.** Parent → box: does "within 15
    minutes" satisfy, or does the glow need to appear within a minute? Box →
    parent: seconds, presumably. This decides poll interval vs. held session,

@@ -1,153 +1,117 @@
 # Development process — and what Claude can do directly
 
-Short version: **yes, Claude can drive the build–flash–log loop itself** from
-this Mac, because the board plugs into this Mac and every step is a shell
-command. What Claude cannot do is hear, see, touch or measure — so the
-firmware is designed to make all of that visible as text.
+Short version: **the box is a Linux machine, and Claude has a shell on it.**
+On the bench over UART or home Wi-Fi; in the other house over Tailscale.
+Every step is a command; what Claude cannot do is hear, see, touch or
+measure — so the service makes all of that visible as text.
 
-## The loop on the T-A7670G R2
+## The loop on the Pi Zero 2 W
 
 ```
- edit → idf.py build → idf.py flash → capture serial 20 s → read → edit
-        ▲ compiler errors            ▲ ESP_LOG, panics, backtraces
-        │                            │  (decoded automatically)
-        └── Claude ──────────────────┘
+ edit on the Mac → rsync to the box → systemctl restart dadbox → journalctl → edit
+                   ▲ same Python runs on the Mac: unit tests first, in milliseconds
 ```
 
-- **Build**: `idf.py build`. Claude reads compiler output and fixes it.
-- **Flash**: `idf.py -p /dev/cu.usbserial-XXXX flash`. The R2 has a USB-UART
-  bridge with auto-reset — no button dance. ~30–60 s at 921600 baud.
-- **Logs**: `idf.py monitor` is interactive, so Claude uses
-  [`tools/serial_capture.py`](../tools/serial_capture.py) — capture for
-  N seconds or until a pattern, to a file, then read it. Panics come with
-  backtraces that `idf.py monitor` decodes to file:line; the capture tool
-  keeps the raw addresses and Claude runs `addr2line` when needed.
-- **Iterate**. A full cycle is about a minute.
+- **Deploy**: `rsync -a box/ dadbox:/opt/dadbox/ && ssh dadbox sudo systemctl restart dadbox`.
+  Seconds. (`/opt` is on `/data`, the writable partition; the root is read-only.)
+- **Logs**: `ssh dadbox journalctl -u dadbox -n 200 --no-pager`, or `-f` with a
+  timeout. Python tracebacks are already file:line.
+- **Poke it**: `ssh dadbox dadboxctl state` — or a Python REPL on the box.
+- **Audio**: `arecord`/`aplay` for raw tests; the dump comes back with `scp`.
+- **Modem**: `ip a`, `nmcli`, `curl -s ifconfig.me`, `speedtest-cli`. The stick
+  is an Ethernet interface; there are no AT commands to get wrong.
+- **Remote**: identical, over Tailscale, from anywhere. The box in the other
+  house is one `ssh dadbox` away. **Updates are `git pull`.**
 
 ## What Claude can do without asking you
 
 | Thing | How |
 | --- | --- |
-| Compile, flash, read logs, decode crashes | Bash on this Mac |
-| Drive the box's state machine | the **serial console** (below) — `lid open`, `play`, `state` |
-| Test the codec, container, CRC, queue logic | **host builds** — plain C compiled on the Mac, no board needed |
-| Test the whole protocol end-to-end | `tools/fakebox` against `server/` — no hardware at all |
-| Run and click through the iOS app | the iOS Simulator (once Xcode is installed) — build, launch, tap, screenshot; push via `xcrun simctl push` |
-| Analyse a recording | pull the ADPCM/WAV off the SD card or over a debug upload; Python computes RMS, clipping, noise floor, spectrum |
-| Reason about power | from your meter readings and the datasheets |
+| Deploy, restart, read logs, tracebacks, REPL, `gdb`/`strace` if it ever comes to that | SSH |
+| Drive the box's state machine | `dadboxctl` — `lid open`, `lid close`, `play`, `state`, `checkin`, `ring test`, `sim link down` |
+| Unit-test every bit of logic | the same Python on the Mac — no board needed |
+| Test the whole protocol end-to-end | `tools/fakebox` against `server/`, or the real box over Tailscale |
+| Run and click through the iOS app | the iOS Simulator (once Xcode is installed); push via `xcrun simctl push` |
+| Analyse a recording | `scp` the WAV; RMS, clipping, noise floor, spectrum in Python |
+| Check the link | from the box: signal via the stick's web UI (HiLink at 192.168.8.1), throughput with `curl` |
+| Power tuning | edit `config.txt`/`cmdline`, disable cores, read the MAX17048 gauge over I²C — then ask you for the meter |
 
 ## What Claude needs you for
 
 | Thing | Why | Cheapest way |
 | --- | --- | --- |
-| **Listening** | no ears | you say "tinny / muffled / fine"; Claude reads the spectrum alongside |
-| **Seeing the ring / LEDs** | no eyes | `state` on the console prints what the ring *should* show; you confirm once, or send a photo |
-| **Physical gestures** | no hands | the console fakes them; you do the real lid a few times per milestone |
-| **Voltages, currents** | no meter | USB power meter inline; you read, Claude budgets |
-| **Cellular** | needs the SIM and the room | Claude drives the modem over the console (`at AT+CSQ`, `at AT+CPSI?`) and reads the answers |
+| **Listening** | no ears | "tinny / muffled / fine"; Claude reads the spectrum alongside |
+| **Seeing the ring / LEDs** | no eyes | `state` prints what the ring *should* show; confirm once, or a photo |
+| **Physical gestures** | no hands | `dadboxctl` fakes them; you do the real lid a few times per milestone |
+| **Currents** | no meter | USB power meter inline; the gauge gives the rest |
+| **First boot** | needs hands and a card reader | Raspberry Pi Imager: hostname `dadbox`, your SSH key, home Wi-Fi for the first boot. After that Claude does the rest over SSH |
+| **Cellular** | needs the SIM and the room | plug in; Claude checks `ip a` |
 
-## The serial console — the thing that makes this work
-
-ESP-IDF's `console` component gives a line-oriented shell over the same UART
-as the logs. Every gesture and every state becomes text:
+## `dadboxctl` — the console, now a CLI over a Unix socket
 
 ```
-> state                 ring=WAITING(2) link=OK power=OK fault=NONE lid=closed vbat=3.91
-> lid open              → mic on, ring LISTENING
-> lid close             → trimmed 4.2 s, queued 01JAY…, GOT_IT pulse
-> play                  → playing 01JAX… (12.1 s)
-> inbox / outbox        list queued messages with seq, size, age
-> rec 3 / dump last     record 3 s from the real mic; dump the buffer as hex/WAV over serial
-| checkin               force a check-in now, print the response
-> at AT+CSQ             pass an AT command to the modem, print the reply
-> ring test             sweep every ring state for 2 s each — you watch once
-> sleep 60              enter light sleep for 60 s (for the meter)
-> sim link down         simulate no link — queue must fill, LINK LED must double-blink
+dadboxctl state          ring=WAITING(2) link=OK power=OK fault=NONE lid=closed vbat=3.91 soc=68%
+dadboxctl lid open       → mic on, ring LISTENING, capture started
+dadboxctl lid close      → trimmed 4.2 s, opus 31 KB, queued 01JAY…, GOT_IT pulse
+dadboxctl play           → playing 01JAX… (12.1 s)
+dadboxctl inbox|outbox   list with seq, size, age
+dadboxctl checkin        force one now, print the response
+dadboxctl modem on|off   the VBUS switch
+dadboxctl ring test      sweep every ring state for 2 s each — you watch once
+dadboxctl sim link down  no link: queue must fill, LINK LED must double-blink
 ```
 
-With that, Claude can reproduce "the message didn't send after the lid closed
-while offline" without anyone touching the box, and the ring's logic is
-verifiable from `state` output alone. Build the console in M0, before the
-audio, because it is how the audio gets debugged.
+Build it in M0, before the audio: it is how the audio gets debugged.
 
-## Debug ladder — when it breaks
+## Debug ladder
 
-1. **Logs.** `ESP_LOGx` at INFO in normal use, DEBUG per module when hunting.
-2. **`state`** on the console — is the state machine where you think it is?
-3. **Assertions + panic backtrace** — decoded to file:line automatically.
-4. **Core dump to flash** (`CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH`), read back
-   with `idf.py coredump-info` — the crash you didn't catch live.
-5. **Host build** of the suspect module with the failing input — fastest
-   iteration, no flash cycle.
-6. **AT passthrough** for anything cellular: registration, signal, APN, PPP.
+1. `journalctl -u dadbox` — structured logging at INFO; DEBUG per module when hunting.
+2. `dadboxctl state` — is the state machine where you think it is?
+3. Tracebacks — Python gives file:line for free.
+4. Unit test the suspect module with the failing input, on the Mac.
+5. `strace -p`, `py-spy dump` if something hangs.
+6. For the link: `ip a`, `ping`, `curl`, the stick's HiLink page.
 
-**No JTAG.** The classic ESP32's JTAG pins are GPIO 12–15 — exactly where the
-R2's TF card lives. Live breakpoints would mean an ESP-Prog *and* no SD card
-during that session. The S3 board would have had USB-JTAG built in; that is
-the one debugging cost of ADR 0013. In practice log-driven debugging plus
-host tests covers it.
+## Reliability rules that make this safe to run unattended
 
-## Structure the firmware so most of it runs on the Mac
+- **Read-only root overlay** (`raspi-config` → Overlay FS, or `overlayroot`).
+  All writes go to `/data`. A power pull cannot corrupt the OS.
+- `/data` is ext4; every message is `write → fsync → rename`.
+- `systemd` restarts the service on failure; a hardware watchdog
+  (`dtparam=watchdog=on`, `RuntimeWatchdogSec=`) reboots a hung Pi.
+- Wi-Fi is off in the field (power); Tailscale over LTE is the door in.
+- A second imaged SD card lives in a drawer.
 
-| Host-testable (pure C, no ESP APIs) | Board-only |
-| --- | --- |
-| ADPCM encode/decode | I2S driver setup |
-| container header + CRC32 | SD/FATFS mount |
-| queue state machine, resume logic | `esp_modem` PPP, HTTPS |
-| ring priority + resting timer | LED/WS2812 driver |
-| chunking, `upload-state` reconciliation | sleep and gating |
-| silence trim | button/lid debounce |
+## Setting up this Mac (checked 2026-09-20)
 
-Aim for the left column being ~70 % of the logic. Claude tests it in
-milliseconds with `cc` and a tiny test runner; the right column is thin
-glue verified on the board.
-
-## Setting up this Mac (nothing is installed yet — checked 2026-09-20)
-
-```bash
-brew install cmake ninja dfu-util
-```
-```bash
-mkdir -p ~/esp && cd ~/esp && git clone -b v5.3 --recursive https://github.com/espressif/esp-idf.git
-```
-```bash
-cd ~/esp/esp-idf && ./install.sh esp32
-```
-Then, per shell (or add an alias): `. ~/esp/esp-idf/export.sh`. Claude will
-run it at the start of each firmware Bash command.
+Nothing embedded is needed any more. Node is installed. For the iOS stream:
+**Xcode from the App Store** (Command Line Tools alone can't build apps or run
+the Simulator), then `sudo xcode-select -s /Applications/Xcode.app` — needs
+your password. Tailscale is already on this Mac.
 
 ```bash
 python3 -m pip install --user pyserial
 ```
+(for the bench UART console via `tools/serial_capture.py`; a CP2102 USB-serial
+adapter on GPIO 14/15, 115200 baud.)
 
-For the iOS stream: **Xcode from the App Store** (the Command Line Tools
-alone can't build apps or run the Simulator), then `sudo xcode-select -s
-/Applications/Xcode.app` — that step needs your password, so it's yours.
+## Setting up the box (first time; Claude does everything after step 2)
 
-Plug the board in and `ls /dev/cu.*` — the R2 shows up as
-`/dev/cu.usbserial-…` or `/dev/cu.wchusbserial…`. Claude will find it.
-
-## Modem specifics to expect
-
-- `esp_modem` has no A7670 profile by name; the A76xx family speaks the
-  SIM7600 AT set, so start with the **SIM7600 device profile** and adjust.
-- Digital Republic rides Sunrise: APN is expected to be `internet`
-  (**verify** on their support site once the SIM arrives). No username or
-  password.
-- PPP dial is `AT+CGDCONT=1,"IP","internet"` then `ATD*99#`. If registration
-  fails, `AT+CPSI?` tells you the band and cell; `AT+CSQ` the signal.
-- Cat-1 wakes from DTR sleep in well under a second — no PWRKEY cycling
-  between check-ins.
+1. Raspberry Pi Imager → Raspberry Pi OS **Lite 64-bit** → hostname `dadbox`,
+   SSH with your key, home Wi-Fi. Boot it.
+2. `ssh dadbox` from the Mac works → hand over.
+3. Claude: `apt` (ffmpeg, alsa-utils, python3-venv), Tailscale, `config.txt`
+   (`dtoverlay=googlevoicehat-soundcard`, `dtparam=audio=off`,
+   `dtparam=spi=on` for the ring, `dtparam=watchdog=on`, HDMI off), `/data`
+   partition, the overlay, the service, `dadboxctl`. Then Wi-Fi off, stick in.
 
 ## Milestone by milestone
 
-- **M0** — console first, then I2S in, ADPCM, I2S out. Claude builds and
-  flashes; you listen to `rec 3` + `play` in the cardboard box and say what
-  you hear; Claude reads the spectrum of the dump.
-- **M1** — SD outbox, container, `fakebox` already proved the server, then
-  the modem: Claude drives AT commands over the console until PPP is up,
-  then the first real upload. You supply the SIM and the room.
-- **M2** — inbound: check-in, download, ring WAITING. Claude verifies with
-  `state`; you confirm the glow once.
-- **M3** — power: you clip the meter in, Claude runs `sleep`, `checkin`,
-  `ring test` and turns your readings into the weekend budget.
+- **M0** — `dadboxctl` first, then `arecord` → WAV → `ffmpeg` → Opus → `aplay`.
+  You listen in the cardboard box; Claude reads the spectrum.
+- **M1** — stick in, `/data` outbox, resumable upload to `server/`, Tailscale
+  up. From here on Claude works on the box directly.
+- **M2** — inbound: check-in, download, ring WAITING. `state` verifies it; you
+  confirm the glow once.
+- **M3** — power: meter in, Claude tunes cores/clocks and the stick gate,
+  reads the gauge, and turns your readings into the cell count.

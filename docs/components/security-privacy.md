@@ -25,10 +25,11 @@ third-party analytics.
 - Device auth to the server: a per-device bearer token, separate from the
   family key. Losing the token lets someone *send*; it must not let them
   *listen*.
-- Physical: the box is in another home. Anyone with a USB cable can read
-  flash unless it's encrypted. The ESP32 supports flash encryption and secure
-  boot; both are a one-way door. For a one-off, flash encryption on, secure
-  boot off, is a reasonable line.
+- Physical: the box is in another home. Anyone can pull the SD card and
+  read it. On the Pi that means LUKS on `/data` with the key in… the same
+  card, unless a key is typed at boot (nobody will). The honest position:
+  on-device message encryption (family key in a file only root reads) makes
+  the *audio* unreadable to a card-puller; the OS itself is not secret.
 - Consent: the co-parent is on board, but "on board" should include knowing
   the box records only while the lid is open / button held, and that they can
   see the mute state. Write that down for them — one page.
@@ -39,7 +40,7 @@ third-party analytics.
    changes the trust model from "trust the server" to "trust the box and the
    phone", which is the right shape for this data.
 2. **Key ceremony** — bake at flash time, or pair over USB? For one box, bake.
-3. **Flash encryption on the ESP32?** One-way; makes reflashing a chore.
+3. ~~Flash encryption on the ESP32?~~ — not applicable on the Pi; see above.
    Suggest: on, from M3 — not during development.
 4. **Who can trigger an OTA?** The server, authenticated. Signed images? For
    one family, a hash pinned in the manifest is proportionate.

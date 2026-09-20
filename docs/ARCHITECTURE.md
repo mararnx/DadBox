@@ -1,37 +1,37 @@
 # Architecture
 
 ```
-  ┌────────────────────┐    LTE Cat-1 / PPP     ┌─────────────┐   HTTPS   ┌────────────┐
-  │   DadBox           │ ───── HTTPS ─────────► │   Server    │ ◄──────── │  Parent's  │
-  │  (travels with     │ ◄──── check-in ──────  │  blobs ·    │ ── APNs ► │  iPhone    │
-  │   the child)       │                        │  telemetry  │           └────────────┘
-  │ ESP32 · A7670G     │                        └─────────────┘
-  │ lid · play · ring  │
-  └────────────────────┘
+  ┌──────────────────────┐   LTE (USB 4G stick)   ┌─────────────┐   HTTPS   ┌────────────┐
+  │   DadBox             │ ───── HTTPS ─────────► │   Server    │ ◄──────── │  Parent's  │
+  │  (travels with       │ ◄──── check-in ──────  │  blobs ·    │ ── APNs ► │  iPhone    │
+  │   the child)         │ ◄──── Tailscale SSH ── │  telemetry  │           └────────────┘
+  │ Pi Zero 2 W · Linux  │        (from the Mac)  └─────────────┘
+  │ lid · play · ring    │
+  └──────────────────────┘
 ```
 
 Nobody but our server is in the path. See [PROTOCOL.md](PROTOCOL.md) for the
 wire contract and [decisions/](decisions/) for why each piece is what it is.
+The box is a Linux machine ([ADR 0014](decisions/0014-raspberry-pi-zero-2w.md));
+the [dev process](DEV-PROCESS.md) is SSH.
 
 ## Audio
 
-- Lid open → mic powered via a load switch → I2S at 16 kHz → **IMA-ADPCM as
-  it goes** → PSRAM. 5 minutes is 2.4 MB; PSRAM is 8 MB.
-- Lid closed → trim silence → container + CRC → **TF-card outbox** (4 MB
-  flash holds only OTA and a one-message fallback) → upload.
-- v1 sends ADPCM on the wire (~480 KB/min). Data is unlimited
-  ([ADR 0013](decisions/0013-cat1-not-catm.md)), so Opus is only about upload
-  time — ~40 s vs ~4 s for a 5-minute message on a 0.5 Mbps uplink. An M3
-  nicety; the container header carries the codec id either way.
-- The rule: **no real-time-constrained codec in the capture path.** ADPCM is a
-  few integer ops per sample and doesn't count.
+- Lid open → mic powered via a load switch → ALSA capture (I2S,
+  `googlevoicehat-soundcard` overlay) at 16 kHz mono → **written to `/data` as
+  it happens**. A power loss mid-story loses only the last buffer.
+- Lid closed → trim silence → `ffmpeg` → **Opus 16 kbps** (~120 KB/min) →
+  container + CRC → outbox. Opus from day one; there is no ADPCM stage and
+  no "encode later" rule any more — a Cortex-A53 encodes Opus faster than
+  real time without noticing.
+- 5 minutes is ~600 KB on the wire: ~10 s on Digital Republic Flat 1.
 
 ## Message flow
 
 **Child → parent**
 1. Open the lid. Ring lights "listening". No timer shown.
 2. Talk. Up to five minutes.
-3. Close the lid. Trim, encode, queue. One pulse. Box is idle again.
+3. Close the lid. Trim, encode to Opus, queue. One pulse. Box is idle again.
 4. Upload when there's a link — resumable in 32 KB chunks. If there's no link,
    it waits. The child is never told about a network.
 5. Server sees `complete`, pushes to the parent's phone.
@@ -108,11 +108,11 @@ is on flash and stays until the server has confirmed it.
 
 1. Lid closes → trim → container + CRC → LittleFS outbox → fsync → **then**
    the pulse.
-2. During capture the PSRAM buffer is checkpointed to flash every 30 s. A
-   power loss mid-story costs at most 30 s.
+2. The capture is written to disk **as it happens**. A power loss mid-story
+   costs the last buffer, not the story.
 3. The **outbox is never evicted**. The inbox may be — the server still has
-   those. On the T-A7670G R2 the outbox is the TF card; internal flash
-   mirrors the latest message so a missing card costs at most one.
+   those. Both live on the `/data` partition of the SD card, beside a
+   read-only root.
 4. Out of the outbox only after `complete` returns 2xx; 2xx only after the
    server's durable write and CRC match.
 5. Retries back off forever. On boot, interrupted uploads resume from
@@ -121,31 +121,29 @@ is on flash and stays until the server has confirmed it.
    battery and does not know the time after a cold start until it connects.
 7. On reconnect, telemetry says how long the box was offline and what queued.
 
-Capacity: ~10 MB of flash after the app and OTA slot → ~20 minutes of ADPCM,
-~3 h once Opus lands. Full is the one case where *never lost* and *always
-accept* collide; the fault pattern shows at 80 %, and whether *never* needs a
-microSD is open in [components/storage-queue.md](components/storage-queue.md).
+Capacity is the SD card — gigabytes, years of Opus. The failure to design
+for is not a full card but a corrupt one: hence the read-only root overlay,
+`fsync`-then-rename on `/data`, a name-brand card, and a spare imaged card
+in a drawer ([components/storage-queue.md](components/storage-queue.md)).
 
 ## Power
 
 Target: **a weekend (60 h) unplugged** ([ADR 0005](decisions/0005-battery-required.md)).
-That makes gating the design's centre of gravity:
+A Pi cannot sleep, so the budget is about what stays on:
 
-| Consumer | Gated by | Idle cost |
+| Consumer | Gated by | Cost |
 | --- | --- | --- |
+| Pi Zero 2 W, tuned (Wi-Fi/BT/HDMI off, cores/clock reduced) | — | ~75–100 mA, always |
+| USB 4G stick | **GPIO high-side switch on VBUS**; on for check-ins and uploads only | ~100–150 mA on; ~60 mA averaged at 10-min polls |
 | Mic | load switch on the lid | 0 |
-| LED ring (16 × WS2812B) | FET — they draw ~1 mA each even dark | 0 when off |
+| LED ring (16 × WS2812B) | FET — ~1 mA each even dark | 0 when off; ~15 mA breathing; ~1.5 mA *resting* |
 | Amp | MAX98357A SD pin | µA |
-| Modem (A7670G, Cat-1) | DTR sleep between check-ins | ~2 mA — 120 mAh per weekend, fine |
-| ESP32 | light sleep; deep sleep between polls if wake sources prove reliable | ~1-2 mA |
-| Ring, *waiting* | — | ~15 mA breathing; ~1.5 mA *resting* after 2 h |
-| Status LEDs | — | ~0 — 10 ms blinks |
+| Boost converter losses | — | ~10 % on top |
 
-Roughly 5 mA average, gated → ~3 weeks on 3000 mAh. Ungated ring alone would
-be ~6 days; a message left *waiting* at full breathing all weekend would be
-~30 % of the cell, which is why *waiting* drops to *resting* after 2 h. Transmit bursts to ~2 A: the cell, its PCM, the power-path
-regulator and the trace to the modem all need to be rated for it, plus bulk
-capacitance at the modem. This is the #1 cause of "my LTE project resets".
+Roughly **140–180 mA average → 9 Ah is 50–65 h.** Tight against 60 h. The
+levers, in order: gate the stick, drop to one core at idle, dim the ring, a
+fourth cell (12 Ah, still fits). **Measure before choosing the cell count.**
+Charging 9 Ah at 1 A is overnight.
 
 ## Retention and privacy
 
@@ -156,13 +154,15 @@ A child's recorded voice is the most sensitive thing in this system.
 - TLS in transit to our server only. Encrypted at rest.
 - On-device encryption with a key the server never holds: recommended, open.
 - The box holds only what is queued, and wipes on successful send or play.
+- The root filesystem is a read-only overlay; `/data` is the only writable
+  partition, and every message write is `fsync` then `rename`.
 
 ## To verify before building
 
-- **Sunrise 4G coverage in both bedrooms** (Digital Republic rides Sunrise).
-- That the T-A7670G R2 has its TF slot, and that the SD survives a power pull
-  mid-write (sync-on-write).
-- The Allnet pigtail's SMA is a bulkhead; the LILYGO's antenna connector is u.FL, not MHF4.
-- Real idle current of each gated rail, on the bench, before choosing a cell.
-- Opus encode time on the S3 for a 5-minute clip (M3, not blocking).
-- That a lid switch / hall sensor is *reliable* — it is the mic gate.
+- **Sunrise 4G in both bedrooms** (Digital Republic rides Sunrise).
+- Real current of the tuned Pi, the stick on and off, and the ring, on the
+  bench with a USB meter — **before buying the cells**.
+- That the stick's TS-9 ports take the pigtail and that it stays in HiLink
+  (Ethernet) mode across reboots.
+- That the read-only overlay + `/data` survives a power pull mid-write.
+- That a reed contact + magnet register reliably through the lid gap.

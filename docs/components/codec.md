@@ -1,41 +1,34 @@
 # Codec
 
-**Role.** Make a voice message small enough for cellular, without ever putting
-a real-time constraint on the firmware.
+**Role.** Make a voice message small enough to upload in seconds and sound
+like the person.
 
 ## Current design
 
-> **Decided 2026-09-20:** ADPCM on the wire for M0-M2 (`codec = 1`); Opus transcode after the lid closes is an M3 upgrade (`codec = 2`). Two-stage (Q2) is the plan. Container per PROTOCOL.md. Q4: custom 16-byte header, not Ogg — the app decodes ADPCM itself.
+> **Platform change 2026-09-20 — [ADR 0014](../decisions/0014-raspberry-pi-zero-2w.md):**
+> the box is a Linux machine; `ffmpeg` is on it.
 
-- Opus, 16 kHz mono, ~16 kbps. ~120 KB per minute.
-- Encoded after the gesture ends, from the capture buffer, in a background task.
-- Fallback: IMA-ADPCM (4:1, ~480 KB/min) if Opus proves painful on the S3.
+- Capture: 16 kHz mono 16-bit PCM, ALSA, written to `/data` as it happens.
+- After the lid closes: trim silence, `ffmpeg -i capture.wav -c:a libopus
+  -b:a 16k -application voip out.opus` → Ogg Opus, ~120 KB/min.
+- Wire: `codec = 2` (Opus in Ogg) inside the 16-byte container. `codec = 1`
+  (IMA-ADPCM) stays reserved so an ESP32 box could still speak the protocol.
+- iOS decodes Opus natively; the server may transcode to AAC for the app if
+  Ogg playback proves awkward.
 
 ## Checked
 
-- The rule should be **no real-time-constrained codec in the capture path**.
-  ADPCM in the capture path is fine — it is cheaper than the I2S DMA copy. This
-  reopens the 5-minute cap (see [audio-capture.md](audio-capture.md)).
-- libopus on a 240 MHz classic ESP32 (LX6, no S3 SIMD) at 16 kHz, complexity ≤ 3, should still encode
-  faster than real time, but that is belief not measurement. ESP-ADF ships an
-  Opus encoder component. **Measure before committing** — a 5-minute message
-  that takes 4 minutes to encode is fine; one that fails to allocate is not.
-- Data budget: at 16 kbps, 500 MB is ~70 hours of audio. At ADPCM's 64 kbps it
-  is ~17 hours. Both are years of use for one family, so the codec choice is
-  about *comfort*, not necessity.
-- The iOS side decodes Opus natively (AVFoundation handles it in a CAF/Ogg
-  container). ADPCM would need a small decoder in the app.
+- A Cortex-A53 encodes 16 kHz Opus many times faster than real time; a
+  5-minute message encodes in seconds. There is no codec constraint anywhere.
+- Data is unlimited (Digital Republic); the bitrate is about sound, not cost.
+  16 kbps `voip` is the speech sweet spot; 24 kbps if a child's voice sounds
+  thin — decide by ear.
+- Upload time on Flat 1 (0.5 Mbps up): ~10 s for a 5-minute message.
 
 ## Questions
 
-1. **Opus, or ADPCM and be done?** ADPCM: zero integration risk, four times the
-   data, needs a decoder in the app. Opus: better sound at a tenth the size,
-   one unverified dependency. Suggest: ADPCM for M0/M1, Opus as an M3
-   upgrade that changes nothing else — the container header carries the codec id.
-2. **Two-stage?** Capture as ADPCM, then transcode to Opus after release. Halves
-   PSRAM need and keeps the 5-minute cap without streaming to flash.
-3. **Bitrate** — 12, 16, or 24 kbps? 16 is the usual speech sweet spot.
-   Decide by ear on real recordings.
-4. **Container** — the 16-byte header in PROTOCOL.md: magic, version, codec id,
-   sample rate, duration, and a CRC. Is that enough, or should it be Ogg so
-   iOS can play it with zero code?
+1. **Ogg Opus straight to the app, or server-side AAC?** Try Ogg first
+   (AVFoundation plays it on recent iOS); fall back to transcoding.
+2. **Bitrate** — 16 vs 24 kbps, by ear on real recordings from the box.
+3. **Trim thresholds** — silence detection level and the < 1 s discard rule;
+   tune on real recordings, not on the bench.

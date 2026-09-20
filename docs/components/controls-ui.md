@@ -5,6 +5,8 @@
 
 ## Current design
 
+> **Platform change 2026-09-20 — [ADR 0014](../decisions/0014-raspberry-pi-zero-2w.md):** GPIO via `gpiozero` (lid as an interrupt), ring via SPI (`rpi_ws281x`) with a 74AHCT125 level shifter because the ring now runs at the Pi's 5 V; `dadboxctl` replaces the serial console.
+
 > **Decided 2026-09-20:** **lid** — open to talk, close to send ([ADR 0007](../decisions/0007-lid-gesture.md)). Play button outside, recessed (Q2). Quiet hours: glow yes, chime no, play works (Q4). Mute = no sound, glow persists, app shows who (Q5). No sender identity on the box (Q7). Sleeping state: very slow, very dim pulse (Q6).
 
 A lid (open to talk, close to send) with a reed contact that is also the mic's

@@ -10,17 +10,20 @@ making assumptions about the design.
 | Stream | Where | Blocked by |
 | --- | --- | --- |
 | Shopping | `hardware/SHOPPING-LIST.md` | phase 2: Sunrise 4G check in both bedrooms |
-| Firmware | `firmware/` (ESP-IDF + esp_modem, LILYGO T-A7670G R2, classic ESP32) | phase 1 parts |
+| Box | `box/` (Python service on a Pi Zero 2 W, Raspberry Pi OS Lite) | phase 1 parts |
 | Server | `server/` (Node + TS + Fastify) | nothing |
 | iOS | `ios/` (SwiftUI, APNs) | server endpoints, Apple dev account |
 
-## Working on the firmware
+## Working on the box
 
-- Every firmware Bash command starts with `. ~/esp/esp-idf/export.sh`.
-- Read the board with `tools/serial_capture.py` (returns), never `idf.py
-  monitor` (doesn't). Drive it through the serial console (`state`, `lid
-  open`, `play`, `at …`) before asking the user to touch anything.
-- Logic goes in pure C so it compiles on the Mac; test it there first.
+- The box is a Linux machine reachable as `ssh dadbox` over Tailscale (bench:
+  UART on GPIO 14/15 via `tools/serial_capture.py`, or home Wi-Fi). Deploy is
+  `rsync` + `systemctl restart dadbox`; logs are `journalctl -u dadbox`.
+- Drive it with `dadboxctl` (`state`, `lid open`, `play`, `checkin`, `ring
+  test`, `sim link down`) before asking the user to touch anything.
+- The root filesystem is a read-only overlay. Only `/data` is writable. Every
+  message write is fsync-then-rename. Never disable the overlay in the field.
+- Same Python runs on the Mac: unit-test the logic here first.
 - Claude can't hear, see LEDs, or read a meter: ask the user for exactly that
   observation, nothing more. See `docs/DEV-PROCESS.md`.
 
@@ -33,7 +36,8 @@ making assumptions about the design.
 - Every bench session gets an entry at the top of `docs/BUILD-LOG.md`.
 - Parts live in `hardware/bom/bom.csv` with a phase number, not scattered in prose.
   Swiss sources and prices in `hardware/SOURCING.md`; the enclosure is a Hammond
-  1590DD (aluminium — antenna outside, 32 mm inside, round holes only).
+  1590DD (aluminium — antenna outside, 32 mm inside, round holes only). Compute
+  is a Pi Zero 2 W with a USB 4G stick (ADR 0014).
 - Never commit secrets. Wi-Fi/API credentials go in `.env` or a gitignored
   `secrets.h`. APNs `.p8` keys never enter this repo.
 
@@ -47,9 +51,9 @@ making assumptions about the design.
   `complete`, which follows a durable write and CRC check.
 - **The mic is powered only while the lid is open**, through a switch, with the
   ring lit. The box lives in rooms with other people in them.
-- **No real-time-constrained codec in the capture path.** ADPCM as it goes is
-  fine; Opus happens after the lid closes, in the background.
-- **Every consumer is power-gated.** Ring, amp, mic, modem. The target is a
-  weekend unplugged and ungated LEDs alone would eat it.
+- **The capture is on disk while the child is still talking.** Opus is made
+  after the lid closes; nothing is ever only in RAM.
+- **Every consumer is power-gated.** Ring, amp, mic — and the USB stick's
+  VBUS between check-ins. A Pi can't sleep, so gating is the whole budget.
 - Quiet hours are enforced on the device, not by the sender's discipline.
 - No transcription, no speech services, no third-party analytics, ever.

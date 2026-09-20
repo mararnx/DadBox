@@ -36,7 +36,7 @@ def main():
     ap.add_argument("-s", "--seconds", type=float, default=20, help="capture duration (default 20)")
     ap.add_argument("-o", "--out", help="also write to this file")
     ap.add_argument("--until", help="stop early when this regex matches a line")
-    ap.add_argument("--reset", action="store_true", help="pulse DTR/RTS to reset the board first")
+    ap.add_argument("--reset", action="store_true", help="pulse DTR/RTS (resets ESP boards; no effect on a Pi UART)")
     ap.add_argument("--send", help="send this line (plus CR LF) after opening, e.g. a console command")
     a = ap.parse_args()
 
@@ -46,7 +46,8 @@ def main():
 
     with serial.Serial(port, a.baud, timeout=0.2) as ser:
         if a.reset:
-            # Classic ESP32 auto-reset via the USB-UART bridge: EN follows RTS, IO0 follows DTR.
+            # Toggling DTR/RTS resets ESP-style boards via their USB-UART bridge. On the
+            # Pi's UART console it does nothing — power-cycle the Pi instead.
             ser.dtr = False; ser.rts = True; time.sleep(0.1)
             ser.rts = False; time.sleep(0.1)
         if a.send:

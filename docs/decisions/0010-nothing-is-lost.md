@@ -1,7 +1,7 @@
 # ADR 0010 — Nothing a child recorded is ever lost
 
 **Date:** 2026-09-20
-**Status:** accepted
+**Status:** accepted — on the Pi ([ADR 0014](0014-raspberry-pi-zero-2w.md)) the capture streams to disk as it happens, so item 2's 30 s checkpoint becomes continuous; the outbox is a writable `/data` partition beside a read-only root
 
 ## Context
 

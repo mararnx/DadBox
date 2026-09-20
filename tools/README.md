@@ -4,9 +4,9 @@ Scripts and rigs.
 
 ## `serial_capture.py` — read the board without a human at the keyboard
 
-`idf.py monitor` never returns; this captures for N seconds or until a regex,
-optionally resetting the board or sending a console command first. It is how
-Claude reads logs, panics and console output during the build–flash loop.
+Captures the Pi's UART console (GPIO 14/15 via a USB-serial adapter) for N
+seconds or until a regex — boot logs before Tailscale is up, or when Wi-Fi is
+off. Once SSH works, `ssh dadbox` replaces it.
 See [docs/DEV-PROCESS.md](../docs/DEV-PROCESS.md). Needs `pyserial`.
 
 ## Wanted first — `fakebox`

@@ -1,5 +1,0 @@
-dependencies:
-  idf: ">=5.1"
-  # PPP over the A7670G's UART. Not needed for M0 — comment out until M1 if
-  # the component fetch is a nuisance on a fresh setup.
-  espressif/esp_modem: "^1.1"

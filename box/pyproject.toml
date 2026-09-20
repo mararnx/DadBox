@@ -1,0 +1,16 @@
+[project]
+name = "dadbox"
+version = "0.1.0"
+description = "Voice messaging box for a parent and child who live apart"
+requires-python = ">=3.11"
+dependencies = [
+  "requests>=2.31",
+]
+
+[project.optional-dependencies]
+# Only on the Pi. The Mac runs the pure logic and the fakes.
+pi = ["gpiozero>=2.0", "rpi-ws281x>=5.0", "smbus2>=0.4", "sounddevice>=0.4"]
+dev = ["pytest>=8"]
+
+[project.scripts]
+dadboxctl = "dadbox.ctl:main"

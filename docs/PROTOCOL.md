@@ -24,15 +24,15 @@ token lets someone *send*; it must never let them *listen* to what others sent
 | Property | Value |
 | --- | --- |
 | Sample rate | 16 kHz mono |
-| Capture | I2S → IMA-ADPCM 4-bit, encoded as it goes, into PSRAM |
-| Cap | 5 minutes (~2.4 MB ADPCM) |
-| Wire codec, v1 | IMA-ADPCM (`codec = 1`), ~64 kbps, ~480 KB/min |
-| Wire codec, M3+ | Opus 16 kbps (`codec = 2`), transcoded after the lid closes |
+| Capture | ALSA (I2S) → 16-bit PCM written to disk as it happens |
+| Cap | 5 minutes |
+| Wire codec, v1 | **Opus 16 kbps in an Ogg container** (`codec = 2`), ~120 KB/min, encoded with `ffmpeg` after the lid closes |
+| Reserved | `codec = 1` IMA-ADPCM — unused on the Pi; kept so an ESP32 box could still speak the protocol |
 | Trim | leading/trailing silence removed; < 1 s of speech → discarded |
 
-ADPCM in the capture path is a handful of integer ops per sample — there is no
-real-time constraint worth the name. The rule is **no real-time-constrained
-codec in the capture path**, not "no encoding during capture".
+The box is a Linux machine ([ADR 0014](decisions/0014-raspberry-pi-zero-2w.md));
+encoding Opus is not a constraint of any kind. iOS decodes Opus natively; the
+server may still transcode to AAC for the app if convenient.
 
 ### Container
 
@@ -80,9 +80,10 @@ In v1 the box always sends `to: parent-a`, and the server enforces it.
 
 ## Transport
 
-The box has an IP stack (LTE Cat-1 over PPP, [ADR 0006](decisions/0006-bare-modem-not-notecard.md),
-[ADR 0013](decisions/0013-cat1-not-catm.md)) and speaks HTTPS directly to the
-server. No third party in the path. Data is unlimited; the poll interval is a
+The box is a Linux machine with a USB 4G stick that appears as an Ethernet
+interface ([ADR 0006](decisions/0006-bare-modem-not-notecard.md),
+[ADR 0013](decisions/0013-cat1-not-catm.md), [ADR 0014](decisions/0014-raspberry-pi-zero-2w.md))
+and speaks HTTPS directly to the server. No third party in the path. Data is unlimited; the poll interval is a
 battery/latency trade only.
 
 ### Upload (either direction)
@@ -178,6 +179,6 @@ persists; the app shows who set it and when. Both are enforced on the device.
 
 - **On-device encryption** (flag bit0): recommended, not yet decided. Family
   key in NVS + Keychain; the server stores ciphertext.
-- Opus transcode timing on the ESP32 (LX6) — measure before scheduling.
+- Whether the app plays Ogg Opus directly or the server transcodes to AAC.
 - Dock ID for `house`.
 - OTA manifest format (M3).
