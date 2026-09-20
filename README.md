@@ -4,7 +4,8 @@ A voice messaging device for a parent and child who live apart. Press a button,
 talk, let go — the other person hears it. No screen, no phone, no account.
 
 > **Status:** designed, nothing built. Decisions recorded in `docs/decisions/`.
-> Next action: check cellular coverage at both addresses, then order phase 1.
+> Next action: answer the four gating questions in `docs/REVIEW.md`, check
+> LTE-M coverage at both addresses, then order phase 1.
 
 ## Layout
 
@@ -25,6 +26,8 @@ talk, let go — the other person hears it. No screen, no phone, no account.
 ## Start here
 
 - [docs/BRIEF.md](docs/BRIEF.md) — what it is and why
+- [docs/REVIEW.md](docs/REVIEW.md) — architecture double-check: what holds, what doesn't
+- [docs/components/](docs/components/README.md) — one file per component, with the open questions
 - [docs/ROADMAP.md](docs/ROADMAP.md) — the four streams and what blocks what
 - [docs/PROTOCOL.md](docs/PROTOCOL.md) — the contract all three code streams share
 - [hardware/SHOPPING-LIST.md](hardware/SHOPPING-LIST.md) — phased; buy phase 1 only

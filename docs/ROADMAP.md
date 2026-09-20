@@ -12,7 +12,7 @@ Four streams. They converge at M2, when a message makes the full round trip.
 
 | Stream | Directory | Blocked by | Status |
 | --- | --- | --- | --- |
-| **Shopping** | [hardware/SHOPPING-LIST.md](../hardware/SHOPPING-LIST.md) | coverage check | ready to order |
+| **Shopping** | [hardware/SHOPPING-LIST.md](../hardware/SHOPPING-LIST.md) | phase 1: nothing · phase 2: **module decision** ([REVIEW §3](REVIEW.md)) | phase 1 ready |
 | **Firmware** | [firmware/](../firmware/) | parts arriving (M0 parts only) | skeleton |
 | **Server** | [server/](../server/) | nothing — start today | skeleton |
 | **iOS** | [ios/](../ios/) | server endpoints, Apple dev account | planned |
@@ -33,6 +33,15 @@ means the day the parts arrive, only the firmware is unknown.
       quiet hours, mute, travel between homes for a week without attention.
 - [ ] **M4 — Real object.** Custom PCB, printed enclosure, no breadboard.
 - [ ] **M5 — In service.** A month unattended, across both homes.
+
+## Decisions outstanding
+
+From [REVIEW.md](REVIEW.md). Each revises an ADR; none blocks phase 1.
+
+1. Recording gesture — hold / toggle / **lid** (§1, §2, §5)
+2. Cellular module — Notecard / **bare modem + PPP** (§3)
+3. Battery — survive transit / operate unplugged, and for how long (§4)
+4. Two parents — does the co-parent get the app (§8)
 
 ## Before spending money
 

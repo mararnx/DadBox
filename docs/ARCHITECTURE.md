@@ -61,14 +61,14 @@ surfaces in the parent's app, never on the box.
 
 A child's recorded voice is the most sensitive thing in this system.
 
-- Messages are deleted a fixed, short time after being played.
+- Messages are not deleted. Kept on server and app for memory. Make sure to never loose them, also not the dads. 
 - No third-party analytics, no cloud transcription, no speech services.
 - Storage encrypted at rest; TLS in transit.
 - The box holds only what is queued, and wipes on successful send.
 
 ## To verify before building
 
-- **Cellular coverage at the destination address.** Everything depends on it.
+- **Cellular coverage at the destination address.** Everything depends on it. -> OK over Digital Republic
 - Notecard binary payload limits — a ~120 KB message will likely need chunking.
 - Notecard current draw during transmit against the chosen LiPo and regulator.
 - Whether the ESP-IDF Opus encoder component is worth it over ADPCM (4:1, near

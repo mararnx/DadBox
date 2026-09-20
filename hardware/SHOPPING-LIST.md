@@ -20,7 +20,7 @@ No network, no battery.
 | 1 | ICS-43434 I2S mic breakout | Better noise floor than the INMP441 and worth it for a child's voice across a room. | 8 |
 | 1 | MAX98357A I2S amp breakout | Digital in, speaker out, no DAC needed. | 6 |
 | 1 | Speaker, 3 W 4 Ω, 40-50 mm | Full-range. The enclosure will matter more than the driver. | 5 |
-| 2 | Arcade button, 60 mm | Big travel, survives a 7-year-old. Get spare microswitches. | 6 |
+| 2 | Arcade button, 60 mm | Big travel, survives a 7-year-old. Get spare microswitches. If the lid wins, one of these becomes a lid switch. | 6 |
 | 1 | WS2812B ring, 16 px | The entire notification system. | 8 |
 | 1 | Breadboard + jumper kit | | 7 |
 
@@ -30,9 +30,12 @@ lose a weekend.
 
 ---
 
-## Phase 2 — Get it online (M1-M2) · ~$64
+## Phase 2 — Get it online (M1-M2) · ~$30-64
 
-Only after phase 1 makes a sound.
+**On hold.** The module choice is open — see
+[docs/REVIEW.md §3](../docs/REVIEW.md). The table below is the Notecard
+option; the bare-modem option is a SIM7080G breakout (~$20) plus a flat-rate
+IoT SIM (~€10). Only after phase 1 makes a sound, either way.
 
 | Qty | Part | Why | ~$ |
 | --- | --- | --- | --- |

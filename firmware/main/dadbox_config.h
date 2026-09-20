@@ -24,6 +24,11 @@
 #define PIN_I2C_SCL     9
 
 // Audio — see docs/PROTOCOL.md. Changing these changes the wire format.
+//
+// KNOWN WRONG — docs/REVIEW.md §2. 300 s of raw 16-bit PCM is 9.6 MB and the
+// board has 8 MB of PSRAM. Resolves with the gesture decision: a ~90 s hold cap
+// fits raw; a 5-minute lid/toggle cap needs ADPCM in the capture path or
+// streaming to flash. Do not build on this number until that is decided.
 #define AUDIO_SAMPLE_RATE_HZ   16000
 #define AUDIO_MAX_SECONDS      300
-#define AUDIO_MAX_PCM_BYTES    (AUDIO_SAMPLE_RATE_HZ * 2 * AUDIO_MAX_SECONDS)  // ~9.6 MB
+#define AUDIO_MAX_PCM_BYTES    (AUDIO_SAMPLE_RATE_HZ * 2 * AUDIO_MAX_SECONDS)  // ~9.6 MB — see above
