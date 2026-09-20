@@ -1,8 +1,9 @@
 # DadBox
 
-A hardware + software maker project.
+A voice messaging device for a parent and child who live apart. Press a button,
+talk, let go — the other person hears it. No screen, no phone, no account.
 
-> **Status:** scaffold only. The project brief still needs to be filled in —
+> **Status:** concept defined, nothing built yet. Platform and connectivity still open —
 > see [docs/BRIEF.md](docs/BRIEF.md).
 
 ## Layout
