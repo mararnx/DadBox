@@ -21,7 +21,8 @@ a child actually stays close to someone who isn't there.
    breaks. This is the single most important constraint and it drives the
    connectivity choice below.
 3. **It never shows an error a child has to interpret.** Offline means the
-   message queues and sends later. The child sees the same thing either way.
+   message queues and sends later — and is never lost. The child sees the same
+   thing either way; two small status LEDs tell the adults.
 4. **It is always on and always ready.** No boot time, no charging ritual, no
    app that logged itself out.
 5. **A child's recorded voice is the most sensitive data here.** Minimal
@@ -116,6 +117,8 @@ being heard. Everything else in the design serves that.
 - Lid: open to talk, close to send; one play button outside — [ADR 0007](decisions/0007-lid-gesture.md)
 - Battery for a weekend unplugged, everything gated — [ADR 0005](decisions/0005-battery-required.md)
 - Two parents in the protocol, one in the build — [ADR 0008](decisions/0008-two-parents-later.md)
+- The ring is the child's; LINK and POWER LEDs are the adults' — [ADR 0009](decisions/0009-two-led-vocabularies.md)
+- Nothing recorded is ever lost; the outbox is never evicted — [ADR 0010](decisions/0010-nothing-is-lost.md)
 - The box travels with the child between both homes
 - The co-parent is on board: placement is flexible, consent is a conversation,
   and they get a mute that is visible in the app

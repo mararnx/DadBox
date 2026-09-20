@@ -8,6 +8,7 @@ phase,qty,ref,part,description,why,unit_price_est,currency,status,notes
 1,1,SW2,Arcade button 60mm,Play button,Large travel - survives abuse,4,USD,not ordered,Buy a spare microswitch
 1,1,DS1,WS2812B ring 16px,Addressable LED ring,The entire notification system,8,USD,not ordered,Must be diffused
 1,1,Q2,Logic-level N-MOSFET,Ring power gate,Sixteen dark WS2812Bs draw ~16mA - gated they draw nothing,1,USD,not ordered,
+1,2,DS2-3,3mm LED + resistor,LINK and POWER status LEDs,Adults' channel - ADR 0009. Patterns not colours,1,USD,not ordered,Low brightness - 10ms blinks
 1,1,,Breadboard + jumpers,Prototyping,,7,USD,not ordered,
 2,1,U2,SIM7080G breakout with level shifting + u.FL LTE antenna,LTE-M Cat-M1 modem,esp_modem PPP - ADR 0006,25,USD,blocked,BLOCKED on LTE-M coverage check at both addresses. UART is 1.8V - breakout MUST level-shift
 2,1,SIM1,Flat-rate IoT SIM (1NCE-type),500MB 10yr EU roaming,One payment - no account to lapse,12,USD,blocked,Confirm roaming countries

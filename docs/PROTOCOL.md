@@ -54,9 +54,11 @@ end-4   4     crc32 of header+payload, u32 LE
 ```json
 {
   "id": "01JAYZ3K7QW9E8RVX2M4N6P8TD",
+  "seq": 184,
   "from": "box",
   "to": "parent-a",
   "created_at": "2026-09-20T18:04:11Z",
+  "time_ok": true,
   "duration_ms": 14200,
   "codec": 1,
   "bytes": 113600,
@@ -67,6 +69,12 @@ end-4   4     crc32 of header+payload, u32 LE
 `id` is a ULID minted **at the recording end** before the first byte is sent.
 It is the idempotency key: retries of any request for the same `id` are the
 same message. The server never mints ids.
+
+`seq` is a monotonic per-sender counter kept in NVS. **It is the ordering key,
+not `created_at`.** The box has no RTC battery: after a cold start it does not
+know the time until it next connects, and messages recorded in that window get
+a best-effort `created_at` with `time_ok: false`. The app shows those as
+"recorded while offline" rather than inventing a time.
 
 In v1 the box always sends `to: parent-a`, and the server enforces it.
 
@@ -114,13 +122,24 @@ interval; the parent controls the trade against battery from the app.
 ```json
 {
   "battery_pct": 68, "charging": false, "rssi": -91, "fw": "0.1.0",
-  "outbox": 0, "inbox": 2, "uptime_s": 41022,
-  "lid_open": false, "house": "unknown"
+  "outbox": 0, "outbox_bytes": 0, "outbox_oldest_s": 0, "storage_pct": 12,
+  "inbox": 2, "uptime_s": 41022, "offline_s": 0,
+  "lid_open": false, "house": "unknown", "fault": null
 }
 ```
 
-`house` is `unknown | a | b`, reserved for a dock ID resistor. The app surfaces
-all of it; this is how a box dead in a bag gets noticed by an adult.
+- `offline_s` — seconds since the last *successful* check-in, as seen by the
+  box. Non-zero on the first check-in after a gap; the app uses it to say
+  "the box was offline for 14 h — these 3 messages are from then".
+- `outbox_oldest_s` — age of the oldest unsent message. The other half of that
+  sentence.
+- `storage_pct` — outbox flash in use. The fault pattern shows at 80 %.
+- `fault` — `null`, or one of `storage`, `modem`, `capture`, `charger`. Mirrors
+  the alternating status-LED pattern so the app can say what the LEDs mean.
+- `house` is `unknown | a | b`, reserved for a dock ID resistor.
+
+The app surfaces all of it; this is how a box dead in a bag gets noticed by an
+adult.
 
 ## Settings (server → box on every check-in)
 
@@ -137,13 +156,20 @@ all of it; this is how a box dead in a bag gets noticed by an adult.
 Quiet hours: glow yes, chime no, play still works. Mute: no sound at all, glow
 persists; the app shows who set it and when. Both are enforced on the device.
 
-## Retention
+## Durability and retention
 
+[ADR 0010](decisions/0010-nothing-is-lost.md): nothing a child recorded is lost.
+
+- The box gives its *got it* pulse only after the container is fsynced to the
+  outbox. The **outbox is never evicted.**
+- `POST /messages/{id}/complete` returns 2xx **only after** the server has
+  durably stored the assembled blob and verified the CRC. The box deletes from
+  its outbox only on that 2xx. Until then, two copies or none — never zero
+  after a pulse.
+- The inbox on the box *may* be evicted under pressure; the server still holds
+  the message and the box re-downloads it.
 - Deleted from the server 24 h after `played`.
-- Unplayed messages do not expire silently; after 48 h the app is told.
-- The box wipes each item from flash once played (inbox) or once `complete`
-  succeeds (outbox). Flash full → oldest-first eviction, telemetry flag, no
-  visible error.
+- Unplayed messages never expire silently; after 48 h the app is told.
 - No transcription, no speech services, no third-party analytics anywhere.
 
 ## Open

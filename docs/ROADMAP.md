@@ -43,6 +43,8 @@ means the day the parts arrive, only the firmware is unknown.
 | Notecard is the wrong shape | Bare LTE-M modem over PPP | [0006](decisions/0006-bare-modem-not-notecard.md) |
 | Travels ≠ operates unplugged | A weekend unplugged, everything gated | [0005](decisions/0005-battery-required.md) |
 | Two parents | In the protocol now, in the build later | [0008](decisions/0008-two-parents-later.md) |
+| No-connection state; ring overloaded | Ring = child's; LINK + POWER LEDs = adults' | [0009](decisions/0009-two-led-vocabularies.md) |
+| Eviction could lose a recording | Outbox never evicted; pulse only after fsync | [0010](decisions/0010-nothing-is-lost.md) |
 
 Still open, per component: [components/](components/README.md).
 

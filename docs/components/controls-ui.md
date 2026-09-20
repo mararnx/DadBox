@@ -31,6 +31,21 @@ households can set and see.
   the lid *always* records (probably: yes, that's the gesture), and what an
   open lid with no speech does (trim to nothing, send nothing).
 
+- **LED logic validated 2026-09-20** — the full priority table is in
+  [ARCHITECTURE.md § Indication](../ARCHITECTURE.md#indication). What the
+  validation found:
+  - The ring was carrying two vocabularies (messages *and* link/sleep state).
+    Split: the ring is the child's, two discrete status LEDs (LINK, POWER)
+    are the adults' — [ADR 0009](../decisions/0009-two-led-vocabularies.md).
+  - *Listening* must outrank *waiting* and must never animate: a bystander
+    has to be able to tell "mic on" from "message waiting" without the key.
+  - *Got it* must be identical online and offline. The pulse promises *safe*,
+    not *delivered*; delivery is the adults' channel.
+  - *Waiting* at full breathing all weekend costs ~30 % of the cell. It drops
+    to *resting* (one breath / 10 s) after 2 h without interaction.
+  - There was no boot state. Added: one sweep.
+  - The status LEDs use patterns, not colours, and 10 ms blinks — so they are
+    invisible in a dark bedroom and free.
 - "Message count as lit segments" reads fine to a 7-year-old. A 4-year-old
   reads "more light = more"; that also works. Above ~8 waiting, just fill the
   ring — the number stops mattering.
@@ -66,3 +81,15 @@ households can set and see.
    tells them in the first second. Suggest: no.
 8. **Haptics?** A small vibration on "sent" is cheap and satisfying. Worth a
    motor?
+9. **Status LED placement** — beside the USB-C port, on the back, on the
+   underside? They must be findable by an adult and ignorable by the child.
+10. **LINK "brief on" at each sync** — helpful while placing the box, but is a
+    flash every 10 minutes at night acceptable? Suggest: only while charging,
+    or only for the first hour after power-up.
+11. **Resting after 2 h** — right threshold? A child home from school at 16:00
+    with a message that arrived at 09:00 should still see it glowing.
+    Resting is dim, not off, so probably fine — but confirm by living with it.
+12. **Should the box show *charged* distinctly from *on battery*?** Both are
+    "POWER off". A parent packing the bag wants to know it's full. Suggest:
+    POWER steady while charging, one long blink when the cable is plugged into
+    a full cell, then off.

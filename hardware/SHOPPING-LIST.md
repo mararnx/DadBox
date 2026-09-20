@@ -25,6 +25,7 @@ hear yourself. No network, no battery.
 | 1 | Arcade button, 60 mm, + a spare microswitch | The play button. Big travel, survives a 7-year-old. | 4 |
 | 1 | WS2812B ring, 16 px | The entire notification system. Diffuse it. | 8 |
 | 1 | Logic-level N-MOSFET (e.g. 2N7002/AO3400-class) | Gates the ring's 5 V. Sixteen dark WS2812Bs draw ~16 mA; gated they draw nothing. | 1 |
+| 2 | 3 mm LEDs + resistors | LINK and POWER status LEDs — the adults' channel, so the ring never has to show a fault. | 1 |
 | 1 | Breadboard + jumper kit | | 7 |
 | — | A cardboard box | Listen to it inside one. Seriously. | 0 |
 

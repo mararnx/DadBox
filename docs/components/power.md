@@ -31,7 +31,8 @@ capacitance for modem bursts.
   | Mic, unpowered | 0 | load switch |
   | Modem in PSM | ~µA–1 mA | eDRX/PSM config dependent |
   | Modem poll every 15 min | ~2-3 mA average | 10-20 s at ~200 mA, bursts to 2 A |
-  | Ring breathing (message waiting) | 20-60 mA | brightness-dependent, only when waiting |
+  | Ring breathing (message waiting) | ~15 mA | brightness-dependent; **drops to *resting* (~1.5 mA) after 2 h** — a message waiting all weekend would otherwise cost ~30 % of the cell |
+  | Status LEDs (LINK, POWER) | ~0 | 10 ms blinks every 3 s, low brightness |
 
   Gated properly: ~5 mA average → ~3 weeks. Ungated ring: ~20 mA → ~6 days.
   Playing a message: ~300-500 mA for its duration, negligible overall.

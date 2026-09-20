@@ -23,6 +23,14 @@
 #define PIN_RING_EN    13   // FET on the ring's 5 V. WS2812B draw ~1 mA each even dark.
 #define LED_RING_PIXELS 16
 
+// Status LEDs — the adults' channel, ADR 0009. Patterns, not colours.
+// Avoid 19/20 (USB), 35-37 (octal PSRAM), 38/48 (onboard RGB), 45/46 (strap).
+#define PIN_LED_LINK   47
+#define PIN_LED_POWER  21
+#define STATUS_BLINK_MS      10     // short enough to be free and invisible at night
+#define STATUS_PERIOD_MS     3000
+#define RING_RESTING_AFTER_S (2 * 3600)   // waiting → resting; see ARCHITECTURE.md
+
 // Modem — SIM7080G over UART, esp_modem PPP. ADR 0006.
 // The module's UART is 1.8 V logic; the breakout MUST level-shift.
 #define PIN_MODEM_TX   17
@@ -48,3 +56,9 @@
 // Protocol
 #define UPLOAD_CHUNK_BYTES     (32 * 1024)
 #define CHECKIN_DEFAULT_MIN    10
+
+// Durability — ADR 0010. The outbox is never evicted.
+#define CAPTURE_CHECKPOINT_S   30     // PSRAM → flash during capture
+#define OUTBOX_FAULT_PCT       80     // fault pattern on the status LEDs above this
+#define BATTERY_SLEEP_PCT      5      // below this the box sleeps and the lid does nothing
+#define BATTERY_LOW_PCT        20

@@ -27,9 +27,12 @@ making assumptions about the design.
 
 ## Design rules that are not negotiable
 
-- **The box has no error state.** Network trouble queues silently and retries.
-  Every failure surfaces in the parent's app instead — a child must never have
-  to interpret a fault.
+- **The ring has no error state.** It speaks only to the child: waiting,
+  listening, playing, got-it. Link, battery and faults live on two small status
+  LEDs — the adults' channel — and in the app. A child never interprets a fault.
+- **Nothing a child recorded is ever lost.** The got-it pulse comes only after
+  fsync; the outbox is never evicted; deletion only on the server's 2xx to
+  `complete`, which follows a durable write and CRC check.
 - **The mic is powered only while the lid is open**, through a switch, with the
   ring lit. The box lives in rooms with other people in them.
 - **No real-time-constrained codec in the capture path.** ADPCM as it goes is

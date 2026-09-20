@@ -42,21 +42,86 @@ wire contract and [decisions/](decisions/) for why each piece is what it is.
    suppressed during quiet hours and by mute.
 4. Child presses play. Oldest first, one per press.
 
-## Device states
+## Indication
 
-| State | What the child sees |
-| --- | --- |
-| Idle, nothing waiting | Ring dark |
-| Messages waiting | Slow warm breathing, N segments lit (fill above ~8) |
-| Listening (lid open) | Steady "listening" light — no time pressure |
-| Just sent (lid closed) | One pulse, then idle |
-| Playing | Segment-by-segment progress |
-| No connection | **Nothing.** Queue and retry with backoff |
-| Sleeping (no link for a day) | Very slow, very dim pulse — different from broken |
-| Battery low | Nothing below 20 %; the app nags the adults. Below 5 %: box sleeps, app says so |
+Two vocabularies, deliberately separate ([ADR 0009](decisions/0009-two-led-vocabularies.md)):
 
-There is no error state. Anything that goes wrong is a grown-up's problem and
-surfaces in the parent's app, never on the box.
+- **The ring** is the child's. It says three things — *something is waiting*,
+  *I'm listening*, *I'm playing* — plus one pulse for *got it*. It never shows
+  link, battery or faults.
+- **Two small status LEDs** — LINK and POWER, low on the box beside the USB-C
+  port — are the adults'. Off means fine. Anyone in either house can glance at
+  them; the child never needs to.
+
+### Ring — priority order, highest wins
+
+| # | State | Ring | Notes |
+| --- | --- | --- | --- |
+| 1 | Listening (lid open) | Steady, bright, warm. Never animated. | The mic-is-on signal for everyone in the room. Quiet hours dim it to a floor, never off. |
+| 2 | Playing | Progress sweep around the ring | Then falls through to 4 or 5 |
+| 3 | Got it (lid just closed) | One pulse, ~600 ms | Only after the message is on flash. Identical online or offline — the pulse means *safe*, not *delivered*. |
+| 4 | Waiting (inbox > 0) | Slow warm breathing, N segments lit (fill ≥ 8) | After 2 h without interaction → *resting*: one breath every ~10 s. Quiet hours: brightness floor. |
+| 5 | Idle | Dark; ring rail off | |
+| — | Boot | One sweep | Then whichever applies |
+
+The ring has no error state. Nothing on it ever needs interpreting beyond the
+four words above.
+
+### Status LEDs — the adults' channel
+
+| LED | Pattern | Meaning |
+| --- | --- | --- |
+| LINK | off | Checked in within 2 × poll interval — nothing to see |
+| LINK | 1 short blink / 3 s | No connection; nothing queued |
+| LINK | 2 short blinks / 3 s | No connection **and messages waiting to go** — safe on flash |
+| LINK | brief on | A check-in or upload just succeeded (useful when placing the box) |
+| POWER | off | On battery above 20 %, or plugged in and full |
+| POWER | steady | Charging |
+| POWER | 1 blink / 3 s | Below 20 %, on battery |
+| POWER | off, box asleep | Below 5 %: box sleeps, lid does nothing; LINK still blinks so an adult can tell |
+| both | alternating | **Fault** — an adult must act: outbox ≥ 80 %, storage error, modem unresponsive, capture failed |
+
+Patterns carry the meaning; colour is redundant, for anyone colour-blind in
+either house. Blinks are ~10 ms at low brightness — invisible in a dark bedroom
+and effectively free.
+
+### Validation notes
+
+- *Listening* outranks everything because it is the safety signal. It is the
+  only ring state that is never animated, so a bystander can tell "mic on"
+  from "message waiting" without knowing the vocabulary.
+- *Got it* is identical online and offline on purpose. The child is promised
+  *safe*; delivery is the adults' business (LINK, and the app).
+- *Waiting* is the expensive state: 16 pixels breathing is ~15 mA, and a
+  message that waits all weekend would eat ~30 % of the cell. Hence *resting*
+  after 2 h — the glow survives, the budget survives.
+- The old *sleeping* ring state is gone. Link is not the child's concern.
+- The old *no connection → nothing* rule is gone. It protected the child but
+  left both households unable to tell a quiet box from a dead one.
+
+## Nothing is lost
+
+[ADR 0010](decisions/0010-nothing-is-lost.md). A recording that got its pulse
+is on flash and stays until the server has confirmed it.
+
+1. Lid closes → trim → container + CRC → LittleFS outbox → fsync → **then**
+   the pulse.
+2. During capture the PSRAM buffer is checkpointed to flash every 30 s. A
+   power loss mid-story costs at most 30 s.
+3. The **outbox is never evicted**. The inbox may be — the server still has
+   those.
+4. Out of the outbox only after `complete` returns 2xx; 2xx only after the
+   server's durable write and CRC match.
+5. Retries back off forever. On boot, interrupted uploads resume from
+   `upload-state`.
+6. Ordering is a monotonic `seq` from NVS, not the clock — the box has no RTC
+   battery and does not know the time after a cold start until it connects.
+7. On reconnect, telemetry says how long the box was offline and what queued.
+
+Capacity: ~10 MB of flash after the app and OTA slot → ~20 minutes of ADPCM,
+~3 h once Opus lands. Full is the one case where *never lost* and *always
+accept* collide; the fault pattern shows at 80 %, and whether *never* needs a
+microSD is open in [components/storage-queue.md](components/storage-queue.md).
 
 ## Power
 
@@ -70,9 +135,12 @@ That makes gating the design's centre of gravity:
 | Amp | MAX98357A SD pin | µA |
 | Modem | PSM between check-ins | ~µA–1 mA |
 | ESP32-S3 | light sleep; deep sleep between polls if wake sources prove reliable | ~1-2 mA |
+| Ring, *waiting* | — | ~15 mA breathing; ~1.5 mA *resting* after 2 h |
+| Status LEDs | — | ~0 — 10 ms blinks |
 
 Roughly 5 mA average, gated → ~3 weeks on 3000 mAh. Ungated ring alone would
-be ~6 days. Transmit bursts to ~2 A: the cell, its PCM, the power-path
+be ~6 days; a message left *waiting* at full breathing all weekend would be
+~30 % of the cell, which is why *waiting* drops to *resting* after 2 h. Transmit bursts to ~2 A: the cell, its PCM, the power-path
 regulator and the trace to the modem all need to be rated for it, plus bulk
 capacitance at the modem. This is the #1 cause of "my LTE project resets".
 

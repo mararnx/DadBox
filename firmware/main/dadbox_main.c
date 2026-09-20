@@ -17,18 +17,38 @@
 
 static const char *TAG = "dadbox";
 
+// The ring is the child's vocabulary (ADR 0009). Priority order, highest wins.
+// It never shows link, battery or faults — there is deliberately no RING_ERROR.
 typedef enum {
-    STATE_IDLE,          // ring dark, everything gated off
-    STATE_WAITING,       // inbox non-empty — slow warm breathing, N segments
-    STATE_LISTENING,     // lid open — mic powered, steady light, no timer
-    STATE_SENT,          // lid just closed — one pulse, then back
-    STATE_PLAYING,       // segment-by-segment progress
-    STATE_SLEEPING,      // no link for a long time — very slow, very dim. Not "broken".
-} dadbox_state_t;
+    RING_LISTENING,      // 1. lid open — steady, bright, never animated. The mic-is-on signal.
+    RING_PLAYING,        // 2. progress sweep
+    RING_GOT_IT,         // 3. lid just closed AND the message is fsynced — one pulse, ~600 ms
+    RING_WAITING,        // 4. inbox > 0 — slow warm breathing, N segments; resting after 2 h
+    RING_IDLE,           // 5. dark, ring rail off
+} ring_state_t;
 
-// Deliberately no STATE_ERROR.
+// The status LEDs are the adults' vocabulary. Off means fine.
+typedef enum {
+    LINK_OK,             // off
+    LINK_DOWN,           // 1 blink / 3 s
+    LINK_DOWN_QUEUED,    // 2 blinks / 3 s — messages waiting to go, safe on flash
+} link_state_t;
 
-static dadbox_state_t s_state = STATE_IDLE;
+typedef enum {
+    PWR_OK,              // off
+    PWR_CHARGING,        // steady
+    PWR_LOW,             // 1 blink / 3 s, below BATTERY_LOW_PCT on battery
+    PWR_ASLEEP,          // off; box asleep below BATTERY_SLEEP_PCT, lid does nothing
+} power_state_t;
+
+typedef enum {
+    FAULT_NONE, FAULT_STORAGE, FAULT_MODEM, FAULT_CAPTURE, FAULT_CHARGER,
+} fault_t;               // any non-NONE → LINK and POWER alternate
+
+static ring_state_t  s_ring  = RING_IDLE;
+static link_state_t  s_link  = LINK_DOWN;
+static power_state_t s_power = PWR_OK;
+static fault_t       s_fault = FAULT_NONE;
 
 void app_main(void)
 {
@@ -56,12 +76,16 @@ void app_main(void)
     //   TODO: settings          quiet hours, mute, poll interval, brightness, volume
     //   TODO: power             light sleep between events; measure every rail
 
+    // Durability (ADR 0010): the RING_GOT_IT pulse is only ever raised after the
+    // outbox write has been fsynced. Never before. The outbox is never evicted.
+
     while (true) {
-        switch (s_state) {
-            case STATE_IDLE:
+        switch (s_ring) {
+            case RING_IDLE:
             default:
                 break;
         }
+        (void) s_link; (void) s_power; (void) s_fault;
         vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
