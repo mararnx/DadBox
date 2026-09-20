@@ -27,44 +27,54 @@ a child actually stays close to someone who isn't there.
 5. **A child's recorded voice is the most sensitive data here.** Minimal
    retention, no third-party analytics, no cloud transcription.
 
-## Hardware (proposed — not yet decided)
+## Hardware (decided — see [bom.csv](../hardware/bom/bom.csv))
 
-- **Compute:** ESP32-S3 — Wi-Fi + BLE, PSRAM for audio buffers, hardware I2S,
+- **Compute:** ESP32-S3 (N16R8) — PSRAM for audio buffers, hardware I2S,
   well-trodden audio path, a few dollars.
-- **Input:** one large arcade button (record, hold-to-talk), one play button.
-  Buttons big enough for small hands and hard to break.
+- **Input:** two large arcade buttons — hold-to-talk record, and play.
+  Sized for a 6-9 year old and hard to break.
 - **Mic:** I2S MEMS, e.g. ICS-43434 or INMP441.
 - **Output:** MAX98357A I2S amp + 3W speaker.
 - **Indicator:** WS2812 LED ring — slow breathing glow means "a message is
-  waiting". This is the whole notification system.
+  waiting", one lit segment per message. This is the whole notification system.
 - **Power:** always-on USB-C, with a LiPo so it survives being unplugged and
   carried around. Not a device anyone should have to remember to charge.
 - **Enclosure:** 3D printed, chunky, drop-survivable, no visible screws.
 
-## Connectivity — the key decision
+## Connectivity — decided: cellular
 
-| Option | Upside | Downside |
-| --- | --- | --- |
-| **Wi-Fi** | Free, simple, fast | Needs the other household's password; dies when their router changes |
-| **Cellular** (LTE-M/NB-IoT — SIM7080G, Blues Notecard) | Plug in and it works, anywhere, forever | ~$5-10/month, more power, more parts |
+The box connects on its own and is never a guest on anyone's network. Wi-Fi
+would have meant depending on the other household's password, router and
+goodwill — and failing silently in a house with no reason to debug it.
 
-Voice is tiny: Opus at 16 kHz mono is ~2-3 KB/s, so a 30-second message is
-roughly 70 KB. Cellular data cost is a rounding error. **Recommendation:
-cellular.** It converts setup from a negotiation into plugging in a box.
+Using a Blues Notecard, whose data plan is bundled with the hardware: no
+monthly bill, no carrier account, no SIM to activate. Voice is tiny (~120 KB
+per minute at 16 kbps Opus), so data volume is not a constraint.
+
+Full reasoning in [ADR 0002](decisions/0002-cellular-not-wifi.md).
 
 ## Software
 
 - **Firmware:** ESP-IDF (Arduino core if speed matters more than control).
   Record → Opus encode → queue to flash → upload when there's a link.
-- **Parent end:** start with a phone web app (PWA) — record, send, listen.
-  A second identical box later would make it symmetric, and symmetric is better.
-- **Transport:** MQTT over TLS for push to the device, HTTPS for audio blobs.
+- **Parent end:** a phone web app (PWA) — record, send, listen. A second
+  identical box later joins as another client of the same protocol
+  ([ADR 0003](decisions/0003-one-box-plus-app.md)).
+- **Transport:** Notecard → Notehub → backend. HTTPS for the PWA.
 - **Backend:** as small as possible. Object storage plus a thin API. Messages
   deleted a short, fixed time after they're played.
 
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the audio path and state machine.
+
+## Scope
+
+A one-off for one family. Hand-assembled, config baked in, no onboarding flow,
+no support burden, no compliance work. One box that actually exists beats a
+product that doesn't.
+
 ## Constraints
 
-- **Budget:** _TBD_
+- **Budget:** ~$150-180 in parts for the prototype (see BOM)
 - **Deadline:** _TBD — is there a birthday or handover date?_
 - **Skills / tools on hand:** _soldering, 3D printer, scope?_
 
@@ -77,13 +87,18 @@ cellular.** It converts setup from a negotiation into plugging in a box.
 - [ ] **M4** Custom PCB and enclosure.
 - [ ] **M5** In the other house, working unattended for a month.
 
-## Open questions
+## Decided
 
-- One box or two? (Child only, or a matching one for the parent.)
-- Child's age — decides one button vs two, and whether "who is this from" needs
-  to be expressed at all.
-- Wi-Fi or cellular. See above; this changes the BOM, the power budget and the
-  enclosure.
-- Message length cap? A hard stop at 60s keeps costs and attention spans sane.
-- What happens to messages after they're heard — vanish, or keep a few?
-- Is this a one-off for one family, or a thing other people might have?
+- One box for the child; parent uses a phone app — [ADR 0003](decisions/0003-one-box-plus-app.md)
+- Cellular, not Wi-Fi — [ADR 0002](decisions/0002-cellular-not-wifi.md)
+- Designed for ages 6-9: two buttons, message count, no text anywhere
+- 60-second cap per message, ended with a chime
+- A one-off for one family
+
+## Still open
+
+- What happens to messages after they're heard — vanish, or keep a few favourites?
+- Quiet hours: what window, and can the child see that one is waiting before
+  it chimes in the morning?
+- Is there a date this needs to exist by?
+- **Cellular coverage at the destination address — verify before ordering.**

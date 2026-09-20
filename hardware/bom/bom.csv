@@ -1,1 +1,14 @@
 qty,ref,part,description,supplier,part_number,unit_price,currency,link,notes
+1,U1,ESP32-S3-DevKitC-1-N16R8,MCU 16MB flash 8MB PSRAM,Espressif/Mouser,,15,USD,,PSRAM required for PCM buffer
+1,U2,Blues Notecard Cellular,LTE-M/NB-IoT module with bundled data,Blues,,49,USD,,Verify current SKU and data allowance
+1,U3,Notecarrier-B,Carrier board for Notecard,Blues,,15,USD,,Check ESP32 wiring / I2C
+1,MK1,ICS-43434 breakout,I2S MEMS microphone,Adafruit/Sparkfun,,8,USD,,INMP441 is a cheaper alternative
+1,U4,MAX98357A breakout,I2S class-D amplifier 3W,Adafruit,,6,USD,,
+1,LS1,Speaker 3W 4ohm,40-50mm full range,,,5,USD,,Enclosure volume matters more than the driver
+1,DS1,WS2812B ring 16px,Addressable LED ring,,,8,USD,,Diffuse it - raw LEDs are harsh for a child
+2,SW1-2,Arcade button 60mm,Record and play buttons,,,3,USD,,Large travel. Microswitch must survive abuse
+1,BT1,LiPo 3000mAh,3.7V pouch cell with protection,,,12,USD,,Sized for cellular transmit bursts
+1,U5,LiPo charger/PMIC,USB-C charge + power path,,,9,USD,,Power path so it runs while charging
+1,J1,USB-C PSU 5V 2A,Mains adapter,,,10,USD,,Default power source
+1,C1,Bulk capacitor 1000uF,Decoupling for modem bursts,,,1,USD,,Near the Notecard supply
+1,ENC,Filament + inserts,3D printed enclosure,,,10,USD,,Heat-set inserts not self-tappers
