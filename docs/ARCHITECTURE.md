@@ -157,7 +157,8 @@ A child's recorded voice is the most sensitive thing in this system.
 ## To verify before building
 
 - **LTE-M coverage at both addresses** — Cat-M1 specifically, not NB-IoT.
-- The SIM7080G breakout level-shifts its 1.8 V UART.
+- Which LILYGO variant arrived (PMU or Standard) — decides battery sensing.
+- The Allnet pigtail's SMA is a bulkhead; the LILYGO's antenna connector is u.FL, not MHF4.
 - Real idle current of each gated rail, on the bench, before choosing a cell.
 - Opus encode time on the S3 for a 5-minute clip (M3, not blocking).
 - That a lid switch / hall sensor is *reliable* — it is the mic gate.

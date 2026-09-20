@@ -1,6 +1,7 @@
 # Firmware
 
-ESP32-S3 (N16R8), ESP-IDF v5.x.
+LILYGO T-SIM7080G-S3 — ESP32-S3 (N16R8) with the SIM7080G on board
+([ADR 0012](../docs/decisions/0012-lilygo-t-sim7080g-s3.md)). ESP-IDF v5.x.
 
 ## Build
 
@@ -39,4 +40,9 @@ Do not buy the modem until this sounds good.
   strapping pins before soldering.
 - Wire format lives in [../docs/PROTOCOL.md](../docs/PROTOCOL.md). Change it
   there first.
-- The SIM7080G's UART is 1.8 V. If the breakout doesn't level-shift, stop.
+- The SIM7080G lives on the LILYGO board: UART on GPIO 4/5, PWRKEY 46,
+  DTR 7. Level shifting and modem power are the board's problem, not ours.
+- The mic's power is switched by the lid's reed contact in hardware. Firmware
+  reads the lid; it never controls the mic rail.
+- LILYGO ships two variants (PMU / Standard). Battery sensing differs — see
+  `dadbox_config.h`.

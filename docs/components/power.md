@@ -37,6 +37,11 @@ capacitance for modem bursts.
   Gated properly: ~5 mA average → ~3 weeks. Ungated ring: ~20 mA → ~6 days.
   Playing a message: ~300-500 mA for its duration, negligible overall.
 
+- **Board change** ([ADR 0012](../decisions/0012-lilygo-t-sim7080g-s3.md)):
+  charging is the LILYGO's, at **500 mA max** — ~7 h from flat for 3000 mAh.
+  Modem bursts are handled on-board. Cell: protected 18650 with JST-PH 2.0
+  leads on the JST connector, strapped, **not** in the spring holder. Battery
+  % via the AXP2101 on the PMU variant, ADC divider on the Standard.
 - Transmit bursts to ~2 A for tens of ms: the cell, the protection PCM, the
   power-path regulator and the trace to the modem all need to be rated for it,
   or the box brown-outs mid-upload. This is the #1 cause of "my LTE project

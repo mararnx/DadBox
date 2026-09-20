@@ -47,6 +47,10 @@ and nothing lingers on the device longer than it must.
      thing to get wrong in the enclosure.
    Suggest: accept the limit for v1, Opus in M3, and revisit microSD only if
    the box actually spends long stretches offline.
+   **Update:** the LILYGO board has a TF slot on GPIO 10-13
+   ([ADR 0012](../decisions/0012-lilygo-t-sim7080g-s3.md)), so the microSD
+   option is free in hardware. Still: internal flash primary, SD as overflow,
+   never a dependency.
 3. **Inbox grace** — how long after play does a message survive on the box?
    Ties to "can the child replay" in [audio-playback.md](audio-playback.md).
 4. **Favourites** — does anything ever get pinned on the device? Suggest no on

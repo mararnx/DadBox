@@ -7,9 +7,10 @@
 
 > **Decided 2026-09-20:** **lid** — open to talk, close to send ([ADR 0007](../decisions/0007-lid-gesture.md)). Play button outside, recessed (Q2). Quiet hours: glow yes, chime no, play works (Q4). Mute = no sound, glow persists, app shows who (Q5). No sender identity on the box (Q7). Sleeping state: very slow, very dim pulse (Q6).
 
-Two 60 mm arcade buttons (hold-to-record, press-to-play), a 16-pixel LED ring
-behind a diffuser, chimes, quiet hours enforced on-device, and a mute both
-households can set and see.
+A lid (open to talk, close to send) with a reed contact that is also the mic's
+power switch; one illuminated 33 mm play button through the front wall; a
+16-pixel LED ring behind an acrylic disc in the lid; two status LEDs; chimes;
+quiet hours enforced on-device; and a mute both households can set and see.
 
 ## Checked
 
@@ -59,7 +60,12 @@ households can set and see.
 
 1. **Lid, or buttons?** Gates the enclosure, the mic gating circuit, the cap,
    and the shopping list (a lid switch instead of one arcade button).
-2. **Play: inside or outside?** Outside: a child can listen without "opening
+2. ~~Play: inside or outside?~~ Outside, **through the front wall** — the
+   1590DD is 32 mm inside and every arcade button is deeper than that. The
+   33 mm button is illuminated: light it during *waiting* so the child knows
+   what to press, dark otherwise. A second, quieter channel for the same
+   fact as the ring.
+2b. **Play: inside or outside?** (original) Outside: a child can listen without "opening
    to talk". Inside: nothing on the outside at all, and listening becomes
    part of the opening ritual. Suggest outside, recessed.
 3. **What does "waiting" look like?** Slow breathe in a warm colour; N

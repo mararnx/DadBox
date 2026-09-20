@@ -1,22 +1,17 @@
-phase,qty,ref,part,description,why,unit_price_est,currency,status,notes
-1,1,U1,ESP32-S3-DevKitC-1-N16R8,MCU 16MB flash 8MB PSRAM,PSRAM holds the ADPCM buffer while the lid is open,15,USD,not ordered,VERIFY the N16R8 variant - generic listings often ship without PSRAM
-1,1,MK1,ICS-43434 breakout,I2S MEMS microphone,Lower noise floor than INMP441 across a room,8,USD,not ordered,INMP441 is the cheaper fallback
-1,1,Q1,Load switch breakout or P-FET,Mic power gate,Mic is unpowered unless the lid is open - ADR 0007,3,USD,not ordered,
-1,1,U4,MAX98357A breakout,I2S class-D amplifier 3W,Digital in speaker out - has a shutdown pin,6,USD,not ordered,Use the SD pin
-1,1,LS1,Speaker 3W 4ohm 40-50mm,Full range driver,Enclosure acoustics matter more than the driver,5,USD,not ordered,
-1,1,SW1,Toggle switch,Stands in for the lid on the bench,,2,USD,not ordered,Real lid switch in phase 4
-1,1,SW2,Arcade button 60mm,Play button,Large travel - survives abuse,4,USD,not ordered,Buy a spare microswitch
-1,1,DS1,WS2812B ring 16px,Addressable LED ring,The entire notification system,8,USD,not ordered,Must be diffused
-1,1,Q2,Logic-level N-MOSFET,Ring power gate,Sixteen dark WS2812Bs draw ~16mA - gated they draw nothing,1,USD,not ordered,
-1,2,DS2-3,3mm LED + resistor,LINK and POWER status LEDs,Adults' channel - ADR 0009. Patterns not colours,1,USD,not ordered,Low brightness - 10ms blinks
-1,1,,Breadboard + jumpers,Prototyping,,7,USD,not ordered,
-2,1,U2,SIM7080G breakout with level shifting + u.FL LTE antenna,LTE-M Cat-M1 modem,esp_modem PPP - ADR 0006,25,USD,blocked,BLOCKED on LTE-M coverage check at both addresses. UART is 1.8V - breakout MUST level-shift
-2,1,SIM1,Flat-rate IoT SIM (1NCE-type),500MB 10yr EU roaming,One payment - no account to lapse,12,USD,blocked,Confirm roaming countries
-2,1,C1,1000uF low-ESR capacitor,Bulk capacitance at the modem,Transmit bursts brown out small rails,2,USD,not ordered,
-3,1,BT1,LiPo 3000-4000mAh with PCM + thermistor,Protected cell,Weekend unplugged - ADR 0005,16,USD,not ordered,Size after measuring gated idle current
-3,1,U5,USB-C charger with power path + NTC input (BQ24074-class),Charge + power path PMIC,Runs while charging on a flat cell,12,USD,not ordered,
-3,1,R1-2,Voltage divider + decoupling,Battery sense,,2,USD,not ordered,
-3,2,J1,USB-C PSU 5V 2A,Mains adapter,One per house,10,USD,not ordered,
-4,1,ENC,Filament (PETG/ASA + TPU) + heat-set inserts,3D printed enclosure,,15,USD,not ordered,Heat-set inserts not self-tappers
-4,1,LID,Pin hinge hardware + microswitch OR magnet + hall sensor,Lid mechanism,The lid switch is the mic gate - must be reliable,5,USD,not ordered,Decide mechanism in enclosure.md
-4,1,PCB,Custom PCB fabrication,Replaces breadboard,,50,USD,not ordered,Expect a second revision
+phase,qty,ref,part,description,why,price_chf,source,url,status,notes
+1,1,U1,LILYGO T-SIM7080G-S3,ESP32-S3 N16R8 + SIM7080G + charger + 18650/JST + TF + SIM,One board replaces DevKitC + modem + level shifter + charger - ADR 0012,43.90,bastelgarage,https://www.bastelgarage.ch/lilygo-t-sim7080g-s3-mit-nb-iot-cat-m-und-gps,not ordered,CONFIRM PMU vs Standard variant. Includes IPEX LTE antenna
+1,1,ENC,Hammond 1590DD,Die-cast alu 188x120x37 inside 183x113x32,The box - ADR 0011,27.91,distrelec,https://www.distrelec.ch/en/die-cast-enclosure-1590-188x120x37mm-die-cast-aluminium-natural-ip54-hammond-1590dd/p/15011796,not ordered,8 in stock 1-2 days
+1,1,MK1,I2S MEMS mic module MSM261S4030H0,3.3V 1mA I2S,Reed contact switches its VDD directly,8.90,bastelgarage,https://www.bastelgarage.ch/i2s-mikrofon-modul,not ordered,INMP441 equivalent
+1,1,U4,Adafruit MAX98357A,I2S class-D amp,From VBAT ~1.5W into 4 ohm. SD pin for gating,9.95,galaxus,https://galaxus.ch/de/s1/product/adafruit-i2s-3w-class-d-amplifier-breakout-max98357a-erweiterung-elektronikmodul-5998646,not ordered,~1 week at supplier
+1,1,LS1,Speaker 4ohm 3W 40mm,17mm tall,Only one that fits 32mm inside,8.90,bastelgarage,https://www.bastelgarage.ch/lautsprecher-4ohm-3w-40mm,not ordered,
+1,1,DS1,Adafruit NeoPixel ring 16,44.5mm OD WS2812,The child's display. Gate it,18.50,galaxus,https://www.galaxus.ch/en/s1/product/adafruit-neopixel-ring-16-x-ws2812-5050-rgb-led-diode-5998257,not ordered,ONLY 2 IN STOCK - order first
+1,1,SW1,Magnetic door contact reed + magnet,NO 3W 330mm lead,Lid sensor and mic power switch - ADR 0007,4.90,bastelgarage,https://www.bastelgarage.ch/magnetischer-tur-fenster-kontakt,not ordered,
+1,1,SW2,Illuminated arcade button 33mm,24mm hole ~33mm deep,Play button - side wall mount,14.90,galaxus,https://www.galaxus.ch/en/s1/product/purecrea-arcade-button-illuminated-33mm-green-buttons-switches-36704979,not ordered,Cheaper direct at bastelgarage
+1,2,DS2-3,3mm LED + 220R,LINK and POWER status LEDs,Adults' channel - ADR 0009,2.00,any,,not ordered,
+1,1,Q1,Logic-level MOSFET,Ring supply gate,~16mA dark otherwise,1.00,any,,not ordered,
+2,1,SIM1,1NCE IoT Lifetime Flat,500MB 10yr EU+CH,No account to lapse,12.00,1nce.com,https://www.1nce.com/en-eu/1nce-connect/pricing,blocked,Confirm private ordering + LTE-M coverage at both addresses. Fallback Hologram
+2,1,ANT1,Pigtail u.FL to bulkhead SMA female,30cm,Through the back wall,9.75,galaxus,https://www.galaxus.ch/en/s1/product/allnet-antenna-pigtail-ufl-to-sma-f-30cm-antenna-cable-antenna-satellite-cables-31824258,not ordered,Confirm it is a flange/bulkhead SMA
+2,1,ANT2,Delock LTE/HSPA/GSM stub antenna SMA male,Hinged 24cm up to 4dBi,Outside the box,20.90,digitec,https://www.digitec.ch/de/s1/product/delock-ltehspagsm-antenne-sma-stecker-mobilfunk-antenne-netzwerk-zubehoer-5833613,not ordered,Take the LTE variant not the 13.50 3G/GSM one
+3,1,BT1,Protected 18650 ~3000mAh with JST-PH 2.0 leads,NCR18650B-class,On the JST strapped down - ADR 0005,15.00,galaxus,https://www.galaxus.ch/de/s1/product/purecrea-li-ion-akku-3000ma-18650-mit-schutzelektronik-und-stecker-entwicklungsboard-kit-36169153,not ordered,Unavailable today - set notify. Buy after measuring idle current
+3,2,J1,USB-C PSU 5V 2A,Mains adapter,One per house,10.00,galaxus,,not ordered,
+4,1,HW,Piano hinge + M3 + catch magnet + acrylic disc + mesh + feet,Lid and windows,,15.00,hardware store,,not ordered,

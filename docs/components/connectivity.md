@@ -7,9 +7,14 @@ houses every few days, without anyone in either house doing anything.
 
 > **Decided 2026-09-20:** **bare LTE-M modem** (SIM7080G-class) over `esp_modem` PPP, flat-rate IoT SIM ([ADR 0006](../decisions/0006-bare-modem-not-notecard.md)). Poll, not push (Q3): check-in every `poll_minutes` (default 10, app-set) and after any upload. Q2: inbound latency = poll interval. Notecard remains the fallback.
 
-Cellular via a SIM7080G-class LTE-M module on UART, `esp_modem` PPP giving the
-ESP32 an IP stack, plain HTTPS to our server. Resumable 32 KB chunks; check-in
-poll on an app-set interval. Flat-rate IoT SIM.
+Cellular via the SIM7080G on the LILYGO T-SIM7080G-S3
+([ADR 0012](../decisions/0012-lilygo-t-sim7080g-s3.md)), `esp_modem` PPP giving
+the ESP32 an IP stack, plain HTTPS to our server. Resumable 32 KB chunks;
+check-in poll on an app-set interval. Flat-rate IoT SIM.
+
+**Antenna:** the box is aluminium ([ADR 0011](../decisions/0011-aluminium-1590dd-enclosure.md)),
+so the board's IPEX antenna is useless inside it. u.FL pigtail → bulkhead SMA
+through the back wall → hinged stub antenna outside.
 
 ## Checked — this is the weakest part of the architecture
 

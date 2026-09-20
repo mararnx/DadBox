@@ -45,6 +45,8 @@ means the day the parts arrive, only the firmware is unknown.
 | Two parents | In the protocol now, in the build later | [0008](decisions/0008-two-parents-later.md) |
 | No-connection state; ring overloaded | Ring = child's; LINK + POWER LEDs = adults' | [0009](decisions/0009-two-led-vocabularies.md) |
 | Eviction could lose a recording | Outbox never evicted; pulse only after fsync | [0010](decisions/0010-nothing-is-lost.md) |
+| Enclosure | Hammond 1590DD aluminium; antenna outside; button through the wall | [0011](decisions/0011-aluminium-1590dd-enclosure.md) |
+| Four boards → one | LILYGO T-SIM7080G-S3 | [0012](decisions/0012-lilygo-t-sim7080g-s3.md) |
 
 Still open, per component: [components/](components/README.md).
 
@@ -52,5 +54,8 @@ Still open, per component: [components/](components/README.md).
 
 1. **LTE-M (Cat-M1) coverage at both addresses.** Not NB-IoT. Everything
    rests on it.
-2. The SIM7080G breakout must level-shift its 1.8 V UART.
-3. Decide on the Apple Developer account ($99/yr vs 7-day re-signing).
+2. Which LILYGO variant Bastelgarage ships (PMU or Standard) — ask.
+3. Whether 1NCE sells to a private individual in CH — or go Hologram.
+4. Decide on the Apple Developer account ($99/yr vs 7-day re-signing).
+
+Links and prices for everything: [hardware/SOURCING.md](../hardware/SOURCING.md).

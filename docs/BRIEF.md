@@ -36,8 +36,9 @@ a child actually stays close to someone who isn't there.
 
 ## Hardware (decided — see [bom.csv](../hardware/bom/bom.csv))
 
-- **Compute:** ESP32-S3 (N16R8) — PSRAM for audio buffers, hardware I2S,
-  well-trodden audio path, a few dollars.
+- **Compute:** LILYGO T-SIM7080G-S3 — ESP32-S3 (N16R8) with the modem, the
+  charger, the battery connector and a TF slot already on the board
+  ([ADR 0012](decisions/0012-lilygo-t-sim7080g-s3.md)).
 - **Input:** a lid (open to talk, close to send —
   [ADR 0007](decisions/0007-lid-gesture.md)) and one recessed play button.
   A closed box has nothing a school bag can press.
@@ -46,13 +47,15 @@ a child actually stays close to someone who isn't there.
 - **Indicator:** WS2812 LED ring, power-gated — slow breathing glow means "a
   message is waiting", one lit segment per message. This is the whole
   notification system.
-- **Modem:** SIM7080G-class LTE-M module over PPP
-  ([ADR 0006](decisions/0006-bare-modem-not-notecard.md)); flat-rate IoT SIM.
+- **Modem:** the SIM7080G on that board, over PPP
+  ([ADR 0006](decisions/0006-bare-modem-not-notecard.md)); flat-rate IoT SIM;
+  external SMA antenna because aluminium.
 - **Power:** internal protected LiPo + USB-C with power-path charging, sized
   for **a weekend unplugged**. Everything is gated; the power budget is the
   centre of the design ([ADR 0005](decisions/0005-battery-required.md)).
-- **Enclosure:** 3D printed, chunky, drop-survivable, no visible screws. It
-  lives in a bag between two houses — treat drops as the normal case.
+- **Enclosure:** Hammond 1590DD die-cast aluminium, 188 × 120 × 37 mm, with
+  its plate hinged as the lid ([ADR 0011](decisions/0011-aluminium-1590dd-enclosure.md)).
+  It lives in a bag between two houses — aluminium treats drops as weather.
 
 ## Connectivity — decided: cellular
 
@@ -98,7 +101,7 @@ being heard. Everything else in the design serves that.
 
 - **Budget:** ~$150-180 in parts for the prototype (see BOM)
 - **Deadline:** _TBD — is there a birthday or handover date?_
-- **Skills / tools on hand:** _soldering, 3D printer, scope?_
+- **Skills / tools on hand:** _soldering, step drill + 45 mm hole saw for the aluminium, scope?_
 
 ## Milestones
 
@@ -119,6 +122,8 @@ being heard. Everything else in the design serves that.
 - Two parents in the protocol, one in the build — [ADR 0008](decisions/0008-two-parents-later.md)
 - The ring is the child's; LINK and POWER LEDs are the adults' — [ADR 0009](decisions/0009-two-led-vocabularies.md)
 - Nothing recorded is ever lost; the outbox is never evicted — [ADR 0010](decisions/0010-nothing-is-lost.md)
+- Hammond 1590DD aluminium enclosure, plate hinged as the lid — [ADR 0011](decisions/0011-aluminium-1590dd-enclosure.md)
+- One board: LILYGO T-SIM7080G-S3 — [ADR 0012](decisions/0012-lilygo-t-sim7080g-s3.md)
 - The box travels with the child between both homes
 - The co-parent is on board: placement is flexible, consent is a conversation,
   and they get a mute that is visible in the app

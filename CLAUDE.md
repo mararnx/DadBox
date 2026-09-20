@@ -10,7 +10,7 @@ making assumptions about the design.
 | Stream | Where | Blocked by |
 | --- | --- | --- |
 | Shopping | `hardware/SHOPPING-LIST.md` | phase 2: LTE-M coverage check |
-| Firmware | `firmware/` (ESP-IDF + esp_modem, ESP32-S3) | phase 1 parts |
+| Firmware | `firmware/` (ESP-IDF + esp_modem, LILYGO T-SIM7080G-S3) | phase 1 parts |
 | Server | `server/` (Node + TS + Fastify) | nothing |
 | iOS | `ios/` (SwiftUI, APNs) | server endpoints, Apple dev account |
 
@@ -22,6 +22,8 @@ making assumptions about the design.
   `docs/decisions/`. Revise the ADR rather than quietly doing something else.
 - Every bench session gets an entry at the top of `docs/BUILD-LOG.md`.
 - Parts live in `hardware/bom/bom.csv` with a phase number, not scattered in prose.
+  Swiss sources and prices in `hardware/SOURCING.md`; the enclosure is a Hammond
+  1590DD (aluminium — antenna outside, 32 mm inside, round holes only).
 - Never commit secrets. Wi-Fi/API credentials go in `.env` or a gitignored
   `secrets.h`. APNs `.p8` keys never enter this repo.
 
