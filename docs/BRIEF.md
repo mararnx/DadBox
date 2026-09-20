@@ -14,8 +14,8 @@ a child actually stays close to someone who isn't there.
 
 ## Design principles
 
-1. **A four-year-old can use it alone.** One obvious action. No menus, no
-   pairing dance, no "are you sure".
+1. **A six-year-old can use it alone.** Two buttons, both obvious. No menus,
+   no pairing dance, no "are you sure".
 2. **It works without the other household's ongoing cooperation.** Setup that
    depends on someone else's Wi-Fi password, router, or goodwill is setup that
    breaks. This is the single most important constraint and it drives the
