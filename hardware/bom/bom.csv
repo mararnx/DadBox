@@ -15,7 +15,7 @@ phase,qty,ref,part,description,why,price_chf,source,url,status,notes
 1,2,Q1-2,Logic-level MOSFET,Ring supply gate; stick VBUS gate,Gating is the whole budget,2.00,any,,not ordered,
 1,2,J1,USB PSU 5V 2.5A,Mains adapter,One per house,10.00,any,,not ordered,micro-USB for the 3A+
 2,1,U2,USB 4G stick HiLink (Huawei E8372 / Brovi E3372-325 / ZTE MF79U),cdc_ether USB Ethernet,No AT no PPP - ADR 0014,30-90,galaxus/brack,https://www.galaxus.ch/de/s1/product/huawei-e8372-lte-3g-datenstick-router-8929882,not ordered,E8372 in stock at 89.90; cheaper sticks at Brack unverified
-2,1,SIM1,Digital Republic Flat 1 data SIM,Unlimited 1/0.5 Mbps Sunrise 4G,No contract - ADR 0013,6.00/month,digitalrepublic.ch,https://digitalrepublic.ch/en/smart-devices/,not ordered,Check Sunrise 4G in both bedrooms
+2,1,SIM1,Digital Republic Flat 1 data SIM,Unlimited 1/0.5 Mbps Sunrise 4G,FIXED by user - ADR 0013,6.00/month,digitalrepublic.ch,https://digitalrepublic.ch/en/smart-devices/,decided,Check Sunrise 4G in both bedrooms
 2,1,ANT1,Delock TS-9 to SMA adapter,Stick antenna port to the wall,Aluminium box,10.00,digitec,https://www.digitec.ch/de/s1/product/delock-antennenadapter-sma-ts-9-antennenkabel-antennenkabel-5829274,not ordered,
 2,1,ANT2,SMA bulkhead coupler,Through the wall,,3.00,any,,not ordered,
 2,1,ANT3,Delock LTE/HSPA/GSM stub antenna SMA male,Hinged 24cm,Outside the box,20.90,digitec,https://www.digitec.ch/de/s1/product/delock-ltehspagsm-antenne-sma-stecker-mobilfunk-antenne-netzwerk-zubehoer-5833613,not ordered,LTE variant not the 13.50 3G/GSM one

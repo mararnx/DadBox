@@ -14,7 +14,10 @@ Cellular via a **USB 4G stick in HiLink mode** on the Pi
 Ethernet interface, DHCP from the stick, no AT, no PPP — plain HTTPS to our
 server. Resumable 32 KB chunks; check-in poll on an app-set interval; the
 stick's 5 V is GPIO-gated between check-ins. **Digital Republic Flat 1** data
-SIM (unlimited, Sunrise 4G, CHF 6/month, no contract).
+SIM — **fixed by the user**: unlimited, 1 Mbit/s down / 0.5 up, Sunrise 4G,
+CHF 6/month, no contract. Everything upstream of the stick is sized to that
+cap: ~10 s to upload a 5-minute message, ~5 s to download one, and Tailscale
+SSH is comfortable at 0.5 Mbit/s up.
 
 Why not Cat-M: Digital Republic does not support Cat-M1/NB-IoT, Cat-M is
 ~100-300 kbps real-world (minutes per long message), and its power advantage

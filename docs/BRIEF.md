@@ -129,7 +129,7 @@ being heard. Everything else in the design serves that.
 - The ring is the child's; LINK and POWER LEDs are the adults' — [ADR 0009](decisions/0009-two-led-vocabularies.md)
 - Nothing recorded is ever lost; the outbox is never evicted — [ADR 0010](decisions/0010-nothing-is-lost.md)
 - Hammond 1590DD aluminium enclosure, plate hinged as the lid — [ADR 0011](decisions/0011-aluminium-1590dd-enclosure.md)
-- LTE Cat-1/Cat-4 on a Digital Republic SIM — [ADR 0013](decisions/0013-cat1-not-catm.md)
+- SIM **fixed**: Digital Republic Flat 1, 1 Mbit/s, CHF 6/month — [ADR 0013](decisions/0013-cat1-not-catm.md)
 - Raspberry Pi Zero 2 W + USB 4G stick, three-cell pack, Tailscale — [ADR 0014](decisions/0014-raspberry-pi-zero-2w.md) (supersedes the boards in 0012/0013)
 - The box travels with the child between both homes
 - The co-parent is on board: placement is flexible, consent is a conversation,

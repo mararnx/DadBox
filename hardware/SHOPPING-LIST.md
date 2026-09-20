@@ -36,7 +36,7 @@ silicon, same OS image); the Zero 2 W replaces it in the box later.
 | Qty | Part | Why | CHF | Source |
 | --- | --- | --- | --- | --- |
 | 1 | USB 4G stick, HiLink class | Appears as USB Ethernet; no AT, no PPP. **Huawei E8372** is in stock (89.90, dear); Brovi E3372-325 / ZTE MF79U cheaper if Brack/Digitec have them — check by hand. | 30–90 | Galaxus / Brack |
-| 1 | Digital Republic **Flat 1** data SIM | Unlimited, Sunrise 4G, no contract | 6/month | digitalrepublic.ch |
+| 1 | Digital Republic **Flat 1** data SIM — **fixed** | Unlimited, 1 / 0.5 Mbit/s, Sunrise 4G, no contract | 6/month | digitalrepublic.ch |
 | 1 | Delock TS-9 → SMA adapter | The stick's antenna port to the wall | ~10 | Digitec |
 | 1 | SMA bulkhead coupler | Through the aluminium | ~3 | any |
 | 1 | Delock hinged LTE stub antenna, SMA | Outside the box | 20.90 | Digitec |

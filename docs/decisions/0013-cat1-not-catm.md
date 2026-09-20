@@ -1,7 +1,7 @@
 # ADR 0013 — LTE Cat-1, not Cat-M; Digital Republic, not 1NCE; T-A7670G R2
 
 **Date:** 2026-09-20
-**Status:** accepted for Cat-1 and Digital Republic; the T-A7670G R2 board is superseded by [ADR 0014](0014-raspberry-pi-zero-2w.md) (Pi Zero 2 W + USB 4G stick)
+**Status:** accepted; **SIM plan fixed by the user 2026-09-20: Digital Republic Flat 1 — unlimited, 1 Mbit/s down / 0.5 up, CHF 6/month.** The T-A7670G R2 board is superseded by [ADR 0014](0014-raspberry-pi-zero-2w.md) (Pi + USB 4G stick)
 
 ## Context
 
@@ -23,8 +23,8 @@ bandwidth is enough, and whether the LILYGO T-A7670G R2 would be better.
 
 ## Decision
 
-**LTE Cat-1**, on a **Digital Republic Flat 1** data SIM (CHF 6/month; Flat
-0.4 works too), on the **LILYGO T-A7670G R2** — ESP32 (WROVER, 4 MB flash,
+**LTE Cat-1**, on a **Digital Republic Flat 1** data SIM (CHF 6/month —
+**fixed**), on the **LILYGO T-A7670G R2** — ESP32 (WROVER, 4 MB flash,
 8 MB PSRAM), A7670G Cat-1 + GNSS, JST LiPo with charging, LTE and GPS
 antennas included, CHF 37.90 and in stock at bastelgarage.ch.
 
@@ -41,8 +41,8 @@ Everything in ADR 0006 still holds: a bare SIMCom modem driven by
   Better chip; not stocked in Switzerland, no TF slot, and a reported
   ~0.5 mA deep-sleep floor (harmless here). The fallback if the R2's 4 MB
   flash or pin count proves too tight: ~2–3 weeks by import.
-- **Digital Republic Flat 0.4** — CHF 4. 0.2 Mbps up makes a 5-minute ADPCM
-  message ~100 s. Works; Flat 1 halves it for CHF 2 more.
+- **Digital Republic Flat 0.4** — CHF 4. Rejected: 0.2 Mbps up doubles every
+  upload for CHF 2 saved.
 
 ## Consequences
 

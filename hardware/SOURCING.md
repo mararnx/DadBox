@@ -53,10 +53,11 @@ Plus, for the aluminium box: **Delock TS-9 → SMA adapter**
 and the **Delock hinged LTE stub antenna** (20.90, [digitec](https://www.digitec.ch/de/s1/product/delock-ltehspagsm-antenne-sma-stecker-mobilfunk-antenne-netzwerk-zubehoer-5833613)).
 An SMA bulkhead coupler (CHF 3) carries it through the wall.
 
-SIM: **Digital Republic Flat 1**, CHF 6/month, unlimited, no contract —
+SIM — **fixed**: **Digital Republic Flat 1**, unlimited, 1 Mbit/s down /
+0.5 up, CHF 6/month, no contract —
 [digitalrepublic.ch/en/smart-devices](https://digitalrepublic.ch/en/smart-devices/).
-Does not support Cat-M/NB-IoT (their support page) — irrelevant now: the
-stick is ordinary LTE.
+A 5-minute Opus message is ~10 s up, ~5 s down; the stick's Cat-4 rating is
+irrelevant behind that cap. (Cat-M/NB-IoT unsupported by DR — moot now.)
 
 ## Power — phase 3, buy after measuring
 
