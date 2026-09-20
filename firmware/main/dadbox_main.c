@@ -1,9 +1,12 @@
 // DadBox firmware — skeleton.
 //
 // Read docs/ARCHITECTURE.md and docs/PROTOCOL.md before filling any of this in.
-// The one rule that shapes everything: capture raw PCM while the button is
-// held, and encode only after it is released. There is no real-time constraint
-// on a voice message, and pretending there is makes the firmware hard.
+// The rules that shape everything:
+//   - The lid is the record gesture and the mic's power switch (ADR 0007).
+//   - No real-time-constrained codec in the capture path. ADPCM as it goes is
+//     fine; anything heavier happens after the lid closes.
+//   - Every rail is gated. The target is a weekend on battery (ADR 0005).
+//   - There is no error state. Faults go to the parent's app, never the ring.
 
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
@@ -15,16 +18,15 @@
 static const char *TAG = "dadbox";
 
 typedef enum {
-    STATE_IDLE,          // ring dark
-    STATE_WAITING,       // messages in the inbox — slow warm breathing, N segments
-    STATE_RECORDING,     // ring fills toward the cap
-    STATE_SENDING,       // one pulse, then back
+    STATE_IDLE,          // ring dark, everything gated off
+    STATE_WAITING,       // inbox non-empty — slow warm breathing, N segments
+    STATE_LISTENING,     // lid open — mic powered, steady light, no timer
+    STATE_SENT,          // lid just closed — one pulse, then back
     STATE_PLAYING,       // segment-by-segment progress
-    STATE_SLEEPING,      // no link for a long time — honest, not alarming
+    STATE_SLEEPING,      // no link for a long time — very slow, very dim. Not "broken".
 } dadbox_state_t;
 
-// There is deliberately no STATE_ERROR. Anything that goes wrong is a
-// grown-up's problem and surfaces in the parent's app, never on the box.
+// Deliberately no STATE_ERROR.
 
 static dadbox_state_t s_state = STATE_IDLE;
 
@@ -34,24 +36,25 @@ void app_main(void)
 
     size_t psram = heap_caps_get_total_size(MALLOC_CAP_SPIRAM);
     ESP_LOGI(TAG, "PSRAM: %u bytes", (unsigned) psram);
-    if (psram < AUDIO_MAX_PCM_BYTES) {
-        // Not fatal — shorter recordings still work — but if this is 0 you have
-        // the wrong board variant. See hardware/SHOPPING-LIST.md.
-        ESP_LOGW(TAG, "PSRAM below the full-length buffer (%d bytes)", AUDIO_MAX_PCM_BYTES);
+    if (psram < AUDIO_ADPCM_BYTES) {
+        // If this is 0 you have the wrong board variant (needs N16R8).
+        // See hardware/SHOPPING-LIST.md.
+        ESP_LOGW(TAG, "PSRAM below the full-length buffer (%d bytes)", AUDIO_ADPCM_BYTES);
     }
 
-    // M0 — the only milestone this file needs to reach first:
-    //   TODO: audio_in_init()   I2S RX from the ICS-43434
-    //   TODO: audio_out_init()  I2S TX to the MAX98357A
-    //   TODO: ui_init()         buttons (debounced, hold-to-record) + LED ring
-    //   Hold record -> capture to PSRAM. Release -> stop.
-    //   Press play -> play that buffer back. Nothing else. No network, no flash.
+    // M0 — the only milestone this file needs to reach first. No network.
+    //   TODO: ui_init()         lid switch (debounced), play button, ring behind PIN_RING_EN
+    //   TODO: audio_in_init()   I2S RX from the ICS-43434; PIN_MIC_EN mirrors the lid
+    //   TODO: adpcm             IMA-ADPCM encode in the I2S read loop → PSRAM
+    //   TODO: audio_out_init()  I2S TX to the MAX98357A; PIN_AMP_SD high only while playing
+    //   Lid open → capture. Lid close → trim, keep in PSRAM. Play → decode and play it.
     //
-    // Only once that sounds good:
-    //   TODO: codec_init()      encode after release, never during capture
-    //   TODO: queue_init()      durable outbox/inbox in flash, survives power loss
-    //   TODO: link_init()       Notecard over I2C, chunked upload, backoff
-    //   TODO: quiet hours, mute, battery telemetry
+    // Only once that sounds good, in the cardboard box:
+    //   TODO: queue_init()      LittleFS outbox/inbox, container + CRC, survives power loss
+    //   TODO: link_init()       esp_modem PPP on the SIM7080G; PWRKEY sequence; PSM
+    //   TODO: sync              chunked resumable upload, check-in, inbox download
+    //   TODO: settings          quiet hours, mute, poll interval, brightness, volume
+    //   TODO: power             light sleep between events; measure every rail
 
     while (true) {
         switch (s_state) {

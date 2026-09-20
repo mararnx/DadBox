@@ -5,6 +5,8 @@ a real-time constraint on the firmware.
 
 ## Current design
 
+> **Decided 2026-09-20:** ADPCM on the wire for M0-M2 (`codec = 1`); Opus transcode after the lid closes is an M3 upgrade (`codec = 2`). Two-stage (Q2) is the plan. Container per PROTOCOL.md. Q4: custom 16-byte header, not Ogg — the app decodes ADPCM itself.
+
 - Opus, 16 kHz mono, ~16 kbps. ~120 KB per minute.
 - Encoded after the gesture ends, from the capture buffer, in a background task.
 - Fallback: IMA-ADPCM (4:1, ~480 KB/min) if Opus proves painful on the S3.

@@ -5,6 +5,8 @@ child's bedroom or bag.
 
 ## Current design (ADR 0005)
 
+> **Decided 2026-09-20:** **operate unplugged for a weekend** (~60 h) — [ADR 0005](../decisions/0005-battery-required.md). Every rail gated: mic (lid), ring (FET), amp (SD), modem (PSM). Q3: nothing on the box below 20 %, sleep below 5 %, the app nags. Cell sized after measuring.
+
 Internal protected LiPo, 3000 mAh, USB-C charging with power path, bulk
 capacitance for modem bursts.
 

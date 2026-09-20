@@ -1,11 +1,11 @@
 # DadBox
 
-A voice messaging device for a parent and child who live apart. Press a button,
-talk, let go — the other person hears it. No screen, no phone, no account.
+A voice messaging device for a parent and child who live apart. Open the lid,
+talk, close it — the other person hears it. No screen, no phone, no account.
 
-> **Status:** designed, nothing built. Decisions recorded in `docs/decisions/`.
-> Next action: answer the four gating questions in `docs/REVIEW.md`, check
-> LTE-M coverage at both addresses, then order phase 1.
+> **Status:** designed and reviewed, nothing built. Eight ADRs in `docs/decisions/`.
+> Next action: check LTE-M coverage at both addresses, order phase 1, build
+> `tools/fakebox`.
 
 ## Layout
 

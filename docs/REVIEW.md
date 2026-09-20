@@ -117,9 +117,16 @@ resistor in the plug. Either is more fun than a "who is this for" button.
   down. Decide who controls it.
 - Charging becomes a chore someone owns. The app should nag before it matters.
 
-## What changes as a result
+## Resolved — same day
 
-Nothing yet. Findings 1, 3, 4 and 8 are decisions, not fixes, and each revises
-an ADR. The shopping list is unaffected — phase 1 is the audio path and is
-correct under every option above. **Phase 2 is on hold until finding 3 is
-decided.**
+| § | Decision | ADR |
+| --- | --- | --- |
+| 1, 2, 5 | Lid: open to talk, close to send. ADPCM in the capture path; 5-min cap fits PSRAM. Closed box is bag-safe. | [0007](decisions/0007-lid-gesture.md) |
+| 3 | Bare LTE-M modem over PPP; flat-rate IoT SIM. Notecard is the fallback. | [0006](decisions/0006-bare-modem-not-notecard.md) |
+| 4 | Operate unplugged for a weekend. Every rail gated. | [0005](decisions/0005-battery-required.md) |
+| 6 | Ring, amp, mic, modem all gated. | [0005](decisions/0005-battery-required.md) |
+| 7 | Inbound latency = poll interval, app-set, default 10 min. | [PROTOCOL](PROTOCOL.md) |
+| 8 | Two parent identities and a `to` field from day one; one parent built. | [0008](decisions/0008-two-parents-later.md) |
+
+Phase 1 of the shopping list changes by one part (a lid switch stands in for
+one arcade button); phase 2 is now a modem breakout and a SIM.

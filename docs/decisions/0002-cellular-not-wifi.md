@@ -1,7 +1,7 @@
 # ADR 0002 — Cellular, not Wi-Fi
 
 **Date:** 2026-09-20
-**Status:** accepted (rationale revised 2026-09-20)
+**Status:** accepted — module choice superseded by [ADR 0006](0006-bare-modem-not-notecard.md)
 
 ## Context
 
@@ -20,7 +20,10 @@ and a box that can silently go quiet in whichever house nobody is checking.
 
 ## Decision
 
-Cellular, via a Blues Notecard. The box has one network and it comes with it.
+Cellular. The box has one network and it comes with it.
+
+> The original choice of a Blues Notecard as the module was reversed the same
+> day — see ADR 0006. The *cellular* decision stands.
 
 The Notecard's data plan is bundled with the hardware, so there is no monthly
 bill, no carrier account, and no SIM to activate or let lapse.

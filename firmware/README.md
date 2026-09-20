@@ -14,20 +14,24 @@ idf.py build flash monitor
 
 | Module | Job | Exists |
 | --- | --- | --- |
-| `audio_in` | I2S capture to a PSRAM buffer while record is held | no |
-| `audio_out` | I2S playback through the amp | no |
-| `codec` | Encode *after* release — never in the capture path | no |
-| `queue` | Durable outbox/inbox in flash, survives power loss | no |
-| `link` | Notecard I2C, sync, chunked upload, backoff | no |
-| `ui` | Buttons, LED ring, chimes, quiet hours | no |
+| `ui` | Lid switch, play button, ring (gated), chimes, quiet hours, mute | no |
+| `audio_in` | I2S capture while the lid is open; mic rail follows the lid | no |
+| `adpcm` | IMA-ADPCM in the capture loop → PSRAM. Cheap enough to not count as real-time | no |
+| `audio_out` | I2S playback through the amp; amp rail only while playing | no |
+| `queue` | LittleFS outbox/inbox, container + CRC, survives power loss | no |
+| `link` | `esp_modem` PPP on the SIM7080G, PWRKEY sequencing, PSM | no |
+| `sync` | Resumable 32 KB chunk upload, check-in, inbox download | no |
+| `power` | Light/deep sleep, rail gating, battery sense | no |
+| `codec` | Opus transcode after the lid closes — M3 | no |
 
 ## First target — M0
 
-Hold record → talk → release → press play → hear it. No network, no flash, no
-codec. It proves the mic, the amp, the PSRAM buffer and the buttons in one go,
-and it is the cheapest possible way to find out the audio quality is bad.
+Open lid (a toggle switch on the bench) → talk → close → press play → hear it.
+No network, no flash. It proves the mic, the amp, ADPCM, the PSRAM buffer and
+the gating in one go, and it is the cheapest possible way to find out the
+audio quality is bad. Listen to it inside a cardboard box, not on the bench.
 
-Do not buy the cellular parts until this sounds good.
+Do not buy the modem until this sounds good.
 
 ## Notes
 
@@ -35,3 +39,4 @@ Do not buy the cellular parts until this sounds good.
   strapping pins before soldering.
 - Wire format lives in [../docs/PROTOCOL.md](../docs/PROTOCOL.md). Change it
   there first.
+- The SIM7080G's UART is 1.8 V. If the breakout doesn't level-shift, stop.

@@ -5,15 +5,16 @@ box is alive.
 
 ## Current design
 
+> **Decided 2026-09-20:** box speaks HTTPS directly — no Notehub handler. Resumable 32 KB chunks, `/device/checkin` returns settings + inbox. Two parent identities in the protocol, one built ([ADR 0008](../decisions/0008-two-parents-later.md)). Retention: 24 h after played; unplayed surfaced at 48 h (Q4).
+
 Node + TypeScript + Fastify. Stubbed endpoints in `server/src/index.ts`.
 Blob storage, short retention, APNs push, telemetry, settings.
 
 ## Checked
 
-- With a bare modem, the server gets simpler: the box speaks HTTPS to it
-  directly. With a Notecard, it also needs a Notehub route handler and a
-  Notehub API client for inbound. The stubs currently assume Notecard; they
-  will change with that decision.
+- The box speaks HTTPS to the server directly (ADR 0006), so there is no
+  Notehub route handler and no third-party inbound path. The stubs in
+  `server/src/index.ts` reflect this.
 - Resumable uploads: `PUT /messages/:id/chunks/:seq` with idempotent seq, and
   `GET /messages/:id/upload-state` on boot so the box knows where to resume.
   Simple, and works over a link that drops every 30 seconds.

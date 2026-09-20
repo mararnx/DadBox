@@ -5,6 +5,8 @@
 
 ## Current design
 
+> **Decided 2026-09-20:** **lid** — open to talk, close to send ([ADR 0007](../decisions/0007-lid-gesture.md)). Play button outside, recessed (Q2). Quiet hours: glow yes, chime no, play works (Q4). Mute = no sound, glow persists, app shows who (Q5). No sender identity on the box (Q7). Sleeping state: very slow, very dim pulse (Q6).
+
 Two 60 mm arcade buttons (hold-to-record, press-to-play), a 16-pixel LED ring
 behind a diffuser, chimes, quiet hours enforced on-device, and a mute both
 households can set and see.

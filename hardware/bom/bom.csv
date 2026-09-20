@@ -1,16 +1,21 @@
 phase,qty,ref,part,description,why,unit_price_est,currency,status,notes
-1,1,U1,ESP32-S3-DevKitC-1-N16R8,MCU 16MB flash 8MB PSRAM,PSRAM holds raw PCM during recording,15,USD,not ordered,VERIFY the N16R8 variant - generic listings often ship without PSRAM
+1,1,U1,ESP32-S3-DevKitC-1-N16R8,MCU 16MB flash 8MB PSRAM,PSRAM holds the ADPCM buffer while the lid is open,15,USD,not ordered,VERIFY the N16R8 variant - generic listings often ship without PSRAM
 1,1,MK1,ICS-43434 breakout,I2S MEMS microphone,Lower noise floor than INMP441 across a room,8,USD,not ordered,INMP441 is the cheaper fallback
-1,1,U4,MAX98357A breakout,I2S class-D amplifier 3W,Digital in speaker out - no DAC needed,6,USD,not ordered,
+1,1,Q1,Load switch breakout or P-FET,Mic power gate,Mic is unpowered unless the lid is open - ADR 0007,3,USD,not ordered,
+1,1,U4,MAX98357A breakout,I2S class-D amplifier 3W,Digital in speaker out - has a shutdown pin,6,USD,not ordered,Use the SD pin
 1,1,LS1,Speaker 3W 4ohm 40-50mm,Full range driver,Enclosure acoustics matter more than the driver,5,USD,not ordered,
-1,2,SW1-2,Arcade button 60mm,Record and play,Large travel - survives abuse,3,USD,not ordered,Buy spare microswitches
-1,1,DS1,WS2812B ring 16px,Addressable LED ring,The entire notification system,8,USD,not ordered,Must be diffused - raw LEDs are harsh
+1,1,SW1,Toggle switch,Stands in for the lid on the bench,,2,USD,not ordered,Real lid switch in phase 4
+1,1,SW2,Arcade button 60mm,Play button,Large travel - survives abuse,4,USD,not ordered,Buy a spare microswitch
+1,1,DS1,WS2812B ring 16px,Addressable LED ring,The entire notification system,8,USD,not ordered,Must be diffused
+1,1,Q2,Logic-level N-MOSFET,Ring power gate,Sixteen dark WS2812Bs draw ~16mA - gated they draw nothing,1,USD,not ordered,
 1,1,,Breadboard + jumpers,Prototyping,,7,USD,not ordered,
-2,1,U2,Blues Notecard Cellular,LTE-M/NB-IoT with bundled data,No SIM no carrier account no monthly bill,49,USD,blocked,BLOCKED on coverage check at both addresses
-2,1,U3,Notecarrier-B,Carrier board for Notecard,I2C to the ESP32,15,USD,blocked,Verify binary payload limit before writing chunking
-3,1,BT1,LiPo 3000mAh with PCM,Protected cell,Protection at the cell not just the charger,14,USD,not ordered,Non-negotiable - child carries this
-3,1,U5,USB-C charger with power path,Charge + power path PMIC,Runs while charging on a flat cell,10,USD,not ordered,
-3,1,C1,1000uF low-ESR + decoupling,Bulk capacitance,Modem transmit bursts brown out small rails,3,USD,not ordered,Place near the Notecard supply
-3,1,J1,USB-C PSU 5V 2A,Mains adapter,,10,USD,not ordered,
-4,1,ENC,Filament + heat-set inserts,3D printed enclosure,,10,USD,not ordered,Heat-set inserts not self-tappers
+2,1,U2,SIM7080G breakout with level shifting + u.FL LTE antenna,LTE-M Cat-M1 modem,esp_modem PPP - ADR 0006,25,USD,blocked,BLOCKED on LTE-M coverage check at both addresses. UART is 1.8V - breakout MUST level-shift
+2,1,SIM1,Flat-rate IoT SIM (1NCE-type),500MB 10yr EU roaming,One payment - no account to lapse,12,USD,blocked,Confirm roaming countries
+2,1,C1,1000uF low-ESR capacitor,Bulk capacitance at the modem,Transmit bursts brown out small rails,2,USD,not ordered,
+3,1,BT1,LiPo 3000-4000mAh with PCM + thermistor,Protected cell,Weekend unplugged - ADR 0005,16,USD,not ordered,Size after measuring gated idle current
+3,1,U5,USB-C charger with power path + NTC input (BQ24074-class),Charge + power path PMIC,Runs while charging on a flat cell,12,USD,not ordered,
+3,1,R1-2,Voltage divider + decoupling,Battery sense,,2,USD,not ordered,
+3,2,J1,USB-C PSU 5V 2A,Mains adapter,One per house,10,USD,not ordered,
+4,1,ENC,Filament (PETG/ASA + TPU) + heat-set inserts,3D printed enclosure,,15,USD,not ordered,Heat-set inserts not self-tappers
+4,1,LID,Pin hinge hardware + microswitch OR magnet + hall sensor,Lid mechanism,The lid switch is the mic gate - must be reliable,5,USD,not ordered,Decide mechanism in enclosure.md
 4,1,PCB,Custom PCB fabrication,Replaces breadboard,,50,USD,not ordered,Expect a second revision

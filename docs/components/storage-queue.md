@@ -5,6 +5,8 @@ and nothing lingers on the device longer than it must.
 
 ## Current design
 
+> **Decided 2026-09-20:** outbox/inbox as container files with CRC; resume from `upload-state` on boot; flash-full → oldest-first eviction with a telemetry flag (Q2). OTA in scope for M3 (Q1) — it's a plain HTTPS fetch now that the box has an IP stack.
+
 - Outbox and inbox as files in a LittleFS partition on the 16 MB flash.
 - Each message is a directory: header, payload, and a small state file.
 - Uploads are chunked and resumable; the message id is minted on-device.

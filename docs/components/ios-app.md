@@ -4,6 +4,8 @@
 
 ## Current design (ADR 0004)
 
+> **Decided 2026-09-20:** one parent in v1; the app is built so a second identity is a config change, not a rewrite ([ADR 0008](../decisions/0008-two-parents-later.md)). Server-side transcode from whatever iOS records. Box-offline alert ships in M1.
+
 SwiftUI, APNs. Three screens: Listen, Send, Box.
 
 ## Checked

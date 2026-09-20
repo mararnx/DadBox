@@ -5,6 +5,8 @@ bag, and make a 40 mm speaker sound like something.
 
 ## Current design
 
+> **Decided 2026-09-20:** there is a lid ([ADR 0007](../decisions/0007-lid-gesture.md)) and a cell sized for a weekend. Mechanism (Q3) still open: pin hinge + microswitch vs magnet + hall sensor. The lid switch is the mic gate; reliability beats cleverness.
+
 3D-printed, chunky, drop-survivable, no visible screws, heat-set inserts.
 
 ## Checked

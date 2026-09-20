@@ -5,6 +5,8 @@ recording, and never otherwise.
 
 ## Current design
 
+> **Decided 2026-09-20:** lid gesture ([ADR 0007](../decisions/0007-lid-gesture.md)); 5-minute cap; IMA-ADPCM in the capture path into PSRAM (2.4 MB); mic rail on a load switch driven by the lid; first 100 ms after power-up discarded; < 1 s of speech discarded. Q1, Q2, Q7 answered — no timer shown while listening.
+
 - ICS-43434 I2S MEMS mic → ESP32-S3 I2S RX → 16 kHz mono 16-bit PCM in PSRAM.
 - Mic VDD behind a load switch driven by the record control, so "not recording"
   is an unpowered microphone, not a software promise.

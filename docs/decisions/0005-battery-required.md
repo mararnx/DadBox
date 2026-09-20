@@ -1,7 +1,7 @@
 # ADR 0005 — Battery, and how to be responsible about it
 
 **Date:** 2026-09-20
-**Status:** accepted
+**Status:** accepted — target set 2026-09-20: **a weekend unplugged**
 
 ## Context
 
@@ -12,7 +12,22 @@ than avoided.
 
 ## Decision
 
-Internal LiPo with USB-C charging, chosen and built for abuse:
+Internal LiPo with USB-C charging, chosen and built for abuse. **Target: 60
+hours unplugged with normal use** — a weekend at a grandparent's, with a few
+messages each way and the modem polling on a relaxed interval.
+
+That target makes the power budget the centre of the design, not a detail:
+
+- Every consumer is gated. LED ring behind a FET (it draws ~16 mA even dark),
+  amp in shutdown, mic unpowered unless the lid is open, modem in PSM between
+  polls.
+- ESP32 in light sleep between events; deep sleep between polls if the wake
+  sources (lid, play button, timer) can be made reliable.
+- Poll interval is app-set and defaults to something the budget can afford
+  (~10 min), not something that feels snappy.
+- Cell: 3000-4000 mAh, sized after measuring, not before.
+
+Built for abuse means:
 
 - **Protected cell** with an integrated PCM — over-charge, over-discharge and
   short-circuit protection at the cell, not just in the charger IC.

@@ -5,6 +5,8 @@ houses every few days, without anyone in either house doing anything.
 
 ## Current design (ADR 0002)
 
+> **Decided 2026-09-20:** **bare LTE-M modem** (SIM7080G-class) over `esp_modem` PPP, flat-rate IoT SIM ([ADR 0006](../decisions/0006-bare-modem-not-notecard.md)). Poll, not push (Q3): check-in every `poll_minutes` (default 10, app-set) and after any upload. Q2: inbound latency = poll interval. Notecard remains the fallback.
+
 Cellular via Blues Notecard on a Notecarrier-B, I2C to the ESP32. Notehub
 routes to our server. Chunked payloads.
 

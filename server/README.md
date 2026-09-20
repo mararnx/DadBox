@@ -9,10 +9,15 @@ npm run dev
 
 ## Job
 
-1. Accept audio blobs from the box (via a Notehub route) and from the app.
-2. Store them, briefly.
+1. Accept audio in resumable 32 KB chunks from the box and from the app.
+2. Store it, briefly.
 3. Wake the parent's phone with an APNs push.
-4. Hold the device telemetry the app needs to tell *quiet* from *dead*.
+4. Answer the box's check-in with settings and an inbox summary.
+5. Hold the telemetry the app needs to tell *quiet* from *dead*, and raise
+   the "no check-in for N hours" alert — the most important one in the system.
+
+The box speaks HTTPS directly (ADR 0006); there is no Notehub or other third
+party in the path.
 
 That is all. No accounts, no user management, no web UI — one family, two
 clients, hardcoded identities.
@@ -29,11 +34,15 @@ See [../docs/PROTOCOL.md](../docs/PROTOCOL.md). All are stubs returning 501.
 
 ## Decisions still open
 
-- **Where it runs.** Fly.io / Railway / a Pi at home. A Pi at home keeps a
-  child's voice off other people's computers, at the cost of your uptime.
-- **Blob storage.** Local disk is fine at this volume; S3-compatible if hosted.
-- **Auth.** Notehub device identity may be enough for the box. The app needs
-  something; a long-lived token in the Keychain is proportionate for one user.
+See [../docs/components/server.md](../docs/components/server.md).
+
+- **Where it runs.** A small EU VPS with disk encryption is the suggested
+  middle; a Pi at home is more private and less available.
+- **Blob storage.** Local disk is fine at this volume.
+- **Auth.** Long-lived bearer token per identity (box, parent-a, and the
+  reserved parent-b). Proportionate for one family.
+- **On-device encryption.** Recommended; if adopted the server stores
+  ciphertext it cannot play, and hosting becomes a pure availability question.
 
 ## Non-negotiable
 
