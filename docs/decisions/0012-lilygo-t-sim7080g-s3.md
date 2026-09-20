@@ -1,7 +1,7 @@
 # ADR 0012 — One board: LILYGO T-SIM7080G-S3
 
 **Date:** 2026-09-20
-**Status:** accepted — refines [ADR 0006](0006-bare-modem-not-notecard.md)
+**Status:** superseded by [ADR 0013](0013-cat1-not-catm.md) — the user's SIM provider does not support Cat-M; board is now the T-A7670G R2 (Cat-1)
 
 ## Context
 

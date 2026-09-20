@@ -36,9 +36,9 @@ a child actually stays close to someone who isn't there.
 
 ## Hardware (decided — see [bom.csv](../hardware/bom/bom.csv))
 
-- **Compute:** LILYGO T-SIM7080G-S3 — ESP32-S3 (N16R8) with the modem, the
-  charger, the battery connector and a TF slot already on the board
-  ([ADR 0012](decisions/0012-lilygo-t-sim7080g-s3.md)).
+- **Compute:** LILYGO T-A7670G R2 — ESP32 (WROVER, 8 MB PSRAM) with the
+  Cat-1 modem, GNSS, charger and battery connector on the board
+  ([ADR 0013](decisions/0013-cat1-not-catm.md)). Outbox on a microSD.
 - **Input:** a lid (open to talk, close to send —
   [ADR 0007](decisions/0007-lid-gesture.md)) and one recessed play button.
   A closed box has nothing a school bag can press.
@@ -47,9 +47,9 @@ a child actually stays close to someone who isn't there.
 - **Indicator:** WS2812 LED ring, power-gated — slow breathing glow means "a
   message is waiting", one lit segment per message. This is the whole
   notification system.
-- **Modem:** the SIM7080G on that board, over PPP
-  ([ADR 0006](decisions/0006-bare-modem-not-notecard.md)); flat-rate IoT SIM;
-  external SMA antenna because aluminium.
+- **Modem:** the A7670G LTE Cat-1 on that board, over PPP
+  ([ADR 0006](decisions/0006-bare-modem-not-notecard.md)); Digital Republic
+  unlimited data SIM, CHF 6/month; external SMA antenna because aluminium.
 - **Power:** internal protected LiPo + USB-C with power-path charging, sized
   for **a weekend unplugged**. Everything is gated; the power budget is the
   centre of the design ([ADR 0005](decisions/0005-battery-required.md)).
@@ -64,7 +64,7 @@ changes network every few days would need credentials for both, re-provisioning
 after any router change in either house, and would fail silently in whichever
 home nobody is checking. It carries its own network instead.
 
-A bare LTE-M module driven over PPP, so the box speaks HTTPS straight to our
+A bare LTE Cat-1 module driven over PPP, so the box speaks HTTPS straight to our
 server — nobody else in the path — with a flat-rate IoT SIM (one payment, ten
 years). The Notecard originally chosen is shaped for telemetry, not audio.
 
@@ -116,14 +116,14 @@ being heard. Everything else in the design serves that.
 
 - One box for the child; parent uses a native iOS app — [ADR 0003](decisions/0003-one-box-plus-app.md), [ADR 0004](decisions/0004-native-ios-app.md)
 - Cellular, not Wi-Fi, because the box travels — [ADR 0002](decisions/0002-cellular-not-wifi.md)
-- Bare LTE-M modem over PPP, not a Notecard — [ADR 0006](decisions/0006-bare-modem-not-notecard.md)
+- Bare LTE modem over PPP, not a Notecard — [ADR 0006](decisions/0006-bare-modem-not-notecard.md)
 - Lid: open to talk, close to send; one play button outside — [ADR 0007](decisions/0007-lid-gesture.md)
 - Battery for a weekend unplugged, everything gated — [ADR 0005](decisions/0005-battery-required.md)
 - Two parents in the protocol, one in the build — [ADR 0008](decisions/0008-two-parents-later.md)
 - The ring is the child's; LINK and POWER LEDs are the adults' — [ADR 0009](decisions/0009-two-led-vocabularies.md)
 - Nothing recorded is ever lost; the outbox is never evicted — [ADR 0010](decisions/0010-nothing-is-lost.md)
 - Hammond 1590DD aluminium enclosure, plate hinged as the lid — [ADR 0011](decisions/0011-aluminium-1590dd-enclosure.md)
-- One board: LILYGO T-SIM7080G-S3 — [ADR 0012](decisions/0012-lilygo-t-sim7080g-s3.md)
+- One board: LILYGO T-A7670G R2, LTE Cat-1, Digital Republic SIM — [ADR 0013](decisions/0013-cat1-not-catm.md) (supersedes 0012)
 - The box travels with the child between both homes
 - The co-parent is on board: placement is flexible, consent is a conversation,
   and they get a mute that is visible in the app
@@ -141,4 +141,4 @@ ones that matter most:
 - Replay / favourites / inbox grace after play
 - Lid mechanism: pin hinge + switch, or magnet + hall sensor
 - Is there a date this needs to exist by?
-- **LTE-M coverage at both addresses — verify before ordering phase 2.**
+- **Sunrise 4G in both bedrooms — check before ordering phase 2.**

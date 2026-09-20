@@ -12,7 +12,7 @@ Four streams. They converge at M2, when a message makes the full round trip.
 
 | Stream | Directory | Blocked by | Status |
 | --- | --- | --- | --- |
-| **Shopping** | [hardware/SHOPPING-LIST.md](../hardware/SHOPPING-LIST.md) | phase 2: LTE-M coverage check | phase 1 ready |
+| **Shopping** | [hardware/SHOPPING-LIST.md](../hardware/SHOPPING-LIST.md) | phase 2: Sunrise 4G check | phase 1 ready |
 | **Firmware** | [firmware/](../firmware/) | parts arriving (M0 parts only) | skeleton |
 | **Server** | [server/](../server/) | nothing — start today | skeleton |
 | **iOS** | [ios/](../ios/) | server endpoints, Apple dev account | planned |
@@ -40,22 +40,21 @@ means the day the parts arrive, only the firmware is unknown.
 | Finding | Decision | ADR |
 | --- | --- | --- |
 | Gesture / cap / gating / bag | Lid: open to talk, close to send | [0007](decisions/0007-lid-gesture.md) |
-| Notecard is the wrong shape | Bare LTE-M modem over PPP | [0006](decisions/0006-bare-modem-not-notecard.md) |
+| Notecard is the wrong shape | Bare LTE modem over PPP | [0006](decisions/0006-bare-modem-not-notecard.md) |
 | Travels ≠ operates unplugged | A weekend unplugged, everything gated | [0005](decisions/0005-battery-required.md) |
 | Two parents | In the protocol now, in the build later | [0008](decisions/0008-two-parents-later.md) |
 | No-connection state; ring overloaded | Ring = child's; LINK + POWER LEDs = adults' | [0009](decisions/0009-two-led-vocabularies.md) |
 | Eviction could lose a recording | Outbox never evicted; pulse only after fsync | [0010](decisions/0010-nothing-is-lost.md) |
 | Enclosure | Hammond 1590DD aluminium; antenna outside; button through the wall | [0011](decisions/0011-aluminium-1590dd-enclosure.md) |
-| Four boards → one | LILYGO T-SIM7080G-S3 | [0012](decisions/0012-lilygo-t-sim7080g-s3.md) |
+| Four boards → one | LILYGO T-SIM7080G-S3 → superseded | [0012](decisions/0012-lilygo-t-sim7080g-s3.md) |
+| Cat-M unsupported by the user's SIM provider | LTE Cat-1 on the T-A7670G R2; Digital Republic Flat 1 | [0013](decisions/0013-cat1-not-catm.md) |
 
 Still open, per component: [components/](components/README.md).
 
 ## Before spending money
 
-1. **LTE-M (Cat-M1) coverage at both addresses.** Not NB-IoT. Everything
-   rests on it.
-2. Which LILYGO variant Bastelgarage ships (PMU or Standard) — ask.
-3. Whether 1NCE sells to a private individual in CH — or go Hologram.
-4. Decide on the Apple Developer account ($99/yr vs 7-day re-signing).
+1. Sunrise 4G in both bedrooms (Digital Republic rides Sunrise). Near-certain.
+2. That the T-A7670G R2 Bastelgarage ships has the TF card slot — ask.
+3. Decide on the Apple Developer account ($99/yr vs 7-day re-signing).
 
 Links and prices for everything: [hardware/SOURCING.md](../hardware/SOURCING.md).

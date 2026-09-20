@@ -16,7 +16,7 @@ a real-time constraint on the firmware.
 - The rule should be **no real-time-constrained codec in the capture path**.
   ADPCM in the capture path is fine — it is cheaper than the I2S DMA copy. This
   reopens the 5-minute cap (see [audio-capture.md](audio-capture.md)).
-- libopus on a 240 MHz ESP32-S3 at 16 kHz, complexity ≤ 3, should encode
+- libopus on a 240 MHz classic ESP32 (LX6, no S3 SIMD) at 16 kHz, complexity ≤ 3, should still encode
   faster than real time, but that is belief not measurement. ESP-ADF ships an
   Opus encoder component. **Measure before committing** — a 5-minute message
   that takes 4 minutes to encode is fine; one that fails to allocate is not.

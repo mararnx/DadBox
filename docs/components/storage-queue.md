@@ -7,7 +7,8 @@ and nothing lingers on the device longer than it must.
 
 > **Decided 2026-09-20:** outbox/inbox as container files with CRC; resume from `upload-state` on boot; flash-full → oldest-first eviction with a telemetry flag (Q2). OTA in scope for M3 (Q1) — it's a plain HTTPS fetch now that the box has an IP stack.
 
-- Outbox and inbox as files in a LittleFS partition on the 16 MB flash.
+- Outbox and inbox as files on the TF card (FATFS, sync-on-write); the latest
+  outbox message mirrored to a small LittleFS partition in the 4 MB flash.
 - Each message is a directory: header, payload, and a small state file.
 - Uploads are chunked and resumable; the message id is minted on-device;
   ordering is a monotonic `seq` from NVS, not the clock.
@@ -19,9 +20,9 @@ and nothing lingers on the device longer than it must.
 
 ## Checked
 
-- 16 MB flash minus app (~2 MB ×2 for OTA) leaves ~10 MB for storage — about
-  80 minutes of Opus, or 20 minutes of ADPCM. Plenty for a queue, not for an
-  archive. Good: the box is not supposed to be an archive.
+- 4 MB flash minus two OTA app slots leaves under 1 MB — one message's worth
+  of fallback, not a queue. The queue is the TF card: gigabytes, so capacity
+  is not a question; card reliability is (see ADR 0013).
 - SPI flash writes at hundreds of KB/s — fast enough to stream PCM during
   capture if that route is chosen, but wear on the same sectors is a concern
   over years. LittleFS wear-levels; still, prefer not to write raw PCM.
@@ -47,10 +48,11 @@ and nothing lingers on the device longer than it must.
      thing to get wrong in the enclosure.
    Suggest: accept the limit for v1, Opus in M3, and revisit microSD only if
    the box actually spends long stretches offline.
-   **Update:** the LILYGO board has a TF slot on GPIO 10-13
-   ([ADR 0012](../decisions/0012-lilygo-t-sim7080g-s3.md)), so the microSD
-   option is free in hardware. Still: internal flash primary, SD as overflow,
-   never a dependency.
+   **Update ([ADR 0013](../decisions/0013-cat1-not-catm.md)):** the T-A7670G R2
+   has **4 MB flash**, so the outbox *is* the TF card — a dependency after
+   all. Mitigations: name-brand card, FATFS with sync-on-write, internal flash
+   mirrors the latest message, missing/failed card → fault on the status LEDs
+   and telemetry `fault: storage`. Capacity stops being a question.
 3. **Inbox grace** — how long after play does a message survive on the box?
    Ties to "can the child replay" in [audio-playback.md](audio-playback.md).
 4. **Favourites** — does anything ever get pinned on the device? Suggest no on

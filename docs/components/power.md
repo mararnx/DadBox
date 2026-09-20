@@ -25,23 +25,23 @@ capacitance for modem bursts.
 
   | Consumer | Idle | Note |
   | --- | --- | --- |
-  | ESP32-S3 light sleep | ~1-2 mA | deep sleep is µA but loses the I2S/timer state; fine between polls |
+  | ESP32 light sleep | ~1-2 mA | deep sleep is µA but loses the I2S/timer state; fine between polls |
   | WS2812B ×16, dark | ~16 mA | **power-gate with a FET** → ~0 |
   | MAX98357A in shutdown | µA | via SD pin |
   | Mic, unpowered | 0 | load switch |
-  | Modem in PSM | ~µA–1 mA | eDRX/PSM config dependent |
-  | Modem poll every 15 min | ~2-3 mA average | 10-20 s at ~200 mA, bursts to 2 A |
+  | Modem asleep (A7670G Cat-1, DTR) | ~2 mA | Cat-1 has no µA PSM; 120 mAh per weekend, acceptable ([ADR 0013](../decisions/0013-cat1-not-catm.md)) |
+  | Modem check-in every 10 min | ~1-2 mA average | a few seconds at ~200 mA on a registered Cat-1 link, bursts to 2 A |
   | Ring breathing (message waiting) | ~15 mA | brightness-dependent; **drops to *resting* (~1.5 mA) after 2 h** — a message waiting all weekend would otherwise cost ~30 % of the cell |
   | Status LEDs (LINK, POWER) | ~0 | 10 ms blinks every 3 s, low brightness |
 
   Gated properly: ~5 mA average → ~3 weeks. Ungated ring: ~20 mA → ~6 days.
   Playing a message: ~300-500 mA for its duration, negligible overall.
 
-- **Board change** ([ADR 0012](../decisions/0012-lilygo-t-sim7080g-s3.md)):
-  charging is the LILYGO's, at **500 mA max** — ~7 h from flat for 3000 mAh.
-  Modem bursts are handled on-board. Cell: protected 18650 with JST-PH 2.0
-  leads on the JST connector, strapped, **not** in the spring holder. Battery
-  % via the AXP2101 on the PMU variant, ADC divider on the Standard.
+- **Board** ([ADR 0013](../decisions/0013-cat1-not-catm.md)): charging is the
+  LILYGO T-A7670G R2's (rate unverified; assume ≤500 mA — overnight from flat).
+  Modem bursts are handled on-board. Cell: protected 18650 with JST leads on
+  the JST connector, strapped, **not** in the spring holder. Battery % from
+  the board's divider on GPIO 35.
 - Transmit bursts to ~2 A for tens of ms: the cell, the protection PCM, the
   power-path regulator and the trace to the modem all need to be rated for it,
   or the box brown-outs mid-upload. This is the #1 cause of "my LTE project

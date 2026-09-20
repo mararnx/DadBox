@@ -1,7 +1,7 @@
 # ADR 0006 — Bare LTE-M modem with PPP, not a Notecard
 
 **Date:** 2026-09-20
-**Status:** accepted — supersedes the module choice in [ADR 0002](0002-cellular-not-wifi.md)
+**Status:** accepted — supersedes the module choice in [ADR 0002](0002-cellular-not-wifi.md); the specific module moved from Cat-M (SIM7080G) to Cat-1 (A7670G) in [ADR 0013](0013-cat1-not-catm.md), the principle unchanged
 
 ## Context
 

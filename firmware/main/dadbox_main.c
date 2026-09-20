@@ -57,8 +57,8 @@ void app_main(void)
     size_t psram = heap_caps_get_total_size(MALLOC_CAP_SPIRAM);
     ESP_LOGI(TAG, "PSRAM: %u bytes", (unsigned) psram);
     if (psram < AUDIO_ADPCM_BYTES) {
-        // If this is 0 you have the wrong board variant (needs N16R8).
-        // See hardware/SHOPPING-LIST.md.
+        // If this is 0 the board is not a WROVER with PSRAM, or PSRAM is off
+        // in sdkconfig. See hardware/SHOPPING-LIST.md.
         ESP_LOGW(TAG, "PSRAM below the full-length buffer (%d bytes)", AUDIO_ADPCM_BYTES);
     }
 
@@ -70,8 +70,9 @@ void app_main(void)
     //   Lid open → capture. Lid close → trim, keep in PSRAM. Play → decode and play it.
     //
     // Only once that sounds good, in the cardboard box:
-    //   TODO: queue_init()      LittleFS outbox/inbox, container + CRC, survives power loss
-    //   TODO: link_init()       esp_modem PPP on the SIM7080G; PWRKEY sequence; PSM
+    //   TODO: queue_init()      outbox/inbox on the TF card (FATFS, sync-on-write), container + CRC;
+    //                           latest message mirrored to internal flash as fallback. ADR 0013.
+    //   TODO: link_init()       esp_modem PPP on the A7670G; PWRKEY sequence; DTR sleep (~2 mA)
     //   TODO: sync              chunked resumable upload, check-in, inbox download
     //   TODO: settings          quiet hours, mute, poll interval, brightness, volume
     //   TODO: power             light sleep between events; measure every rail

@@ -7,10 +7,15 @@ houses every few days, without anyone in either house doing anything.
 
 > **Decided 2026-09-20:** **bare LTE-M modem** (SIM7080G-class) over `esp_modem` PPP, flat-rate IoT SIM ([ADR 0006](../decisions/0006-bare-modem-not-notecard.md)). Poll, not push (Q3): check-in every `poll_minutes` (default 10, app-set) and after any upload. Q2: inbound latency = poll interval. Notecard remains the fallback.
 
-Cellular via the SIM7080G on the LILYGO T-SIM7080G-S3
-([ADR 0012](../decisions/0012-lilygo-t-sim7080g-s3.md)), `esp_modem` PPP giving
-the ESP32 an IP stack, plain HTTPS to our server. Resumable 32 KB chunks;
-check-in poll on an app-set interval. Flat-rate IoT SIM.
+Cellular via the A7670G **LTE Cat-1** on the LILYGO T-A7670G R2
+([ADR 0013](../decisions/0013-cat1-not-catm.md)), `esp_modem` PPP giving the
+ESP32 an IP stack, plain HTTPS to our server. Resumable 32 KB chunks;
+check-in poll on an app-set interval. **Digital Republic Flat 1** data SIM
+(unlimited, Sunrise 4G, CHF 6/month, no contract).
+
+Why not Cat-M: Digital Republic does not support Cat-M1/NB-IoT, Cat-M is
+~100-300 kbps real-world (minutes per long message), and its power advantage
+(µA vs ~2 mA asleep) is worth ~120 mAh over a weekend — 4 % of the cell.
 
 **Antenna:** the box is aluminium ([ADR 0011](../decisions/0011-aluminium-1590dd-enclosure.md)),
 so the board's IPEX antenna is useless inside it. u.FL pigtail → bulkhead SMA
@@ -22,7 +27,7 @@ See [review §3](../REVIEW.md). The Notecard was chosen for "it just connects",
 which is true, and for its bundled data, which is real. It was **not** checked
 against the actual workload, which is moving ~100-600 KB blobs, not telemetry.
 
-| | Notecard (via `card.binary` + proxy routes) | Bare LTE-M modem + `esp_modem` PPP |
+| | Notecard (via `card.binary` + proxy routes) | Bare LTE modem + `esp_modem` PPP (historical comparison; module is now Cat-1) |
 | --- | --- | --- |
 | Getting online | trivial — the whole point of the product | modem bring-up, bands, APN, antenna: a weekend, maybe two |
 | Moving audio | awkward: ~100 KB binary buffer (unverified), synchronous `web.post`, Notehub proxy | plain HTTPS to our server; resumable uploads are just `Content-Range` |
@@ -41,9 +46,8 @@ and it falls in M1 where nothing else is blocked by it. The Notecard remains the
 fallback if the modem fights back — it can be swapped in later on the same
 I2C/UART header without touching the protocol.
 
-Coverage: LTE-M is broadly deployed in Germany, Switzerland and Austria; NB-IoT
-too, but NB-IoT is too slow for audio. Check LTE-M specifically, at both
-addresses, on the carrier the SIM roams onto.
+Coverage: ordinary Sunrise 4G — ~99 % of the population. Check the two
+bedrooms, not the street; a hinged external antenna helps.
 
 ## Questions
 

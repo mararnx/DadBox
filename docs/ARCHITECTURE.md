@@ -1,11 +1,11 @@
 # Architecture
 
 ```
-  ┌────────────────────┐      LTE-M / PPP       ┌─────────────┐   HTTPS   ┌────────────┐
+  ┌────────────────────┐    LTE Cat-1 / PPP     ┌─────────────┐   HTTPS   ┌────────────┐
   │   DadBox           │ ───── HTTPS ─────────► │   Server    │ ◄──────── │  Parent's  │
   │  (travels with     │ ◄──── check-in ──────  │  blobs ·    │ ── APNs ► │  iPhone    │
   │   the child)       │                        │  telemetry  │           └────────────┘
-  │ ESP32-S3 · SIM7080G│                        └─────────────┘
+  │ ESP32 · A7670G     │                        └─────────────┘
   │ lid · play · ring  │
   └────────────────────┘
 ```
@@ -17,10 +17,12 @@ wire contract and [decisions/](decisions/) for why each piece is what it is.
 
 - Lid open → mic powered via a load switch → I2S at 16 kHz → **IMA-ADPCM as
   it goes** → PSRAM. 5 minutes is 2.4 MB; PSRAM is 8 MB.
-- Lid closed → trim silence → container + CRC → flash outbox → upload.
-- v1 sends ADPCM on the wire (~480 KB/min). Opus transcode after the lid
-  closes is an M3 upgrade: ten times smaller, one more dependency, nothing
-  else changes — the container header carries the codec id.
+- Lid closed → trim silence → container + CRC → **TF-card outbox** (4 MB
+  flash holds only OTA and a one-message fallback) → upload.
+- v1 sends ADPCM on the wire (~480 KB/min). Data is unlimited
+  ([ADR 0013](decisions/0013-cat1-not-catm.md)), so Opus is only about upload
+  time — ~40 s vs ~4 s for a 5-minute message on a 0.5 Mbps uplink. An M3
+  nicety; the container header carries the codec id either way.
 - The rule: **no real-time-constrained codec in the capture path.** ADPCM is a
   few integer ops per sample and doesn't count.
 
@@ -109,7 +111,8 @@ is on flash and stays until the server has confirmed it.
 2. During capture the PSRAM buffer is checkpointed to flash every 30 s. A
    power loss mid-story costs at most 30 s.
 3. The **outbox is never evicted**. The inbox may be — the server still has
-   those.
+   those. On the T-A7670G R2 the outbox is the TF card; internal flash
+   mirrors the latest message so a missing card costs at most one.
 4. Out of the outbox only after `complete` returns 2xx; 2xx only after the
    server's durable write and CRC match.
 5. Retries back off forever. On boot, interrupted uploads resume from
@@ -133,8 +136,8 @@ That makes gating the design's centre of gravity:
 | Mic | load switch on the lid | 0 |
 | LED ring (16 × WS2812B) | FET — they draw ~1 mA each even dark | 0 when off |
 | Amp | MAX98357A SD pin | µA |
-| Modem | PSM between check-ins | ~µA–1 mA |
-| ESP32-S3 | light sleep; deep sleep between polls if wake sources prove reliable | ~1-2 mA |
+| Modem (A7670G, Cat-1) | DTR sleep between check-ins | ~2 mA — 120 mAh per weekend, fine |
+| ESP32 | light sleep; deep sleep between polls if wake sources prove reliable | ~1-2 mA |
 | Ring, *waiting* | — | ~15 mA breathing; ~1.5 mA *resting* after 2 h |
 | Status LEDs | — | ~0 — 10 ms blinks |
 
@@ -156,8 +159,9 @@ A child's recorded voice is the most sensitive thing in this system.
 
 ## To verify before building
 
-- **LTE-M coverage at both addresses** — Cat-M1 specifically, not NB-IoT.
-- Which LILYGO variant arrived (PMU or Standard) — decides battery sensing.
+- **Sunrise 4G coverage in both bedrooms** (Digital Republic rides Sunrise).
+- That the T-A7670G R2 has its TF slot, and that the SD survives a power pull
+  mid-write (sync-on-write).
 - The Allnet pigtail's SMA is a bulkhead; the LILYGO's antenna connector is u.FL, not MHF4.
 - Real idle current of each gated rail, on the bench, before choosing a cell.
 - Opus encode time on the S3 for a 5-minute clip (M3, not blocking).

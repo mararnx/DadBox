@@ -80,8 +80,10 @@ In v1 the box always sends `to: parent-a`, and the server enforces it.
 
 ## Transport
 
-The box has an IP stack (LTE-M over PPP, [ADR 0006](decisions/0006-bare-modem-not-notecard.md))
-and speaks HTTPS directly to the server. No third party in the path.
+The box has an IP stack (LTE Cat-1 over PPP, [ADR 0006](decisions/0006-bare-modem-not-notecard.md),
+[ADR 0013](decisions/0013-cat1-not-catm.md)) and speaks HTTPS directly to the
+server. No third party in the path. Data is unlimited; the poll interval is a
+battery/latency trade only.
 
 ### Upload (either direction)
 
@@ -176,6 +178,6 @@ persists; the app shows who set it and when. Both are enforced on the device.
 
 - **On-device encryption** (flag bit0): recommended, not yet decided. Family
   key in NVS + Keychain; the server stores ciphertext.
-- Opus transcode timing on the ESP32-S3 — measure before scheduling.
+- Opus transcode timing on the ESP32 (LX6) — measure before scheduling.
 - Dock ID for `house`.
 - OTA manifest format (M3).

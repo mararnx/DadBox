@@ -1,60 +1,62 @@
 #pragma once
 
-// Board: LILYGO T-SIM7080G-S3 (ADR 0012). Pins marked FIXED come from the
-// LILYGO docs; everything else is PROVISIONAL — confirm against the board's
-// pinout image before soldering. On this board GPIO 4-7, 10-13, 45, 46, 48
-// are spoken for; 35-37 are the octal PSRAM; 19/20 are USB; 0/3/45/46 strap.
+// Board: LILYGO T-A7670G R2 — classic ESP32 (WROVER), A7670G LTE Cat-1.
+// ADR 0013. Modem and TF pins are from the LILYGO/RandomNerd pinout and are
+// marked FIXED; everything else is PROVISIONAL until the board is on the
+// bench. WROVER: GPIO 6-11 are flash, 16/17 are PSRAM — never use them.
+// 34-39 are input-only. 0/2/12/15 are strapping pins — inputs only, or avoid.
 
-// Modem — SIM7080G on UART, esp_modem PPP. ADR 0006 / 0012.  (FIXED)
-#define PIN_MODEM_TX     4
-#define PIN_MODEM_RX     5
-#define PIN_MODEM_RI     6
-#define PIN_MODEM_DTR    7    // wake from PSM
-#define PIN_MODEM_PWRKEY 46
-#define PIN_MODEM_RTS    48
-#define PIN_MODEM_CTS    45
+// Modem — A7670G on UART, esp_modem PPP.  (FIXED — LILYGO / RandomNerd pinout)
+#define PIN_MODEM_TX       26
+#define PIN_MODEM_RX       27
+#define PIN_MODEM_PWRKEY    4
+#define PIN_MODEM_DTR      25   // sleep/wake; the A7670 idles ~2 mA asleep
+#define PIN_MODEM_RI       33
+#define PIN_MODEM_RESET     5
+#define PIN_MODEM_POWER_ON 12   // board-level modem supply enable; strapping pin, leave low at boot
 
-// TF card — optional outbox overflow, ADR 0010.  (FIXED)
-#define PIN_SD_CS       10
-#define PIN_SD_MOSI     11
-#define PIN_SD_SCK      12
-#define PIN_SD_MISO     13
+// TF card — THE outbox (4 MB flash can't hold OTA + queue). ADR 0013.  (FIXED)
+#define PIN_SD_SCK      14
+#define PIN_SD_MISO      2
+#define PIN_SD_MOSI     15
+#define PIN_SD_CS       13
 
-// I2C — PMU (AXP2101) on the PMU variant.  (FIXED)
-#define PIN_I2C_SDA      3
-#define PIN_I2C_SCL      2
+// Battery — on-board divider.  (FIXED)
+#define PIN_VBAT_SENSE  35   // ADC1_CH7, input-only
 
-// I2S in — MSM261S4030H0 / INMP441 microphone.  (provisional)
-#define PIN_MIC_BCLK   14
-#define PIN_MIC_WS     15
-#define PIN_MIC_DIN    16
+// --- Pin budget -------------------------------------------------------------
+// After the fixed pins, a WROVER has six free native outputs (18 19 21 22 23 32)
+// and three free input-only pins (34 36 39). That is exactly enough if the mic
+// and the amp SHARE one I2S port in full-duplex (common BCLK + WS, separate
+// DIN/DOUT) — they never run at different rates and never both at once anyway.
+
+// I²C — PCF8574 expander for the slow outputs.  (provisional)
+#define PIN_I2C_SDA     21
+#define PIN_I2C_SCL     22
+#define PCF8574_ADDR    0x20
+//   P0 LED_LINK   P1 LED_POWER   P2 RING_EN   P3 AMP_SD   P4 BTN_LED   P5-P7 spare
+
+// I2S — ONE port, full duplex. Mic RX and amp TX share the clocks.  (provisional)
+#define PIN_I2S_BCLK   18
+#define PIN_I2S_WS     19
+#define PIN_I2S_DOUT   23   // → MAX98357A DIN
+#define PIN_I2S_DIN    34   // ← MSM261S4030H0 / INMP441 SD (input-only pin is fine)
 // No PIN_MIC_EN: the mic's VDD is switched by the lid's reed contact in
-// hardware. Firmware only *reads* the lid (PIN_LID_SWITCH). ADR 0007.
+// hardware. Firmware only *reads* the lid. ADR 0007.
 
-// I2S out — MAX98357A amplifier.  (provisional)
-#define PIN_AMP_BCLK   17
-#define PIN_AMP_WS     18
-#define PIN_AMP_DOUT   21
-#define PIN_AMP_SD     38   // shutdown; low = off. Off unless playing or chiming.
-
-// Controls — ADR 0007 / 0009.  (provisional)
-#define PIN_LID_SWITCH 41   // reed contact: closed = lid closed. Same contact powers the mic.
-#define PIN_BTN_PLAY   42   // the only button on the outside, through the side wall
-#define PIN_BTN_LED    40   // the 33 mm button's own LED — lit while waiting
-#define PIN_RING_DATA  39
-#define PIN_RING_EN    47   // FET on the ring's supply. WS2812B draw ~1 mA each even dark.
+// Ring — data on a native pin; its supply gate is on the expander.  (provisional)
+#define PIN_RING_DATA  32
 #define LED_RING_PIXELS 16
 
-// Status LEDs — the adults' channel, ADR 0009. Patterns, not colours.
-#define PIN_LED_LINK    1
-#define PIN_LED_POWER   8
-#define STATUS_BLINK_MS      10     // short enough to be free and invisible at night
-#define STATUS_PERIOD_MS     3000
-#define RING_RESTING_AFTER_S (2 * 3600)   // waiting → resting; see ARCHITECTURE.md
+// Lid and play button — native input-only pins so they can wake the ESP32 and
+// raise interrupts. Input-only pins have NO internal pull-ups: add 10 kΩ external.
+#define PIN_LID_SWITCH 36   // reed contact: closed = lid closed. Same contact powers the mic.
+#define PIN_BTN_PLAY   39   // the only button on the outside, through the side wall
 
-// Battery sense — PMU variant: read the AXP2101 over I2C. Standard variant:
-// ADC divider on a pin from the 1-21 range; assign once the board is in hand.
-#define PIN_VBAT_SENSE  9   // Standard variant only, provisional
+// Status LEDs, ring gate, amp shutdown, button LED: on the expander (see above). ADR 0009.
+#define STATUS_BLINK_MS      10
+#define STATUS_PERIOD_MS     3000
+#define RING_RESTING_AFTER_S (2 * 3600)
 
 // Audio — see docs/PROTOCOL.md. Changing these changes the wire format.
 #define AUDIO_SAMPLE_RATE_HZ   16000

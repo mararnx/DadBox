@@ -26,7 +26,7 @@ third-party analytics.
   family key. Losing the token lets someone *send*; it must not let them
   *listen*.
 - Physical: the box is in another home. Anyone with a USB cable can read
-  flash unless it's encrypted. ESP32-S3 supports flash encryption and secure
+  flash unless it's encrypted. The ESP32 supports flash encryption and secure
   boot; both are a one-way door. For a one-off, flash encryption on, secure
   boot off, is a reasonable line.
 - Consent: the co-parent is on board, but "on board" should include knowing

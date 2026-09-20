@@ -47,11 +47,13 @@ the lid is open — which is the gesture.
 
 | # | Component | Verdict | What was checked |
 | --- | --- | --- | --- |
-| 1 | **LILYGO T-SIM7080G-S3** replaces DevKitC + modem breakout + level shifter + charger | **Switch to it** — [ADR 0012](../docs/decisions/0012-lilygo-t-sim7080g-s3.md) | ESP32-S3 with **16 MB / 8 MB**, SIM7080G on UART (TX 4, RX 5, PWRKEY 46, DTR 7, RI 6), USB-C charging, **18650 holder + JST 2.0**, **TF slot** (GPIO 10-13), nano-SIM, I2C on 2/3. 110 × 32 × 19.5 mm, 66 g — fits along the 183 mm with room. Modem VBAT 2.7–4.8 V and up-to-2 A bursts handled on-board. Includes an IPEX LTE antenna. `esp_modem` PPP works the same over its UART, so ADR 0006 stands. |
-| 1a | — charge current | note | **500 mA max** → a 3000 mAh cell charges from flat in ~7 h. Overnight, fine. Not a "top up at lunch" device. |
-| 1b | — variant | **verify before ordering** | Two variants exist: with a PMU (AXP2101 — software control of rails, real fuel gauge) and "Standard" without. Bastelgarage's listing doesn't say. Prefer the PMU one; the Standard one works with an ADC divider for battery %. Ask Bastelgarage or check the board photo for the AXP chip. |
-| 1c | — 18650 holder | **don't rely on it** | Spring holders bounce in a bag → brownout → reset mid-upload. Use a **protected 18650 with JST-PH 2.0 leads** on the JST connector, strapped down. Holder stays empty (or holds the same cell with tape, as a fallback). |
-| 1d | — TF slot | bonus | Answers storage-queue.md Q2: the outbox can overflow to SD if it ever needs to. Keep internal flash primary; SD is optional headroom, not a dependency. |
+| 1 | **LILYGO T-A7670G R2** (Cat-1) replaces the T-SIM7080G-S3 (Cat-M) | **Switch** — [ADR 0013](../docs/decisions/0013-cat1-not-catm.md) | The user's SIM provider, Digital Republic, [does not support Cat-M1/NB-IoT](https://support.digitalrepublic.ch/en/support/solutions/articles/33000225329-do-digital-republic-sim-cards-support-lte-cat-m1-and-nb-iot-); the SIM7080G has no ordinary 4G. The R2: ESP32 **WROVER (classic LX6), 4 MB flash, 8 MB PSRAM**, A7670G **LTE Cat-1 (10/5 Mbps)** + GNSS, JST LiPo with charging, USB-C, micro/nano-SIM, u.FL for LTE and GPS, both antennas in the box. 111 × 35 × 22 mm — fits. `esp_modem` PPP works the same. CHF 37.90, in stock. |
+| 1a | — flash | **the real cost** | 4 MB. OTA wants two ~1.5 MB slots → <1 MB left. The never-lost outbox moves to the **TF card**; internal flash keeps only the latest message as fallback. SD becomes a dependency — name-brand card, sync-on-write, missing card = fault LED. **Confirm the R2 has the TF slot** (LILYGO says yes; Bastelgarage's listing is silent). |
+| 1b | — pins | **exactly enough** | Fixed on the R2: modem TX 26 / RX 27 / PWRKEY 4 / DTR 25 / RI 33 / RESET 5 / POWER_ON 12; TF 14/2/15/13; VBAT ADC 35. That leaves **six native outputs** (18 19 21 22 23 32) and three input-only pins (34 36 39). It fits: mic and amp **share one I2S port in full-duplex** (BCLK 18, WS 19, DOUT 23, DIN 34), I²C 21/22 to a **PCF8574** for LEDs, ring gate, amp shutdown and button LED, ring data on 32, lid on 36 and play on 39 (input-only → external 10 kΩ pull-ups). Pin map in `firmware/main/dadbox_config.h`. |
+| 1c | — battery | ✔ | The R2 has **both** an 18650 holder with charging and a JST LiPo connector (LILYGO/RandomNerd; Bastelgarage's listing shows only the connector). Same rule as before: protected 18650 with JST leads, strapped down; don't trust the spring holder in a bag. Charge rate unverified — assume ≤500 mA. |
+| 1d | — power | fine | A7670 sleeps at ~2 mA (vs µA for Cat-M). 60 h × 2 mA = 120 mAh = 4 % of the cell. Wake via DTR; no need to power-cycle the modem between check-ins, so the poll interval can be tighter for free. |
+| 1e | — GNSS | free bonus | Not needed, but the modem's cell ID (`AT+CPSI`) or a GNSS fix at check-in answers "which house" for ADR 0008 without a dock resistor. |
+| 1f | — alternative | if 1a/1b bite | **T-SIM7670G-S3**: ESP32-S3, 16 MB flash, SIM7670G Cat-1. Not stocked in CH, no TF slot, ~0.5 mA deep-sleep floor (harmless). 2–3 weeks by import. |
 | 2 | I2S mic MSM261S4030H0 (Bastelgarage) | ✔ | 3.3 V, 1 mA, 24-bit I2S. No enable pin — the reed contact switches its VDD directly (1 mA ≪ 3 W contact rating). That is the physical mic gate. INMP441 from Temu is the equivalent. |
 | 3 | MAX98357A amp | ✔ | 2.7–5.5 V. Feed from VBAT (3.7–4.2 V) → ~1.5 W into 4 Ω. Plenty for a bedroom; 3 W needs 5 V and a boost we don't want. SD pin for gating. Gain set by pin, volume in firmware. |
 | 4 | Speaker 40 mm 4 Ω 3 W, 17 mm tall | ✔ fits | Mounted under the lid plate, cone up through a hole pattern. The 50 mm (30 mm tall) does not fit. Visaton BF 45 is 61 × 45 mm rectangular and 4–6 weeks — skipped. |
@@ -62,7 +64,7 @@ the lid is open — which is the gesture.
 | 9 | LTE antenna | **changes** | The included IPEX antenna is useless inside aluminium. Pigtail U.FL → **bulkhead** SMA through the back wall, stub SMA antenna outside. Delock hinged LTE/GSM stub, or the 3 m-cable indoor antenna if the box's spot has bad signal. Confirm the LILYGO's connector is u.FL/IPEX-1 (2.0 mm), not MHF4. |
 | 10 | Battery: protected 18650 ~3000 mAh, JST-PH 2.0 | ✔ phase 3 | Protection at the cell ([ADR 0005](../docs/decisions/0005-battery-required.md)). 60 h target at ~40 mA average = 2.4 Ah — realistic if the ring, amp, mic and modem are gated. Measure first. |
 | 11 | USB-C PSU, one per house | ✔ | Any 5 V / 2 A. |
-| 12 | SIM | **risk** | 1NCE €12 / 10 yr covers CH, but sells B2B — confirm private ordering. Hologram is the fallback. And check **LTE-M** coverage specifically at both addresses. |
+| 12 | SIM: Digital Republic Flat 1 | ✔ | CHF 6/month, unlimited, Sunrise 4G, no contract. Flat 0.4 (CHF 4) works but a 5-min ADPCM message takes ~100 s at 0.2 Mbps up; Flat 1 halves it. Coverage question is now "Sunrise 4G in both bedrooms" — near-certain. |
 | 13 | ESP32-S3-DevKitC-1 N16R8 | dropped | Redundant with the LILYGO. Buy one (18.90) only if you want a second bench board. |
 | 14 | BQ24074 charger, level shifter, SIM7080G breakout | dropped | All on the LILYGO. |
 | 15 | 1000 µF at the modem | keep in the drawer | The LILYGO has its own decoupling. Add it only if uploads reset the board. |
@@ -70,18 +72,19 @@ the lid is open — which is the gesture.
 ## What this does to the phases
 
 - **Phase 1 now includes the LILYGO** (it *is* the audio board), the box, the
-  mic, speaker, amp, ring, reed contact, button, LEDs. ~CHF 160. You prove
-  audio *and* fit in the real enclosure at once.
-- **Phase 2** is just the SIM, the pigtail and the stub antenna. ~CHF 35.
+  mic, speaker, amp, ring, reed contact, button, LEDs, a microSD and the
+  expander. ~CHF 165. You prove audio *and* fit in the real enclosure at once.
+- **Phase 2** is the Digital Republic SIM, the pigtail and the stub antenna.
+  ~CHF 31 + CHF 6/month.
 - **Phase 3** is the cell and two PSUs. ~CHF 35.
 - **Phase 4** is hinge, acrylic, mesh, screws. Hardware store.
 
 ## Still to verify with parts in hand
 
-1. Which LILYGO variant arrived (PMU or Standard) — decides battery sensing.
-2. Free GPIOs on the LILYGO headers for I2S ×2, ring, gates, lid, button,
-   LEDs (13 pins). The docs list what's *taken*; confirm the rest on the
-   pinout image.
+1. ~~That the R2 has its TF slot~~ — confirmed (SPI on 14/2/15/13). Still: that
+   the SD survives a power pull mid-write.
+2. Free GPIOs on the R2 headers after modem and TF. Expect to need the
+   PCF8574; confirm how many native pins remain for I2S ×2 + ring data.
 3. That the reed contact + magnet register reliably through the 4 mm lid
    gap you end up with. Reed range is ~10–15 mm; should be fine.
 4. Idle current of every gated rail, before ordering the cell.

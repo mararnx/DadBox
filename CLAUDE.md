@@ -9,8 +9,8 @@ making assumptions about the design.
 
 | Stream | Where | Blocked by |
 | --- | --- | --- |
-| Shopping | `hardware/SHOPPING-LIST.md` | phase 2: LTE-M coverage check |
-| Firmware | `firmware/` (ESP-IDF + esp_modem, LILYGO T-SIM7080G-S3) | phase 1 parts |
+| Shopping | `hardware/SHOPPING-LIST.md` | phase 2: Sunrise 4G check in both bedrooms |
+| Firmware | `firmware/` (ESP-IDF + esp_modem, LILYGO T-A7670G R2, classic ESP32) | phase 1 parts |
 | Server | `server/` (Node + TS + Fastify) | nothing |
 | iOS | `ios/` (SwiftUI, APNs) | server endpoints, Apple dev account |
 

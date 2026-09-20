@@ -4,7 +4,7 @@ A voice messaging device for a parent and child who live apart. Open the lid,
 talk, close it — the other person hears it. No screen, no phone, no account.
 
 > **Status:** designed and reviewed, nothing built. Eight ADRs in `docs/decisions/`.
-> Next action: check LTE-M coverage at both addresses, order phase 1, build
+> Next action: check Sunrise 4G in both bedrooms, order phase 1, build
 > `tools/fakebox`.
 
 ## Layout
@@ -15,7 +15,7 @@ talk, close it — the other person hears it. No screen, no phone, no account.
 | `hardware/pcb` | Only if a PCB ever happens — v1 is point-to-point on the LILYGO's headers |
 | `hardware/cad` | Drill templates for the 1590DD lid and walls (PDF/DXF, 1:1) |
 | `hardware/bom` | Bills of materials, supplier links, cost tracking |
-| `firmware` | ESP32-S3 firmware (ESP-IDF) |
+| `firmware` | ESP32 firmware (ESP-IDF) for the LILYGO T-A7670G R2 |
 | `server` | Backend: blob storage, APNs push, device telemetry |
 | `ios` | Parent's native iOS app (SwiftUI) |
 | `docs` | Brief, architecture, protocol, roadmap, build log |

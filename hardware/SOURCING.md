@@ -11,7 +11,8 @@ listings **is bastelgarage.ch**. Same stock, same box, marked up:
 
 | Part | Galaxus | Bastelgarage direct |
 | --- | --- | --- |
-| LILYGO T-SIM7080G-S3 | 57.90 | **43.90** |
+| LILYGO T-A7670G R2 | 54.90 | **37.90** |
+| LILYGO T-SIM7080G-S3 (superseded, ADR 0013) | 57.90 | 43.90 |
 | Waveshare ESP32-S3 N16R8 | 24.90 | **18.90** |
 | Hall sensor module | 8.90 | **3.90** |
 
@@ -20,11 +21,13 @@ Allnet). So: **two orders** — Bastelgarage direct for the maker modules,
 Galaxus for the rest — or one Galaxus order for ~CHF 40 more. Both ship in
 two days.
 
-## Order 1 — Bastelgarage direct · CHF 66.60 · all in stock
+## Order 1 — Bastelgarage direct · CHF 63.50 · all in stock
 
 | Qty | Part | CHF | Link |
 | --- | --- | --- | --- |
-| 1 | **LILYGO T-SIM7080G-S3** — ESP32-S3 16 MB/8 MB + SIM7080G + charger + 18650 holder + JST 2.0 + TF slot + nano-SIM; LTE & GPS antennas and headers included | 43.90 | [bastelgarage](https://www.bastelgarage.ch/lilygo-t-sim7080g-s3-mit-nb-iot-cat-m-und-gps) |
+| 1 | **LILYGO T-A7670G R2** — ESP32 WROVER (4 MB / 8 MB PSRAM) + A7670G **LTE Cat-1** + GNSS + JST LiPo charging; LTE & GPS antennas included ([ADR 0013](../docs/decisions/0013-cat1-not-catm.md)) | 37.90 | [bastelgarage](https://www.bastelgarage.ch/lilygo-t-a7670g-r2-esp32-4g-carte-de-developpement-avec-gps) |
+| 1 | PCF8574 I²C GPIO expander module — the WROVER runs out of pins after modem + TF | ~3 | bastelgarage (search "PCF8574") |
+| 1 | microSD card 8–32 GB, name-brand — **the outbox lives here** (4 MB flash) | ~8 | Galaxus / any |
 | 1 | I2S MEMS microphone module (MSM261S4030H0, 3.3 V, 1 mA) | 8.90 | [bastelgarage](https://www.bastelgarage.ch/i2s-mikrofon-modul) |
 | 1 | Speaker 4 Ω 3 W **40 mm, 17 mm tall** | 8.90 | [bastelgarage](https://www.bastelgarage.ch/lautsprecher-4ohm-3w-40mm) |
 | 1 | Magnetic door/window contact (reed + magnet, 330 mm lead, NO) — the lid switch *and* the mic's power switch | 4.90 | [bastelgarage](https://www.bastelgarage.ch/magnetischer-tur-fenster-kontakt) |
@@ -65,17 +68,21 @@ Not on Galaxus/Digitec (they carry the taller 1590E and 1590D). Distrelec is
 the Swiss stockist; datasheet with inside dimensions at
 [hammfg.com/part/1590DD](https://www.hammfg.com/part/1590DD).
 
-## Order 4 — the SIM
+## Order 4 — the SIM: Digital Republic
 
-| Part | Price | Link |
-| --- | --- | --- |
-| 1NCE IoT Lifetime Flat — 500 MB, 10 years, EU + Switzerland, no monthly fee | €12 one-off | [1nce.com pricing](https://www.1nce.com/en-eu/1nce-connect/pricing) |
+| Plan | Speed (down/up) | CHF/month | Link |
+| --- | --- | --- | --- |
+| **Flat 1** (recommended) | 1 / 0.5 Mbps | 6.– | [digitalrepublic.ch/en/smart-devices](https://digitalrepublic.ch/en/smart-devices/) |
+| Flat 0.4 | 0.4 / 0.2 Mbps | 4.– | same |
+| Flat 10 | 10 / 5 Mbps | 10.– | same; also as a 365-day card at [Digitec](https://www.digitec.ch/en/s1/product/digital-republic-sim-karte-unlimitiert-internet-fuer-365-tage-medium-speed-unlimitiert-mobile-abo-si-14968386) (out of stock today) |
 
-**Verify before relying on it:** 1NCE sells B2B; confirm a private individual
-can order in CH. Fallback that definitely sells to individuals and supports
-LTE-M: Hologram (pay-as-you-go). Either way, confirm **LTE-M (Cat-M1)** —
-not NB-IoT — coverage at both addresses on the network the SIM roams onto
-(Swisscom in CH).
+Unlimited data, Sunrise 4G/5G, no contract, cancel any month, SIM free.
+**Digital Republic does not support Cat-M1/NB-IoT**
+([their support page](https://support.digitalrepublic.ch/en/support/solutions/articles/33000225329-do-digital-republic-sim-cards-support-lte-cat-m1-and-nb-iot-)) —
+which is why the board is Cat-1. A 5-minute ADPCM message uploads in ~40 s on
+Flat 1, ~100 s on Flat 0.4, seconds on Flat 10.
+
+Superseded: 1NCE (Cat-M only; B2B ordering unconfirmed).
 
 ## Battery — not yet in stock anywhere convenient
 
@@ -99,23 +106,23 @@ If you want the cheap route for the modules: search Temu for `INMP441`,
 
 | | CHF |
 | --- | --- |
-| Bastelgarage | 66.60 |
+| Bastelgarage (board, mic, speaker, reed, expander) | ~66 |
 | Galaxus / Digitec (incl. antenna 20.90, two PSUs ~20) | ~94 |
 | Distrelec 1590DD | 27.91 |
-| 1NCE SIM | ~12 |
+| Digital Republic Flat 1 | 6 / month |
+| microSD 16 GB | ~8 |
 | Battery (phase 3) | ~15 |
-| **Total** | **~CHF 225** |
+| **Total** | **~CHF 225 + CHF 6/month** |
 
-Down from ~215 USD on the old plan for *more* — the LILYGO replaces the
-DevKitC, the modem breakout, the level shifter and the charger, and adds the
-TF slot.
+The LILYGO replaces the DevKitC, the modem breakout, the level shifter and
+the charger. The T-A7670G R2's 4 MB flash is why a microSD joins the list.
 
 ## Not sourced yet
 
 - Two 3 mm LEDs + resistors (status LEDs) — any assortment, CHF 2.
 - Bulkhead SMA (if Allnet's pigtail isn't one), CHF 3.
 - Delock's cheaper "3G, GSM" antenna variant (13.50) is *not* the one — it may
-  lack the LTE-M bands. Take the 20.90 LTE variant.
+  lack the LTE bands. Take the 20.90 LTE variant.
 - Piano hinge + M3 hardware for the lid, acrylic disc for the ring window,
   speaker grille mesh — hardware store, phase 4.
 - 1000 µF cap at the modem — only if resets appear; the LILYGO has its own.
