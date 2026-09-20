@@ -1,9 +1,12 @@
 # ADR 0003 — One box, parent uses a phone
 
 **Date:** 2026-09-20
-**Status:** accepted
+**Status:** accepted — parent-end platform amended by [ADR 0004](0004-native-ios-app.md)
 
 ## Context
+
+> **Amendment:** the parent end is a native iOS app, not a PWA. See
+> [ADR 0004](0004-native-ios-app.md). Everything else below stands.
 
 The child needs a physical object: a phone is not theirs, not always available,
 and not the point. The parent already carries a device that records audio

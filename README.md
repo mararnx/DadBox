@@ -3,8 +3,8 @@
 A voice messaging device for a parent and child who live apart. Press a button,
 talk, let go — the other person hears it. No screen, no phone, no account.
 
-> **Status:** concept defined, nothing built yet. Platform and connectivity still open —
-> see [docs/BRIEF.md](docs/BRIEF.md).
+> **Status:** designed, nothing built. Decisions recorded in `docs/decisions/`.
+> Next action: check cellular coverage at both addresses, then order phase 1.
 
 ## Layout
 
@@ -14,15 +14,20 @@ talk, let go — the other person hears it. No screen, no phone, no account.
 | `hardware/pcb` | PCB layouts and fabrication outputs (Gerbers, drill files) |
 | `hardware/cad` | Enclosure / mechanical CAD (STEP, STL, F3D) |
 | `hardware/bom` | Bills of materials, supplier links, cost tracking |
-| `firmware` | Embedded code that runs on the device |
-| `software` | Host-side code: app, CLI, web UI, services |
-| `docs` | Brief, build log, wiring notes |
+| `firmware` | ESP32-S3 firmware (ESP-IDF) |
+| `server` | Backend: blob storage, APNs push, device telemetry |
+| `ios` | Parent's native iOS app (SwiftUI) |
+| `docs` | Brief, architecture, protocol, roadmap, build log |
 | `docs/decisions` | Decision records — one file per choice that was hard to make |
 | `tools` | Scripts: flashing, test rigs, build helpers |
 | `assets` | Photos, renders, datasheets |
 
-## Getting started
+## Start here
 
-Nothing to build yet. Fill in `docs/BRIEF.md` first — what the box does,
-what it runs on, and how the hardware and software talk to each other.
-Toolchain setup lands here once those are picked.
+- [docs/BRIEF.md](docs/BRIEF.md) — what it is and why
+- [docs/ROADMAP.md](docs/ROADMAP.md) — the four streams and what blocks what
+- [docs/PROTOCOL.md](docs/PROTOCOL.md) — the contract all three code streams share
+- [hardware/SHOPPING-LIST.md](hardware/SHOPPING-LIST.md) — phased; buy phase 1 only
+
+`server/` and `ios/` are not blocked by hardware. Build them against a fake box
+so that when the parts arrive, the firmware is the only unknown.

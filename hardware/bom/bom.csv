@@ -1,14 +1,16 @@
-qty,ref,part,description,supplier,part_number,unit_price,currency,link,notes
-1,U1,ESP32-S3-DevKitC-1-N16R8,MCU 16MB flash 8MB PSRAM,Espressif/Mouser,,15,USD,,PSRAM required for PCM buffer
-1,U2,Blues Notecard Cellular,LTE-M/NB-IoT module with bundled data,Blues,,49,USD,,Verify current SKU and data allowance
-1,U3,Notecarrier-B,Carrier board for Notecard,Blues,,15,USD,,Check ESP32 wiring / I2C
-1,MK1,ICS-43434 breakout,I2S MEMS microphone,Adafruit/Sparkfun,,8,USD,,INMP441 is a cheaper alternative
-1,U4,MAX98357A breakout,I2S class-D amplifier 3W,Adafruit,,6,USD,,
-1,LS1,Speaker 3W 4ohm,40-50mm full range,,,5,USD,,Enclosure volume matters more than the driver
-1,DS1,WS2812B ring 16px,Addressable LED ring,,,8,USD,,Diffuse it - raw LEDs are harsh for a child
-2,SW1-2,Arcade button 60mm,Record and play buttons,,,3,USD,,Large travel. Microswitch must survive abuse
-1,BT1,LiPo 3000mAh,3.7V pouch cell with protection,,,12,USD,,Sized for cellular transmit bursts
-1,U5,LiPo charger/PMIC,USB-C charge + power path,,,9,USD,,Power path so it runs while charging
-1,J1,USB-C PSU 5V 2A,Mains adapter,,,10,USD,,Default power source
-1,C1,Bulk capacitor 1000uF,Decoupling for modem bursts,,,1,USD,,Near the Notecard supply
-1,ENC,Filament + inserts,3D printed enclosure,,,10,USD,,Heat-set inserts not self-tappers
+phase,qty,ref,part,description,why,unit_price_est,currency,status,notes
+1,1,U1,ESP32-S3-DevKitC-1-N16R8,MCU 16MB flash 8MB PSRAM,PSRAM holds raw PCM during recording,15,USD,not ordered,VERIFY the N16R8 variant - generic listings often ship without PSRAM
+1,1,MK1,ICS-43434 breakout,I2S MEMS microphone,Lower noise floor than INMP441 across a room,8,USD,not ordered,INMP441 is the cheaper fallback
+1,1,U4,MAX98357A breakout,I2S class-D amplifier 3W,Digital in speaker out - no DAC needed,6,USD,not ordered,
+1,1,LS1,Speaker 3W 4ohm 40-50mm,Full range driver,Enclosure acoustics matter more than the driver,5,USD,not ordered,
+1,2,SW1-2,Arcade button 60mm,Record and play,Large travel - survives abuse,3,USD,not ordered,Buy spare microswitches
+1,1,DS1,WS2812B ring 16px,Addressable LED ring,The entire notification system,8,USD,not ordered,Must be diffused - raw LEDs are harsh
+1,1,,Breadboard + jumpers,Prototyping,,7,USD,not ordered,
+2,1,U2,Blues Notecard Cellular,LTE-M/NB-IoT with bundled data,No SIM no carrier account no monthly bill,49,USD,blocked,BLOCKED on coverage check at both addresses
+2,1,U3,Notecarrier-B,Carrier board for Notecard,I2C to the ESP32,15,USD,blocked,Verify binary payload limit before writing chunking
+3,1,BT1,LiPo 3000mAh with PCM,Protected cell,Protection at the cell not just the charger,14,USD,not ordered,Non-negotiable - child carries this
+3,1,U5,USB-C charger with power path,Charge + power path PMIC,Runs while charging on a flat cell,10,USD,not ordered,
+3,1,C1,1000uF low-ESR + decoupling,Bulk capacitance,Modem transmit bursts brown out small rails,3,USD,not ordered,Place near the Notecard supply
+3,1,J1,USB-C PSU 5V 2A,Mains adapter,,10,USD,not ordered,
+4,1,ENC,Filament + heat-set inserts,3D printed enclosure,,10,USD,not ordered,Heat-set inserts not self-tappers
+4,1,PCB,Custom PCB fabrication,Replaces breadboard,,50,USD,not ordered,Expect a second revision

@@ -1,22 +1,37 @@
 # Firmware
 
-ESP32-S3 (N16R8). ESP-IDF.
+ESP32-S3 (N16R8), ESP-IDF v5.x.
 
-Nothing here yet. See [../docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) for
-the audio path and state machine before writing any of it.
+## Build
 
-## Planned modules
+```bash
+. $IDF_PATH/export.sh
+idf.py set-target esp32s3
+idf.py build flash monitor
+```
 
-| Module | Job |
-| --- | --- |
-| `audio_in` | I2S capture to a PSRAM ring buffer while record is held |
-| `audio_out` | I2S playback through the amp |
-| `codec` | Encode after release — never in the capture path |
-| `queue` | Durable outbox/inbox in flash; survives power loss |
-| `link` | Notecard I2C, sync, chunked upload, backoff |
-| `ui` | Buttons, LED ring, chimes, quiet hours |
+## Shape of it
 
-## First target (M0)
+| Module | Job | Exists |
+| --- | --- | --- |
+| `audio_in` | I2S capture to a PSRAM buffer while record is held | no |
+| `audio_out` | I2S playback through the amp | no |
+| `codec` | Encode *after* release — never in the capture path | no |
+| `queue` | Durable outbox/inbox in flash, survives power loss | no |
+| `link` | Notecard I2C, sync, chunked upload, backoff | no |
+| `ui` | Buttons, LED ring, chimes, quiet hours | no |
 
-Hold button → record → release → press play → hear it back. No network at all.
-Proves the mic, the amp, the buffer and the buttons in one go.
+## First target — M0
+
+Hold record → talk → release → press play → hear it. No network, no flash, no
+codec. It proves the mic, the amp, the PSRAM buffer and the buttons in one go,
+and it is the cheapest possible way to find out the audio quality is bad.
+
+Do not buy the cellular parts until this sounds good.
+
+## Notes
+
+- Pin assignments in `main/dadbox_config.h` are provisional — check the
+  strapping pins before soldering.
+- Wire format lives in [../docs/PROTOCOL.md](../docs/PROTOCOL.md). Change it
+  there first.

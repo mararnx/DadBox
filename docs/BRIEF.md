@@ -26,6 +26,12 @@ a child actually stays close to someone who isn't there.
    app that logged itself out.
 5. **A child's recorded voice is the most sensitive data here.** Minimal
    retention, no third-party analytics, no cloud transcription.
+6. **The mic is powered only while the button is physically held**, with the
+   ring unmistakably lit. A box that lives in two homes will be in rooms with
+   other people in them; it must be obvious to everyone when it is listening,
+   and incapable of listening otherwise.
+7. **Both households can mute it, and both can see the mute.** A known-off beats
+   a mystery silence — and a box nobody can silence is a box that gets unplugged.
 
 ## Hardware (decided — see [bom.csv](../hardware/bom/bom.csv))
 
@@ -37,19 +43,22 @@ a child actually stays close to someone who isn't there.
 - **Output:** MAX98357A I2S amp + 3W speaker.
 - **Indicator:** WS2812 LED ring — slow breathing glow means "a message is
   waiting", one lit segment per message. This is the whole notification system.
-- **Power:** always-on USB-C, with a LiPo so it survives being unplugged and
-  carried around. Not a device anyone should have to remember to charge.
-- **Enclosure:** 3D printed, chunky, drop-survivable, no visible screws.
+- **Power:** internal protected LiPo + USB-C with power-path charging. The box
+  travels with the child, so the battery is mandatory rather than a nicety
+  ([ADR 0005](decisions/0005-battery-required.md)).
+- **Enclosure:** 3D printed, chunky, drop-survivable, no visible screws. It
+  lives in a bag between two houses — treat drops as the normal case.
 
 ## Connectivity — decided: cellular
 
-The box connects on its own and is never a guest on anyone's network. Wi-Fi
-would have meant depending on the other household's password, router and
-goodwill — and failing silently in a house with no reason to debug it.
+The box travels between two homes, and that is what settles it. A device that
+changes network every few days would need credentials for both, re-provisioning
+after any router change in either house, and would fail silently in whichever
+home nobody is checking. It carries its own network instead.
 
 Using a Blues Notecard, whose data plan is bundled with the hardware: no
-monthly bill, no carrier account, no SIM to activate. Voice is tiny (~120 KB
-per minute at 16 kbps Opus), so data volume is not a constraint.
+monthly bill, no carrier account, no SIM to activate. Voice is tiny, so data
+volume is not a constraint.
 
 Full reasoning in [ADR 0002](decisions/0002-cellular-not-wifi.md).
 
@@ -57,20 +66,26 @@ Full reasoning in [ADR 0002](decisions/0002-cellular-not-wifi.md).
 
 - **Firmware:** ESP-IDF (Arduino core if speed matters more than control).
   Record → Opus encode → queue to flash → upload when there's a link.
-- **Parent end:** a phone web app (PWA) — record, send, listen. A second
-  identical box later joins as another client of the same protocol
-  ([ADR 0003](decisions/0003-one-box-plus-app.md)).
-- **Transport:** Notecard → Notehub → backend. HTTPS for the PWA.
+- **Parent end:** a native iOS app (SwiftUI + APNs). Notification reliability
+  is the product — a message you notice six hours late defeats the device
+  ([ADR 0004](decisions/0004-native-ios-app.md)). A second box would later join
+  as another client of the same protocol.
+- **Transport:** Notecard → Notehub → backend. HTTPS for the app.
 - **Backend:** as small as possible. Object storage plus a thin API. Messages
   deleted a short, fixed time after they're played.
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the audio path and state machine.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the audio path and state machine,
+[PROTOCOL.md](PROTOCOL.md) for the wire contract, and [ROADMAP.md](ROADMAP.md)
+for how the four streams fit together.
 
 ## Scope
 
-A one-off for one family. Hand-assembled, config baked in, no onboarding flow,
-no support burden, no compliance work. One box that actually exists beats a
-product that doesn't.
+A one-off for one family, built deliberately rather than bought. Hand-assembled,
+config baked in, no onboarding flow, no support burden, no compliance work.
+
+Tonies and Yoto already do parent → child voice into a box. Neither does the
+reply direction well, and the reply is the point: a child pressing a button and
+being heard. Everything else in the design serves that.
 
 ## Constraints
 
@@ -89,16 +104,22 @@ product that doesn't.
 
 ## Decided
 
-- One box for the child; parent uses a phone app — [ADR 0003](decisions/0003-one-box-plus-app.md)
-- Cellular, not Wi-Fi — [ADR 0002](decisions/0002-cellular-not-wifi.md)
-- Designed for ages 6-9: two buttons, message count, no text anywhere
-- 60-second cap per message, ended with a chime
-- A one-off for one family
+- One box for the child; parent uses a native iOS app — [ADR 0003](decisions/0003-one-box-plus-app.md), [ADR 0004](decisions/0004-native-ios-app.md)
+- Cellular, not Wi-Fi, because the box travels — [ADR 0002](decisions/0002-cellular-not-wifi.md)
+- Battery required, with protection at the cell — [ADR 0005](decisions/0005-battery-required.md)
+- The box travels with the child between both homes
+- The co-parent is on board: placement is flexible, consent is a conversation,
+  and they get a mute that is visible in the app
+- Ages 6-9: two buttons, message count, no text anywhere
+- **5 minutes** per message, not 60 seconds. Data is effectively free and
+  cutting a child off mid-story is not
+- Building rather than buying — the making is part of the point
 
 ## Still open
 
-- What happens to messages after they're heard — vanish, or keep a few favourites?
-- Quiet hours: what window, and can the child see that one is waiting before
-  it chimes in the morning?
+- Does a message vanish after it's heard, or can a few be kept?
+- Quiet hours: what window? (Glow yes, chime no, until morning.)
+- Where the server runs — a Pi at home keeps a child's voice off other people's
+  computers, at the cost of your uptime
 - Is there a date this needs to exist by?
-- **Cellular coverage at the destination address — verify before ordering.**
+- **Cellular coverage at both addresses — verify before ordering phase 2.**
