@@ -29,6 +29,7 @@ talk, close it — the other person hears it. No screen, no phone, no account.
 - [docs/REVIEW.md](docs/REVIEW.md) — architecture double-check: what holds, what doesn't
 - [docs/components/](docs/components/README.md) — one file per component, with the open questions
 - [docs/ROADMAP.md](docs/ROADMAP.md) — the four streams and what blocks what
+- [docs/DEV-PROCESS.md](docs/DEV-PROCESS.md) — the build–flash–log loop, what Claude drives itself, what needs a human
 - [docs/PROTOCOL.md](docs/PROTOCOL.md) — the contract all three code streams share
 - [hardware/SHOPPING-LIST.md](hardware/SHOPPING-LIST.md) — phased; buy phase 1 only
 - [hardware/SOURCING.md](hardware/SOURCING.md) — Swiss links and prices, ready to order

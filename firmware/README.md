@@ -7,15 +7,20 @@ ESP-IDF v5.x.
 ## Build
 
 ```bash
-. $IDF_PATH/export.sh
+. ~/esp/esp-idf/export.sh
 idf.py set-target esp32
-idf.py build flash monitor
+idf.py build flash
+python3 ../tools/serial_capture.py -s 20
 ```
+
+(`idf.py monitor` for a human; `serial_capture.py` for Claude — it returns.)
+Setup for this Mac is in [docs/DEV-PROCESS.md](../docs/DEV-PROCESS.md).
 
 ## Shape of it
 
 | Module | Job | Exists |
 | --- | --- | --- |
+| `console` | **Build this first.** Serial shell: `state`, `lid open/close`, `play`, `rec N`, `dump`, `checkin`, `at …`, `ring test`, `sim link down`. It is how the box is debugged without hands or eyes — see [docs/DEV-PROCESS.md](../docs/DEV-PROCESS.md) | no |
 | `ui` | Lid switch, play button, ring (gated), chimes, quiet hours, mute | no |
 | `audio_in` | I2S capture while the lid is open; mic rail follows the lid | no |
 | `adpcm` | IMA-ADPCM in the capture loop → PSRAM. Cheap enough to not count as real-time | no |
@@ -26,9 +31,17 @@ idf.py build flash monitor
 | `power` | Light/deep sleep, rail gating, battery sense | no |
 | `codec` | Opus transcode after the lid closes — M3 | no |
 
+## Layout rule
+
+Keep the logic in pure C with no ESP-IDF includes (`adpcm`, container/CRC,
+queue state machine, ring priority, chunking, silence trim) so it compiles
+and tests on the Mac with plain `cc`. Only drivers and glue touch the SDK.
+Target ~70 % host-testable.
+
 ## First target — M0
 
-Open lid (a toggle switch on the bench) → talk → close → press play → hear it.
+Console, then audio. Open lid (a toggle switch on the bench) → talk → close →
+press play → hear it.
 No network, no flash. It proves the mic, the amp, ADPCM, the PSRAM buffer and
 the gating in one go, and it is the cheapest possible way to find out the
 audio quality is bad. Listen to it inside a cardboard box, not on the bench.

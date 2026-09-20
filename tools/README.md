@@ -1,6 +1,13 @@
 # Tools
 
-Scripts and rigs. Nothing here yet.
+Scripts and rigs.
+
+## `serial_capture.py` — read the board without a human at the keyboard
+
+`idf.py monitor` never returns; this captures for N seconds or until a regex,
+optionally resetting the board or sending a console command first. It is how
+Claude reads logs, panics and console output during the build–flash loop.
+See [docs/DEV-PROCESS.md](../docs/DEV-PROCESS.md). Needs `pyserial`.
 
 ## Wanted first — `fakebox`
 

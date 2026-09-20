@@ -14,6 +14,16 @@ making assumptions about the design.
 | Server | `server/` (Node + TS + Fastify) | nothing |
 | iOS | `ios/` (SwiftUI, APNs) | server endpoints, Apple dev account |
 
+## Working on the firmware
+
+- Every firmware Bash command starts with `. ~/esp/esp-idf/export.sh`.
+- Read the board with `tools/serial_capture.py` (returns), never `idf.py
+  monitor` (doesn't). Drive it through the serial console (`state`, `lid
+  open`, `play`, `at …`) before asking the user to touch anything.
+- Logic goes in pure C so it compiles on the Mac; test it there first.
+- Claude can't hear, see LEDs, or read a meter: ask the user for exactly that
+  observation, nothing more. See `docs/DEV-PROCESS.md`.
+
 ## Conventions
 
 - **The protocol is the contract.** `docs/PROTOCOL.md` changes first, then the
