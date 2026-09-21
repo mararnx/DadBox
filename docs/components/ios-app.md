@@ -4,9 +4,11 @@
 
 ## Current design (ADR 0004)
 
-> **Decided 2026-09-20:** one parent in v1; the app is built so a second identity is a config change, not a rewrite ([ADR 0008](../decisions/0008-two-parents-later.md)). Server-side transcode from whatever iOS records. Box-offline alert ships in M1.
+> **Decided 2026-09-20:** one parent in v1; the app is built so a second identity is a config change, not a rewrite ([ADR 0008](../decisions/0008-two-parents-later.md)). Box-offline alert ships in M1. ~~Server-side transcode from whatever iOS records~~ — withdrawn: with E2EE the server cannot transcode ([ADR 0017](../decisions/0017-managed-hosting-e2ee.md)); the app uploads AAC-LC (`codec = 3`) and plays the box's Ogg Opus natively.
+>
+> **Decided 2026-09-21:** one conversation timeline instead of three tabs; tap-tap-review-send; 5-minute cap; no autoplay from a push; no widget or quick-record, ever; English only; archive both directions forever with the key in iCloud Keychain ([ADR 0018](../decisions/0018-archive-forever.md)); paid developer account exists. Design: [ios/DESIGN.md](../../ios/DESIGN.md). Answers Q2–Q7 below; Q1 stands as suggested (own thread, own key).
 
-SwiftUI, APNs. Three screens: Listen, Send, Box.
+SwiftUI, APNs. Two screens — Conversation and Box — plus a one-time setup.
 
 ## Checked
 
@@ -15,10 +17,11 @@ SwiftUI, APNs. Three screens: Listen, Send, Box.
   message — wrong tool.
 - The "box hasn't checked in" alert is the most important notification in the
   system and is *not* about a message. It should exist by M1.
-- Recording on iOS: AVAudioRecorder to AAC is trivial; producing Opus for the
-  box needs a small library or server-side transcode. Server-side transcode is
-  simplest: the app uploads whatever iOS makes, the server produces what the
-  box wants. That also keeps codec choice off the phone.
+- Recording on iOS: AVAudioRecorder to AAC-LC 16 kHz mono. The box decodes it
+  with `ffmpeg`; nothing transcodes in between (ADR 0017).
+- Playing the box's Ogg Opus: `AVAudioPlayer` opened a standard Ogg Opus file
+  on macOS 26.4 (checked 2026-09-21) — no demuxer or codec library needed.
+  Confirm on the iPhone.
 - Background upload matters: a parent records in a lift, puts the phone away,
   and the message must still go. `URLSession` background configuration.
 - A second parent (review §8) doubles the app users but not the app — same

@@ -13,16 +13,17 @@ place to economise. This app's real job is to be *loud and on time*.
 
 ## Screens
 
-There are three, and it should be hard to add a fourth.
+Two, and it should be hard to add a third. Full design: [DESIGN.md](DESIGN.md).
 
-1. **Listen** — waiting messages, big play button, oldest first. Opens straight
-   to the newest unplayed message from a push notification.
-2. **Send** — hold to record, release to send. Same 5-minute cap as the box.
-   Shows delivered / played state, because "did it arrive" is the question
-   you'll actually have.
-3. **Box** — battery, signal, last sync, queue depth, mute, quiet hours.
-   This screen exists so a flat battery in a school bag surfaces as a fact
-   rather than as a child who seems to have stopped messaging.
+1. **Conversation** — one timeline, both directions, the whole archive above
+   it. Tap-tap-review-send recorder at the bottom. Each message you sent says
+   sent / on the box / **played 19:12**, because "did it arrive" is the
+   question you'll actually have. A push opens it at the new message; nothing
+   autoplays.
+2. **Box** — battery, signal, last and next check-in, queue depth, faults in
+   words, mute, quiet hours, the key. This screen exists so a flat battery in
+   a school bag surfaces as a fact rather than as a child who seems to have
+   stopped messaging.
 
 ## Push
 
@@ -34,7 +35,8 @@ There are three, and it should be hard to add a fourth.
 
 ## Setup needed
 
-- Apple Developer account ($99/yr), or a free account and re-signing weekly.
+- Apple Developer account — paid membership exists (a free team cannot use APNs at all).
+- Xcode. The logic package (`DadBoxKit`) builds and tests with the Command Line Tools alone.
 - APNs key (.p8) + key id + team id, given to the server.
 
 ## Contract
