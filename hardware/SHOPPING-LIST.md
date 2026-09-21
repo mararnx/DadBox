@@ -1,94 +1,73 @@
 # Shopping List
 
-Re-cut 2026-09-21 after [EVALUATION.md](EVALUATION.md) (Option C) and the
-user's decisions: aluminium 1590DD with a small rigid antenna, start on the
-Pi 3A+, off-the-shelf parts only, Flat 1 always. Platform in
-[ADR 0014](../docs/decisions/0014-raspberry-pi-zero-2w.md) (revised). Every
-part with its link is in [bom/bom.csv](bom/bom.csv); this file is the order
-of buying. Prices CHF incl. VAT as seen 2026-09-20.
+The two-button box ([ADR 0016](../docs/decisions/0016-two-buttons-no-lid.md))
+on a Pi Zero 2 W with a Cat-1 HAT
+([ADR 0014](../docs/decisions/0014-raspberry-pi-zero-2w.md)): aluminium 1590DD
+clone, small rigid antenna, off-the-shelf parts only, Flat 1 always. Every
+part with its link and status is in [bom/bom.csv](bom/bom.csv); where things
+come from is in [SOURCING.md](SOURCING.md). Prices CHF incl. VAT.
 
-**The Pi Zero 2 W cannot be bought this week.** Everything is developed on a
-**Pi 3 Model A+** (same image, same pins). On the 3A+ the box is a mains
-device; the weekend on battery waits for the Zero 2 W.
+## Ordered
 
----
+| Date | Shop | Item | CHF | Notes |
+| --- | --- | --- | --- | --- |
+| 2026-09-21 | Pi-Shop | [**Raspberry Pi Zero 2 W starter kit**](https://www.pi-shop.ch/raspberry-pi-zero-2-w-starter-kit) — board, 16 GB microSD, USB OTG host cable, 2×20 header (to solder), mini-HDMI adapter | 42.90 | The deployment board. The kit's card is the bench card; the OTG cable is the modem's |
+| 2026-09-21 | Bastelgarage | [**Waveshare SIM7670G 4G LTE/GPS HAT**](https://www.bastelgarage.ch/sim7670g-4g-lte-gps-hat-fur-raspberry-pi) — Cat-1, bands 20 and 28, LTE antenna and USB cable included | 55.90 | With the part in hand: power-key wiring, that the USB Ethernet mode persists across reboots, which antenna connector it has |
+| 2026-09-21 | Bastelgarage | [**16 mm stainless momentary button, raised head, RGB ring, 5 V**](https://www.bastelgarage.ch/16mm-drucktaster-erhoht-mit-rgb-beleuchtung-5v-edelstahl) × 2 | 19.90 ea | **One is Record, one is Play.** 16 mm hole, flange Ø21.8, ~20 mm behind the panel — wall **or** top plate, decide with the box in hand. Common cathode, resistors built in, works at 3.3 V: LEDs straight from GPIO |
+| 2026-09-21 | Bastelgarage | [DFRobot I2S MEMS mic module](https://www.bastelgarage.ch/i2s-mikrofon-modul) (MSM261S4030H0) | 8.90 | Its 3.3 V supply shares a GPIO with the record button's red LED |
+| 2026-09-21 | Bastelgarage | [Seeed 5 W 4 Ω speaker in plastic enclosure](https://www.bastelgarage.ch/5w-4ohm-lautsprecher-in-kunststoffgehause), 50 × 45 × 22 mm | 7.90 | |
+| 2026-09-21 | Bastelgarage | MAX98357 I2S amp module — spare | 7.90 | Same chip as the Adafruit one; the shop lists it as "MAX98367" |
+| 2026-09-21 | Galaxus | [Adafruit MAX98357A I2S amp](https://galaxus.ch/de/s1/product/adafruit-i2s-3w-class-d-amplifier-breakout-max98357a-erweiterung-elektronikmodul-5998646) | 9.95 | Delivery 28–29 Sep |
+| 2026-09-21 | Galaxus | Raspberry Pi Debug Probe | 12.70 | UART console on GPIO 14/15 — `tools/serial_capture.py` |
+| 2026-09-21 | Temu | **1590DD-size die-cast aluminium enclosure**, 188 × 119 × 37.5 mm | 12.94 | A clone, not the Hammond. **Measure the inside (length, width, depth, corner bosses) before any layout or drilling** — clones differ by a millimetre or two |
+| 2026-09-21 | Temu | M35 cobalt step drill, 5–23 mm | 8.48 | Covers every hole in the box |
+| 2026-09-21 | Temu | Cordless USB soldering iron set | 11.61 | Fine for headers and wires; add solder and flux if not in the set |
+| 2026-09-21 | — | Jumper wires | — | Module-to-header wiring on the bench; something sturdier before the box travels in a bag |
 
-## Phase 1 — Bench: records and plays back · ~CHF 140 · order today
+In hand: the Digital Republic **Flat 1** SIM
+([digitalrepublic.ch](https://digitalrepublic.ch/en/smart-devices/), CHF
+6/month) and a 5 V micro-USB supply — `vcgencmd get_throttled` tells if it
+sags. Temu order total CHF 12.69 after credit.
 
-| Qty | Part | CHF | Source |
-| --- | --- | --- | --- |
-| 1 | **Adafruit NeoPixel ring 16 (44.5 mm)** — 2 in stock, **order first** | 14.90 | Play-Zone |
-| 1 | Adafruit MAX98357A I2S amp | 8.90 | Play-Zone |
-| 1 | **Raspberry Pi 3 Model A+** | 26.90 | Pi-Shop |
-| 1 | Official Pi 12.5 W micro-USB PSU | 11.90 | Pi-Shop |
-| 1 | Waveshare USB-C inline power meter | 10.90 | Pi-Shop |
-| 1 | INMP441 I2S MEMS mic module | 3.10 | BerryBase CH |
-| 1 | SN74AHCT125N level shifter | 0.50 | BerryBase CH |
-| 1 | Speaker 4 Ω 3 W Ø40 × 17 mm | 8.90 | Bastelgarage |
-| 1 | DFRobot reed door contact + magnet (lid sensor **and** mic power switch) | 7.90 | Bastelgarage |
-| 1 | SanDisk High Endurance 32 GB microSD | 22.95 | Brack |
-| 2 | Pololu 2811 high-side switch (ring gate + spare for the modem feed) | EUR 3.50 ea | Botland |
-| 1 | USB-serial adapter (CP2102) or Pi Debug Probe — skip if in the drawer | ~10 | any |
-| — | 3 mm LEDs, 220 Ω, 10 kΩ, jumper wire, perfboard | ~5 | any / drawer |
+## Still to buy
 
-Add the phase-2 modem to the Pi-Shop order to save a shipment.
+### After the modem HAT arrives
 
-## Phase 2 — Online · ~CHF 60 + CHF 6/month
-
-| Qty | Part | CHF | Source |
-| --- | --- | --- | --- |
-| 1 | **Waveshare A7670E LTE Cat-1 HAT** | 34.90 | Pi-Shop |
-| 1 | Digital Republic **Flat 1** SIM — always, also while developing | 6/month | digitalrepublic.ch |
-| 1 | Delock 88747 SMA bulkhead → MHF/U.FL pigtail | 7.32 | Reichelt CH |
-| 1 | **Delock 90694** rigid LTE stub, 52 mm — the chosen antenna | 8.24 | Reichelt CH |
-| 1 | Delock 90682 rigid LTE antenna, 115 mm — comparison / fallback | 9.16 | Reichelt CH |
-
-The short stub's datasheet range stops at 824 MHz; Sunrise's indoor band 20
-downlink is 791–821 MHz. It may be fine (band 3 is covered) — `AT+CSQ` in both
-bedrooms with each antenna decides. **Check Sunrise 4G in both bedrooms first.**
-
-## Phase 3 — Portable · ~CHF 110 · buy after measuring
+Confirm the HAT's antenna connector first, then order all three together.
 
 | Qty | Part | CHF | Source |
 | --- | --- | --- | --- |
-| 1 | Waveshare UPS HAT (C): load-share charger, 5 V boost, INA219 gauge | 25.90 | Pi-Shop |
-| 4 | Panasonic NCR18650GA 3300 mAh, protected, JST lead | 13.90 ea | Bastelgarage |
-| 1 | 4-slot 18650 holder (takes 69.5 mm protected cells) | 4.90 | Bastelgarage |
-| 1 | **Raspberry Pi Zero 2 W** — backorder now, notify at Pi-Shop + BerryBase CH | EUR 19.90 | Welectron |
-| 1 | Short micro-USB OTG → USB-C cable (Zero 2 W ↔ modem) | ~5 | any |
+| 1 | Delock 88747 SMA bulkhead → MHF/U.FL pigtail | 7.32 | [Reichelt CH](https://www.reichelt.com/ch/de/shop/produkt/wlan_kabel_sma_einbaubuchse_mhf_u_fl-179772) |
+| 1 | **Delock 90694** rigid LTE stub, 52 mm | 8.24 | [Reichelt CH](https://www.reichelt.com/ch/de/shop/produkt/lte_antenne_sma_stecker_omnidirektional_starr-426541) |
+| 1 | Delock 90682 rigid LTE antenna, 115 mm, 700–2700 MHz — comparison / fallback | 9.16 | [Reichelt CH](https://www.reichelt.com/ch/de/shop/produkt/lte_antenne_sma_stecker_omnidirektional_starr-426542) |
 
-Measure the tuned Pi and the modem (registered, transmitting, PWRKEY-off)
-before buying cells: 3 vs 4 is decided by the meter, not by this list.
+The short stub's datasheet range (824–960 / 1710–2170 MHz) starts above the
+band 20 downlink, 791–821 MHz. `AT+CSQ` in both bedrooms with each antenna
+decides; keep whichever holds signal. **Check Sunrise 4G in both bedrooms
+first.**
 
-## Phase 4 — The real box · ~CHF 105
+### Deferred — battery ([ADR 0019](../docs/decisions/0019-mains-first-battery-deferred.md): the first box is mains only)
 
 | Qty | Part | CHF | Source |
 | --- | --- | --- | --- |
-| 1 | **Hammond 1590DD** die-cast aluminium | 27.90 | Distrelec |
-| 1 | 16 mm stainless flush button, RGB ring, IP65 | 19.90 | Bastelgarage |
-| 1 | Adafruit USB-C round panel-mount extension + C→micro-B adapter | 1.75 + ~5 | BerryBase CH |
-| 1 | 8 × 3 mm N45 disc magnets, 10 pack | 4.10 | supermagnete.ch |
-| 1 | Second High Endurance card (spare image) | 22.95 | Brack |
-| 1 | Second PSU (house B) | 11.90 | Pi-Shop |
-| — | Opal acrylic 3 mm, piano hinge, rubber feet | 17.05 | Hornbach |
+| 1 | **Waveshare UPS Module 3S** — 3 × 18650 in series, 5 V 5 A, charges while powering, INA219, case and 12.6 V 2 A supply included; 93 × 86 mm. **Barrel-jack charger, not USB** | 25.90 | [Bastelgarage](https://www.bastelgarage.ch/ups-usv-modul-5v-5a-unterbrechungsfreies-18650-akkuboard) |
+| 3 | Panasonic NCR18650GA 3300 mAh, protected — same batch, same charge state; check the module's holders take 69.5 mm cells | 13.90 ea | [Bastelgarage](https://www.bastelgarage.ch/batterien-lipo-akkus/li-ion-akku-ncr18650ga-3300mah-mit-pcm-schutzelektronik-und-stecker) |
+| 1 | Second 12.6 V 2 A (3S Li-ion) charger for house B | ~12 | any — match the plug with the first one in hand |
+| 1 | Panel-mount DC barrel jack, round hole — the charge port through the wall | ~4 | any — buy with the UPS module in hand |
 
-Off-the-shelf only, no 3D printing: the ring window is a 45 mm round hole with
-a **square** of opal acrylic glued behind it (score and snap — no disc to
-cut); the stainless button brings its own bezel. Round holes only: 45 mm ring
-window, 16 mm button, 12–18 mm USB-C, 6.5 mm SMA, speaker grille as a drilled
-pattern.
+### Before the box leaves home
 
----
+| Qty | Part | CHF | Source |
+| --- | --- | --- | --- |
+| 1 | SanDisk High Endurance 32 GB microSD — the deployed card; the bench card becomes the spare image | 22.95 | [Brack](https://www.brack.ch/sandisk-microsdhc-karte-high-endurance-uhs-i-32-gb-935760) |
+| — | Rubber feet, self-adhesive | ~5 | [Hornbach](https://www.hornbach.ch/de/p/tarrox-rutsch-laermschutzpuffer-selbstklebend-transparent-o-10-x-3-mm-32-stueck/10565335/) |
+| 2 | 3 mm LEDs + 220 Ω for LINK and POWER | ~2 | any / drawer |
+| — | Sturdier internal wiring than jumpers | — | open |
 
-## Running total
+Round holes only, all within the step drill: 2 × 16 mm buttons, charge port,
+6.5 mm SMA, 2 × 3 mm status LEDs, and a drilled pattern over the speaker. No
+hole saw.
 
-~CHF 415 for everything including the meter, the spare card, both PSUs and
-the Zero 2 W, plus CHF 6/month. Phases 1 + 2 (~CHF 200) get a working,
-online, mains-powered box.
-
-## Dropped
-
-USB 4G sticks (E8372 / E3372 / MF79U) and TS-9 adapters, PowerBoost 1000C,
-separate fuel gauge, 33 mm arcade button, hinged 24 cm antenna; and from
-earlier lists the LILYGO boards, ESP32-S3, Notecard, 1NCE SIM, 3D-printing
-filament, custom PCB. Reasons in EVALUATION.md and ADR 0014.
+Parts considered and dropped are in [EVALUATION.md](EVALUATION.md) and ADRs
+[0014](../docs/decisions/0014-raspberry-pi-zero-2w.md) and
+[0016](../docs/decisions/0016-two-buttons-no-lid.md).

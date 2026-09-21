@@ -3,74 +3,88 @@
 **Role.** Be on when a child reaches for it, and never be a lithium hazard in a
 child's bedroom or bag.
 
-## Current design (ADR 0005)
+## Current design (ADR 0005, ADR 0014, ADR 0019)
 
-> **Revised 2026-09-21 — [ADR 0014](../decisions/0014-raspberry-pi-zero-2w.md) rev.:** Waveshare **UPS HAT (C)** (load-share charger, 5 V 1.8 A boost, INA219 gauge) and **four** protected NCR18650GA (~13 Ah) replace the PowerBoost 1000C, the separate gauge and the three-cell pack. Zero 2 W ~100 mA + Cat-1 modem ~3–10 mA averaged on battery → ~117 mA → ≈ 60 h. On the 3A+ (~225 mA) the box is a mains device. The box is plugged in most of the time; on mains the modem stays on ([ADR 0015](../decisions/0015-adaptive-polling.md)). Fallback power path: bq24074 + Pololu S13V30F5 + MAX17048.
+**The first box has no battery** ([ADR 0019](../decisions/0019-mains-first-battery-deferred.md)):
+5 V micro-USB, on only while plugged in, `mains: true` / `battery_pct: null`,
+POWER LED off. Pulling the plug is how it turns off, so every write path must
+survive that. What follows is the battery as designed, for when it is fitted;
+the left half of the enclosure floor (93 × 86 mm) stays free for it.
 
-> **Platform change 2026-09-20 — [ADR 0014](../decisions/0014-raspberry-pi-zero-2w.md):** a Pi cannot sleep: ~75–100 mA tuned, plus the stick averaged ~60 mA with VBUS gating → ~140–180 mA → **three protected 18650s (~9 Ah) for 50–65 h; a fourth if measured**. PowerBoost-1000C-class charger/boost (1 A charge, overnight) and a MAX17048 gauge. Measure before buying cells.
+The box is plugged in most of the time; the battery is for weekends and car
+rides. Target: **operate unplugged for a weekend**
+([ADR 0005](../decisions/0005-battery-required.md)). The power section is
+**phase 3 — not ordered, bought after measuring.** Until then the box runs
+from a 5 V micro-USB supply.
 
-> **Decided 2026-09-20:** **operate unplugged for a weekend** (~60 h) — [ADR 0005](../decisions/0005-battery-required.md). Every rail gated: mic (lid), ring (FET), amp (SD), modem (PSM). Q3: nothing on the box below 20 %, sleep below 5 %, the app nags. Cell sized after measuring.
+- **Waveshare UPS Module 3S** ([ADR 0014](../decisions/0014-raspberry-pi-zero-2w.md)):
+  three protected 18650s in series (~36 Wh), 5 V 5 A out, charges while
+  powering, protection on board, 93 × 86 mm.
+- **INA219 over I²C** gives battery %, current, and **mains vs battery from
+  the sign of the battery current** — the signal
+  [ADR 0015](../decisions/0015-adaptive-polling.md)'s cadence needs
+  (telemetry `mains`, distinct from `charging`).
+- Charged from its own **12.6 V 2 A barrel-jack supply — not USB** — through a
+  panel-mount DC jack in the wall. A second charger lives in house B. A full
+  charge is ~5 h.
+- **Budget:** Zero 2 W ~100 mA at 5 V + modem ~3–10 mA averaged on battery
+  ≈ 0.6 W → **≈ 50–55 h**, ~45 h with a 20 % margin. About two days; the
+  60 h weekend is not quite met.
+- **Every consumer is power-gated:** button LEDs, amp (SD pin), mic (the pin
+  it shares with the red light), and on battery the modem between check-ins.
+  A Pi can't sleep, so gating is the whole budget.
+- **Low battery is the adults' business.** Nothing on the buttons. POWER LED
+  blinks below 20 % and the app nags; below 5 % the box shuts down cleanly
+  and the app says so.
 
-Internal protected LiPo, 3000 mAh, USB-C charging with power path, bulk
-capacitance for modem bursts.
+USB-charged fallback, if the module disappoints: bq24074 + Pololu S13V30F5 +
+MAX17048, in ADR 0014 only.
 
 ## Checked
 
-- **The premise is unexamined** — see [review §4](../REVIEW.md). ADR 0005
-  answers "how do we put a battery in safely" but nobody asked "does it need to
-  run on one". Two very different products:
-
-  | Mode | Battery | What it must do unplugged |
-  | --- | --- | --- |
-  | **Survive transit** | small (500 mAh) or none | hold state, maybe finish an upload |
-  | **Operate unplugged** | large (3000+ mAh) | a day? a weekend? with cellular |
-
-- Idle budget, rough, for the "operate" case on 3000 mAh:
+- Idle budget on battery, rough, to be measured:
 
   | Consumer | Idle | Note |
   | --- | --- | --- |
-  | (the ESP32 row is history — see ADR 0013/0014) | | |
-  | WS2812B ×16, dark | ~16 mA | **power-gate with a FET** → ~0 |
+  | Pi Zero 2 W, tuned | ~100 mA at 5 V | Wi-Fi/BT/HDMI off; it never sleeps |
+  | Modem, averaged | ~3–10 mA | off between 30-minute check-ins; ~20–30 mA while registered during a conversation window |
+  | Button LEDs | small | *waiting* drops to *resting* after 2 h; idle is dark |
   | MAX98357A in shutdown | µA | via SD pin |
-  | Mic, unpowered | 0 | load switch |
-  | Pi Zero 2 W, tuned | ~75–100 mA | Wi-Fi/BT/HDMI off, one core at idle; it never sleeps |
-  | USB stick, VBUS-gated | ~60 mA averaged | ~100–150 mA on; ~30 s per 10-min check-in incl. boot; always-on would be ~2.7 Ah more per weekend |
-  | Boost converter | ~10 % | 3.7 V → 5 V for the Pi |
-  | Ring breathing (message waiting) | ~15 mA | brightness-dependent; **drops to *resting* (~1.5 mA) after 2 h** — a message waiting all weekend would otherwise cost ~30 % of the cell |
-  | Status LEDs (LINK, POWER) | ~0 | 10 ms blinks every 3 s, low brightness |
+  | Mic, unpowered | 0 | its supply pin is low |
+  | Status LEDs (LINK, POWER) | ~0 | ~10 ms blinks every 3 s |
+  | UPS module itself | to measure | buck losses and quiescent draw |
 
-  Gated properly: ~5 mA average → ~3 weeks. Ungated ring: ~20 mA → ~6 days.
-  Playing a message: ~300-500 mA for its duration, negligible overall.
-
-- **Charging** ([ADR 0014](../decisions/0014-raspberry-pi-zero-2w.md)): a
-  PowerBoost 1000C — 1 A charge (9 Ah ≈ 9–10 h, overnight), 1 A 5.2 V boost
-  with load-sharing. Marginal for a 3A+ + stick at peak; if the 3A+ stays in
-  the box, add a separate 2 A boost. Cells: protected 18650s in parallel,
-  strapped, no spring holders. Battery % from a MAX17043 or ADS1115 on I²C —
-  the Pi has no ADC.
-- Transmit bursts to ~2 A for tens of ms: the cell, the protection PCM, the
-  power-path regulator and the trace to the modem all need to be rated for it,
-  or the box brown-outs mid-upload. This is the #1 cause of "my LTE project
-  resets randomly".
-- Charging while a child sleeps next to it: keep charge current ≤ 0.5 C, use a
-  charger IC with a thermistor input, and put the thermistor on the cell.
-- USB-C: a proper 5.1 kΩ CC pull-down pair so any USB-C supply works, not
-  just A-to-C cables.
+  Playing a message: a few hundred mA for its duration, negligible overall.
+  **The modem's off-time is the lever**; nothing else moves the total.
+- LTE transmit bursts reach amps for milliseconds. A supply that sags there
+  is the #1 cause of "my LTE project resets randomly" — the reason a 1 A
+  boost was dropped for a module with 5 A of headroom.
+- **Not a power bank.** Most drop their output for a moment on plug/unplug (a
+  Pi reboot each time), many switch off at low current, and none reports
+  charge level or mains-present — so no battery % in the app, no low-battery
+  LED, no clean shutdown, nothing for the polling cadence to go on. Fine for
+  carrying a bench prototype around; not the box.
+- Cells: three protected NCR18650GA, same batch and charge state, in the
+  module's holders — 69.5 mm long with their protection, which the holders
+  must take (Q2).
 
 ## Questions
 
-1. **Operate or survive?** — the biggest swing in the BOM and the enclosure.
-2. If operate: **for how long?** A school day (8 h), a night (14 h), a weekend
-   away (60 h)? Each is a different cell and a different sleep strategy.
-3. **What does low battery look like to the child?** Rule: nothing alarming.
-   Suggest: nothing on the box at all below 20%; the app nags the adults.
-   Below 5%: box goes fully to sleep, ring off, and the app says so.
-4. **Charging dock or cable?** A dock with pogo pins is charming and
-   travel-proof; a USB-C port is a hole in the enclosure that collects crumbs.
-   Dock also enables the per-house ID resistor trick in
-   [server.md](server.md).
-5. **Does the box know which house it's in from the charger?** If a dock is
-   chosen, a resistor in each dock tells the box where it is. Cheap and decides
-   routing without a button.
-6. **Thermal** — the cell, the modem and the amp all make heat in a sealed
-   plastic box. Vent, or derate?
+1. **Measure first — with what?** Real idle current of the tuned Pi, and of
+   the modem registered, transmitting and off, decides whether three cells
+   are right. Before the module exists there is no INA219: a USB meter on
+   the micro-USB supply, or buy the module first and the cells after?
+2. **UPS module height and holder length** — its height against the clone's
+   inner depth ([enclosure.md](enclosure.md) Q1, Q3), and whether the holders
+   take 69.5 mm protected cells.
+3. **Does its output blip** when the charger is plugged or pulled? And its
+   own quiescent draw?
+4. **Charging beside a sleeping child** — what charge current does the module
+   actually apply from its 2 A supply, against the cells' rated charge
+   current? Does it sense cell temperature? How warm does the closed
+   aluminium box get while charging?
+5. **Two days, not 60 h** — accept, or stretch `idle_minutes` on battery?
+   Decide after measuring.
+6. **DC panel jack** — match the charger's plug; buy with the module in hand.
+7. **Which house?** Telemetry `house` is reserved for a dock ID resistor;
+   with a barrel jack there is no dock. Drop it, or find another signal?

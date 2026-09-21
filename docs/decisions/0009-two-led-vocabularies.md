@@ -1,7 +1,7 @@
 # ADR 0009 — Two LED vocabularies: the ring is the child's, status LEDs are the adults'
 
 **Date:** 2026-09-20
-**Status:** accepted
+**Status:** accepted — revised by [ADR 0016](0016-two-buttons-no-lid.md): the child's channel is now the two buttons' lights, not a ring. Read "the ring" below as "the button lights"; the rule (no error state on the child's channel) is unchanged
 
 ## Context
 

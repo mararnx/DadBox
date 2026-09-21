@@ -5,33 +5,49 @@ a child's bedroom, and play nothing in a school bag.
 
 ## Current design
 
-- MAX98357A I2S amp, 3 W into a 4 Ω 40-50 mm full-range driver.
-- Amp held in shutdown except while playing or chiming.
-- Oldest unplayed message first; `played` reported on next sync.
+- MAX98357A I2S class-D amp into a Seeed 5 W 4 Ω speaker in its own plastic
+  enclosure (50 × 45 × 22 mm), on the same I2S bus and
+  `googlevoicehat-soundcard` overlay as the mic
+  ([audio-capture.md](audio-capture.md)).
+- Amp held in shutdown (SD_MODE on GPIO 16) except while playing or chiming.
+- **Play** plays the oldest unheard message, one per press; the button is
+  steady warm while it plays and goes back to breathing if more are waiting.
+  `played` is reported at the next check-in, and playing opens the
+  conversation window ([ADR 0015](../decisions/0015-adaptive-polling.md)).
+- One gentle chime when a message arrives — suppressed by quiet hours and by
+  mute. Play still works during quiet hours; mute silences everything.
+- Volume is the `volume` setting from the app, applied in software. No
+  control on the box.
+- In a bag: the ≥ 0.5 s press and the travel lock
+  ([controls-ui.md](controls-ui.md)) are what stop a message playing aloud in
+  a classroom.
 
 ## Checked
 
-- MAX98357A's gain is set by a pin, not software. Volume control has to be done
-  by scaling samples in firmware, which costs headroom. Fine for speech.
-- Speaker in an enclosure with a mic 5 cm away: no echo problem (async), but a
-  playing speaker must never coincide with a powered mic — the state machine
-  already forbids it.
-- The driver is not the bottleneck. Enclosure volume and port design are.
-  Phase 1 should be listened to inside a cardboard mock-up, not on the bench.
+- MAX98357A's gain is set by a pin, not software. Volume is done by scaling
+  samples, which costs headroom. Fine for speech.
+- Speaker in an enclosure with a mic a few cm away: no echo problem (async),
+  but a playing speaker must never coincide with a powered mic — the state
+  machine already forbids it.
+- The driver is not the bottleneck. The grille and how the speaker sits
+  against the aluminium are ([enclosure.md](enclosure.md) Q4). Listen inside
+  a cardboard mock-up, not on the bench.
 - Playing a message aloud in a shared room is a feature and a liability — the
   other household hears every message. That is a placement and volume question
   for [controls-ui.md](controls-ui.md), not an audio one.
 
 ## Questions
 
-1. **Volume** — fixed, a physical knob, app-set, or child-adjustable? Suggest:
-   app-set with a night-time ceiling, no control on the box.
-2. **Chime** — one chime on new-message arrival (outside quiet hours), none, or
-   the parent's own voice saying the child's name? The last is lovely and
-   free — it's just a message the parent records once.
-3. **Replay** — can the child replay a message after it's played? How many
-   times, for how long? Ties to retention.
-4. **Skip / next** — with three messages waiting, does play run through all of
-   them, or one per press? Suggest one per press, ring shows the remainder.
-5. **Interrupt** — pressing play during playback: stop, or ignore?
-6. **Headphones** — no. But say so, because someone will ask.
+1. **Volume at night** — should the app-set volume have a quiet-hours
+   ceiling, enforced on the device?
+2. **Chime** — the stock chime, or the parent's own voice saying the child's
+   name? The last is lovely and free — it's just a message the parent records
+   once.
+3. **Replay** — a played message leaves the inbox
+   ([ADR 0018](../decisions/0018-archive-forever.md)). Can the child hear it
+   again — how, and for how long? The server keeps everything, so this is a
+   protocol and gesture question, not a storage one. Ties to
+   [storage-queue.md](storage-queue.md) Q1.
+4. **Interrupt** — pressing Play during playback: stop, restart, or ignore?
+   And Record during playback?
+5. **Headphones** — no. But say so, because someone will ask.

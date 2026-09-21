@@ -363,6 +363,31 @@ BerryBase CH and place the Welectron backorder now.
 Carried into [ADR 0014](../docs/decisions/0014-raspberry-pi-zero-2w.md)
 (revised), [bom/bom.csv](bom/bom.csv) and [SHOPPING-LIST.md](SHOPPING-LIST.md).
 
+**Later the same day (2026-09-21, evening).** The option (C: Linux, Cat-1
+HAT, SSH) and points 1, 4 and 6 stand. What changed:
+
+- **Two lit buttons, no lid** — [ADR 0016](../docs/decisions/0016-two-buttons-no-lid.md).
+  Record and Play, 16 mm stainless with RGB rings. The reed contact, magnets,
+  hinge, NeoPixel ring, SN74AHCT125, ring power switch, ring window and the
+  opal acrylic of point 5 are all gone; requirements 1, 4 and 10 in §1 are
+  met by the buttons instead (the mic's supply shares a GPIO with the record
+  button's red LED).
+- **Compute: Pi Zero 2 W from the start** (supersedes point 2). Pi-Shop has
+  it in stock as a starter kit, CHF 42.90; the Pi 3A+ stop-gap is dropped.
+- **Modem: Waveshare SIM7670G 4G LTE/GPS HAT** (Bastelgarage, CHF 55.90,
+  bands 20 and 28) instead of the A7670E — the user's choice, one shop fewer.
+  Same role: USB Ethernet plus an AT port.
+- **Power: Waveshare UPS Module 3S** with three 18650s in series (~36 Wh,
+  12.6 V barrel-jack charger) instead of the UPS HAT (C) and four cells; the
+  HAT (C) is built around its own LiPo and pogo-pins. About two days on
+  battery, not quite the 60 h of §3. Its INA219 replaces the USB meter.
+- The enclosure is a 1590DD-size Temu clone — measure the inside; §6 item 6
+  matters more, item 5 no longer applies.
+
+Reasoning in [ADR 0014](../docs/decisions/0014-raspberry-pi-zero-2w.md)
+(revised), [ADR 0015](../docs/decisions/0015-adaptive-polling.md) and
+[ADR 0016](../docs/decisions/0016-two-buttons-no-lid.md).
+
 ## Sources checked
 
 Shop pages fetched 2026-09-20 by the research pass (Pi-Shop.ch, BerryBase CH,

@@ -1,7 +1,7 @@
 # ADR 0015 — Adaptive polling, no SMS wake
 
 **Date:** 2026-09-21
-**Status:** accepted
+**Status:** accepted — while the box has no battery ([ADR 0019](0019-mains-first-battery-deferred.md)) only the mains row applies
 
 ## Context
 
@@ -67,7 +67,7 @@ Settings change from `poll_minutes` to a `poll` object
 - Plugged in, a parent's message reaches the box in ≤ 1 minute, always.
 - On battery, an idle box checks in 48 times a day instead of 144; a
   conversation costs ~90 min of registered modem (~20–30 mA at 5 V, ≈ 0.04 Ah)
-  — noise against a 13 Ah pack.
+  — noise against a ~36 Wh pack.
 - Worst-case inbound latency on battery, outside a conversation, is 30
   minutes. The app says when the next check-in is due.
 - At one check-in a minute, a check-in must stay small: one TLS session kept

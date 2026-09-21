@@ -1,7 +1,7 @@
 # ADR 0011 — Hammond 1590DD die-cast aluminium enclosure
 
 **Date:** 2026-09-20
-**Status:** accepted — layout revised for the Pi Zero 2 W, USB stick and three-cell pack ([ADR 0014](0014-raspberry-pi-zero-2w.md)); the Faraday-cage and 32 mm consequences are unchanged
+**Status:** accepted — revised by [ADR 0016](0016-two-buttons-no-lid.md): the plate is screwed down, not hinged; no ring window; two 16 mm buttons through a wall or the plate. Earlier note: — layout revised for the Pi Zero 2 W, USB stick and three-cell pack ([ADR 0014](0014-raspberry-pi-zero-2w.md)); the Faraday-cage and 32 mm consequences are unchanged
 
 ## Context
 

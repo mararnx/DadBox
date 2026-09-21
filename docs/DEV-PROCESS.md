@@ -18,9 +18,10 @@ measure — so the service makes all of that visible as text.
   timeout. Python tracebacks are already file:line.
 - **Poke it**: `ssh dadbox dadboxctl state` — or a Python REPL on the box.
 - **Audio**: `arecord`/`aplay` for raw tests; the dump comes back with `scp`.
-- **Modem**: `ip a`, `nmcli`, `curl -s ifconfig.me`. The HAT is an Ethernet
-  interface for traffic; `/dev/ttyUSB2` is an AT port for diagnostics only
-  (`AT+CSQ`, `AT+CREG?`, `AT+CPSI?`).
+- **Modem**: `ip a`, `nmcli`, `curl -s ifconfig.me`. The SIM7670G HAT hangs
+  off the Zero's OTG port and is a USB Ethernet interface for traffic; one of
+  its `/dev/ttyUSB*` ports is an AT port for diagnostics only (`AT+CSQ`,
+  `AT+CREG?`, `AT+CPSI?`).
 - **Remote**: identical, over Tailscale, from anywhere. The box in the other
   house is one `ssh dadbox` away. **Updates are `git pull`.**
 
@@ -29,36 +30,37 @@ measure — so the service makes all of that visible as text.
 | Thing | How |
 | --- | --- |
 | Deploy, restart, read logs, tracebacks, REPL, `gdb`/`strace` if it ever comes to that | SSH |
-| Drive the box's state machine | `dadboxctl` — `lid open`, `lid close`, `play`, `state`, `checkin`, `ring test`, `sim link down` |
+| Drive the box's state machine | `dadboxctl` — `state`, `record start`, `record stop`, `play`, `inbox`, `outbox`, `checkin`, `modem on|off`, `led test`, `lock on|off`, `sim link down` |
 | Unit-test every bit of logic | the same Python on the Mac — no board needed |
 | Test the whole protocol end-to-end | `tools/fakebox` against `server/`, or the real box over Tailscale |
 | Run and click through the iOS app | the iOS Simulator (once Xcode is installed); push via `xcrun simctl push` |
 | Analyse a recording | `scp` the WAV; RMS, clipping, noise floor, spectrum in Python |
-| Check the link | from the box: signal via `AT+CSQ` / `AT+CPSI?` on `/dev/ttyUSB2`, throughput with `curl` |
-| Power tuning | edit `config.txt`/`cmdline`, disable cores, read the MAX17048 gauge over I²C — then ask you for the meter |
+| Check the link | from the box: signal via `AT+CSQ` / `AT+CPSI?` on the modem's AT port, throughput with `curl` |
+| Power tuning | edit `config.txt`/`cmdline`, disable cores, read the INA219 on the UPS Module 3S over I²C (battery %, current, mains or battery) |
 
 ## What Claude needs you for
 
 | Thing | Why | Cheapest way |
 | --- | --- | --- |
 | **Listening** | no ears | "tinny / muffled / fine"; Claude reads the spectrum alongside |
-| **Seeing the ring / LEDs** | no eyes | `state` prints what the ring *should* show; confirm once, or a photo |
-| **Physical gestures** | no hands | `dadboxctl` fakes them; you do the real lid a few times per milestone |
-| **Currents** | no meter | USB power meter inline; the gauge gives the rest |
+| **Seeing the button lights / LEDs** | no eyes | `state` prints what the lights *should* show; confirm once, or a photo |
+| **Physical gestures** | no hands | `dadboxctl` fakes them; you press the real buttons a few times per milestone |
+| **Currents** | no meter | the INA219 on the UPS Module 3S reports current over I²C once it is fitted (phase 3); until then, your reading |
 | **First boot** | needs hands and a card reader | Raspberry Pi Imager: hostname `dadbox`, your SSH key, home Wi-Fi for the first boot. After that Claude does the rest over SSH |
-| **Cellular** | needs the SIM and the room | plug in; Claude checks `ip a` |
+| **Cellular** | needs the SIM and the room | SIM in, box in the bedroom; Claude checks `ip a` and `AT+CSQ` |
 
 ## `dadboxctl` — the console, now a CLI over a Unix socket
 
 ```
-dadboxctl state          ring=WAITING(2) link=OK power=OK fault=NONE lid=closed vbat=3.91 soc=68%
-dadboxctl lid open       → mic on, ring LISTENING, capture started
-dadboxctl lid close      → trimmed 4.2 s, opus 31 KB, queued 01JAY…, GOT_IT pulse
+dadboxctl state          lights=WAITING link=OK power=OK fault=NONE recording=no lock=off mains=yes soc=68%
+dadboxctl record start   → mic + red light on, lights RECORDING, capture started
+dadboxctl record stop    → trimmed 4.2 s, opus 31 KB, queued 01JAY…, GOT_IT pulse
 dadboxctl play           → playing 01JAX… (12.1 s)
 dadboxctl inbox|outbox   list with seq, size, age
 dadboxctl checkin        force one now, print the response
-dadboxctl modem on|off   PWRKEY (or the 5 V feed switch)
-dadboxctl ring test      sweep every ring state for 2 s each — you watch once
+dadboxctl modem on|off   the HAT's power key (wiring to verify with the part in hand)
+dadboxctl led test       sweep every button-light state for 2 s each — you watch once
+dadboxctl lock on|off    travel lock — same as holding both buttons for 3 s
 dadboxctl sim link down  no link: queue must fill, LINK LED must double-blink
 ```
 
@@ -93,8 +95,8 @@ your password. Tailscale is already on this Mac.
 ```bash
 python3 -m pip install --user pyserial
 ```
-(for the bench UART console via `tools/serial_capture.py`; a CP2102 USB-serial
-adapter on GPIO 14/15, 115200 baud.)
+(for the bench UART console via `tools/serial_capture.py`; the Raspberry Pi
+Debug Probe on GPIO 14/15, 115200 baud.)
 
 ## Setting up the box (first time; Claude does everything after step 2)
 
@@ -103,8 +105,9 @@ adapter on GPIO 14/15, 115200 baud.)
 2. `ssh dadbox` from the Mac works → hand over.
 3. Claude: `apt` (ffmpeg, alsa-utils, python3-venv), Tailscale, `config.txt`
    (`dtoverlay=googlevoicehat-soundcard`, `dtparam=audio=off`,
-   `dtparam=spi=on` for the ring, `dtparam=watchdog=on`, HDMI off), `/data`
+   `dtparam=i2c_arm=on`, `dtparam=watchdog=on`, HDMI off), `/data`
    partition, the overlay, the service, `dadboxctl`. Then Wi-Fi off, modem on.
+   Details in [box/setup/README.md](../box/setup/README.md).
 
 ## Milestone by milestone
 
@@ -112,7 +115,7 @@ adapter on GPIO 14/15, 115200 baud.)
   You listen in the cardboard box; Claude reads the spectrum.
 - **M1** — modem on, `/data` outbox, resumable upload to `server/`, Tailscale
   up. From here on Claude works on the box directly.
-- **M2** — inbound: check-in, download, ring WAITING. `state` verifies it; you
-  confirm the glow once.
-- **M3** — power: meter in, Claude tunes cores/clocks and the modem gate,
-  reads the gauge, and turns your readings into the cell count.
+- **M2** — inbound: check-in, download, lights WAITING. `state` verifies it;
+  you confirm the play button breathes once.
+- **M3** — power: Claude tunes cores/clocks and the modem gate; with the UPS
+  Module 3S fitted, the INA219 turns that into hours on three cells.

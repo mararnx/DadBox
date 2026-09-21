@@ -1,7 +1,7 @@
 # ADR 0007 — Open the lid to talk, close it to send
 
 **Date:** 2026-09-20
-**Status:** accepted
+**Status:** superseded by [ADR 0016](0016-two-buttons-no-lid.md) (2026-09-21) — two lit buttons, no lid. The bag problem and the mic guarantee described here are carried into 0016's consequences
 
 ## Context
 

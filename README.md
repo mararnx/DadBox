@@ -32,7 +32,7 @@ talk, close it — the other person hears it. No screen, no phone, no account.
 - [docs/PROTOCOL.md](docs/PROTOCOL.md) — the contract all three code streams share
 - [hardware/SHOPPING-LIST.md](hardware/SHOPPING-LIST.md) — phased; buy phase 1 only
 - [hardware/SOURCING.md](hardware/SOURCING.md) — Swiss links and prices, ready to order
-- [hardware/DOUBLE-CHECK.md](hardware/DOUBLE-CHECK.md) — every part checked against the 1590DD
+- [hardware/EVALUATION.md](hardware/EVALUATION.md) — the hardware options weighed against what Swiss shops stock
 
 `server/` and `ios/` are not blocked by hardware. Build them against a fake box
 so that when the parts arrive, the firmware is the only unknown.

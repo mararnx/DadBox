@@ -1,7 +1,7 @@
 """`dadboxctl` — the debug console as a CLI over a Unix socket. Build first."""
 import sys
 
-COMMANDS = ("state", "lid", "play", "inbox", "outbox", "checkin", "modem", "ring", "sim")
+COMMANDS = ("state", "record", "play", "inbox", "outbox", "checkin", "modem", "led", "lock", "sim")
 
 
 def main() -> int:

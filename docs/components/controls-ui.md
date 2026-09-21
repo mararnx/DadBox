@@ -5,99 +5,105 @@
 
 ## Current design
 
-> **Platform change 2026-09-20 — [ADR 0014](../decisions/0014-raspberry-pi-zero-2w.md):** GPIO via `gpiozero` (lid as an interrupt), ring via SPI (`rpi_ws281x`) with a 74AHCT125 level shifter because the ring now runs at the Pi's 5 V; `dadboxctl` replaces the serial console.
+**Two lit buttons and nothing that moves** ([ADR 0016](../decisions/0016-two-buttons-no-lid.md)).
+Both are 16 mm stainless momentary buttons with a raised head and an RGB
+ring light; the plate is screwed down.
 
-> **Decided 2026-09-20:** **lid** — open to talk, close to send ([ADR 0007](../decisions/0007-lid-gesture.md)). Play button outside, recessed (Q2). Quiet hours: glow yes, chime no, play works (Q4). Mute = no sound, glow persists, app shows who (Q5). No sender identity on the box (Q7). Sleeping state: very slow, very dim pulse (Q6).
+- **Record** — press to start, press again to stop. Auto-stop at 5 minutes or
+  after ~20 s of continuous silence. On stop: trim, encode, fsync into the
+  outbox, *got it*, upload. Under 1 s of speech → discarded silently.
+- **Play** — plays the oldest unheard message, one per press.
+- **The button lights are the child's whole display:**
 
-A lid (open to talk, close to send) with a reed contact that is also the mic's
-power switch; one illuminated 33 mm play button through the front wall; a
-16-pixel LED ring behind an acrylic disc in the lid; two status LEDs; chimes;
-quiet hours enforced on-device; and a mute both households can set and see.
+  | State | Record button | Play button |
+  | --- | --- | --- |
+  | Recording | **steady red** | dark |
+  | Got it — the message is fsynced | one green pulse | — |
+  | Message(s) waiting | — | slow warm breathing; *resting* (dim) after 2 h |
+  | Playing | dark | steady warm |
+  | Idle | dark | dark |
+
+  **No error state, ever.** No link, battery or fault appears on them, and
+  the number of waiting messages is not shown on the box — the app has it.
+  Priority order is in [ARCHITECTURE.md § Indication](../ARCHITECTURE.md#indication).
+- **No red light, no mic.** The record button's red LED and the mic's 3.3 V
+  supply are the **same GPIO pin** — a wiring fact, not firmware. That pin is
+  only ever on or off: the red light is never dimmed or animated, because
+  dimming it would chop the mic's supply.
+- **The adults' channel** is two small status LEDs, LINK and POWER
+  ([ADR 0009](../decisions/0009-two-led-vocabularies.md)): off = fine, blink
+  patterns for trouble, alternating = fault — plus the app. LINK goes quiet
+  when the box has checked in within 2 × the current interval
+  ([ADR 0015](../decisions/0015-adaptive-polling.md)).
+- **The bag.** Buttons on the outside of a box in a school bag: a press must
+  last ≥ 0.5 s to count; under 1 s of speech is discarded; **travel lock** —
+  hold both buttons 3 s, both blink twice, buttons dead until the same
+  gesture again, persists across reboot; mute and quiet hours still apply to
+  playback and chimes.
+- **Quiet hours** (default 20:00–07:00, enforced on the device): glow yes,
+  chime no, play still works. **Mute:** no sound at all, glow persists; the
+  app shows who set it and when. No sender identity on the box — the voice
+  says who it is in the first second.
+- **Electrically:** six LED pins (2 × RGB, common cathode, resistors built
+  in) driven at 3.3 V straight from GPIO with software PWM, two switch
+  inputs on the Pi's internal pull-ups, two status LED pins. Setting
+  `led_brightness` scales everything except the red recording light.
+- `dadboxctl record start|stop`, `play`, `led test`, `lock on|off` drive all
+  of it without touching the box.
+
+History: the lid, reed contact and NeoPixel ring are in
+[ADR 0007](../decisions/0007-lid-gesture.md) (superseded).
 
 ## Checked
 
-- **Hold-to-talk × 5-minute cap × physical mic gating is inconsistent** —
-  [review §1](../REVIEW.md). Something gives.
-- **Transport lock is missing** — [review §5](../REVIEW.md). Buttons on the
-  outside of a box that lives in a bag are a bug.
-- Both are answered at once by a **lid**:
-
-  ```
-  closed   → idle. Nothing on the outside but the ring. Bag-safe.
-  open     → mic powered (lid switch on the load switch), ring lit
-             "listening", record for up to 5 minutes. No time pressure.
-  close    → stop, trim, encode, queue, send. One pulse.
-  play btn → inside the lid, or the only thing on the outside?
-  ```
-
-  Open questions in that sketch: where the play button lives, whether opening
-  the lid *always* records (probably: yes, that's the gesture), and what an
-  open lid with no speech does (trim to nothing, send nothing).
-
-- **LED logic validated 2026-09-20** — the full priority table is in
-  [ARCHITECTURE.md § Indication](../ARCHITECTURE.md#indication). What the
-  validation found:
-  - The ring was carrying two vocabularies (messages *and* link/sleep state).
-    Split: the ring is the child's, two discrete status LEDs (LINK, POWER)
-    are the adults' — [ADR 0009](../decisions/0009-two-led-vocabularies.md).
-  - *Listening* must outrank *waiting* and must never animate: a bystander
-    has to be able to tell "mic on" from "message waiting" without the key.
-  - *Got it* must be identical online and offline. The pulse promises *safe*,
-    not *delivered*; delivery is the adults' channel.
-  - *Waiting* at full breathing all weekend costs ~30 % of the cell. It drops
-    to *resting* (one breath / 10 s) after 2 h without interaction.
-  - There was no boot state. Added: one sweep.
-  - The status LEDs use patterns, not colours, and 10 ms blinks — so they are
-    invisible in a dark bedroom and free.
-- "Message count as lit segments" reads fine to a 7-year-old. A 4-year-old
-  reads "more light = more"; that also works. Above ~8 waiting, just fill the
-  ring — the number stops mattering.
-- Ring colours must not be the only channel for anyone colour-blind in either
-  household — use brightness and motion, not hue, to carry meaning.
+- **Hold-to-talk was rejected** — no child holds a button for a three-minute
+  story ([review §1](../REVIEW.md)). Press-to-start, press-to-stop keeps the
+  5-minute cap honest; the silence auto-stop covers the forgotten stop.
+- **The bag problem is back** without a lid ([review §5](../REVIEW.md)). The
+  ordered buttons have a raised head (2.3 mm proud), which a bag presses more
+  easily than a flush one — so the 0.5 s press, the < 1 s discard and the
+  travel lock are not optional.
+- *Recording* outranks everything and never animates: a bystander has to be
+  able to tell "mic on" from "message waiting" without the key. It is also a
+  different button.
+- *Got it* is identical online and offline. The pulse promises *safe*, not
+  *delivered*; delivery is the adults' channel.
+- Which button and how it moves (steady, one pulse, breathing) carry the
+  meaning; colour is redundant, for anyone colour-blind in either household.
+- The status LEDs use patterns, not colours, and ~10 ms blinks — invisible in
+  a dark bedroom and effectively free.
+- "Obvious to the room" is weaker than an open lid: a red ring on a 16 mm
+  button is a small light. The wiring tie keeps the promise honest; say so to
+  the co-parent ([security-privacy.md](security-privacy.md)).
 - Chimes are the only sound the box makes unbidden. That makes them the only
   thing that can annoy the other household. Keep them short, gentle, and
   subject to mute and quiet hours.
 
 ## Questions
 
-1. **Lid, or buttons?** Gates the enclosure, the mic gating circuit, the cap,
-   and the shopping list (a lid switch instead of one arcade button).
-2. ~~Play: inside or outside?~~ Outside, **through the front wall** — the
-   1590DD is 32 mm inside and every arcade button is deeper than that. The
-   33 mm button is illuminated: light it during *waiting* so the child knows
-   what to press, dark otherwise. A second, quieter channel for the same
-   fact as the ring.
-2b. **Play: inside or outside?** (original) Outside: a child can listen without "opening
-   to talk". Inside: nothing on the outside at all, and listening becomes
-   part of the opening ritual. Suggest outside, recessed.
-3. **What does "waiting" look like?** Slow breathe in a warm colour; N
-   segments. Should it be visible across a dark room at night (a nightlight
-   the child *wants*) or dim enough not to be (a nightlight the co-parent
-   doesn't)? Probably app-set brightness with a quiet-hours floor.
-4. **Quiet hours** — window? Default 20:00-07:00? Set per house?
-   Behaviour: glow yes, chime no. Does play still work during quiet hours?
-   Suggest yes — if the child is awake and presses it, that's their call.
-5. **Mute** — mute what, exactly? Chimes only (glow still shows)? Or fully
-   dark? Suggest: mute = no sound; glow persists. The app shows who muted and
-   when.
-6. **The "sleeping" state** — a box with no link for a day should look
-   different from a box with nothing waiting, without looking *broken*.
-   A very slow, very dim pulse? Or nothing, and let the adults handle it?
-   This is the emotional-design question in the brief; it deserves an answer.
-7. **Any sender identity on the box?** If a second parent gets the app, does
-   the child need to know who a message is from before playing it? The voice
-   tells them in the first second. Suggest: no.
-8. **Haptics?** A small vibration on "sent" is cheap and satisfying. Worth a
-   motor?
-9. **Status LED placement** — beside the USB-C port, on the back, on the
-   underside? They must be findable by an adult and ignorable by the child.
-10. **LINK "brief on" at each sync** — helpful while placing the box, but is a
-    flash every 10 minutes at night acceptable? Suggest: only while charging,
-    or only for the first hour after power-up.
-11. **Resting after 2 h** — right threshold? A child home from school at 16:00
-    with a message that arrived at 09:00 should still see it glowing.
-    Resting is dim, not off, so probably fine — but confirm by living with it.
-12. **Should the box show *charged* distinctly from *on battery*?** Both are
-    "POWER off". A parent packing the bag wants to know it's full. Suggest:
-    POWER steady while charging, one long blink when the cable is plugged into
-    a full cell, then off.
+1. **Wall or top plate?** At ~20 mm behind the panel the buttons fit either.
+   The plate is nicer for a child at a bedside and more exposed in a bag; a
+   wall is safer in the bag and wants rubber feet so the box doesn't slide.
+   Decide with the box in hand ([enclosure.md](enclosure.md)).
+2. **Bright enough at 3.3 V?** The LEDs are specified for 5 V. Judge green
+   and the warm mix (red + green) in a daylit room; two 74AHCT125 buffers if
+   too dim. The recording red stays on its 3.3 V pin regardless — it shares
+   the mic's supply. Which PWM mix reads as *warm* is by eye.
+3. **Waiting at night** — a glow the child *wants* across a dark room, or dim
+   enough that the co-parent doesn't mind? Probably app-set `led_brightness`
+   with a quiet-hours floor; confirm by living with it.
+4. **Resting after 2 h** — right threshold? A child home at 16:00 with a
+   message from 09:00 should still see it. Resting is dim, not off.
+5. **Travel lock, seen from outside** — does a locked box still show
+   *waiting*? Should the app show the lock? That needs a telemetry field —
+   [PROTOCOL.md](../PROTOCOL.md) first.
+6. **Status LED placement** — beside the charge jack, on the back, on the
+   underside? Findable by an adult, ignorable by the child.
+7. **LINK "brief on" at each check-in** — helpful while placing the box, but
+   on mains that is a flash every minute, all night. Suggest: only for the
+   first hour after power-up.
+8. **Charged vs on battery** — both are "POWER off". A parent packing the bag
+   wants to know the pack is full. Suggest: POWER steady while charging, one
+   long blink when the supply is plugged into a full pack, then off.
+9. **Haptics?** A small vibration on *got it* is cheap and satisfying. Worth a
+   motor and one more gated consumer?

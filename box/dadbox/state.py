@@ -1,7 +1,8 @@
 """State machines. Pure Python — no hardware imports — so this runs on the Mac.
 
-The ring is the child's vocabulary (ADR 0009). Priority order, highest wins.
-It never shows link, battery or faults; there is deliberately no RING_ERROR.
+The two button lights are the child's vocabulary (ADR 0009, ADR 0016).
+Priority order, highest wins. They never show link, battery or faults; there
+is deliberately no error state.
 """
 from __future__ import annotations
 
@@ -9,12 +10,12 @@ from dataclasses import dataclass
 from enum import Enum, auto
 
 
-class Ring(Enum):
-    LISTENING = auto()   # 1. lid open — steady, bright, never animated. The mic-is-on signal.
-    PLAYING = auto()     # 2. progress sweep
-    GOT_IT = auto()      # 3. lid just closed AND the message is fsynced — one pulse, ~600 ms
-    WAITING = auto()     # 4. inbox > 0 — slow warm breathing, N segments; resting after 2 h
-    IDLE = auto()        # 5. dark, ring rail off
+class Lights(Enum):
+    RECORDING = auto()   # 1. record button steady red. Same pin powers the mic: no light, no mic.
+    PLAYING = auto()     # 2. play button steady warm
+    GOT_IT = auto()      # 3. recording stopped AND the message is fsynced — one green pulse, ~600 ms
+    WAITING = auto()     # 4. inbox > 0 — play button breathes warm; resting (dim) after 2 h
+    IDLE = auto()        # 5. both dark
 
 
 class Link(Enum):        # status LED, adults' vocabulary — off means fine
@@ -27,7 +28,7 @@ class Power(Enum):
     OK = auto()          # off
     CHARGING = auto()    # steady
     LOW = auto()         # 1 blink / 3 s, below LOW_PCT on battery
-    ASLEEP = auto()      # box shut down below SLEEP_PCT; lid does nothing
+    ASLEEP = auto()      # box shut down below SLEEP_PCT; buttons do nothing
 
 
 class Fault(Enum):       # any non-NONE → LINK and POWER alternate
@@ -43,20 +44,33 @@ LOW_PCT = 20
 SLEEP_PCT = 5
 MAX_MESSAGE_S = 300
 MIN_SPEECH_MS = 1000
+MIN_PRESS_S = 0.5
+STOP_AFTER_SILENCE_S = 20
+TRAVEL_LOCK_HOLD_S = 3
 CHUNK_BYTES = 32 * 1024
 
 
-def ring_state(*, lid_open: bool, playing: bool, got_it_pulse: bool, inbox: int) -> Ring:
-    """Highest-priority ring state for the current inputs. Unit-tested on the Mac."""
-    if lid_open:
-        return Ring.LISTENING
+def lights_state(*, recording: bool, playing: bool, got_it_pulse: bool, inbox: int) -> Lights:
+    """Highest-priority state of the button lights for the current inputs."""
+    if recording:
+        return Lights.RECORDING
     if playing:
-        return Ring.PLAYING
+        return Lights.PLAYING
     if got_it_pulse:
-        return Ring.GOT_IT
+        return Lights.GOT_IT
     if inbox > 0:
-        return Ring.WAITING
-    return Ring.IDLE
+        return Lights.WAITING
+    return Lights.IDLE
+
+
+def press_counts(held_s: float) -> bool:
+    """A press shorter than this is a bag, not a finger (ADR 0016)."""
+    return held_s >= MIN_PRESS_S
+
+
+def should_stop_recording(*, elapsed_s: float, silence_s: float) -> bool:
+    """Bounds a recording nobody stopped: the cap, or a long continuous silence."""
+    return elapsed_s >= MAX_MESSAGE_S or silence_s >= STOP_AFTER_SILENCE_S
 
 
 @dataclass(frozen=True)

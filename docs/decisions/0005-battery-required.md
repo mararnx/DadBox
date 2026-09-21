@@ -1,7 +1,7 @@
 # ADR 0005 — Battery, and how to be responsible about it
 
 **Date:** 2026-09-20
-**Status:** accepted — target **a weekend unplugged**; sizing revised by [ADR 0014](0014-raspberry-pi-zero-2w.md): a Pi cannot sleep, so the pack is three protected 18650s (~9 Ah), a fourth if measured
+**Status:** accepted, **suspended for the first box by [ADR 0019](0019-mains-first-battery-deferred.md)** (mains only; battery deferred) — target **a weekend unplugged**; sizing revised by [ADR 0014](0014-raspberry-pi-zero-2w.md): a Pi cannot sleep, so the pack is three protected 18650s (~9 Ah), a fourth if measured
 
 ## Context
 

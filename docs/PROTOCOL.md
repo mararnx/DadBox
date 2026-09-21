@@ -26,7 +26,7 @@ token lets someone *send*; it must never let them *listen* to what others sent
 | Sample rate | 16 kHz mono |
 | Capture | ALSA (I2S) → 16-bit PCM written to disk as it happens |
 | Cap | 5 minutes |
-| Wire codec, v1 | **Opus 16 kbps in an Ogg container** (`codec = 2`), ~120 KB/min, encoded with `ffmpeg` after the lid closes |
+| Wire codec, v1 | **Opus 16 kbps in an Ogg container** (`codec = 2`), ~120 KB/min, encoded with `ffmpeg` after recording stops |
 | Reserved | `codec = 1` IMA-ADPCM — unused on the Pi; kept so an ESP32 box could still speak the protocol |
 | Trim | leading/trailing silence removed; < 1 s of speech → discarded |
 
@@ -141,10 +141,12 @@ few hundred bytes.
   "battery_pct": 68, "charging": false, "mains": false, "rssi": -91, "fw": "0.1.0",
   "outbox": 0, "outbox_bytes": 0, "outbox_oldest_s": 0, "storage_pct": 12,
   "inbox": 2, "uptime_s": 41022, "offline_s": 0, "next_checkin_s": 1800,
-  "lid_open": false, "house": "unknown", "fault": null
+  "recording": false, "house": "unknown", "fault": null
 }
 ```
 
+- `battery_pct`, `charging` — `null` while no battery is fitted
+  ([ADR 0019](decisions/0019-mains-first-battery-deferred.md)); `mains` is then always true.
 - `mains` — external power present. Not the same as `charging`: a full pack
   on mains is not charging. Selects the poll cadence.
 - `next_checkin_s` — when the box intends to check in next. The server and
@@ -169,7 +171,7 @@ adult.
   "poll": { "active_minutes": 1, "active_window_minutes": 90, "idle_minutes": 30 },
   "mute": { "a": false, "b": false },
   "quiet_hours": { "start": "20:00", "end": "07:00", "tz": "Europe/Berlin" },
-  "ring_brightness": 40,
+  "led_brightness": 40,
   "volume": 70
 }
 ```
