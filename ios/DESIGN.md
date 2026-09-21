@@ -230,13 +230,11 @@ Not in SERVER-CONCEPT's v0.3 list, and the app cannot work without them:
 
 ## Open
 
-- **Per-message delete.** ADR 0018 drafts it in; asked directly, Marco chose
-  "keep both directions" over "keep both, with per-message delete". v1 ships
-  **without** a delete control; the endpoint can exist unused. Settle in
-  SERVER-CONCEPT Q2.
+- ~~Per-message delete~~ — **no delete in v1** (Marco, 2026-09-21; ADR 0018
+  revised). No control in the app, no endpoint; tombstones drop out of
+  § Needed item 5 until it returns.
+- ~~iOS version~~ — the iPhone runs the latest iOS; minimum iOS 26 stands.
 - Ogg Opus through `AVAudioPlayer` on an actual iPhone (above).
-- Is the iPhone on iOS 26? If not, the minimum drops and the Ogg fallback
-  becomes the main path.
 - ~28 background upload tasks per long message: measure time-to-`complete`
   with the app suspended.
 - What `played` means on the box side (start or end of playback) — should

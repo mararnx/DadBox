@@ -27,8 +27,10 @@ and at ~120 KB/min it costs almost no storage: an hour a month is under
   unchanged). Inbox: removed after play, evictable under pressure, as before.
 - The `expired` message state is unused; unplayed messages are still
   surfaced at 48 h, never reaped.
-- Deleting is a deliberate act in the app, per message, by the parent it
-  belongs to. The server then deletes the blob and keeps a tombstone row.
+- **No delete in v1** (Marco, 2026-09-21, revised the same day): no delete
+  control in the app and no `DELETE /messages/{id}` endpoint. If it is added
+  later it is a deliberate act in the app, per message, by the parent it
+  belongs to; the server deletes the blob and keeps a tombstone row.
 
 ## Alternatives considered
 

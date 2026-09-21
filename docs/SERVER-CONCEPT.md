@@ -3,7 +3,8 @@
 **Status:** draft, revised 2026-09-21. Decided: one managed host, end-to-end
 encryption, iOS the only client ([ADR 0017](decisions/0017-managed-hosting-e2ee.md));
 archive forever ([ADR 0018](decisions/0018-archive-forever.md)); host:
-Supabase Pro, Zurich. Nothing here is built; PROTOCOL.md changes first.
+Supabase Pro, Zurich. Nothing here is built. PROTOCOL.md is at v0.3 and carries all of this; where
+the two differ, PROTOCOL.md wins.
 
 The job: hold the audio, wake a phone immediately, know whether the box is
 alive — without being able to listen, and without ever throwing a message away.
@@ -45,7 +46,7 @@ anywhere; the service-role key exists only inside the Edge Function.
 | 4 | **Nothing public** — private bucket, no signed URLs; RLS enabled on every table with **no policies**, so the auto-generated REST API returns nothing to anyone; only the Edge Function's service role reads or writes | Guessable links, direct database access, a leaked anon key. |
 | 5 | **Hygiene** — secrets only in Supabase function secrets, 2FA on the Supabase and GitHub accounts, Auth sign-ups disabled, no analytics or logging of bodies, rate limit on unauthenticated requests | The supply chain and the account itself. |
 | 6 | **Two copies of the archive** — Supabase Storage + the phone (and its backup). Pro's daily backups cover the database, **not** Storage objects | One of them disappearing. |
-| 7 | **Audit** — every audio fetch, `played`, delete and settings change recorded with identity and time | Not knowing. |
+| 7 | **Audit** — every audio fetch, `played` and settings change recorded with identity and time | Not knowing. |
 
 **What the host can still see:** that messages exist, when, how long,
 between which identities, and the box's telemetry. Not the audio.
@@ -80,7 +81,7 @@ identities      id 'box'|'parent-a'|'parent-b' · token_hash
 push_devices    identity · apns_token · environment · updated_at
 messages        id (ULID, client-minted) · seq · from · to · created_at · time_ok · duration_ms
                 codec · key_id · bytes · chunk_total · crc32 · state · blob_key
-                uploaded_at · delivered_at · played_at · deleted_at            unique (from, seq)
+                uploaded_at · delivered_at · played_at                         unique (from, seq)
 message_chunks  message_id · seq · data (≤ 32 KB)                              primary key (message_id, seq)
 box_status      single row: last telemetry · last_checkin_at · next_due_at
 checkins        at · telemetry                                                 pruned at 30 days
@@ -105,7 +106,6 @@ The assembled container goes to the bucket and stays there.
 | `GET …/audio` | Streams from the bucket, `Range` passed through. Box: only ids in its current inbox. First fetch by the recipient sets `delivered`. |
 | `POST …/played` | Recipient only. Feedback for the sender; starts no clock. |
 | `GET /messages?after=&limit=` | Parents only. **New** — the protocol has no list endpoint today. The app pages through it to fill and verify its local archive. |
-| `DELETE /messages/{id}` | Parents only, own messages. Deletes the blob, keeps a tombstone. **New.** |
 | `POST /device/checkin` | Box only. One SQL function (`rpc`): update `box_status`, insert `checkins`, clear a `late` alert, return settings + inbox ids — a single database round trip. Runs every minute on mains: ~45 k invocations a month against Pro's 2 M. |
 | `GET /device/status` | Parents only. Last telemetry, `last_checkin_at`, `late`, settings with who-set-what. **New.** |
 | `pg_cron` → `pg_net` → `POST /tick` (shared secret), every minute | Box late (now > `next_due_at`, i.e. 2 × `next_checkin_s`) → alert + push, once. Unplayed > 48 h → push, once. Drop chunk rows of completed messages. Prune `checkins`. **Never** deletes audio, **never** reaps an incomplete upload. |
@@ -115,7 +115,9 @@ The assembled container goes to the bucket and stays there.
 1. § Open → specified: the encryption envelope; `flags bit0` mandatory.
 2. `codec = 3` — AAC-LC in M4A, parent → box. iOS records it natively, the
    box decodes with `ffmpeg`. Replaces "the server may transcode".
-3. New endpoints: `GET /messages`, `DELETE /messages/{id}`, `GET /device/status`.
+3. New endpoints: `GET /messages`, `GET /messages/{id}`, `GET /device/status`,
+   `PATCH /settings`, `PUT /push-token`; the push payload kinds; server
+   timestamps on the message object; telemetry `locked` (from `ios/DESIGN.md`).
 4. `key_id` in the message object.
 5. § Durability and retention: archive forever; `played` starts nothing;
    `expired` unused; box token scoped to its inbox.
@@ -128,7 +130,7 @@ The assembled container goes to the bucket and stays there.
 | --- | --- | --- |
 | Box outbox | own recordings | the server's 2xx on `complete` |
 | Box inbox | parent's messages | played, or evicted under pressure |
-| Host bucket | every message, ciphertext | forever, or a parent's explicit delete |
+| Host bucket | every message, ciphertext | forever — no delete in v1 (ADR 0018) |
 | iPhone | every message it has fetched, ciphertext + key in Keychain | forever; rides in the phone's backup |
 
 Size: 16 kbps Opus ≈ 120 KB/min. An hour a month ≈ 90 MB a year. Pro's
@@ -178,9 +180,9 @@ USD 25/month, flat; nothing here approaches a Pro quota. Set the spend cap on.
 ## Questions
 
 1. ~~Which host?~~ — Supabase Pro, decided 2026-09-21.
-2. **Can the parent delete a message from the archive?** Drafted as yes, per
-   message, in the app. Or is forever *forever*?
+2. ~~Can the parent delete from the archive?~~ — no delete in v1, no endpoint
+   (ADR 0018, revised 2026-09-21).
 3. **Parent-b and the archive** — own key, own thread, own archive; neither
    parent can read the other's. Confirm.
-4. **Does the phone keep ciphertext or decrypted audio?** Suggest ciphertext
-   + Keychain key: a stray device backup then reveals nothing.
+4. ~~Ciphertext or decrypted audio on the phone?~~ — ciphertext + Keychain
+   key (`ios/DESIGN.md`).
