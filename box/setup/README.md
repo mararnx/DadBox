@@ -20,7 +20,8 @@
    is installed. Disable it only on the bench, never in the field.
 5. **Service**: `.venv` under `/opt/dadbox`, `pip install -e .[pi]`,
    `systemctl enable --now dadbox`. `dadboxctl` on `$PATH`.
-6. **Stick**: plug in; it should appear as `eth0`/`usb0` (HiLink, `cdc_ether`)
-   with DHCP from 192.168.8.1. No AT commands. Check `ip a`, `curl ifconfig.me`.
+6. **Modem** (A7670E HAT on USB): set ECM once with `AT+CUSBPIDSWITCH=9018,1,1`
+   on `/dev/ttyUSB2`; it should then appear as `usb0` with DHCP. Check `ip a`,
+   `curl ifconfig.me`, and that the mode survives a reboot and a PWRKEY cycle.
 7. **Power tuning**: `arm_freq`/`over_voltage` down, `maxcpus=1` in
    `cmdline.txt` for idle; measure each step with the USB meter.

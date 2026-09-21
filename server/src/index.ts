@@ -72,8 +72,8 @@ app.get('/device/state', async (_req, reply) => {
 
 // --- Settings ----------------------------------------------------------------
 // Mute is per household and visible to both. Quiet hours are enforced on the
-// device, not by the sender's discipline. Poll interval is the latency/battery
-// trade and belongs to the parent.
+// device, not by the sender's discipline. `poll` (ADR 0015) is the latency/battery
+// trade; the app exposes idle_minutes only.
 app.get('/settings', async (_req, reply) => {
   return reply.code(501).send({ error: 'not implemented' })
 })

@@ -5,6 +5,8 @@ houses every few days, without anyone in either house doing anything.
 
 ## Current design (ADR 0002, ADR 0006)
 
+> **Revised 2026-09-21 — [ADR 0014](../decisions/0014-raspberry-pi-zero-2w.md) rev., [ADR 0015](../decisions/0015-adaptive-polling.md):** the modem is a **Waveshare A7670E LTE Cat-1 HAT**, not a USB stick — still a USB Ethernet interface (ECM), plus an AT port for `AT+CSQ`, gated by PWRKEY. Antenna: IPEX → SMA bulkhead, short rigid Delock 90694 stub outside (90682 as the comparison). Polling is adaptive: 1 min on mains or for 90 min after the child uses the box, 30 min idle on battery with the modem off in between. No SMS wake. Flat 1 always. Where the text below says "stick", read "modem HAT".
+
 > **Platform change 2026-09-20 — [ADR 0014](../decisions/0014-raspberry-pi-zero-2w.md):** the modem is a **USB 4G stick in HiLink mode** on the Zero's OTG port — a `cdc_ether` Ethernet interface, no AT, no PPP. Its VBUS is switched by a GPIO so it is off between check-ins. Cat-4, on the same Digital Republic Flat 1 SIM. External antenna via the stick's TS-9 ports → SMA bulkhead. Tailscale rides the same link.
 
 > **Decided 2026-09-20:** **bare LTE-M modem** (SIM7080G-class) over `esp_modem` PPP, flat-rate IoT SIM ([ADR 0006](../decisions/0006-bare-modem-not-notecard.md)). Poll, not push (Q3): check-in every `poll_minutes` (default 10, app-set) and after any upload. Q2: inbound latency = poll interval. Notecard remains the fallback.

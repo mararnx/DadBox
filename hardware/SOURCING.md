@@ -1,5 +1,11 @@
 # Sourcing — Switzerland, ready to order
 
+> **Superseded in part, 2026-09-21.** [EVALUATION.md](EVALUATION.md) (Option C) and the revised
+> [ADR 0014](../docs/decisions/0014-raspberry-pi-zero-2w.md) replace the USB stick with a Waveshare A7670E
+> Cat-1 HAT and the PowerBoost with a UPS HAT (C) + four cells. Current parts and links:
+> [bom/bom.csv](bom/bom.csv) and [SHOPPING-LIST.md](SHOPPING-LIST.md). The stick and PowerBoost sections
+> below are history; the Pi 3A+ / Zero 2 W availability notes still hold.
+
 Re-researched 2026-09-20 (evening) for the Pi platform ([ADR 0014](../docs/decisions/0014-raspberry-pi-zero-2w.md))
 with one constraint from the user: **immediate availability**. Prices CHF
 incl. VAT as shown that day; stock changes daily. Reasoning per part in

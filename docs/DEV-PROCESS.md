@@ -18,8 +18,9 @@ measure — so the service makes all of that visible as text.
   timeout. Python tracebacks are already file:line.
 - **Poke it**: `ssh dadbox dadboxctl state` — or a Python REPL on the box.
 - **Audio**: `arecord`/`aplay` for raw tests; the dump comes back with `scp`.
-- **Modem**: `ip a`, `nmcli`, `curl -s ifconfig.me`, `speedtest-cli`. The stick
-  is an Ethernet interface; there are no AT commands to get wrong.
+- **Modem**: `ip a`, `nmcli`, `curl -s ifconfig.me`. The HAT is an Ethernet
+  interface for traffic; `/dev/ttyUSB2` is an AT port for diagnostics only
+  (`AT+CSQ`, `AT+CREG?`, `AT+CPSI?`).
 - **Remote**: identical, over Tailscale, from anywhere. The box in the other
   house is one `ssh dadbox` away. **Updates are `git pull`.**
 
@@ -33,7 +34,7 @@ measure — so the service makes all of that visible as text.
 | Test the whole protocol end-to-end | `tools/fakebox` against `server/`, or the real box over Tailscale |
 | Run and click through the iOS app | the iOS Simulator (once Xcode is installed); push via `xcrun simctl push` |
 | Analyse a recording | `scp` the WAV; RMS, clipping, noise floor, spectrum in Python |
-| Check the link | from the box: signal via the stick's web UI (HiLink at 192.168.8.1), throughput with `curl` |
+| Check the link | from the box: signal via `AT+CSQ` / `AT+CPSI?` on `/dev/ttyUSB2`, throughput with `curl` |
 | Power tuning | edit `config.txt`/`cmdline`, disable cores, read the MAX17048 gauge over I²C — then ask you for the meter |
 
 ## What Claude needs you for
@@ -56,7 +57,7 @@ dadboxctl lid close      → trimmed 4.2 s, opus 31 KB, queued 01JAY…, GOT_IT 
 dadboxctl play           → playing 01JAX… (12.1 s)
 dadboxctl inbox|outbox   list with seq, size, age
 dadboxctl checkin        force one now, print the response
-dadboxctl modem on|off   the VBUS switch
+dadboxctl modem on|off   PWRKEY (or the 5 V feed switch)
 dadboxctl ring test      sweep every ring state for 2 s each — you watch once
 dadboxctl sim link down  no link: queue must fill, LINK LED must double-blink
 ```
@@ -70,7 +71,7 @@ Build it in M0, before the audio: it is how the audio gets debugged.
 3. Tracebacks — Python gives file:line for free.
 4. Unit test the suspect module with the failing input, on the Mac.
 5. `strace -p`, `py-spy dump` if something hangs.
-6. For the link: `ip a`, `ping`, `curl`, the stick's HiLink page.
+6. For the link: `ip a`, `ping`, `curl`, `AT+CSQ` on the modem's AT port.
 
 ## Reliability rules that make this safe to run unattended
 
@@ -103,15 +104,15 @@ adapter on GPIO 14/15, 115200 baud.)
 3. Claude: `apt` (ffmpeg, alsa-utils, python3-venv), Tailscale, `config.txt`
    (`dtoverlay=googlevoicehat-soundcard`, `dtparam=audio=off`,
    `dtparam=spi=on` for the ring, `dtparam=watchdog=on`, HDMI off), `/data`
-   partition, the overlay, the service, `dadboxctl`. Then Wi-Fi off, stick in.
+   partition, the overlay, the service, `dadboxctl`. Then Wi-Fi off, modem on.
 
 ## Milestone by milestone
 
 - **M0** — `dadboxctl` first, then `arecord` → WAV → `ffmpeg` → Opus → `aplay`.
   You listen in the cardboard box; Claude reads the spectrum.
-- **M1** — stick in, `/data` outbox, resumable upload to `server/`, Tailscale
+- **M1** — modem on, `/data` outbox, resumable upload to `server/`, Tailscale
   up. From here on Claude works on the box directly.
 - **M2** — inbound: check-in, download, ring WAITING. `state` verifies it; you
   confirm the glow once.
-- **M3** — power: meter in, Claude tunes cores/clocks and the stick gate,
+- **M3** — power: meter in, Claude tunes cores/clocks and the modem gate,
   reads the gauge, and turns your readings into the cell count.

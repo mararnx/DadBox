@@ -1,80 +1,94 @@
 # Shopping List
 
-Re-cut 2026-09-20 (evening) for the Pi platform ([ADR 0014](../docs/decisions/0014-raspberry-pi-zero-2w.md)).
-Links, stock and prices in [SOURCING.md](SOURCING.md); reasoning in
-[DOUBLE-CHECK.md](DOUBLE-CHECK.md). Prices CHF incl. VAT as seen that day.
+Re-cut 2026-09-21 after [EVALUATION.md](EVALUATION.md) (Option C) and the
+user's decisions: aluminium 1590DD with a small rigid antenna, start on the
+Pi 3A+, off-the-shelf parts only, Flat 1 always. Platform in
+[ADR 0014](../docs/decisions/0014-raspberry-pi-zero-2w.md) (revised). Every
+part with its link is in [bom/bom.csv](bom/bom.csv); this file is the order
+of buying. Prices CHF incl. VAT as seen 2026-09-20.
 
-**The Pi Zero 2 W cannot be bought this week anywhere in Europe.** Phase 1
-therefore uses a **Raspberry Pi 3 Model A+** (in stock at Pi-Shop, same
-silicon, same OS image); the Zero 2 W replaces it in the box later.
-
----
-
-## Phase 1 — Audio proof in the real enclosure (M0) · ~CHF 150 · order today
-
-| Qty | Part | Why | CHF | Source |
-| --- | --- | --- | --- | --- |
-| 1 | **Raspberry Pi 3 Model A+** | Development board now; Zero 2 W later. USB-A takes the stick directly. | 26.90 | Pi-Shop (ships from stock) |
-| 1 | **Hammond 1590DD** | The box. Fit is proven with the audio. | 27.91 | Distrelec (1–2 days / pickup) |
-| 1 | microSD 32 GB A1, name-brand | Root (read-only overlay) + `/data`. Buy a second one later as the spare image. | ~10 | any |
-| 1 | I2S MEMS mic module | ALSA capture via the `googlevoicehat-soundcard` overlay | 8.90 | Bastelgarage |
-| 1 | Adafruit MAX98357A I2S amp | Same overlay — this pair *is* the Voice HAT | 9.95 | Galaxus (~1 week) |
-| 1 | Speaker 4 Ω 3 W 40 mm, 17 mm tall | Only one that fits 32 mm inside | 8.90 | Bastelgarage |
-| 1 | Adafruit NeoPixel ring 16 | The child's display. **2 left** — order first. | 18.50 | Galaxus (~1 week) |
-| 1 | 74AHCT125 level shifter | Ring data: 3.3 V logic → 5 V WS2812 | ~3 | Bastelgarage / any |
-| 1 | Magnetic door contact (reed + magnet) | Lid sensor **and** mic power switch | 4.90 | Bastelgarage |
-| 1 | Illuminated arcade button 33 mm | Play. Side-wall mounted. | 14.90 | Galaxus |
-| 2 | 3 mm LEDs + resistors; 2 × 10 kΩ pull-ups | LINK / POWER status LEDs; lid & button inputs | ~3 | any |
-| 1 | Logic-level MOSFET ×2 | Ring supply gate; later the stick's VBUS gate | ~2 | any / drawer |
-| 2 | USB PSU 5 V ≥ 2.5 A (micro-USB for the 3A+) | One per house | ~10 ea | any |
-| — | Jumper wire, a short 5-way ribbon, M3 screws, a cardboard box | | ~5 | drawer |
+**The Pi Zero 2 W cannot be bought this week.** Everything is developed on a
+**Pi 3 Model A+** (same image, same pins). On the 3A+ the box is a mains
+device; the weekend on battery waits for the Zero 2 W.
 
 ---
 
-## Phase 2 — Get it online (M1-M2) · ~CHF 65–125 + CHF 6/month
+## Phase 1 — Bench: records and plays back · ~CHF 140 · order today
 
-| Qty | Part | Why | CHF | Source |
-| --- | --- | --- | --- | --- |
-| 1 | USB 4G stick, HiLink class | Appears as USB Ethernet; no AT, no PPP. **Huawei E8372** is in stock (89.90, dear); Brovi E3372-325 / ZTE MF79U cheaper if Brack/Digitec have them — check by hand. | 30–90 | Galaxus / Brack |
-| 1 | Digital Republic **Flat 1** data SIM — **fixed** | Unlimited, 1 / 0.5 Mbit/s, Sunrise 4G, no contract | 6/month | digitalrepublic.ch |
-| 1 | Delock TS-9 → SMA adapter | The stick's antenna port to the wall | ~10 | Digitec |
-| 1 | SMA bulkhead coupler | Through the aluminium | ~3 | any |
-| 1 | Delock hinged LTE stub antenna, SMA | Outside the box | 20.90 | Digitec |
+| Qty | Part | CHF | Source |
+| --- | --- | --- | --- |
+| 1 | **Adafruit NeoPixel ring 16 (44.5 mm)** — 2 in stock, **order first** | 14.90 | Play-Zone |
+| 1 | Adafruit MAX98357A I2S amp | 8.90 | Play-Zone |
+| 1 | **Raspberry Pi 3 Model A+** | 26.90 | Pi-Shop |
+| 1 | Official Pi 12.5 W micro-USB PSU | 11.90 | Pi-Shop |
+| 1 | Waveshare USB-C inline power meter | 10.90 | Pi-Shop |
+| 1 | INMP441 I2S MEMS mic module | 3.10 | BerryBase CH |
+| 1 | SN74AHCT125N level shifter | 0.50 | BerryBase CH |
+| 1 | Speaker 4 Ω 3 W Ø40 × 17 mm | 8.90 | Bastelgarage |
+| 1 | DFRobot reed door contact + magnet (lid sensor **and** mic power switch) | 7.90 | Bastelgarage |
+| 1 | SanDisk High Endurance 32 GB microSD | 22.95 | Brack |
+| 2 | Pololu 2811 high-side switch (ring gate + spare for the modem feed) | EUR 3.50 ea | Botland |
+| 1 | USB-serial adapter (CP2102) or Pi Debug Probe — skip if in the drawer | ~10 | any |
+| — | 3 mm LEDs, 220 Ω, 10 kΩ, jumper wire, perfboard | ~5 | any / drawer |
 
-**Check first:** Sunrise 4G in both bedrooms.
+Add the phase-2 modem to the Pi-Shop order to save a shipment.
+
+## Phase 2 — Online · ~CHF 60 + CHF 6/month
+
+| Qty | Part | CHF | Source |
+| --- | --- | --- | --- |
+| 1 | **Waveshare A7670E LTE Cat-1 HAT** | 34.90 | Pi-Shop |
+| 1 | Digital Republic **Flat 1** SIM — always, also while developing | 6/month | digitalrepublic.ch |
+| 1 | Delock 88747 SMA bulkhead → MHF/U.FL pigtail | 7.32 | Reichelt CH |
+| 1 | **Delock 90694** rigid LTE stub, 52 mm — the chosen antenna | 8.24 | Reichelt CH |
+| 1 | Delock 90682 rigid LTE antenna, 115 mm — comparison / fallback | 9.16 | Reichelt CH |
+
+The short stub's datasheet range stops at 824 MHz; Sunrise's indoor band 20
+downlink is 791–821 MHz. It may be fine (band 3 is covered) — `AT+CSQ` in both
+bedrooms with each antenna decides. **Check Sunrise 4G in both bedrooms first.**
+
+## Phase 3 — Portable · ~CHF 110 · buy after measuring
+
+| Qty | Part | CHF | Source |
+| --- | --- | --- | --- |
+| 1 | Waveshare UPS HAT (C): load-share charger, 5 V boost, INA219 gauge | 25.90 | Pi-Shop |
+| 4 | Panasonic NCR18650GA 3300 mAh, protected, JST lead | 13.90 ea | Bastelgarage |
+| 1 | 4-slot 18650 holder (takes 69.5 mm protected cells) | 4.90 | Bastelgarage |
+| 1 | **Raspberry Pi Zero 2 W** — backorder now, notify at Pi-Shop + BerryBase CH | EUR 19.90 | Welectron |
+| 1 | Short micro-USB OTG → USB-C cable (Zero 2 W ↔ modem) | ~5 | any |
+
+Measure the tuned Pi and the modem (registered, transmitting, PWRKEY-off)
+before buying cells: 3 vs 4 is decided by the meter, not by this list.
+
+## Phase 4 — The real box · ~CHF 105
+
+| Qty | Part | CHF | Source |
+| --- | --- | --- | --- |
+| 1 | **Hammond 1590DD** die-cast aluminium | 27.90 | Distrelec |
+| 1 | 16 mm stainless flush button, RGB ring, IP65 | 19.90 | Bastelgarage |
+| 1 | Adafruit USB-C round panel-mount extension + C→micro-B adapter | 1.75 + ~5 | BerryBase CH |
+| 1 | 8 × 3 mm N45 disc magnets, 10 pack | 4.10 | supermagnete.ch |
+| 1 | Second High Endurance card (spare image) | 22.95 | Brack |
+| 1 | Second PSU (house B) | 11.90 | Pi-Shop |
+| — | Opal acrylic 3 mm, piano hinge, rubber feet | 17.05 | Hornbach |
+
+Off-the-shelf only, no 3D printing: the ring window is a 45 mm round hole with
+a **square** of opal acrylic glued behind it (score and snap — no disc to
+cut); the stainless button brings its own bezel. Round holes only: 45 mm ring
+window, 16 mm button, 12–18 mm USB-C, 6.5 mm SMA, speaker grille as a drilled
+pattern.
 
 ---
-
-## Phase 3 — Make it portable (M3) · ~CHF 90–130
-
-Target: a weekend unplugged ([ADR 0005](../docs/decisions/0005-battery-required.md)).
-**Measure the tuned Pi + gated stick on the bench first.** The cell count
-depends on which Pi ends up in the box: ~3 × 18650 for a Zero 2 W, ~5–6 for
-a 3A+.
-
-| Qty | Part | Why | CHF | Source |
-| --- | --- | --- | --- | --- |
-| 1 | Adafruit PowerBoost 1000C | 1 A charge + 1 A 5 V boost, load-sharing | 21.70 | BerryBase CH (15 in stock, 2–5 days) |
-| 3–6 | Protected 18650 ~3000 mAh (1S, parallel) | The pack | ~15 ea | BerryBase / Conrad (Fenix ARB-L18) |
-| 1 | LiPo fuel gauge (MAX17043) or ADS1115 | Battery % for the app | ~10–18 | Digitec |
-| 1 | Zero 2 W (when available) | Halves the Pi's share of the budget | ~20–30 | BerryBase CH notify |
-
----
-
-## Phase 4 — Make it real (M4) · hardware store
-
-Piano hinge + M3, catch magnet, 3 mm acrylic disc, speaker mesh, rubber
-feet, step drill, 45 mm hole saw. No PCB.
-
----
-
-## Dropped from the previous lists
-
-LILYGO T-A7670G R2 / T-SIM7080G-S3, ESP32-S3-DevKitC-1, PCF8574 expander,
-SIM7080G breakout, BQ24074, Notecard, 1NCE SIM, 60 mm button, 50 mm speaker,
-hall sensor module, 3D-printing filament, custom PCB. See DOUBLE-CHECK.md.
 
 ## Running total
 
-~CHF 330–430 plus CHF 6/month. A USB current meter (~CHF 10) will pay for
-itself in phase 3.
+~CHF 415 for everything including the meter, the spare card, both PSUs and
+the Zero 2 W, plus CHF 6/month. Phases 1 + 2 (~CHF 200) get a working,
+online, mains-powered box.
+
+## Dropped
+
+USB 4G sticks (E8372 / E3372 / MF79U) and TS-9 adapters, PowerBoost 1000C,
+separate fuel gauge, 33 mm arcade button, hinged 24 cm antenna; and from
+earlier lists the LILYGO boards, ESP32-S3, Notecard, 1NCE SIM, 3D-printing
+filament, custom PCB. Reasons in EVALUATION.md and ADR 0014.

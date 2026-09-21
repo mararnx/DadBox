@@ -5,6 +5,8 @@ bag, and make a 40 mm speaker sound like something.
 
 ## Current design
 
+> **Revised 2026-09-21:** aluminium 1590DD **confirmed by the user**, with a short rigid SMA stub antenna (Delock 90694, 52 mm) on a bulkhead. **Off-the-shelf parts only — no 3D printing:** 16 mm stainless flush button with its own bezel; the ring window is a 45 mm round hole with a square of opal acrylic glued behind it. Inside: 4-cell holder 78 × 79 × 22 along the back, Pi + UPS HAT stack 65 × 30 × 17 (3A+: 65 × 56), modem HAT 65 × 31 × 12 **flat beside the Pi, not stacked**, ring and speaker under the lid over the modem side (12 + 17 = 29 < 33 mm). Layout in [hardware/EVALUATION.md](../../hardware/EVALUATION.md) §4 Option C.
+
 > **Platform change 2026-09-20 — [ADR 0014](../decisions/0014-raspberry-pi-zero-2w.md):** inside the 1590DD: a Pi 3A+ (65 × 56) now or a Zero 2 W (65 × 30) later, the USB stick beside it (~90 × 30 × 12), three to six 18650s along the back wall (3 × = 56 × 65 × 19; 6 × = 112 × 65 × 19 — still fits), PowerBoost, amp, mic, level shifter. ~0.9–1.1 kg.
 
 > **Decided 2026-09-20:** there is a lid ([ADR 0007](../decisions/0007-lid-gesture.md)) and a cell sized for a weekend. Mechanism (Q3) still open: pin hinge + microswitch vs magnet + hall sensor. The lid switch is the mic gate; reliability beats cleverness.

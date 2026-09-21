@@ -5,6 +5,8 @@ child's bedroom or bag.
 
 ## Current design (ADR 0005)
 
+> **Revised 2026-09-21 — [ADR 0014](../decisions/0014-raspberry-pi-zero-2w.md) rev.:** Waveshare **UPS HAT (C)** (load-share charger, 5 V 1.8 A boost, INA219 gauge) and **four** protected NCR18650GA (~13 Ah) replace the PowerBoost 1000C, the separate gauge and the three-cell pack. Zero 2 W ~100 mA + Cat-1 modem ~3–10 mA averaged on battery → ~117 mA → ≈ 60 h. On the 3A+ (~225 mA) the box is a mains device. The box is plugged in most of the time; on mains the modem stays on ([ADR 0015](../decisions/0015-adaptive-polling.md)). Fallback power path: bq24074 + Pololu S13V30F5 + MAX17048.
+
 > **Platform change 2026-09-20 — [ADR 0014](../decisions/0014-raspberry-pi-zero-2w.md):** a Pi cannot sleep: ~75–100 mA tuned, plus the stick averaged ~60 mA with VBUS gating → ~140–180 mA → **three protected 18650s (~9 Ah) for 50–65 h; a fourth if measured**. PowerBoost-1000C-class charger/boost (1 A charge, overnight) and a MAX17048 gauge. Measure before buying cells.
 
 > **Decided 2026-09-20:** **operate unplugged for a weekend** (~60 h) — [ADR 0005](../decisions/0005-battery-required.md). Every rail gated: mic (lid), ring (FET), amp (SD), modem (PSM). Q3: nothing on the box below 20 %, sleep below 5 %, the app nags. Cell sized after measuring.

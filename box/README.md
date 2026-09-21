@@ -14,8 +14,8 @@ machine and [docs/PROTOCOL.md](../docs/PROTOCOL.md) for the wire contract.
 | `ui` | Lid (reed on GPIO, interrupt), play button, ring (WS2812 over SPI, gated), status LEDs, chimes, quiet hours, mute | no |
 | `audio` | ALSA capture straight to `/data` while the lid is open; `ffmpeg` → Opus on close; playback via the amp (SD pin gated) | no |
 | `queue` | `/data/outbox`, `/data/inbox`; container + CRC; fsync-then-rename; resume from `upload-state` | no |
-| `link` | VBUS switch for the stick; wait for the interface; check-in, chunked upload, download; backoff forever | no |
-| `power` | MAX17048 gauge over I²C; low-battery behaviour; cores/clock tuning | no |
+| `link` | Modem PWRKEY; wait for the interface; check-in on the `state.poll_plan` cadence (ADR 0015), chunked upload, download; backoff forever | no |
+| `power` | INA219 gauge (UPS HAT) over I²C; mains present; low-battery behaviour; cores/clock tuning | no |
 | `state` | The ring/link/power/fault state machines — pure Python, unit-tested on the Mac | no |
 
 ## Layout rule

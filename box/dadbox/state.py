@@ -3,6 +3,9 @@
 The ring is the child's vocabulary (ADR 0009). Priority order, highest wins.
 It never shows link, battery or faults; there is deliberately no RING_ERROR.
 """
+from __future__ import annotations
+
+from dataclasses import dataclass
 from enum import Enum, auto
 
 
@@ -41,7 +44,6 @@ SLEEP_PCT = 5
 MAX_MESSAGE_S = 300
 MIN_SPEECH_MS = 1000
 CHUNK_BYTES = 32 * 1024
-CHECKIN_DEFAULT_MIN = 10
 
 
 def ring_state(*, lid_open: bool, playing: bool, got_it_pulse: bool, inbox: int) -> Ring:
@@ -55,3 +57,24 @@ def ring_state(*, lid_open: bool, playing: bool, got_it_pulse: bool, inbox: int)
     if inbox > 0:
         return Ring.WAITING
     return Ring.IDLE
+
+
+@dataclass(frozen=True)
+class Poll:
+    """`settings.poll` from the server (PROTOCOL.md, ADR 0015). Minutes."""
+    active_minutes: int = 1
+    active_window_minutes: int = 90
+    idle_minutes: int = 30
+
+
+def poll_plan(poll: Poll, *, mains: bool, since_activity_s: float | None) -> tuple[int, bool]:
+    """(seconds to the next check-in, keep the modem on until then).
+
+    `since_activity_s` is the time since the last completed upload or played
+    message — the things that open a conversation window — or None if there
+    has been none since boot. A message arriving is not activity.
+    """
+    in_window = since_activity_s is not None and since_activity_s < poll.active_window_minutes * 60
+    if mains or in_window:
+        return poll.active_minutes * 60, True
+    return poll.idle_minutes * 60, False

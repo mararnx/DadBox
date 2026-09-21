@@ -80,11 +80,12 @@ In v1 the box always sends `to: parent-a`, and the server enforces it.
 
 ## Transport
 
-The box is a Linux machine with a USB 4G stick that appears as an Ethernet
-interface ([ADR 0006](decisions/0006-bare-modem-not-notecard.md),
+The box is a Linux machine with an LTE Cat-1 modem that appears as a USB
+Ethernet interface ([ADR 0006](decisions/0006-bare-modem-not-notecard.md),
 [ADR 0013](decisions/0013-cat1-not-catm.md), [ADR 0014](decisions/0014-raspberry-pi-zero-2w.md))
-and speaks HTTPS directly to the server. No third party in the path. Data is unlimited; the poll interval is a
-battery/latency trade only.
+and speaks HTTPS directly to the server. No third party in the path — which is
+also why there is no SMS wake ([ADR 0015](decisions/0015-adaptive-polling.md)).
+Data is unlimited; the poll cadence is a battery/latency trade only.
 
 ### Upload (either direction)
 
@@ -116,21 +117,38 @@ POST /device/checkin
   ← { "settings": {…}, "inbox": ["01J…", "01J…"] }
 ```
 
-The box checks in on a timer (`settings.poll_minutes`, default 10, app-set
-1-60) and immediately after any upload. Inbound latency is therefore the poll
-interval; the parent controls the trade against battery from the app.
+The box checks in on a timer and immediately after any upload. The cadence
+is adaptive ([ADR 0015](decisions/0015-adaptive-polling.md)), chosen by the
+box from `settings.poll`:
+
+| Box state | Modem | Interval |
+| --- | --- | --- |
+| On mains | stays on | `active_minutes` (default 1) |
+| On battery, conversation window open | stays on | `active_minutes` |
+| On battery, idle | off between check-ins | `idle_minutes` (default 30, app-set 5-60) |
+
+A conversation window opens when an upload completes or the child plays a
+message, lasts `active_window_minutes` (default 90), and restarts on each such
+event. A message arriving does not open one. Inbound latency is therefore
+≤ 1 minute whenever the box is plugged in or the child has just used it, and
+`idle_minutes` otherwise. Every check-in reuses one TLS session and stays a
+few hundred bytes.
 
 ## Telemetry
 
 ```json
 {
-  "battery_pct": 68, "charging": false, "rssi": -91, "fw": "0.1.0",
+  "battery_pct": 68, "charging": false, "mains": false, "rssi": -91, "fw": "0.1.0",
   "outbox": 0, "outbox_bytes": 0, "outbox_oldest_s": 0, "storage_pct": 12,
-  "inbox": 2, "uptime_s": 41022, "offline_s": 0,
+  "inbox": 2, "uptime_s": 41022, "offline_s": 0, "next_checkin_s": 1800,
   "lid_open": false, "house": "unknown", "fault": null
 }
 ```
 
+- `mains` — external power present. Not the same as `charging`: a full pack
+  on mains is not charging. Selects the poll cadence.
+- `next_checkin_s` — when the box intends to check in next. The server and
+  the app call the box *late* after 2 × this, not after a fixed interval.
 - `offline_s` — seconds since the last *successful* check-in, as seen by the
   box. Non-zero on the first check-in after a gap; the app uses it to say
   "the box was offline for 14 h — these 3 messages are from then".
@@ -148,7 +166,7 @@ adult.
 
 ```json
 {
-  "poll_minutes": 10,
+  "poll": { "active_minutes": 1, "active_window_minutes": 90, "idle_minutes": 30 },
   "mute": { "a": false, "b": false },
   "quiet_hours": { "start": "20:00", "end": "07:00", "tz": "Europe/Berlin" },
   "ring_brightness": 40,

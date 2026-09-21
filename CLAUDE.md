@@ -37,7 +37,9 @@ making assumptions about the design.
 - Parts live in `hardware/bom/bom.csv` with a phase number, not scattered in prose.
   Swiss sources and prices in `hardware/SOURCING.md`; the enclosure is a Hammond
   1590DD (aluminium — antenna outside, 32 mm inside, round holes only). Compute
-  is a Pi Zero 2 W with a USB 4G stick (ADR 0014).
+  is a Pi Zero 2 W (a 3A+ until one can be bought) with an A7670E LTE Cat-1
+  HAT and a UPS HAT (ADR 0014, revised 2026-09-21; options in
+  `hardware/EVALUATION.md`). Off-the-shelf parts only — no 3D printing.
 - Never commit secrets. Wi-Fi/API credentials go in `.env` or a gitignored
   `secrets.h`. APNs `.p8` keys never enter this repo.
 
@@ -53,7 +55,7 @@ making assumptions about the design.
   ring lit. The box lives in rooms with other people in them.
 - **The capture is on disk while the child is still talking.** Opus is made
   after the lid closes; nothing is ever only in RAM.
-- **Every consumer is power-gated.** Ring, amp, mic — and the USB stick's
-  VBUS between check-ins. A Pi can't sleep, so gating is the whole budget.
+- **Every consumer is power-gated.** Ring, amp, mic — and, on battery, the
+  modem between check-ins (ADR 0015). A Pi can't sleep, so gating is the whole budget.
 - Quiet hours are enforced on the device, not by the sender's discipline.
 - No transcription, no speech services, no third-party analytics, ever.

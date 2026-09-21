@@ -1,7 +1,7 @@
 # Architecture
 
 ```
-  ┌──────────────────────┐   LTE (USB 4G stick)   ┌─────────────┐   HTTPS   ┌────────────┐
+  ┌──────────────────────┐   LTE (Cat-1 modem)    ┌─────────────┐   HTTPS   ┌────────────┐
   │   DadBox             │ ───── HTTPS ─────────► │   Server    │ ◄──────── │  Parent's  │
   │  (travels with       │ ◄──── check-in ──────  │  blobs ·    │ ── APNs ► │  iPhone    │
   │   the child)         │ ◄──── Tailscale SSH ── │  telemetry  │           └────────────┘
@@ -38,8 +38,10 @@ the [dev process](DEV-PROCESS.md) is SSH.
 
 **Parent → child**
 1. Parent records in the app, uploads.
-2. Box learns of it at its next check-in (poll interval, app-set, default
-   10 min), downloads it, stores it in the inbox.
+2. Box learns of it at its next check-in — within a minute when plugged in
+   or just used, otherwise `idle_minutes` (default 30;
+   [ADR 0015](decisions/0015-adaptive-polling.md)) — downloads it, stores it
+   in the inbox.
 3. Ring breathes warm, one lit segment per waiting message. One gentle chime —
    suppressed during quiet hours and by mute.
 4. Child presses play. Oldest first, one per press.
@@ -73,7 +75,7 @@ four words above.
 
 | LED | Pattern | Meaning |
 | --- | --- | --- |
-| LINK | off | Checked in within 2 × poll interval — nothing to see |
+| LINK | off | Checked in within 2 × the current poll interval — nothing to see |
 | LINK | 1 short blink / 3 s | No connection; nothing queued |
 | LINK | 2 short blinks / 3 s | No connection **and messages waiting to go** — safe on flash |
 | LINK | brief on | A check-in or upload just succeeded (useful when placing the box) |
@@ -133,17 +135,18 @@ A Pi cannot sleep, so the budget is about what stays on:
 
 | Consumer | Gated by | Cost |
 | --- | --- | --- |
-| Pi Zero 2 W, tuned (Wi-Fi/BT/HDMI off, cores/clock reduced) | — | ~75–100 mA, always |
-| USB 4G stick | **GPIO high-side switch on VBUS**; on for check-ins and uploads only | ~100–150 mA on; ~60 mA averaged at 10-min polls |
+| Pi Zero 2 W, tuned (Wi-Fi/BT/HDMI off, cores/clock reduced) | — | ~100 mA, always (a 3A+: ~200 mA — mains only) |
+| A7670E Cat-1 modem HAT | **PWRKEY** (or a high-side switch on its 5 V feed). On battery: on for check-ins, uploads and the 90-min conversation window only. On mains: stays on ([ADR 0015](decisions/0015-adaptive-polling.md)) | ~150 mA on; ~3–10 mA averaged on battery |
 | Mic | load switch on the lid | 0 |
 | LED ring (16 × WS2812B) | FET — ~1 mA each even dark | 0 when off; ~15 mA breathing; ~1.5 mA *resting* |
 | Amp | MAX98357A SD pin | µA |
 | Boost converter losses | — | ~10 % on top |
 
-Roughly **140–180 mA average → 9 Ah is 50–65 h.** Tight against 60 h. The
-levers, in order: gate the stick, drop to one core at idle, dim the ring, a
-fourth cell (12 Ah, still fits). **Measure before choosing the cell count.**
-Charging 9 Ah at 1 A is overnight.
+Roughly **~117 mA average → four cells (13 Ah) ≈ 60 h** on a Zero 2 W. The
+levers, in order: keep the modem off between idle check-ins, drop to one core
+at idle, dim the ring. **Measure before choosing the cell count.** Charging
+13 Ah at ~1 A is overnight and then some — the box is plugged in most of the
+time, which is the point of the mains cadence.
 
 ## Retention and privacy
 
@@ -160,9 +163,11 @@ A child's recorded voice is the most sensitive thing in this system.
 ## To verify before building
 
 - **Sunrise 4G in both bedrooms** (Digital Republic rides Sunrise).
-- Real current of the tuned Pi, the stick on and off, and the ring, on the
+- Real current of the tuned Pi, the modem on and PWRKEY-off, and the ring, on the
   bench with a USB meter — **before buying the cells**.
-- That the stick's TS-9 ports take the pigtail and that it stays in HiLink
-  (Ethernet) mode across reboots.
+- That the modem HAT stays in ECM (Ethernet) mode across reboots and PWRKEY
+  cycles, and which antenna connector it has.
+- That the short Delock 90694 stub holds signal in both bedrooms (`AT+CSQ`),
+  against the 115 mm 90682.
 - That the read-only overlay + `/data` survives a power pull mid-write.
 - That a reed contact + magnet register reliably through the lid gap.

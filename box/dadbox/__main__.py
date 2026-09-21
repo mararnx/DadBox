@@ -16,8 +16,8 @@ def main() -> int:
     # TODO: ui.start()         lid interrupt → audio.start_capture(); button → audio.play_next()
     # TODO: audio              ALSA capture streamed to /data/capture.wav; ffmpeg → Opus on close
     # TODO: queue              /data/outbox, /data/inbox, fsync-then-rename, resume
-    # TODO: link               VBUS switch, wait for the stick's interface, check-in loop
-    # TODO: power              MAX17048 over I²C, LOW / ASLEEP behaviour
+    # TODO: link               modem PWRKEY, wait for the interface, check-in loop (state.poll_plan)
+    # TODO: power              INA219 over I²C, mains present, LOW / ASLEEP behaviour
     return 0
 
 

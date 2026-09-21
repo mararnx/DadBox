@@ -48,8 +48,8 @@ a child actually stays close to someone who isn't there.
 - **Indicator:** WS2812 LED ring, power-gated — slow breathing glow means "a
   message is waiting", one lit segment per message. This is the whole
   notification system.
-- **Modem:** a USB 4G stick (HiLink — it's just an Ethernet interface), off
-  between check-ins; Digital Republic unlimited data SIM, CHF 6/month
+- **Modem:** an LTE Cat-1 HAT (it's just a USB Ethernet interface, plus an AT
+  port for diagnostics), off between check-ins when on battery; Digital Republic unlimited data SIM, CHF 6/month
   ([ADR 0013](decisions/0013-cat1-not-catm.md)); external SMA antenna because
   aluminium.
 - **Power:** three protected 18650s (~9 Ah) with a load-sharing charger and
@@ -67,15 +67,17 @@ changes network every few days would need credentials for both, re-provisioning
 after any router change in either house, and would fail silently in whichever
 home nobody is checking. It carries its own network instead.
 
-A USB 4G stick on the Pi, appearing as an ordinary Ethernet interface, so the
+An LTE Cat-1 modem HAT on the Pi, appearing as an ordinary Ethernet interface, so the
 box speaks HTTPS straight to our server — nobody else in the path — on a
-Digital Republic unlimited data SIM (CHF 6/month, no contract). Powered off
-between check-ins.
+Digital Republic unlimited data SIM (CHF 6/month, no contract). Plugged in, it
+checks in every minute; on battery it is powered off between half-hourly
+check-ins, except for 90 minutes after the child uses the box
+([ADR 0015](decisions/0015-adaptive-polling.md)).
 
 [ADR 0002](decisions/0002-cellular-not-wifi.md) for cellular,
 [ADR 0006](decisions/0006-bare-modem-not-notecard.md) for "our own server,
 nobody in between", [ADR 0013](decisions/0013-cat1-not-catm.md) for the SIM,
-[ADR 0014](decisions/0014-raspberry-pi-zero-2w.md) for the stick.
+[ADR 0014](decisions/0014-raspberry-pi-zero-2w.md) for the modem.
 
 ## Software
 
@@ -130,7 +132,7 @@ being heard. Everything else in the design serves that.
 - Nothing recorded is ever lost; the outbox is never evicted — [ADR 0010](decisions/0010-nothing-is-lost.md)
 - Hammond 1590DD aluminium enclosure, plate hinged as the lid — [ADR 0011](decisions/0011-aluminium-1590dd-enclosure.md)
 - SIM **fixed**: Digital Republic Flat 1, 1 Mbit/s, CHF 6/month — [ADR 0013](decisions/0013-cat1-not-catm.md)
-- Raspberry Pi Zero 2 W + USB 4G stick, three-cell pack, Tailscale — [ADR 0014](decisions/0014-raspberry-pi-zero-2w.md) (supersedes the boards in 0012/0013)
+- Raspberry Pi Zero 2 W (3A+ for now) + A7670E Cat-1 HAT, UPS HAT + four cells, Tailscale — [ADR 0014](decisions/0014-raspberry-pi-zero-2w.md) (supersedes the boards in 0012/0013)
 - The box travels with the child between both homes
 - The co-parent is on board: placement is flexible, consent is a conversation,
   and they get a mute that is visible in the app
