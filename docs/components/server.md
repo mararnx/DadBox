@@ -7,6 +7,8 @@ box is alive.
 
 > **Decided 2026-09-20:** box speaks HTTPS directly — no Notehub handler. Resumable 32 KB chunks, `/device/checkin` returns settings + inbox. Two parent identities in the protocol, one built ([ADR 0008](../decisions/0008-two-parents-later.md)). Retention: 24 h after played; unplayed surfaced at 48 h (Q4).
 
+> **Decided 2026-09-21:** one managed host, audio end-to-end encrypted so the host cannot play it, iOS the only client — no web UI, no accounts ([ADR 0017](../decisions/0017-managed-hosting-e2ee.md)). **Messages are archived forever**; the 24 h deletion above is withdrawn ([ADR 0018](../decisions/0018-archive-forever.md)). The box still deletes from its outbox only on the server's 2xx to `complete`. Concept: [SERVER-CONCEPT.md](../SERVER-CONCEPT.md). Answers Q3–Q5 below; Q1 narrows to *which* host — Cloudflare Workers + R2 + D1 proposed, Supabase alone the fallback. The scheduler becomes the host's cron. PROTOCOL.md v0.3 follows.
+
 Node + TypeScript + Fastify. Stubbed endpoints in `server/src/index.ts`.
 Blob storage, short retention, APNs push, telemetry, settings.
 
