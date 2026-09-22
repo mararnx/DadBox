@@ -147,7 +147,7 @@ export function parseRange(header: string | null, size: number): { start: number
 // --- Settings ----------------------------------------------------------------
 
 export type Settings = {
-  poll: { active_minutes: number; active_window_minutes: number; idle_minutes: number }
+  poll: { active_minutes: number; active_window_minutes: number; idle_minutes: number; backstop_minutes: number }
   mute: { a: boolean; b: boolean }
   quiet_hours: { start: string; end: string; tz: string }
   led_brightness: number
@@ -155,7 +155,7 @@ export type Settings = {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  poll: { active_minutes: 1, active_window_minutes: 90, idle_minutes: 30 },
+  poll: { active_minutes: 1, active_window_minutes: 90, idle_minutes: 30, backstop_minutes: 10 },
   mute: { a: false, b: false },
   quiet_hours: { start: '20:00', end: '07:00', tz: 'Europe/Zurich' },
   led_brightness: 40,
@@ -167,6 +167,7 @@ const LIMITS: Record<string, (v: unknown) => boolean> = {
   'poll.active_minutes': (v) => isInt(v, 1, 10),
   'poll.active_window_minutes': (v) => isInt(v, 10, 240),
   'poll.idle_minutes': (v) => isInt(v, 5, 60),
+  'poll.backstop_minutes': (v) => isInt(v, 5, 30),
   'mute.a': (v) => typeof v === 'boolean',
   'mute.b': (v) => typeof v === 'boolean',
   'quiet_hours.start': (v) => typeof v === 'string' && HHMM.test(v),
@@ -227,4 +228,17 @@ export function decodeCursor(c: string): { updatedAt: string; id: string } | nul
   } catch {
     return null
   }
+}
+
+// --- Doorbell (ADR 0021) ------------------------------------------------------
+// The address the box joins: this project's Realtime, with the publishable
+// key, on the topic only Vault and the box know. No topic or no key: no
+// doorbell, and the box polls exactly as ADR 0015 says.
+
+export type Doorbell = { url: string; topic: string }
+
+export function doorbellFor(supabaseUrl: string | undefined, apikey: string | undefined, topic: unknown): Doorbell | null {
+  if (!supabaseUrl || !apikey || typeof topic !== 'string' || !topic) return null
+  const base = supabaseUrl.replace(/^http/, 'ws').replace(/\/+$/, '')
+  return { url: `${base}/realtime/v1/websocket?apikey=${encodeURIComponent(apikey)}&vsn=1.0.0`, topic }
 }

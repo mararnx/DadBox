@@ -5,7 +5,7 @@ import { test } from 'node:test'
 
 import { concat, crc32, crcOk, fromBytea, parseHeader, toBytea } from './container.ts'
 import {
-  canFetchAudio, chunkTotalFor, decodeCursor, DEFAULT_SETTINGS, encodeCursor, headerMatches,
+  canFetchAudio, chunkTotalFor, decodeCursor, DEFAULT_SETTINGS, doorbellFor, encodeCursor, headerMatches,
   type MessageRow, missingChunks, parseRange, patchSettings, validateMetadata,
 } from './rules.ts'
 
@@ -116,4 +116,21 @@ test('cursor round-trips and rejects junk', () => {
   const c = encodeCursor('2026-09-20T18:04:31.123456+00:00', '01JAYZ3K7QW9E8RVX2M4N6P8TD')
   assert.deepEqual(decodeCursor(c), { updatedAt: '2026-09-20T18:04:31.123456+00:00', id: '01JAYZ3K7QW9E8RVX2M4N6P8TD' })
   assert.equal(decodeCursor('not a cursor'), null)
+})
+
+test('doorbell: the address is this project Realtime; no topic or key means none', () => {
+  const d = doorbellFor('https://ref.supabase.co', 'pk+/=', 'doorbell:abc')
+  assert.deepEqual(d, { url: 'wss://ref.supabase.co/realtime/v1/websocket?apikey=pk%2B%2F%3D&vsn=1.0.0', topic: 'doorbell:abc' })
+  assert.equal(doorbellFor('https://ref.supabase.co', undefined, 'doorbell:abc'), null)
+  assert.equal(doorbellFor('https://ref.supabase.co', 'k', null), null)
+  assert.equal(doorbellFor('http://127.0.0.1:54321/', 'k', 't')!.url, 'ws://127.0.0.1:54321/realtime/v1/websocket?apikey=k&vsn=1.0.0')
+})
+
+test('settings: the backstop is a parent setting within 5-30 minutes', () => {
+  const now = '2026-09-22T10:00:00Z'
+  assert.equal(DEFAULT_SETTINGS.poll.backstop_minutes, 10)
+  const ok = patchSettings('parent-a', DEFAULT_SETTINGS, {}, { poll: { backstop_minutes: 15 } }, now)
+  assert.ok('settings' in ok && ok.settings.poll.backstop_minutes === 15)
+  const bad = patchSettings('parent-a', DEFAULT_SETTINGS, {}, { poll: { backstop_minutes: 1 } }, now)
+  assert.ok('status' in bad && bad.status === 400)
 })

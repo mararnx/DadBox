@@ -51,6 +51,15 @@ select vault.create_secret('https://cjwmemfxvsrlqncieseq.supabase.co/functions/v
 select vault.create_secret('<the same random TICK_SECRET>', 'dadbox_tick_secret');
 ```
 
+The doorbell ([ADR 0021](../docs/decisions/0021-doorbell.md)) needs nothing
+by hand: its migration generates the topic into Vault (`dadbox_doorbell_topic`),
+and the function builds the address from `SUPABASE_URL` and
+`SUPABASE_ANON_KEY`, which every Edge Function has. It does need
+**Realtime → Settings → Allow public access** left on; with it off the box
+never joins and simply polls every minute. Rotate the topic with
+`select vault.update_secret(id, 'doorbell:<new random hex>') from vault.secrets where name = 'dadbox_doorbell_topic';`
+and the box follows at its next check-in.
+
 Tokens: `python3 ../tools/mint_token.py box` prints a token once and the SQL
 that stores its hash. APNs secrets (`APNS_KEY_P8`, `APNS_KEY_ID`,
 `APNS_TEAM_ID`, `APNS_TOPIC`) follow when the Apple Developer account exists.

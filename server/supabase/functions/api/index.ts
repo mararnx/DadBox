@@ -14,7 +14,7 @@ import { createClient } from '@supabase/supabase-js'
 import { type Device, push, type PushKind } from './apns.ts'
 import { concat, crc32, crcOk, fromBytea, parseHeader, toBytea } from './core/container.ts'
 import {
-  canFetchAudio, canSeeMessage, CHUNK_BYTES, chunkTotalFor, decodeCursor, encodeCursor,
+  canFetchAudio, canSeeMessage, CHUNK_BYTES, chunkTotalFor, decodeCursor, doorbellFor, encodeCursor,
   headerMatches, type Identity, isParent, isUlid, type MessageRow, missingChunks, PARENTS,
   parseRange, patchSettings, sameMetadata, type Settings, type SettingsMeta, toWire,
   validateMetadata,
@@ -334,6 +334,9 @@ app.post('/device/checkin', async (c) => {
   if (typeof t !== 'object' || t === null) return fail(c, 400, 'telemetry must be a JSON object')
   const { data, error } = await db.rpc('checkin', { p_telemetry: t })
   if (error) return fail(c, 503, 'could not check in')
+  // The database knows the topic; the address around it is this project's Realtime (ADR 0021).
+  const { doorbell_topic: topic, ...reply } = data as Record<string, unknown>
+  reply.doorbell = doorbellFor(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_ANON_KEY'), topic)
 
   // Faults and a low battery reach an adult once, not every minute.
   later((async () => {
@@ -349,7 +352,7 @@ app.post('/device/checkin', async (c) => {
       await db.rpc('clear_alert', { p_kind: 'battery_low' })     // once per discharge
     }
   })())
-  return c.json(data)
+  return c.json(reply)
 })
 
 app.notFound((c) => fail(c, 404, 'not found'))
