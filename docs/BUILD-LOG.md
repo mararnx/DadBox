@@ -2,6 +2,27 @@
 
 Newest entry at the top. One entry per session at the bench.
 
+## 2026-09-22 — Box firmware designed and built on the Mac; virtual box
+
+**Did:** The box's service, end to end, on fake hardware (`box/DESIGN.md`):
+a pure core (`core.py`, events in, actions out) with gestures, light
+rendering, the `/data` store, the link worker and the audio worker around
+it; `dadboxctl` over a Unix socket; Pi drivers written against a proposed
+pin map. `python3 -m dadbox.sim` runs it all with a fake server speaking
+PROTOCOL v0.3 and a web page: hold the buttons, be the parent, pull the
+link or the plug, skip time. 70 tests, including the whole round trip at
+40× and boot recovery of an interrupted recording. Driven in the browser:
+tap ignored, record, upload, reply, glow, play, `played_at`.
+**Learned:** Putting the "record red is the mic pin" rule as an assertion in
+the renderer caught a real bug in the first hour — the lock blink was grey,
+which would have chopped the mic's supply; it is teal now. A fake clock
+that every wait goes through makes a 90-minute conversation window a
+two-second test. No ffmpeg on this Mac: the simulator seals WAV as codec 2
+until it is installed.
+**Next:** the parts. Then `hw/pi.py` against real pins: confirm the pin
+map, the PWRKEY wiring, `arecord` from the shared mic pin, and run the same
+tests through `dadboxctl` on the box.
+
 ## 2026-09-22 — Server live; phone ↔ fake box round trip
 
 **Did:** Supabase Pro project in Zurich; schema, Edge Function and `pg_cron`

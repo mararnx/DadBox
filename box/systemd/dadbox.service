@@ -10,10 +10,15 @@ WorkingDirectory=/opt/dadbox
 ExecStart=/opt/dadbox/.venv/bin/python -m dadbox
 Restart=always
 RestartSec=3
-# The root is a read-only overlay; only /data is writable.
-ReadWritePaths=/data /run
+# The root is a read-only overlay; only /data is writable. /run/dadbox holds the dadboxctl socket.
+RuntimeDirectory=dadbox
+RuntimeDirectoryMode=0770
+ReadWritePaths=/data
 Environment=DADBOX_DATA=/data
+Environment=DADBOX_CTL=/run/dadbox/ctl.sock
+# Keepalives come from python3-systemd (apt); without it, drop WatchdogSec.
 WatchdogSec=60
+NotifyAccess=all
 
 [Install]
 WantedBy=multi-user.target

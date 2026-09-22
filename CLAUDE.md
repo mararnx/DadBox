@@ -11,7 +11,7 @@ before making assumptions about the design.
 | Stream | Where | Blocked by |
 | --- | --- | --- |
 | Shopping | `hardware/SHOPPING-LIST.md` | bench parts ordered 2026-09-21; antenna waits for the modem HAT, battery parts for a current measurement |
-| Box | `box/` (Python service on a Pi Zero 2 W, Raspberry Pi OS Lite) | parts arriving; pure logic is testable on the Mac now |
+| Box | `box/` (Python service on a Pi Zero 2 W, Raspberry Pi OS Lite); `box/DESIGN.md`; the whole service runs on the Mac as `python3 -m dadbox.sim` | parts arriving; drivers in `box/dadbox/hw/pi.py` untested |
 | Server | `server/` — live on Supabase Pro, Zurich (Edge Function, Postgres, Storage, `pg_cron`); `docs/SERVER-CONCEPT.md`, ADR 0017/0018. Drive it with `tools/fakebox` | APNs key for push |
 | iOS | `ios/` (SwiftUI, APNs) | server endpoints, Apple dev account |
 

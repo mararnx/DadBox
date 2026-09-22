@@ -1,6 +1,6 @@
 # Box setup — what Claude does over SSH after the first boot
 
-1. **Packages**: `ffmpeg alsa-utils python3-venv i2c-tools` and Tailscale
+1. **Packages**: `ffmpeg alsa-utils python3-venv python3-systemd i2c-tools` and Tailscale
    (`curl -fsSL https://tailscale.com/install.sh | sh`, then `tailscale up`
    — the auth link is the user's to open).
 2. **`/boot/firmware/config.txt`**
@@ -19,6 +19,10 @@
    is installed. Disable it only on the bench, never in the field.
 5. **Service**: `.venv` under `/opt/dadbox`, `pip install -e .[pi]`,
    `systemctl enable --now dadbox`. `dadboxctl` on `$PATH`.
+   Before the first start: `/data/config.env` with `DADBOX_URL` and
+   `DADBOX_TOKEN` (root, 0600) and the family key in `/data/keys/1.key`
+   (64 hex characters, root, 0600) — see `store.py` for the layout. Without
+   them the service runs, records and queues, and cannot send.
 6. **Modem** (SIM7670G HAT on the Zero's OTG port): confirm it enumerates as
    a USB Ethernet interface (`ip a`) and find its AT port (`/dev/ttyUSB*`;
    `AT+CSQ`, `AT+CPSI?`). If it does not come up as Ethernet, the mode is set

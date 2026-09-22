@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DadBox simulator</title>
+<style>
+  :root {
+    --bg: #14161a; --panel: #1d2026; --panel2: #23272e; --line: #2f343c; --fg: #e6e6e6; --dim: #8b93a1;
+    --accent: #5aa9ff; --ok: #4cd964; --warn: #ffb020; --bad: #ff5a5a; --alu: #9aa1a8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.4 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  a { color: var(--accent); }
+  .wrap { display: grid; grid-template-columns: minmax(360px, 520px) 1fr; gap: 16px; padding: 16px; max-width: 1400px; margin: 0 auto; }
+  @media (max-width: 900px) { .wrap { grid-template-columns: 1fr; } }
+  h1 { font-size: 16px; margin: 0 0 8px; font-weight: 600; }
+  h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); margin: 0 0 8px; font-weight: 600; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0; }
+  button { background: var(--panel2); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button:hover { border-color: var(--accent); }
+  button.on { border-color: var(--accent); background: #26364a; }
+  input[type=number], input[type=text], select { background: var(--panel2); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; font: inherit; width: 70px; }
+  input[type=text] { width: 100%; }
+  input[type=range] { width: 120px; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+  .dim { color: var(--dim); }
+  .kv { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; font-size: 13px; }
+  .kv div:nth-child(odd) { color: var(--dim); }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { text-align: left; padding: 3px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--dim); font-weight: 500; }
+  .log { height: 220px; overflow: auto; background: #101216; border-radius: 6px; padding: 8px; }
+  .log div { white-space: pre-wrap; }
+  .log .warning { color: var(--warn); } .log .error { color: var(--bad); }
+  .badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 11px; background: var(--panel2); border: 1px solid var(--line); }
+  .badge.on { background: #1f3a26; border-color: var(--ok); color: var(--ok); }
+  .badge.bad { background: #3a1f1f; border-color: var(--bad); color: var(--bad); }
+  .badge.warn { background: #3a301f; border-color: var(--warn); color: var(--warn); }
+
+  /* --- the box ------------------------------------------------------------- */
+  .stage { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 10px 10px; container-type: inline-size; }
+  @container (max-width: 420px) { .box { transform: scale(.82); margin: -20px 0 -22px; } }
+  @container (max-width: 340px) { .box { transform: scale(.68); margin: -36px 0 -40px; } }
+  .box { position: relative; width: 376px; height: 238px; border-radius: 14px;
+         background: linear-gradient(160deg, #b9bec4 0%, #8d939a 45%, #6f757c 100%);
+         box-shadow: 0 30px 60px rgba(0,0,0,.6), inset 0 2px 3px rgba(255,255,255,.5), inset 0 -3px 6px rgba(0,0,0,.35); }
+  .box::before { content: ""; position: absolute; inset: 12px; border-radius: 9px; border: 1px solid rgba(255,255,255,.18); pointer-events: none; }
+  .screw { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #d7dbdf, #5b6167); box-shadow: inset 0 0 1px #000; }
+  .screw::after { content: ""; position: absolute; left: 1px; top: 3.5px; width: 6px; height: 1px; background: #3a3f45; transform: rotate(30deg); }
+  .btn { position: absolute; top: 74px; width: 96px; height: 96px; border-radius: 50%; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: none;
+         background: radial-gradient(circle at 50% 50%, #4a4f55 0 0, #2b2f34 40%, #1a1d21 100%);
+         box-shadow: inset 0 0 0 5px #3a3f45, inset 0 0 0 7px #0f1114, 0 2px 4px rgba(0,0,0,.5); }
+  .btn .ring { position: absolute; inset: 10px; border-radius: 50%; border: 6px solid rgba(20,20,20,.9); transition: border-color .05s, box-shadow .05s; }
+  .btn .head { position: absolute; inset: 20px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #f0f2f4, #b7bcc2 55%, #8a9096); box-shadow: 0 3px 4px rgba(0,0,0,.6), inset 0 -2px 3px rgba(0,0,0,.25); transition: transform .06s, box-shadow .06s; }
+  .btn.down .head { transform: translateY(2px) scale(.985); box-shadow: 0 1px 1px rgba(0,0,0,.6), inset 0 -1px 2px rgba(0,0,0,.25); }
+  .btn.record { left: 44px; } .btn.play { right: 44px; }
+  .lbl { position: absolute; top: 178px; font-size: 11px; letter-spacing: .12em; color: rgba(0,0,0,.45); text-transform: uppercase; }
+  .lbl.r { left: 76px; } .lbl.p { right: 84px; }
+  .grille { position: absolute; left: 160px; top: 76px; width: 56px; height: 92px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; padding: 3px; }
+  .grille i { width: 6px; height: 6px; border-radius: 50%; background: #2a2e33; box-shadow: inset 0 1px 1px #000; }
+  .leds { position: absolute; left: 20px; bottom: 14px; display: flex; gap: 22px; }
+  .led { display: flex; align-items: center; gap: 6px; font-size: 10px; letter-spacing: .1em; color: rgba(0,0,0,.5); }
+  .led i { width: 9px; height: 9px; border-radius: 50%; background: #3b2a2a; box-shadow: inset 0 0 2px #000; }
+  .led i.on { background: #ff5a3c; box-shadow: 0 0 8px 3px rgba(255,90,60,.8); }
+  .led i.pw.on { background: #7dff5a; box-shadow: 0 0 8px 3px rgba(125,255,90,.8); }
+  .port { position: absolute; right: 22px; bottom: 12px; width: 26px; height: 12px; border-radius: 3px; background: #111; box-shadow: inset 0 0 0 2px #444; }
+  .ant { position: absolute; right: -18px; top: 20px; width: 10px; height: 60px; border-radius: 5px; background: linear-gradient(90deg, #222, #555, #222); box-shadow: 0 2px 4px rgba(0,0,0,.5); }
+  .ant::after { content: ""; position: absolute; left: -6px; top: 44px; width: 22px; height: 10px; border-radius: 3px; background: #7a8087; }
+  .caption { color: var(--dim); font-size: 12px; text-align: center; }
+  .kbd { display: inline-block; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; font: 11px ui-monospace, monospace; color: var(--fg); }
+  .lights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; font-size: 12px; margin-top: 4px; }
+  .lights b { display: block; font-size: 15px; }
+  .rec-word { color: var(--bad); } .wait-word { color: var(--warn); }
+  .msg-audio { height: 22px; vertical-align: middle; }
+  .tabs button { padding: 3px 8px; font-size: 12px; }
+  .hidden { display: none; }
+  #pushes div { font-size: 12px; }
+  .prog { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .prog i { display: block; height: 100%; background: var(--warn); width: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <div class="panel">
+      <h1>DadBox <span class="dim">simulator</span> <span id="conn" class="badge">connecting…</span></h1>
+      <div class="stage">
+        <div class="box">
+          <div class="screw" style="left:6px;top:6px"></div><div class="screw" style="right:6px;top:6px"></div>
+          <div class="screw" style="left:6px;bottom:6px"></div><div class="screw" style="right:6px;bottom:6px"></div>
+          <div class="screw" style="left:184px;top:6px"></div><div class="screw" style="left:184px;bottom:6px"></div>
+          <div class="ant"></div>
+          <div class="btn record" id="btn-record"><div class="ring" id="ring-record"></div><div class="head"></div></div>
+          <div class="grille" id="grille"></div>
+          <div class="btn play" id="btn-play"><div class="ring" id="ring-play"></div><div class="head"></div></div>
+          <div class="lbl r">record</div><div class="lbl p">play</div>
+          <div class="leds">
+            <div class="led"><i id="led-link"></i>LINK</div>
+            <div class="led"><i id="led-power" class="pw"></i>POWER</div>
+          </div>
+          <div class="port" title="5 V micro-USB"></div>
+        </div>
+        <div class="caption">Hold a button with the mouse (or <span class="kbd">R</span> / <span class="kbd">P</span>). A press counts after 0.5 s. Both for 3 s: travel lock.</div>
+      </div>
+      <div class="lights">
+        <div><span class="dim">lights</span><b id="w-lights">—</b></div>
+        <div><span class="dim">mic pin</span><b id="w-mic">—</b></div>
+        <div><span class="dim">amp</span><b id="w-amp">—</b></div>
+      </div>
+      <div id="playing-wrap" class="hidden" style="margin-top:8px">
+        <div class="row"><span class="dim">playing</span> <span id="playing-text" class="mono"></span></div>
+        <div class="prog"><i id="playing-bar"></i></div>
+        <audio id="playing-audio" class="msg-audio" controls autoplay></audio>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Inside the box</h2>
+      <div class="kv">
+        <div>state</div><div class="mono" id="state-line">—</div>
+        <div>link</div><div id="link-text">—</div>
+        <div>recording</div><div id="rec-text">—</div>
+        <div>outbox</div><div class="mono" id="outbox">—</div>
+        <div>inbox (unheard)</div><div class="mono" id="inbox">—</div>
+        <div>settings</div><div class="mono" id="settings">—</div>
+      </div>
+      <details style="margin-top:6px"><summary class="dim">telemetry (what the next check-in sends)</summary><pre class="mono" id="telemetry"></pre></details>
+    </div>
+
+    <div class="panel">
+      <h2>dadboxctl</h2>
+      <div class="row">
+        <input type="text" id="ctl" value="state" style="flex:1" placeholder="state | record start|stop | play | inbox | outbox | checkin | lock on|off | led test | modem on|off | sim link down|up">
+        <button onclick="ctl()">run</button>
+      </div>
+      <div class="row tabs">
+        <button onclick="ctlq('state')">state</button><button onclick="ctlq('record start')">record start</button>
+        <button onclick="ctlq('record stop')">record stop</button><button onclick="ctlq('play')">play</button>
+        <button onclick="ctlq('checkin')">checkin</button><button onclick="ctlq('led test')">led test</button>
+        <button onclick="ctlq('lock on')">lock on</button><button onclick="ctlq('lock off')">lock off</button>
+      </div>
+      <pre class="mono" id="ctl-out" style="margin:4px 0 0;white-space:pre-wrap"></pre>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <h2>World <span class="dim" id="sim-time"></span></h2>
+      <div class="row">
+        <span class="dim">link</span>
+        <button id="w-coverage" onclick="world({coverage: !S.world.coverage})">coverage</button>
+        <button id="w-server" onclick="world({server_down: !S.world.server_down})">server reachable</button>
+        <button id="w-simdown" onclick="ctlq(S.box.link_worker.simulated_down ? 'sim link up' : 'sim link down')">sim link</button>
+        <span class="dim" id="modem-text"></span>
+      </div>
+      <div class="row">
+        <span class="dim">power</span>
+        <button id="w-mains" onclick="world({mains: !S.world.mains})">mains</button>
+        <button id="w-batt" onclick="world({battery_pct: S.world.battery_pct === null ? 80 : null})">battery fitted</button>
+        <input type="range" id="w-pct" min="0" max="100" oninput="world({battery_pct: +this.value})" title="battery %">
+        <span id="w-pct-text" class="mono"></span>
+        <button id="w-chg" onclick="world({charging: !S.world.charging})">charging</button>
+        <button onclick="if (confirm('Pull the plug now? The simulator exits; start it again to see the boot recovery.')) world({power_cut: true})" title="exit mid-whatever; restart to see recovery">pull the plug</button>
+      </div>
+      <div class="row">
+        <span class="dim">child</span>
+        <button id="w-speak" onclick="world({speaking: !S.world.speaking})">is talking</button>
+        <button id="w-failcap" onclick="world({fail_capture: !S.world.fail_capture})">mic broken</button>
+      </div>
+      <div class="row">
+        <span class="dim">time</span>
+        <select id="w-speed" onchange="world({speed: +this.value})">
+          <option value="1">1×</option><option value="5">5×</option><option value="20">20×</option><option value="60">60×</option>
+        </select>
+        <button onclick="world({skip_s: 60})">+1 min</button>
+        <button onclick="world({skip_s: 1800})">+30 min</button>
+        <button onclick="world({skip_s: 7200})">+2 h</button>
+        <button onclick="world({skip_s: 3600*48})">+48 h</button>
+        <span class="dim">clock →</span>
+        <button onclick="world({wall_hhmm: '09:00'})">09:00</button>
+        <button onclick="world({wall_hhmm: '21:00'})">21:00 (quiet)</button>
+      </div>
+      <div class="dim" id="ffmpeg-note"></div>
+    </div>
+
+    <div class="panel" id="parent-panel">
+      <h2>Parent's phone <span class="dim">(the app, through the same server routes)</span></h2>
+      <div class="row">
+        <button onclick="parentSend()">Send a message to the box</button>
+        <input type="number" id="p-secs" value="8" min="1" max="300"> s
+        <button onclick="parentSend(2)" title="the link dies after two chunks — the app retries later">…link drops mid-upload</button>
+      </div>
+      <div class="row">
+        <button id="p-mute" onclick="parentSettings({mute: {a: !S.server.device.settings.mute.a}})">mute (parent-a)</button>
+        <button id="p-quiet" onclick="toggleQuiet()">quiet hours 20:00–07:00</button>
+        <span class="dim">volume</span><input type="range" id="p-vol" min="0" max="100" onchange="parentSettings({volume: +this.value})">
+        <span class="dim">brightness</span><input type="range" id="p-bri" min="0" max="100" onchange="parentSettings({led_brightness: +this.value})">
+        <span class="dim">idle poll</span><select id="p-idle" onchange="parentSettings({poll: {idle_minutes: +this.value}})">
+          <option value="5">5 min</option><option value="15">15 min</option><option value="30">30 min</option><option value="60">60 min</option></select>
+      </div>
+      <div class="row"><span class="dim">box status:</span> <span id="p-status"></span></div>
+      <table id="thread"><thead><tr><th>message</th><th>from → to</th><th>length</th><th>state</th><th>played</th><th></th></tr></thead><tbody></tbody></table>
+      <div style="margin-top:8px"><span class="dim">pushes the server would send</span><div id="pushes"></div></div>
+    </div>
+
+    <div class="panel">
+      <h2>Log <span class="dim">journalctl -u dadbox</span></h2>
+      <div class="log mono" id="log"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let S = null;
+const $ = id => document.getElementById(id);
+const g = $('grille'); for (let i = 0; i < 50; i++) g.appendChild(document.createElement('i'));
+
+async function post(path, body) {
+  const r = await fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body || {})});
+  return r.json();
+}
+const world = b => post('/api/world', b);
+async function ctl() {
+  const argv = $('ctl').value.trim().split(/\s+/).filter(Boolean);
+  const r = await post('/api/ctl', {argv});
+  $('ctl-out').textContent = '$ dadboxctl ' + argv.join(' ') + '\n' + (r.reply ?? JSON.stringify(r));
+}
+function ctlq(cmd) { $('ctl').value = cmd; ctl(); }
+async function parentSend(dropAfter) {
+  const r = await post('/api/parent/send', {seconds: +$('p-secs').value, drop_after: dropAfter ?? null});
+  if (r.error) $('ctl-out').textContent = r.error;
+}
+const parentSettings = patch => post('/api/parent/settings', patch);
+function toggleQuiet() {
+  const q = S.server.device.settings.quiet_hours;
+  parentSettings({quiet_hours: q.start === q.end ? {start: '20:00', end: '07:00'} : {start: '00:00', end: '00:00'}});
+}
+
+// --- buttons: hold with the mouse, touch, or keyboard ---------------------------------
+function bindButton(id, name) {
+  const el = $(id);
+  let down = false;
+  const set = d => { if (down === d) return; down = d; el.classList.toggle('down', d); post('/api/button', {button: name, down: d}); };
+  el.addEventListener('pointerdown', e => { el.setPointerCapture(e.pointerId); set(true); });
+  el.addEventListener('pointerup', () => set(false));
+  el.addEventListener('pointercancel', () => set(false));
+  el.addEventListener('lostpointercapture', () => set(false));
+  el.addEventListener('contextmenu', e => e.preventDefault());
+  return set;
+}
+const setRecord = bindButton('btn-record', 'record'), setPlay = bindButton('btn-play', 'play');
+document.addEventListener('keydown', e => {
+  if (e.repeat || e.target.tagName === 'INPUT') return;
+  if (e.key === 'r' || e.key === 'R') setRecord(true);
+  if (e.key === 'p' || e.key === 'P') setPlay(true);
+});
+document.addEventListener('keyup', e => {
+  if (e.key === 'r' || e.key === 'R') setRecord(false);
+  if (e.key === 'p' || e.key === 'P') setPlay(false);
+});
+
+// --- drawing ---------------------------------------------------------------------------------
+function ringStyle(el, rgb, glow) {
+  const [r, gg, b] = rgb;
+  const lum = Math.max(r, gg, b);
+  if (lum < 0.02) { el.style.borderColor = 'rgba(20,20,20,.9)'; el.style.boxShadow = 'none'; return; }
+  const c = `rgb(${Math.round(40 + 215 * r)}, ${Math.round(40 + 215 * gg)}, ${Math.round(40 + 215 * b)})`;
+  el.style.borderColor = c;
+  el.style.boxShadow = `0 0 ${Math.round(6 + 24 * lum)}px ${Math.round(2 + 8 * lum)}px rgba(${Math.round(255*r)},${Math.round(255*gg)},${Math.round(255*b)},${(0.25 + 0.6 * lum).toFixed(2)})`;
+}
+function badge(el, on, text, cls) { el.className = 'badge ' + (on ? (cls || 'on') : ''); el.textContent = text; }
+function tog(id, on, label) { const el = $(id); el.classList.toggle('on', !!on); if (label) el.textContent = label; }
+function fmt(iso) { return iso ? iso.replace('T', ' ').replace('Z', '') : '—'; }
+let lastPlayingKey = null;
+
+function draw(s) {
+  S = s;
+  const b = s.box, w = s.world;
+  // The record ring's red is the mic pin — the wiring fact, drawn as such.
+  const rec = [b.mic ? 1 : 0, b.frame.record[1], b.frame.record[2]];
+  ringStyle($('ring-record'), rec);
+  ringStyle($('ring-play'), b.frame.play);
+  $('led-link').classList.toggle('on', b.status.link);
+  $('led-power').classList.toggle('on', b.status.power);
+  $('w-lights').innerHTML = b.lights === 'RECORDING' ? '<span class="rec-word">RECORDING</span>' : b.lights === 'WAITING' ? '<span class="wait-word">WAITING' + (b.resting ? ' (resting)' : '') + '</span>' : b.lights;
+  $('w-mic').textContent = b.mic ? 'ON (red)' : 'off';
+  $('w-amp').textContent = b.amp ? 'ON' : 'off';
+  $('state-line').textContent = b.state_line;
+  $('link-text').innerHTML = `${b.link} · check-in every ${b.checkin_interval_s}s · last ${b.last_checkin_ago_s == null ? 'never' : Math.round(b.last_checkin_ago_s) + 's ago'} · next in ${Math.round(b.link_worker.next_in_s)}s · modem ${b.modem_on ? 'stays on' : 'off between'}${b.window_open ? ' · <span class="wait-word">conversation window open</span>' : ''}${b.link_worker.simulated_down ? ' · <span class="rec-word">sim link down</span>' : ''}`;
+  $('rec-text').textContent = b.mode === 'recording' ? `${b.recording_s.toFixed(1)} s (silence ${b.silence_s.toFixed(1)} s; stops at 20 s silence or 300 s)` : b.locked ? 'travel lock ON' : '—';
+  $('outbox').textContent = b.outbox_ids.length ? b.outbox_ids.join('\n') : 'empty';
+  $('inbox').textContent = b.inbox.length ? b.inbox.join('\n') : (b.inbox_on_disk ? `${b.inbox_on_disk} on disk, played` : 'empty');
+  $('settings').textContent = `mute ${b.muted ? 'ON' : 'off'} · quiet ${b.quiet ? 'NOW' : 'no'} (${b.settings.quiet_hours.start}–${b.settings.quiet_hours.end}) · vol ${b.settings.volume} · bright ${b.settings.led_brightness} · poll ${b.settings.poll.active_minutes}/${b.settings.poll.idle_minutes} min`;
+  $('telemetry').textContent = JSON.stringify(b.telemetry, null, 1);
+  // playing
+  const p = b.playing;
+  $('playing-wrap').classList.toggle('hidden', !p);
+  if (p) {
+    $('playing-text').textContent = `${b.playing_id}  ${p.elapsed_s.toFixed(1)} / ${p.duration_s.toFixed(1)} s  codec ${p.codec}`;
+    $('playing-bar').style.width = Math.min(100, 100 * p.elapsed_s / p.duration_s) + '%';
+    const key = b.playing_id;
+    if (key !== lastPlayingKey) { lastPlayingKey = key; const a = $('playing-audio'); a.src = '/api/audio/playing?' + key; a.classList.toggle('hidden', !p.real); }
+  } else lastPlayingKey = null;
+  // world
+  $('sim-time').textContent = `${fmt(s.sim.wall)} UTC · ${s.sim.speed}× · t=${s.sim.now.toFixed(0)}s`;
+  tog('w-coverage', w.coverage, w.coverage ? 'coverage: yes' : 'coverage: NONE');
+  tog('w-server', !w.server_down, w.server_down ? 'server: DOWN' : 'server: reachable');
+  tog('w-simdown', b.link_worker.simulated_down, b.link_worker.simulated_down ? 'sim link: DOWN' : 'sim link: up');
+  $('modem-text').textContent = `modem ${w.modem_powered ? 'powered' : 'OFF'}`;
+  tog('w-mains', w.mains, w.mains ? 'mains: plugged in' : 'mains: UNPLUGGED');
+  tog('w-batt', w.battery_pct !== null, w.battery_pct === null ? 'battery: none (ADR 0019)' : 'battery: fitted');
+  $('w-pct').disabled = w.battery_pct === null; if (document.activeElement !== $('w-pct')) $('w-pct').value = w.battery_pct ?? 0;
+  $('w-pct-text').textContent = w.battery_pct === null ? '' : w.battery_pct + '%';
+  tog('w-chg', w.charging, w.charging ? 'charging: yes' : 'charging: no');
+  tog('w-speak', w.speaking, w.speaking ? 'child: talking' : 'child: SILENT');
+  tog('w-failcap', w.fail_capture, w.fail_capture ? 'mic: BROKEN' : 'mic: works');
+  if (document.activeElement !== $('w-speed')) $('w-speed').value = String(s.sim.speed);
+  $('ffmpeg-note').textContent = w.real_server ? `REAL server: ${w.real_server} — the parent is the iPhone app.` :
+    (w.have_ffmpeg ? 'ffmpeg found: the box sends real Ogg Opus; the parent sends real AAC.' : 'No ffmpeg on this Mac: the box seals WAV audio labelled codec 2 (fine for the fake server; install ffmpeg for real Opus).');
+  // parent
+  const srv = s.server;
+  $('parent-panel').classList.toggle('hidden', !srv.device);
+  if (srv.device) {
+    const st = srv.device.settings;
+    tog('p-mute', st.mute.a, st.mute.a ? 'mute: ON (parent-a)' : 'mute: off');
+    tog('p-quiet', st.quiet_hours.start !== st.quiet_hours.end, `quiet hours ${st.quiet_hours.start}–${st.quiet_hours.end}`);
+    if (document.activeElement !== $('p-vol')) $('p-vol').value = st.volume;
+    if (document.activeElement !== $('p-bri')) $('p-bri').value = st.led_brightness;
+    if (document.activeElement !== $('p-idle')) $('p-idle').value = String(st.poll.idle_minutes);
+    const d = srv.device;
+    $('p-status').innerHTML = d.last_checkin_at ? `last check-in ${fmt(d.last_checkin_at)} ${d.late ? '<span class="badge bad">LATE</span>' : '<span class="badge on">alive</span>'}` +
+      (d.telemetry ? ` · fw ${d.telemetry.fw} · ${d.telemetry.mains ? 'mains' : 'battery ' + d.telemetry.battery_pct + '%'} · outbox ${d.telemetry.outbox} · ${d.telemetry.locked ? 'LOCKED · ' : ''}${d.telemetry.fault ? '<span class="badge bad">fault: ' + d.telemetry.fault + '</span>' : ''}` : '')
+      : 'never checked in';
+    const tb = $('thread').querySelector('tbody');
+    tb.innerHTML = srv.messages.slice().reverse().map(m => `<tr>
+      <td class="mono">${m.id.slice(-8)}${m.time_ok ? '' : ' <span class="badge warn">offline clock</span>'}</td>
+      <td>${m.from} → ${m.to}</td><td>${(m.duration_ms / 1000).toFixed(1)} s</td>
+      <td><span class="badge ${m.state === 'played' ? 'on' : ''}">${m.state}</span></td>
+      <td class="dim">${fmt(m.played_at)}</td>
+      <td>${m.from === 'box' ? `<audio class="msg-audio" controls preload="none" src="/api/audio/box/${m.id}"></audio>` : ''}</td></tr>`).join('');
+    $('pushes').innerHTML = srv.pushes.slice().reverse().map(p => `<div><span class="dim">${fmt(p.at)}</span> <b>${p.kind}</b> → ${p.to} ${p.id ? '<span class="mono">' + p.id.slice(-8) + '</span>' : ''}${p.fault ? p.fault : ''}${p.battery_pct != null ? p.battery_pct + '%' : ''}</div>`).join('') || '<div class="dim">none yet</div>';
+  }
+  // log
+  const lg = $('log');
+  const atBottom = lg.scrollTop + lg.clientHeight >= lg.scrollHeight - 4;
+  lg.innerHTML = s.log.map(l => `<div class="${l.level}"><span class="dim">${l.at.slice(11, 19)}</span> ${l.text}</div>`).join('');
+  if (atBottom) lg.scrollTop = lg.scrollHeight;
+}
+
+async function poll() {
+  try {
+    const r = await fetch('/api/state');
+    draw(await r.json());
+    badge($('conn'), true, 'live');
+  } catch (e) {
+    badge($('conn'), false, 'simulator not running', 'bad');
+  }
+  setTimeout(poll, 100);
+}
+poll();
+</script>
+</body>
+</html>

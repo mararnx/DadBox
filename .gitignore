@@ -55,3 +55,6 @@ credentials.json
 xcuserdata/
 DerivedData/
 *.xcuserstate
+
+# --- Claude desktop app (machine-specific launch config) ---
+.claude/launch.json

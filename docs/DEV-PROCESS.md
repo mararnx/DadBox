@@ -32,6 +32,7 @@ measure — so the service makes all of that visible as text.
 | Deploy, restart, read logs, tracebacks, REPL, `gdb`/`strace` if it ever comes to that | SSH |
 | Drive the box's state machine | `dadboxctl` — `state`, `record start`, `record stop`, `play`, `inbox`, `outbox`, `checkin`, `modem on|off`, `led test`, `lock on|off`, `sim link down` |
 | Unit-test every bit of logic | the same Python on the Mac — no board needed |
+| Run the whole box without the box | `python3 -m dadbox.sim`: the real service on fake hardware, a fake server, a web page with the buttons ([box/DESIGN.md](../box/DESIGN.md) § The simulator) |
 | Test the whole protocol end-to-end | `tools/fakebox` against `server/`, or the real box over Tailscale |
 | Run and click through the iOS app | the iOS Simulator (once Xcode is installed); push via `xcrun simctl push` |
 | Analyse a recording | `scp` the WAV; RMS, clipping, noise floor, spectrum in Python |
