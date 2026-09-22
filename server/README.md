@@ -4,8 +4,58 @@
 one Edge Function for the API, Postgres, a private Storage bucket, `pg_cron`.
 Design: [../docs/SERVER-CONCEPT.md](../docs/SERVER-CONCEPT.md). Deliberately small.
 
-> The Fastify skeleton in `src/` predates that decision and is to be replaced
-> by `supabase/functions/api/`. Nothing below the stubs is implemented.
+Project `dadBox`, ref `cjwmemfxvsrlqncieseq`, `eu-central-2`. The CLI runs
+through npm — Homebrew on this Mac belongs to another user account:
+
+```bash
+npx supabase@2.117.0 <command>     # from server/, where supabase/ lives
+```
+
+`supabase/` is linked to that project. The database password, service-role
+key and APNs key never enter this repo.
+
+## Layout
+
+```
+supabase/functions/api/index.ts      routes: parse → core → respond
+supabase/functions/api/core/         the protocol's rules and the container — no I/O, no framework
+supabase/functions/api/apns.ts       push, straight to Apple; a logged no-op until the APNs secrets exist
+supabase/migrations/                 schema · RLS on, zero policies · checkin() · pg_cron jobs
+```
+
+## Test, on the Mac
+
+```bash
+npm test          # core rules + the shared vectors in docs/testvectors — Node only, no install
+npm run check     # deno check + lint of the whole function
+```
+
+Nothing is installed into this folder: it lives in a synced drive, so Deno and
+the Supabase CLI come through `npx` with their caches elsewhere.
+
+## Deploy
+
+Each step changes the live project. The database password is asked for and
+never stored here.
+
+```bash
+npm run supabase -- db push                          # the migration
+npm run supabase -- functions deploy api --use-api   # --use-api: no Docker needed
+npm run supabase -- secrets set TICK_SECRET=<random>
+```
+
+Then, once, in the SQL editor — the clock's address and its secret go into Vault:
+
+```sql
+select vault.create_secret('https://cjwmemfxvsrlqncieseq.supabase.co/functions/v1/api/tick', 'dadbox_tick_url');
+select vault.create_secret('<the same random TICK_SECRET>', 'dadbox_tick_secret');
+```
+
+Tokens: `python3 ../tools/mint_token.py box` prints a token once and the SQL
+that stores its hash. APNs secrets (`APNS_KEY_P8`, `APNS_KEY_ID`,
+`APNS_TEAM_ID`, `APNS_TOPIC`) follow when the Apple Developer account exists.
+Exercise everything with [`../tools/fakebox`](../tools/fakebox/fakebox.py);
+`fakebox.py --as parent-a setup-code` prints what the iOS app's setup screen asks for.
 
 ## Job
 
@@ -30,7 +80,7 @@ the only genuine unknown on the day the parts land.
 
 ## Endpoints
 
-See [../docs/PROTOCOL.md](../docs/PROTOCOL.md). All are stubs returning 501.
+See [../docs/PROTOCOL.md](../docs/PROTOCOL.md) v0.3. All implemented and, on 2026-09-22, exercised against the live project with the fake box: dropped-link resume, shuffled and repeated chunks, Range download, mute with who-set-what, `played` flowing back, the box-late alert raising once and clearing. Not yet: APNs (no key yet).
 
 ## Decided
 

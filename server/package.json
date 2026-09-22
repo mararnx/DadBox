@@ -1,19 +1,12 @@
 {
   "name": "dadbox-server",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
+  "description": "Scripts only. The function runs on Deno at Supabase; nothing is installed here — this repo lives in a synced folder, so tools come through npx and keep their caches outside it.",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js"
-  },
-  "dependencies": {
-    "fastify": "^5.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22.0.0",
-    "tsx": "^4.0.0",
-    "typescript": "^5.6.0"
+    "test": "node --test 'supabase/functions/api/core/*.test.ts'",
+    "check": "cd supabase/functions/api && DENO_DIR=$HOME/.cache/deno-dadbox npx --yes deno@2 check --no-lock index.ts && DENO_DIR=$HOME/.cache/deno-dadbox npx --yes deno@2 lint",
+    "supabase": "npx --yes supabase@2.117.0"
   }
 }

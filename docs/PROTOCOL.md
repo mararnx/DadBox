@@ -38,8 +38,13 @@ token reaches only messages where that parent is `from` or `to`.
 
 The box is a Linux machine ([ADR 0014](decisions/0014-raspberry-pi-zero-2w.md));
 encoding Opus is not a constraint of any kind. **The server never transcodes**
-— it cannot read the audio. The iOS app plays Ogg Opus itself; the box plays
-whatever the app sends.
+— it cannot read the audio. The iOS app plays Ogg Opus itself — iOS 26 reads it
+natively through `AVAudioPlayer` (verified 2026-09-21, `ios/DESIGN.md` § Audio);
+the box plays whatever the app sends.
+
+Byte-exact examples of the container and the encryption below are in
+[testvectors/container-v1.json](testvectors/container-v1.json). Every
+implementation — box, app, fake box — must produce and accept them.
 
 ### Container
 
@@ -134,11 +139,20 @@ All paths below are relative to one configured base URL (for Supabase:
 ### Upload (either direction)
 
 ```
-PUT  /messages/{id}                      metadata; idempotent create
+PUT  /messages/{id}                      metadata; idempotent create → the message object
 PUT  /messages/{id}/chunks/{seq}         raw bytes; header X-Chunk-Total
-GET  /messages/{id}/upload-state         → { "received": [0,1,2,5] }
-POST /messages/{id}/complete             server verifies crc32, sets uploaded
+GET  /messages/{id}/upload-state         → { "received": [0,1,2,5], "complete": false }
+POST /messages/{id}/complete             server verifies crc32, sets uploaded → the message object
 ```
+
+The metadata body is the message object without `id`, `from`, `state` and the
+server timestamps: `seq`, `to`, `created_at`, `time_ok`, `duration_ms`,
+`codec`, `key_id`, `bytes` — `bytes` being the size of the whole container.
+The same `id` with different metadata is `409`. `X-Chunk-Total` is
+⌈bytes / 32768⌉; every chunk is exactly 32 KB except the last. `complete`
+answers `409 { "missing": [3,4] }` while chunks are missing and `422` when the
+assembled container contradicts its metadata, is not encrypted, or fails its
+crc — and `200` again, harmlessly, on every retry after it has succeeded.
 
 Chunk size **32 KB**. Chunks may arrive out of order and may repeat. On boot,
 the box asks `upload-state` for every message in `uploading` and resumes from
@@ -147,14 +161,14 @@ the gaps. A message is invisible to the recipient until `complete` succeeds.
 ### Download
 
 ```
-GET  /messages/{id}/audio                Range supported; first fetch by the recipient → delivered
+GET  /messages/{id}/audio                Range supported; delivered once the recipient has been sent the last byte
 POST /messages/{id}/played               recipient only; feedback for the sender, starts no clock
 ```
 
 ### Archive and state (parents only)
 
 ```
-GET    /messages?cursor={c}&limit={n}    → { "messages": [ … ], "cursor": "…", "max_seq": 41 }
+GET    /messages?cursor={c}&limit={n}    → { "messages": [ … ], "cursor": "…", "more": false, "max_seq": 41 }
 GET    /messages/{id}                    one message object — refresh its state
 GET    /device/status                    → { "telemetry": {…}, "last_checkin_at": "…", "late": false,
                                              "settings": {…}, "settings_meta": { "mute.a": { "by": "parent-a", "at": "…" } } }
@@ -162,9 +176,11 @@ PATCH  /settings                         partial settings object → the same sh
 PUT    /push-token                       { "apns": "<hex>", "environment": "production" | "sandbox" }
 ```
 
-- `GET /messages` returns the caller's thread ordered by server `uploaded_at`.
-  `cursor` is opaque; omit it to start from the
-  beginning, pass the last one back to get only what is new or changed.
+- `GET /messages` returns the caller's thread **in order of last change** —
+  a message reappears when its state moves — so the app orders the timeline
+  itself, by `uploaded_at`. `cursor` is opaque; omit it to start from the
+  beginning, pass the last one back to get only what is new or changed. Keep
+  asking while `more` is true.
   `max_seq` is the highest `seq` the server has seen **from the caller**, so a
   reinstalled app continues its counter instead of reusing one.
 - `PATCH /settings`: a parent may set `poll`, `quiet_hours`, `led_brightness`,
@@ -292,7 +308,5 @@ persists; the app shows who set it and when. Both are enforced on the device.
 ## Open
 
 - Key ceremony and rotation procedure (`components/security-privacy.md` Q2).
-- How the iOS app plays Ogg Opus: a small Ogg demuxer into `AVAudioConverter`,
-  or a library.
 - Dock ID for `house`.
 - OTA manifest format (M3).

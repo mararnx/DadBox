@@ -3,8 +3,8 @@
 **Status:** draft, revised 2026-09-21. Decided: one managed host, end-to-end
 encryption, iOS the only client ([ADR 0017](decisions/0017-managed-hosting-e2ee.md));
 archive forever ([ADR 0018](decisions/0018-archive-forever.md)); host:
-Supabase Pro, Zurich. Nothing here is built. PROTOCOL.md is at v0.3 and carries all of this; where
-the two differ, PROTOCOL.md wins.
+Supabase Pro, Zurich. Built and live since 2026-09-22 (`server/`); PROTOCOL.md v0.3 is the contract
+and wins where the two differ.
 
 The job: hold the audio, wake a phone immediately, know whether the box is
 alive — without being able to listen, and without ever throwing a message away.
@@ -26,8 +26,9 @@ alive — without being able to listen, and without ever throwing a message away
          never on the host
 ```
 
-Base URL: `https://<project>.supabase.co/functions/v1/api` — PROTOCOL.md paths
-are relative to it. No custom domain needed (a paid add-on; the URL is
+Base URL: `https://cjwmemfxvsrlqncieseq.supabase.co/functions/v1/api` —
+PROTOCOL.md paths are relative to it. (Project `dadBox`, created 2026-09-21,
+`eu-central-2`; the ref is an address, not a secret.) No custom domain needed (a paid add-on; the URL is
 configuration on the box and in the app, not a promise).
 
 Two clients, one contract. No accounts, no login page, no web UI: three

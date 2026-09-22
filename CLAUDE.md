@@ -12,7 +12,7 @@ before making assumptions about the design.
 | --- | --- | --- |
 | Shopping | `hardware/SHOPPING-LIST.md` | bench parts ordered 2026-09-21; antenna waits for the modem HAT, battery parts for a current measurement |
 | Box | `box/` (Python service on a Pi Zero 2 W, Raspberry Pi OS Lite) | parts arriving; pure logic is testable on the Mac now |
-| Server | `server/` — Supabase Pro (Edge Functions, Postgres, Storage, `pg_cron`); see `docs/SERVER-CONCEPT.md`, ADR 0017/0018 (E2EE, archive forever) | nothing — first spike: APNs from an Edge Function |
+| Server | `server/` — live on Supabase Pro, Zurich (Edge Function, Postgres, Storage, `pg_cron`); `docs/SERVER-CONCEPT.md`, ADR 0017/0018. Drive it with `tools/fakebox` | APNs key for push |
 | iOS | `ios/` (SwiftUI, APNs) | server endpoints, Apple dev account |
 
 ## Working on the box

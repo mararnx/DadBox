@@ -9,14 +9,29 @@ seconds or until a regex — boot logs before Tailscale is up, or when Wi-Fi is
 off. Once SSH works, `ssh dadbox` replaces it.
 See [docs/DEV-PROCESS.md](../docs/DEV-PROCESS.md). Needs `pyserial`.
 
-## Wanted first — `fakebox`
+## `fakebox/fakebox.py` — the box, without the box
 
-A script that impersonates the box against the server: uploads a message,
-polls for inbound, reports telemetry, and can pretend to be offline or flat.
+Impersonates the box against the server — and, with `--as parent-a`, the app —
+so a message can make the full round trip before any hardware or Xcode exists.
+Uses the box's own `dadbox.container`, so what it sends is byte-for-byte what
+the real box will send.
 
-This is the highest-value thing in the repo before the parts arrive. It unblocks
-the server and iOS streams completely, and it doubles as the test rig for
-everything the real firmware will later have to get right.
+```bash
+~/.venvs/dadbox/bin/python tools/fakebox/fakebox.py send --seconds 60 --drop-after 1   # the link drops…
+~/.venvs/dadbox/bin/python tools/fakebox/fakebox.py resume                             # …and the upload resumes
+~/.venvs/dadbox/bin/python tools/fakebox/fakebox.py --as parent-a send                 # the app answers
+~/.venvs/dadbox/bin/python tools/fakebox/fakebox.py inbox --halves --play              # Range download, decrypt, played
+~/.venvs/dadbox/bin/python tools/fakebox/fakebox.py --as parent-a list
+```
+
+Also: `checkin --fault storage`, `--no-mains --battery 15`, `--locked`,
+`send --shuffle --repeat` (out-of-order and repeated chunks), `run`. Config in
+`tools/fakebox/.env` (gitignored; see `.env.example`). The venv lives outside
+the repo: `python3 -m venv ~/.venvs/dadbox && ~/.venvs/dadbox/bin/pip install cryptography requests pytest`.
+
+## `mint_token.py` — bearer tokens
+
+Prints a 256-bit token once, and the SQL that stores only its SHA-256.
 
 ## Later
 
