@@ -74,8 +74,10 @@ class AudioBackend(Protocol):
     def encode(self, pcm_path: str) -> Tuple[bytes, int]:
         """Trimmed PCM → (Ogg Opus bytes, duration_ms). Raises on failure."""
 
-    def play(self, audio: bytes, codec: int, volume: int, on_end: Callable[[bool], None]) -> Callable[[], None]:
-        """Decode and play; returns a stop function. Raises the amp gate itself."""
+    def play(self, audio: bytes, codec: int, volume: int, on_end: Callable[[bool], None],
+             duration_ms: int = 0) -> Callable[[], None]:
+        """Decode and play; returns a stop function. `duration_ms` is the header's
+        word on the length — the simulator paces itself by it."""
 
     def chime(self, volume: int) -> None: ...
 

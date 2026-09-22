@@ -183,7 +183,8 @@ class PiAudio:
             capture_output=True, check=True)
         return out.stdout, duration_ms
 
-    def play(self, audio: bytes, codec: int, volume: int, on_end: Callable[[bool], None]) -> Callable[[], None]:
+    def play(self, audio: bytes, codec: int, volume: int, on_end: Callable[[bool], None],
+             duration_ms: int = 0) -> Callable[[], None]:
         gain = max(0, min(100, volume)) / 100.0
         dec = subprocess.Popen(
             ["ffmpeg", "-v", "error", "-i", "pipe:0", "-af", f"volume={gain}", "-f", "s16le", "-ar", str(RATE), "-ac", "1", "-"],

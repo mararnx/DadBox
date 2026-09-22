@@ -120,7 +120,8 @@ class AudioWorker:
         self.amp.set(True)
         try:
             with self._lock:
-                self._stop_play = self.backend.play(audio, header.codec, volume, on_end)
+                self._stop_play = self.backend.play(audio, header.codec, volume, on_end,
+                                                    duration_ms=header.duration_ms)
         except Exception as e:                           # noqa: BLE001
             log.error("play %s failed: %s", message_id, e)
             self.amp.set(False)

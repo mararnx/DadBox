@@ -37,7 +37,7 @@ def test_playing_is_steady_green_and_record_is_dark():
 def test_record_pulses_dimly_when_ready_and_not_when_locked():
     plan = LightsPlan(lights=Lights.IDLE, brightness=100)
     levels = {round(render(plan, t).record[2], 3) for t in [0, 0.75, 1.5, 2.25]}
-    assert len(levels) > 1 and max(levels) <= 0.25 and min(levels) > 0      # dim, pulsing, never off
+    assert len(levels) > 1 and max(levels) <= 0.5 and min(levels) > 0       # dim, pulsing, never off
     assert all(render(plan, t).record[0] == 0.0 for t in [0, 0.75, 1.5])    # and never any red
     assert render(LightsPlan(lights=Lights.WAITING, brightness=100), 0.75).record[2] > 0   # also while a message waits
     assert render(LightsPlan(lights=Lights.IDLE, brightness=100, locked=True), 0.75).record == (0.0, 0.0, 0.0)

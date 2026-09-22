@@ -262,9 +262,10 @@ document.addEventListener('keyup', e => {
 
 // --- drawing ---------------------------------------------------------------------------------
 function ringStyle(el, rgb, glow) {
-  const [r, gg, b] = rgb;
+  // Perceptual: an LED at 10 % PWM looks far brighter than 10 % on a screen.
+  const [r, gg, b] = rgb.map(v => Math.sqrt(Math.max(0, v)));
   const lum = Math.max(r, gg, b);
-  if (lum < 0.02) { el.style.borderColor = 'rgba(20,20,20,.9)'; el.style.boxShadow = 'none'; return; }
+  if (lum < 0.05) { el.style.borderColor = 'rgba(20,20,20,.9)'; el.style.boxShadow = 'none'; return; }
   const c = `rgb(${Math.round(40 + 215 * r)}, ${Math.round(40 + 215 * gg)}, ${Math.round(40 + 215 * b)})`;
   el.style.borderColor = c;
   el.style.boxShadow = `0 0 ${Math.round(6 + 24 * lum)}px ${Math.round(2 + 8 * lum)}px rgba(${Math.round(255*r)},${Math.round(255*gg)},${Math.round(255*b)},${(0.25 + 0.6 * lum).toFixed(2)})`;
@@ -307,8 +308,8 @@ function draw(s) {
   tog('w-coverage', w.coverage, w.coverage ? 'coverage: yes' : 'coverage: NONE');
   tog('w-server', !w.server_down, w.server_down ? 'server: DOWN' : 'server: reachable');
   tog('w-simdown', b.link_worker.simulated_down, b.link_worker.simulated_down ? 'sim link: DOWN' : 'sim link: up');
-  $('modem-text').textContent = `modem ${w.modem_powered ? 'powered' : 'OFF'}`;
   tog('w-silent', b.doorbell_worker.silent, b.doorbell_worker.silent ? 'doorbell: HALF-OPEN' : 'doorbell: normal');
+  $('modem-text').textContent = `modem ${w.modem_powered ? 'powered' : 'OFF'}`;
   tog('w-mains', w.mains, w.mains ? 'USB power: present' : 'USB power: ABSENT');
   tog('w-batt', w.battery_pct !== null, w.battery_pct === null ? 'battery: none (ADR 0019)' : 'battery: fitted');
   $('w-pct').disabled = w.battery_pct === null; if (document.activeElement !== $('w-pct')) $('w-pct').value = w.battery_pct ?? 0;

@@ -98,8 +98,9 @@ class SimAudio:
             return out.stdout, duration_ms
         return wav(pcm), duration_ms                  # no ffmpeg on this Mac: a WAV labelled as codec 2 (sim only)
 
-    def play(self, audio: bytes, codec: int, volume: int, on_end: Callable[[bool], None]) -> Callable[[], None]:
-        duration_s = _duration_s(audio, codec)
+    def play(self, audio: bytes, codec: int, volume: int, on_end: Callable[[bool], None],
+             duration_ms: int = 0) -> Callable[[], None]:
+        duration_s = duration_ms / 1000 if duration_ms > 0 else _duration_s(audio, codec)
         stop = threading.Event()
         self._stop_play = stop
         self.playing = {"audio": audio, "codec": codec, "volume": volume, "started": self.clock.now(), "duration_s": duration_s}

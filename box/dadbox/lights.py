@@ -25,7 +25,7 @@ RED: RGB = (1.0, 0.0, 0.0)
 GREEN: RGB = (0.0, 1.0, 0.0)      # Play: pulsing = a new message, steady = playing (ADR 0020)
 READY: RGB = (0.0, 0.2, 1.0)      # Record: dim slow pulse = ready to record. No red: that channel is the mic pin
 LOCK_BLINK_COLOUR: RGB = (0.0, 1.0, 1.0)   # both blink twice, bright cyan; no red, so the mic pin is never touched by a cue
-READY_LEVEL = 0.22                # the ready pulse peaks here (× brightness); dim by design
+READY_LEVEL = 0.5                 # the ready pulse peaks here (× brightness); dim next to a steady button
 READY_PERIOD_S = 3.0
 
 GOT_IT_S = 0.6                    # one green pulse (ARCHITECTURE.md § Indication)
@@ -92,7 +92,7 @@ def render(plan: LightsPlan, t: float) -> Frame:
     else:
         # Ready to record: a dim, slow pulse on Record whenever a press would start a recording.
         if not plan.locked:
-            record = _scale(READY, k * READY_LEVEL * (0.25 + 0.75 * _breathe(t, READY_PERIOD_S)))
+            record = _scale(READY, k * READY_LEVEL * (0.35 + 0.65 * _breathe(t, READY_PERIOD_S)))
         # 4. Waiting: play button pulses green; resting (dim) after 2 h.
         if plan.lights in (Lights.WAITING, Lights.GOT_IT):
             level = RESTING_LEVEL if plan.resting else (RESTING_LEVEL + (1 - RESTING_LEVEL) * _breathe(t))
