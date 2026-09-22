@@ -34,7 +34,7 @@ SIM_KEY = bytes.fromhex("6461646206f8b0d2c1a3e5f7091b2d3f4a5c6e7081920b3c4d5e6f7
 
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--port", type=int, default=8765)
+    p.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8765")), help="default: $PORT or 8765")
     p.add_argument("--data", default=os.path.expanduser("~/.dadbox-sim"))
     p.add_argument("--speed", type=float, default=1.0)
     p.add_argument("--voice", help="a 16 kHz mono WAV to record 'from' instead of the synthetic voice")
