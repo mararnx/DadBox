@@ -153,6 +153,8 @@ class LinkWorker:
         self._partial: Dict[str, bytes] = {}      # download resume buffers
         self._checkin_done = threading.Event()
         self.last_round_ok: Optional[bool] = None
+        self._started = 0                         # rounds begun; `request_checkin` waits for one begun after it
+        self._results: Dict[int, bool] = {}
         self.thread = threading.Thread(target=self._run, name="link", daemon=True)
 
     # --- control from the service ---------------------------------------------------------
@@ -167,9 +169,20 @@ class LinkWorker:
             self._wake.set()
 
     def request_checkin(self, timeout_s: float = 20.0) -> Optional[bool]:
-        self._checkin_done.clear()
+        """Wake the worker and wait for a round that *starts after this call*:
+        a round already in flight began before whatever the caller just changed."""
+        with self._lock:
+            want = self._started + 1
+        deadline = self.clock.now() + timeout_s
         self._wake.set()
-        return self.last_round_ok if self.clock.wait(self._checkin_done, timeout_s) else None
+        while self.clock.now() < deadline:
+            with self._lock:
+                done = [ok for n, ok in self._results.items() if n >= want]
+            if done:
+                return done[0]
+            self._checkin_done.clear()
+            self.clock.wait(self._checkin_done, min(1.0, max(0.0, deadline - self.clock.now())))
+        return None
 
     def start(self) -> None:
         self.thread.start()
@@ -192,8 +205,15 @@ class LinkWorker:
                 if self._stop.is_set():
                     break
             self._wake.clear()
+            with self._lock:
+                self._started += 1
+                n = self._started
             ok = self._round()
             self.last_round_ok = ok
+            with self._lock:
+                self._results[n] = ok
+                for old in [k for k in self._results if k < n - 8]:
+                    del self._results[old]
             self._checkin_done.set()
             with self._lock:
                 if ok:

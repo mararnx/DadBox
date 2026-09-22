@@ -97,3 +97,34 @@ def test_no_coverage_is_a_modem_fault_and_never_a_give_up(tmp_path):
     assert any(isinstance(e, c.FaultEvent) and e.fault.name == "MODEM" and e.active for e in ev)
     worker.modem.coverage = True
     assert worker._round() is True
+
+
+def test_request_checkin_reports_a_round_begun_after_the_request(tmp_path):
+    """A round already in flight started before the caller's change; its result must not be reported."""
+    import threading
+    clock, srv, store, events, transport, worker = setup(tmp_path)
+    gate = threading.Event()
+    real_round = worker._round
+    calls = []
+
+    def slow_round():
+        calls.append(1)
+        if len(calls) == 1:
+            gate.wait(5)                           # the first round is in flight when the request arrives
+            return True
+        return False                               # the round after the request fails
+    worker._round = slow_round
+    worker.start()
+    try:
+        while not calls:
+            clock.sleep(0.01)
+        result = {}
+        t = threading.Thread(target=lambda: result.setdefault("ok", worker.request_checkin(30)))
+        t.start()
+        clock.sleep(0.2)
+        gate.set()                                 # the old round finishes "ok"…
+        t.join(10)
+        assert result["ok"] is False               # …but the answer is the round that began afterwards
+    finally:
+        worker.stop()
+        worker._round = real_round

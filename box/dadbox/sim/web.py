@@ -19,6 +19,7 @@ from ..hal import Hardware
 from ..service import Service
 from ..store import Store
 from .audio import SimAudio
+from .net import Network
 from .parent import Parent
 from .server import FakeServer
 
@@ -32,9 +33,11 @@ def _iso(wall: float) -> str:
 
 class SimApp:
     def __init__(self, *, svc: Service, hw: Hardware, clock: FakeClock, store: Store, audio: SimAudio,
-                 server: Optional[FakeServer], parent: Optional[Parent], real_url: Optional[str] = None):
+                 server: Optional[FakeServer], parent: Optional[Parent], real_url: Optional[str] = None,
+                 net: Optional[Network] = None):
         self.svc, self.hw, self.clock, self.store, self.audio = svc, hw, clock, store, audio
         self.server, self.parent, self.real_url = server, parent, real_url
+        self.net = net or Network(hw.modem.is_up)
         self.pushes_seen = 0
         if server is not None:
             threading.Thread(target=self._cron, name="pg_cron", daemon=True).start()
@@ -70,7 +73,8 @@ class SimApp:
         })
         world = {"coverage": modem.coverage, "modem_powered": modem.powered, "mains": power.mains,
                  "battery_pct": power.battery_pct, "charging": power.charging, "speaking": self.audio.speaking,
-                 "server_down": bool(self.server and self.server.down), "real_server": self.real_url,
+                 "fail_capture": self.audio.fail_capture,
+                 "server_down": self.net.server_down, "real_server": self.real_url,
                  "have_ffmpeg": self.audio.encoded_real_opus}
         srv: Dict[str, Any] = {}
         if self.server is not None:
@@ -92,8 +96,10 @@ class SimApp:
     def world(self, b: Dict[str, Any]) -> Dict[str, Any]:
         if "coverage" in b:
             self.hw.modem.coverage = bool(b["coverage"])
-        if "server_down" in b and self.server is not None:
-            self.server.down = bool(b["server_down"])
+        if "server_down" in b:                  # both modes: the gate (real server) and the fake server's own switch
+            self.net.server_down = bool(b["server_down"])
+            if self.server is not None:
+                self.server.down = self.net.server_down
         if "speaking" in b:
             self.audio.speaking = bool(b["speaking"])
         if "fail_capture" in b:

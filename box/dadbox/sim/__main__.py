@@ -23,7 +23,9 @@ from ..hal import Hardware
 from ..link import Client, RequestsTransport
 from ..service import Service
 from ..store import Store
+from ..doorbell import connect_ws
 from .audio import SimAudio
+from .net import GatedTransport, Network, gated_connect
 from .hal import (FakeAmpGate, FakeButtonLights, FakeButtons, FakeMicGate, FakeModem, FakePower, FakeStatusLeds)
 from .parent import Parent
 from .server import FakeServer
@@ -58,7 +60,7 @@ def main() -> int:
                     cfg.setdefault(k.strip(), v.strip())
         real_url = cfg["DADBOX_URL"]
         store.put_key(1, bytes.fromhex(cfg["DADBOX_KEY_1"]))
-        client = Client(RequestsTransport(real_url, cfg["DADBOX_TOKEN_BOX"]))
+        transport = RequestsTransport(real_url, cfg["DADBOX_TOKEN_BOX"])
     else:
         if 1 not in store.keys():
             store.put_key(1, SIM_KEY)
@@ -69,9 +71,15 @@ def main() -> int:
     audio = SimAudio(clock, a.voice)
     hw = Hardware(buttons=FakeButtons(), lights=FakeButtonLights(), status=FakeStatusLeds(), mic=FakeMicGate(),
                   amp=FakeAmpGate(), modem=FakeModem(), power=FakePower(mains=True, battery_pct=a.battery), audio=audio)
-    svc = Service(hw=hw, store=store, clock=clock, client=client, has_battery=a.battery is not None,
-                  **({} if server is None else {"doorbell_connect": lambda url: server.doorbell_connect(url, hw.modem.is_up)}))
-    app = SimApp(svc=svc, hw=hw, clock=clock, store=store, audio=audio, server=server, parent=parent, real_url=real_url)
+    net = Network(hw.modem.is_up)
+    if server is None:     # the real server: coverage and "server down" act through the gate
+        client = Client(GatedTransport(transport, net))
+        doorbell = {"doorbell_connect": gated_connect(connect_ws, net)}
+    else:                  # the fake server models its own outages and the modem's coverage
+        doorbell = {"doorbell_connect": lambda url: server.doorbell_connect(url, hw.modem.is_up)}
+    svc = Service(hw=hw, store=store, clock=clock, client=client, has_battery=a.battery is not None, **doorbell)
+    app = SimApp(svc=svc, hw=hw, clock=clock, store=store, audio=audio, server=server, parent=parent,
+                 real_url=real_url, net=net)
     ctl = CtlServer(str(Path(a.data) / "ctl.sock"), svc.command)
 
     svc.start()
