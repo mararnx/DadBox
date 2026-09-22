@@ -1,8 +1,10 @@
 # ADR 0021 — The doorbell: a ring that carries nothing
 
 **Date:** 2026-09-22
-**Status:** proposed — revises the mains and conversation-window rows of
-[ADR 0015](0015-adaptive-polling.md); battery-idle is unchanged
+**Status:** accepted 2026-09-22 — revises the mains row of
+[ADR 0015](0015-adaptive-polling.md); the battery rows are unchanged.
+Implemented in the box, the simulator and the server; the server migration
+waits to be deployed, and the bench measurements below are still open.
 
 ## Context
 
@@ -61,14 +63,20 @@ door with an ordinary check-in.**
 7. **Rings are rate-limited by the box.** At most one ring-triggered round
    per 5 s; rings during a round coalesce into one more round (the link
    worker's existing wake flag already does this).
-8. **Battery-idle is untouched.** The modem is off between check-ins, so
-   there is no socket. The doorbell opens whenever the modem is on anyway —
-   mains, or a conversation window on battery.
+8. **Mains only, for now.** Other products keep their heartbeat at 5 to 28
+   minutes; ours is 25 s because Realtime drops sockets that stop beating,
+   not because of the carrier. On mains that costs nothing. On battery it
+   would wake the radio more than twice as often as polling every minute,
+   so the doorbell stays closed on battery, even in a conversation window,
+   until the battery exists and its draw has been measured
+   ([ADR 0019](0019-mains-first-battery-deferred.md)). Both battery rows of
+   ADR 0015 are unchanged.
 
 | Box state | Modem | Doorbell | Timer check-in |
 | --- | --- | --- | --- |
-| Mains, or battery in a conversation window — doorbell joined | on | open | `backstop_minutes` (10) |
-| Mains, or battery in a conversation window — doorbell not joined | on | reconnecting | `active_minutes` (1) |
+| Mains, doorbell joined | on | open | `backstop_minutes` (10) |
+| Mains, doorbell not joined | on | reconnecting | `active_minutes` (1) |
+| Battery, conversation window | on | closed | `active_minutes` (1) |
 | Battery, idle | off between check-ins | closed | `idle_minutes` (30) |
 
 Plus, in every row: a check-in at once after a ring, a doorbell join, an
@@ -113,6 +121,24 @@ place, or show the child anything. The worst case is today.
 - **SMS wake.** Rejected in [ADR 0015](0015-adaptive-polling.md) and still
   rejected: gateway account, per-message cost, a number anyone can text.
 
+## Prior art
+
+Every product that needs fast delivery to a device holds a connection open
+from the device, and none trusts it alone:
+
+- **APNs and FCM** keep one socket per phone, beat about every 28 min on
+  mobile, and recommend empty "send-to-sync" pushes for sensitive data.
+- **Alexa** holds an HTTP/2 downchannel, pings every 5 min, and resends its
+  state after every reconnect.
+- **Yoto** players take commands over MQTT on AWS IoT.
+- **Particle** holds a UDP session with a keepalive tuned to the carrier's
+  NAT: 23 min on its own SIM, 30 s to minutes on others.
+- **Blues Notecard** is the closest match: in continuous mode a second
+  long-poll only announces that something changed, and the data then syncs
+  over the main connection.
+- **LwM2M queue mode** holds nothing; the server may speak just after the
+  device's own uplink. That is our battery-idle row.
+
 ## Consequences
 
 - **Parent → child on mains: seconds**, not up to a minute. Settings changed
@@ -127,9 +153,10 @@ place, or show the child anything. The worst case is today.
 - **Telemetry gains `doorbell: true | false`** so the app can say "instant"
   or "every minute", and so a doorbell that never joins in the field is
   visible to an adult.
-- **One new dependency on the box**: a small synchronous WebSocket client
-  (`websocket-client`, pure Python). One new server piece: a trigger and two
-  Vault secrets. Realtime being down degrades to ADR 0015, nothing more.
+- **No new dependency on the box**: a small RFC 6455 client on the standard
+  library (`box/dadbox/doorbell.py`). One new server piece: a migration with
+  two triggers and one Vault secret, the topic, generated on the server.
+  Realtime being down degrades to ADR 0015, nothing more.
 - **The simulator** gets an in-process doorbell next to its fake server, so
   every rule above is testable on the Mac.
 

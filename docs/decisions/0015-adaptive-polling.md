@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-21
 **Status:** accepted — while the box has no battery ([ADR 0019](0019-mains-first-battery-deferred.md)) only the mains row applies
-— the mains and conversation-window rows are revised by the doorbell, [ADR 0021](0021-doorbell.md) (proposed)
+— the mains row is revised by the doorbell, [ADR 0021](0021-doorbell.md)
 
 ## Context
 

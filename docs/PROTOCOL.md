@@ -4,7 +4,7 @@
 > mute); the box keeps its last played message so Play can repeat it. Server
 > and app: drop `mute` from `PATCH /settings` and from the settings object.
 >
-> **2026-09-22, ADR 0021 (proposed):** the doorbell. The check-in response
+> **2026-09-22, ADR 0021:** the doorbell, on mains only. The check-in response
 > gains `doorbell`, telemetry gains `doorbell`, `poll` gains
 > `backstop_minutes`. A box or server that ignores all three is still correct.
 
@@ -193,7 +193,7 @@ PUT    /push-token                       { "apns": "<hex>", "environment": "prod
   asking while `more` is true.
   `max_seq` is the highest `seq` the server has seen **from the caller**, so a
   reinstalled app continues its counter instead of reusing one.
-- `PATCH /settings`: a parent may set `poll`, `quiet_hours`, `led_brightness`
+- `PATCH /settings`: a parent may set `poll` (including `backstop_minutes`, 5-30), `quiet_hours`, `led_brightness`
   and `volume`. Anything else → 403. Every field records who set it and when.
 - `PUT /push-token` is idempotent per identity and device token.
 
@@ -224,8 +224,9 @@ chosen by the box from `settings.poll`:
 
 | Box state | Modem | Doorbell | Interval |
 | --- | --- | --- | --- |
-| On mains, or on battery in a conversation window — doorbell joined | stays on | open | `backstop_minutes` (default 10) |
-| On mains, or on battery in a conversation window — doorbell not joined | stays on | reconnecting | `active_minutes` (default 1) |
+| On mains, doorbell joined | stays on | open | `backstop_minutes` (default 10, app-set 5-30) |
+| On mains, doorbell not joined | stays on | reconnecting | `active_minutes` (default 1) |
+| On battery, conversation window open | stays on | closed | `active_minutes` |
 | On battery, idle | off between check-ins | closed | `idle_minutes` (default 30, app-set 5-60) |
 
 A conversation window opens when an upload completes or the child plays a

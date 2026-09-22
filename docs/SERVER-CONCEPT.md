@@ -19,7 +19,8 @@ alive — without being able to listen, and without ever throwing a message away
   bearer token: parent-a     │  audio     Storage — private bucket, ciphertext,      │    never content
                              │            forever                                    │
                              │  clock     pg_cron, every minute ─► pg_net ─► `tick`  │
-                             │  unused    Auth, Realtime, the auto-generated REST API│
+                             │  doorbell  Realtime broadcast, rung by a trigger     │
+                             │  unused    Auth, the auto-generated REST API          │
                              └───────────────────────────────────────────────────────┘
 
   Keys:  box /data/keys (root 0600)  ·  iPhone Keychain (iCloud-synced)  ·  paper, in a drawer
@@ -177,6 +178,9 @@ USD 25/month, flat; nothing here approaches a Pro quota. Set the spend cap on.
    answers; `Range` passes through on download.
 5. The project really is in `eu-central-2`, and functions run there
    (`x-region`), not wherever the caller is nearest.
+6. The doorbell ([ADR 0021](decisions/0021-doorbell.md)): the trigger's
+   `realtime.send()` reaches a box joined to the public topic, only after
+   commit, and "Allow public access" is on.
 
 ## Questions
 
