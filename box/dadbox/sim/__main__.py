@@ -69,7 +69,8 @@ def main() -> int:
     audio = SimAudio(clock, a.voice)
     hw = Hardware(buttons=FakeButtons(), lights=FakeButtonLights(), status=FakeStatusLeds(), mic=FakeMicGate(),
                   amp=FakeAmpGate(), modem=FakeModem(), power=FakePower(mains=True, battery_pct=a.battery), audio=audio)
-    svc = Service(hw=hw, store=store, clock=clock, client=client, has_battery=a.battery is not None)
+    svc = Service(hw=hw, store=store, clock=clock, client=client, has_battery=a.battery is not None,
+                  **({} if server is None else {"doorbell_connect": lambda url: server.doorbell_connect(url, hw.modem.is_up)}))
     app = SimApp(svc=svc, hw=hw, clock=clock, store=store, audio=audio, server=server, parent=parent, real_url=real_url)
     ctl = CtlServer(str(Path(a.data) / "ctl.sock"), svc.command)
 

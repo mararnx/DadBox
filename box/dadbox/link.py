@@ -8,7 +8,7 @@ posts what it learned as events. Order of a round:
     2. upload everything in the outbox, oldest seq first, resuming from
        `upload-state`; delete locally only on `complete` 2xx (ADR 0010)
     3. report messages the child has played; then drop all but the newest (replay)
-    4. check in: telemetry up, settings and inbox ids down
+    4. check in: telemetry up, settings, inbox ids and the doorbell address down
     5. download every inbox id not on disk, crc-checked, and post `Downloaded`
     6. modem off if the plan says so; sleep until the next round or a wake
 
@@ -111,11 +111,14 @@ class Client:
             return True
         raise LinkError(f"complete {status}: {body}")
 
-    def checkin(self, telemetry: Dict[str, Any]) -> Tuple[Settings, List[str]]:
+    def checkin(self, telemetry: Dict[str, Any]) -> Tuple[Settings, List[str], Optional[Dict[str, str]]]:
+        """(settings, inbox ids, doorbell {url, topic} or None). An absent or
+        malformed doorbell means none: the box polls (ADR 0021)."""
         status, body = self._json("POST", "/device/checkin", telemetry)
         if status >= 400 or not isinstance(body, dict):
             raise LinkError(f"checkin {status}: {body}")
-        return Settings.from_json(body.get("settings")), [m for m in body.get("inbox", []) if isinstance(m, str)]
+        return (Settings.from_json(body.get("settings")), [m for m in body.get("inbox", []) if isinstance(m, str)],
+                parse_doorbell(body.get("doorbell")))
 
     def download(self, message_id: str, have: bytes = b"") -> bytes:
         """Range-resumable: `have` is what an earlier attempt already got."""
@@ -228,9 +231,11 @@ class LinkWorker:
                 self.store.inbox_mark(mid, reported=True)
                 self.post(PlayedReported(mid))
             self.store.inbox_prune_played(keep=1)
-            settings, inbox = self.client.checkin(self.telemetry())
+            settings, inbox, doorbell = self.client.checkin(self.telemetry())
             self.store.save_settings(settings.to_json())
-            self.post(Checkin(True, settings, tuple(inbox), rssi=self.modem.rssi()))
+            if doorbell != self.store.doorbell_json():
+                self.store.save_doorbell(doorbell)
+            self.post(Checkin(True, settings, tuple(inbox), rssi=self.modem.rssi(), doorbell=doorbell))
             broken = set(self.store.inbox_broken())
             for mid in inbox:
                 if mid in broken:
@@ -265,6 +270,16 @@ class LinkWorker:
         self._partial.pop(mid, None)
         self.store.inbox_put(mid, data)
         self.post(Downloaded(mid))
+
+
+def parse_doorbell(d: Any) -> Optional[Dict[str, str]]:
+    if not isinstance(d, dict):
+        return None
+    url, topic = d.get("url"), d.get("topic")
+    if not (isinstance(url, str) and isinstance(topic, str) and topic
+            and url.split("://", 1)[0] in ("wss", "ws", "sim")):
+        return None
+    return {"url": url, "topic": topic}
 
 
 def iso(wall: float) -> str:

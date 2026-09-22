@@ -131,7 +131,7 @@
     <div class="panel">
       <h2>dadboxctl</h2>
       <div class="row">
-        <input type="text" id="ctl" value="state" style="flex:1" placeholder="state | record start|stop | play | inbox | outbox | checkin | lock on|off | led test | modem on|off | sim link down|up">
+        <input type="text" id="ctl" value="state" style="flex:1" placeholder="state | record start|stop | play | inbox | outbox | checkin | lock on|off | led test | modem on|off | sim link down|up | sim doorbell silent|up">
         <button onclick="ctl()">run</button>
       </div>
       <div class="row tabs">
@@ -152,6 +152,7 @@
         <button id="w-coverage" onclick="world({coverage: !S.world.coverage})">coverage</button>
         <button id="w-server" onclick="world({server_down: !S.world.server_down})">server reachable</button>
         <button id="w-simdown" onclick="ctlq(S.box.link_worker.simulated_down ? 'sim link up' : 'sim link down')">sim link</button>
+        <button id="w-silent" title="a half-open doorbell socket: nothing arrives, TCP looks fine" onclick="ctlq(S.box.doorbell_worker.silent ? 'sim doorbell up' : 'sim doorbell silent')">doorbell</button>
         <span class="dim" id="modem-text"></span>
       </div>
       <div class="row">
@@ -286,7 +287,7 @@ function draw(s) {
   $('w-mic').textContent = b.mic ? 'ON (red)' : 'off';
   $('w-amp').textContent = b.amp ? 'ON' : 'off';
   $('state-line').textContent = b.state_line;
-  $('link-text').innerHTML = `${b.link} · check-in every ${b.checkin_interval_s}s · last ${b.last_checkin_ago_s == null ? 'never' : Math.round(b.last_checkin_ago_s) + 's ago'} · next in ${Math.round(b.link_worker.next_in_s)}s · modem ${b.modem_on ? 'stays on' : 'off between'}${b.window_open ? ' · <span class="wait-word">conversation window open</span>' : ''}${b.link_worker.simulated_down ? ' · <span class="rec-word">sim link down</span>' : ''}`;
+  $('link-text').innerHTML = `${b.link} · doorbell ${b.doorbell}${b.doorbell_worker.rings ? ` (${b.doorbell_worker.rings} rings)` : ''} · check-in every ${b.checkin_interval_s}s · last ${b.last_checkin_ago_s == null ? 'never' : Math.round(b.last_checkin_ago_s) + 's ago'} · next in ${Math.round(b.link_worker.next_in_s)}s · modem ${b.modem_on ? 'stays on' : 'off between'}${b.window_open ? ' · <span class="wait-word">conversation window open</span>' : ''}${b.link_worker.simulated_down ? ' · <span class="rec-word">sim link down</span>' : ''}`;
   $('rec-text').textContent = b.mode === 'recording' ? `${b.recording_s.toFixed(1)} s (silence ${b.silence_s.toFixed(1)} s; stops at 20 s silence or 300 s)` : b.locked ? 'travel lock ON' : '—';
   $('outbox').textContent = b.outbox_ids.length ? b.outbox_ids.join('\n') : 'empty';
   $('inbox').textContent = (b.inbox.length ? b.inbox.join('\n') : 'nothing new') + (b.last_played ? `\nlast heard ${b.last_played} — Play repeats it` : '');
@@ -307,6 +308,7 @@ function draw(s) {
   tog('w-server', !w.server_down, w.server_down ? 'server: DOWN' : 'server: reachable');
   tog('w-simdown', b.link_worker.simulated_down, b.link_worker.simulated_down ? 'sim link: DOWN' : 'sim link: up');
   $('modem-text').textContent = `modem ${w.modem_powered ? 'powered' : 'OFF'}`;
+  tog('w-silent', b.doorbell_worker.silent, b.doorbell_worker.silent ? 'doorbell: HALF-OPEN' : 'doorbell: normal');
   tog('w-mains', w.mains, w.mains ? 'USB power: present' : 'USB power: ABSENT');
   tog('w-batt', w.battery_pct !== null, w.battery_pct === null ? 'battery: none (ADR 0019)' : 'battery: fitted');
   $('w-pct').disabled = w.battery_pct === null; if (document.activeElement !== $('w-pct')) $('w-pct').value = w.battery_pct ?? 0;

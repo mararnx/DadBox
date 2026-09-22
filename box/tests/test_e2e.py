@@ -40,7 +40,10 @@ def box(tmp_path):
     store.put_key(1, KEY)
     hw = Hardware(buttons=FakeButtons(), lights=FakeButtonLights(), status=FakeStatusLeds(), mic=FakeMicGate(),
                   amp=FakeAmpGate(), modem=FakeModem(), power=FakePower(), audio=SimAudio(clock))
-    svc = Service(hw=hw, store=store, clock=clock, client=Client(server.transport("box")))
+    svc = Service(hw=hw, store=store, clock=clock, client=Client(server.transport("box")),
+                  doorbell_connect=lambda url: server.doorbell_connect(url, hw.modem.is_up))
+    svc.doorbell.reply_timeout_s, svc.doorbell.heartbeat_s = 0.3, 0.2    # real seconds; the box runs at 40x
+    svc.doorbell.backoff_min_s = 0.2
     svc.start()
     yield svc, hw, server, clock, store
     svc.stop()
@@ -157,5 +160,33 @@ def test_a_power_cut_mid_recording_is_recovered_at_boot(tmp_path):
         until(lambda: mid in server.messages and server.messages[mid]["state"] == "uploaded", what="recovered upload")
         assert server.messages[mid]["time_ok"] is False and store.pending_captures() == []
         assert not hw.mic.is_on() and hw.mic.transitions == []      # recovery never powers the mic
+    finally:
+        svc.stop()
+
+
+def test_the_doorbell_delivers_a_reply_in_seconds_at_real_speed(tmp_path):
+    """At 1x a poll every minute would take up to 60 s; only a ring explains a second."""
+    clock = FakeClock(speed=1.0, wall=1_800_000_000.0)
+    server = FakeServer(clock)
+    store = Store(tmp_path)
+    store.put_key(1, KEY)
+    hw = Hardware(buttons=FakeButtons(), lights=FakeButtonLights(), status=FakeStatusLeds(), mic=FakeMicGate(),
+                  amp=FakeAmpGate(), modem=FakeModem(), power=FakePower(), audio=SimAudio(clock))
+    svc = Service(hw=hw, store=store, clock=clock, client=Client(server.transport("box")),
+                  doorbell_connect=lambda url: server.doorbell_connect(url, hw.modem.is_up))
+    svc.doorbell.reply_timeout_s, svc.doorbell.heartbeat_s, svc.doorbell.backoff_min_s = 0.3, 0.2, 0.2
+    svc.start()
+    try:
+        until(lambda: svc.doorbell.joined, what="doorbell joined")
+        until(lambda: (server.telemetry or {}).get("doorbell") is True, what="a check-in saying so")
+        assert server.telemetry["next_checkin_s"] == 600               # the timer is only the backstop now
+        assert store.doorbell_json()["topic"] == server.doorbell_topic
+
+        mid = Parent(server, KEY).send(2.0, audio=b"RIFF" + bytes(20_000))
+        until(lambda: mid in svc.core.s.inbox, timeout=3.0, what="the ring to bring the message")
+
+        server.down = True                                              # half-open: rings and beats vanish
+        until(lambda: not svc.doorbell.joined, timeout=3.0, what="a dead socket to be noticed")
+        until(lambda: svc.core.s.checkin_interval_s == 60, what="polling every minute again")
     finally:
         svc.stop()

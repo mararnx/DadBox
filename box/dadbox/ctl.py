@@ -2,6 +2,7 @@
 
     dadboxctl state | record start|stop | play | inbox | outbox | checkin
               | modem on|off | led test | lock on|off | sim link down|up
+              | sim doorbell silent|up
 
 Wire format: one JSON line in — {"argv": [...]} — one JSON line back —
 {"reply": "..."}. The socket is `$DADBOX_CTL` or /run/dadbox/ctl.sock.

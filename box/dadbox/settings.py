@@ -38,7 +38,8 @@ class Settings:
         return cls(
             poll=Poll(active_minutes=int(p.get("active_minutes", 1)),
                       active_window_minutes=int(p.get("active_window_minutes", 90)),
-                      idle_minutes=int(p.get("idle_minutes", 30))),
+                      idle_minutes=int(p.get("idle_minutes", 30)),
+                      backstop_minutes=int(p.get("backstop_minutes", 10))),
             quiet_hours=QuietHours(start=str(q.get("start", dflt.quiet_hours.start)),
                                    end=str(q.get("end", dflt.quiet_hours.end)),
                                    tz=str(q.get("tz", dflt.quiet_hours.tz))),

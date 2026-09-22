@@ -57,6 +57,7 @@ class Boot(Event):
     charging: bool = False
     last_checkin_wall: Optional[float] = None   # for offline_s on the first check-in
     last_played: Optional[str] = None           # still on disk: Play repeats it when nothing new waits
+    doorbell: Optional[Dict[str, str]] = None   # the last {url, topic} the server gave (ADR 0021)
 
 
 @dataclass(frozen=True)
@@ -111,6 +112,17 @@ class Checkin(Event):
     inbox: Sequence[str] = ()
     rssi: Optional[int] = None
     error: str = ""
+    doorbell: Optional[Dict[str, str]] = None   # {url, topic}, or None: the server wants no doorbell
+
+
+@dataclass(frozen=True)
+class Ring(Event):
+    """The server rang the doorbell. It carries nothing; it means "check in" (ADR 0021)."""
+
+
+@dataclass(frozen=True)
+class DoorbellState(Event):
+    joined: bool
 
 
 @dataclass(frozen=True)
@@ -231,6 +243,13 @@ class LinkPlan(Action):
 
 
 @dataclass(frozen=True)
+class DoorbellPlan(Action):
+    """Open the doorbell at this address, or close it (url None)."""
+    url: Optional[str] = None
+    topic: Optional[str] = None
+
+
+@dataclass(frozen=True)
 class Reply(Action):
     token: int
     text: str
@@ -279,6 +298,10 @@ class BoxState:
     last_checkin_wall: Optional[float] = None
     checkin_interval_s: int = 60
     modem_on: bool = True
+    doorbell: Optional[Dict[str, str]] = None               # {url, topic} from the last check-in
+    doorbell_joined: bool = False
+    last_ring_round_at: Optional[float] = None
+    ring_pending: bool = False
     last_activity_at: Optional[float] = None                # upload done / played: opens the window
     last_interaction_at: float = 0.0                        # any press: resets *resting*
     waiting_since: Optional[float] = None
@@ -301,6 +324,7 @@ class Core:
         self._lights: Optional[LightsPlan] = None
         self._status: Optional[StatusPlan] = None
         self._link_plan: Optional[Tuple[int, bool]] = None
+        self._doorbell_plan: Optional[DoorbellPlan] = None
 
     # --- entry point ----------------------------------------------------------------
 
@@ -380,11 +404,26 @@ class Core:
             self._link_plan = (interval, modem_on)
             self.s.checkin_interval_s, self.s.modem_on = interval, modem_on
             out.append(LinkPlan(interval, modem_on))
+        bell = self.doorbell_plan()
+        if bell != self._doorbell_plan:
+            self._doorbell_plan = bell
+            out.append(bell)
         return out
 
     def plan(self, now: float) -> Tuple[int, bool]:
         since = None if self.s.last_activity_at is None else now - self.s.last_activity_at
-        return rules.poll_plan(self.s.settings.poll, mains=self.s.mains, since_activity_s=since)
+        return rules.poll_plan(self.s.settings.poll, mains=self.s.mains, since_activity_s=since,
+                               doorbell=self.doorbell_joined())
+
+    def doorbell_plan(self) -> DoorbellPlan:
+        d = self.s.doorbell
+        if d and rules.doorbell_wanted(mains=self.s.mains):
+            return DoorbellPlan(d["url"], d["topic"])
+        return DoorbellPlan()
+
+    def doorbell_joined(self) -> bool:
+        """Joined, and still wanted: a doorbell closing after unplugging counts as closed at once."""
+        return self.s.doorbell_joined and self.doorbell_plan().url is not None
 
     # --- event handlers -----------------------------------------------------------------
 
@@ -400,6 +439,7 @@ class Core:
         s.mains, s.battery_pct, s.charging = e.mains, e.battery_pct, e.charging
         s.last_checkin_wall = e.last_checkin_wall
         s.last_played = e.last_played
+        s.doorbell = e.doorbell
         out.append(MicPower(False))                     # the wiring fact, restated at every boot
         out.append(Log(f"boot: outbox {len(s.outbox)}, inbox {len(s.inbox)}, "
                        f"{'locked' if s.locked else 'unlocked'}, {'mains' if s.mains else 'battery'}"))
@@ -417,6 +457,8 @@ class Core:
             self._gesture(g, now, out)
 
     def _on_Tick(self, e: Tick, now: float, out: List[Action]) -> None:
+        if self.s.ring_pending and self._ring_gap_ok(now):
+            self._answer_ring(now, out)
         for g in self.gestures.tick(now):
             self._gesture(g, now, out)
         if self.s.mode is Mode.RECORDING and self.s.recording_id:
@@ -551,6 +593,37 @@ class Core:
         if e.settings is not None and e.settings != s.settings:
             out.append(Log("settings changed: " + str(e.settings.to_json())))
             s.settings = e.settings
+        if e.doorbell != s.doorbell:
+            out.append(Log("doorbell " + ("address changed" if e.doorbell else "switched off by the server")))
+            s.doorbell = e.doorbell
+
+    # --- the doorbell (ADR 0021): a ring carries nothing, the answer is an ordinary check-in ---
+
+    def _ring_gap_ok(self, now: float) -> bool:
+        last = self.s.last_ring_round_at
+        return last is None or now - last >= rules.RING_MIN_GAP_S
+
+    def _answer_ring(self, now: float, out: List[Action]) -> None:
+        self.s.ring_pending = False
+        self.s.last_ring_round_at = now
+        out.append(LinkPlan(*self.plan(now), wake=True))
+
+    def _on_Ring(self, e: Ring, now: float, out: List[Action]) -> None:
+        if self._ring_gap_ok(now):
+            out.append(Log("ring: checking in"))
+            self._answer_ring(now, out)
+        else:
+            self.s.ring_pending = True                  # answered on a tick once the gap has passed
+
+    def _on_DoorbellState(self, e: DoorbellState, now: float, out: List[Action]) -> None:
+        if e.joined == self.s.doorbell_joined:
+            return
+        self.s.doorbell_joined = e.joined
+        if e.joined:
+            out.append(Log("doorbell joined: checking in"))
+            out.append(LinkPlan(*self.plan(now), wake=True))   # every join is a knock
+        else:
+            out.append(Log("doorbell closed: polling every minute"))
 
     def _on_Downloaded(self, e: Downloaded, now: float, out: List[Action]) -> None:
         s = self.s
@@ -657,7 +730,7 @@ class Core:
             "mains": s.mains, "rssi": s.rssi, "fw": FW_VERSION,
             "outbox": len(s.outbox), "outbox_bytes": outbox_bytes, "outbox_oldest_s": outbox_oldest_s,
             "storage_pct": storage_pct, "inbox": inbox_on_disk, "uptime_s": int(now - s.boot_at),
-            "offline_s": offline, "next_checkin_s": s.checkin_interval_s,
+            "offline_s": offline, "next_checkin_s": s.checkin_interval_s, "doorbell": self.doorbell_joined(),
             "recording": s.mode is Mode.RECORDING, "locked": s.locked, "house": "unknown",
             "fault": None if fault is Fault.NONE else fault.name.lower(),
         }
@@ -671,7 +744,8 @@ class Core:
                 f"playing={'yes' if s.mode is Mode.PLAYING else 'no'} lock={'on' if s.locked else 'off'} "
                 f"mains={'yes' if s.mains else 'no'} soc={soc} inbox={len(s.inbox)} outbox={len(s.outbox)} "
                 f"quiet={'yes' if self.quiet() else 'no'} "
-                f"next_checkin={s.checkin_interval_s}s modem={'on' if s.modem_on else 'off'}")
+                f"next_checkin={s.checkin_interval_s}s modem={'on' if s.modem_on else 'off'} "
+                f"doorbell={'joined' if self.doorbell_joined() else 'closed' if self.doorbell_plan().url else 'off'}")
 
     def snapshot(self) -> Dict[str, Any]:
         now = self.clock.now()
@@ -687,6 +761,7 @@ class Core:
             "replaying": s.replaying, "last_played": s.last_played, "settings": s.settings.to_json(),
             "checkin_interval_s": s.checkin_interval_s, "modem_on": s.modem_on,
             "last_checkin_ago_s": None if s.last_checkin_ok_at is None else now - s.last_checkin_ok_at,
+            "doorbell": "joined" if self.doorbell_joined() else "closed" if self.doorbell_plan().url else "off",
             "link_up": s.link_up, "uptime_s": now - s.boot_at, "time_ok": s.time_ok,
             "window_open": s.last_activity_at is not None
             and now - s.last_activity_at < s.settings.poll.active_window_minutes * 60,

@@ -11,6 +11,7 @@
       seq                  monotonic per-sender counter — the ordering key
       lock                 present ⇔ travel lock engaged (survives a reboot)
       settings.json        last settings from the server
+      doorbell.json        last doorbell address from the server (ADR 0021)
       keys/<key_id>.key    32 bytes, hex — root 0600, never in this repo
       config.env           DADBOX_URL, DADBOX_TOKEN — root 0600
 
@@ -116,6 +117,13 @@ class Store:
 
     def save_settings(self, settings: Dict[str, Any]) -> None:
         write_json_atomic(self.root / "settings.json", settings)
+
+    def doorbell_json(self) -> Optional[Dict[str, str]]:
+        """The last doorbell address the server gave, or None (ADR 0021)."""
+        return read_json(self.root / "doorbell.json")
+
+    def save_doorbell(self, doorbell: Optional[Dict[str, str]]) -> None:
+        write_json_atomic(self.root / "doorbell.json", doorbell)
 
     # --- capture --------------------------------------------------------------------
 

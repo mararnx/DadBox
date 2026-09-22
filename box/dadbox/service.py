@@ -17,6 +17,7 @@ from typing import Callable, Dict, List, Optional, Tuple
 from . import core as c
 from .audio import AudioWorker
 from .clock import Clock
+from .doorbell import Connect, DoorbellWorker, connect_ws
 from .gestures import Button
 from .hal import Hardware
 from .lights import LightsPlan, StatusPlan, render, render_status
@@ -79,13 +80,14 @@ class LightsDriver:
 
 class Service:
     def __init__(self, *, hw: Hardware, store: Store, clock: Clock, client: Optional[Client],
-                 has_battery: bool = False, key_id: int = 1):
+                 has_battery: bool = False, key_id: int = 1, doorbell_connect: Optional[Connect] = connect_ws):
         self.hw, self.store, self.clock = hw, store, clock
         self.events: "queue.Queue[c.Event]" = queue.Queue()
         self.core = c.Core(clock, has_battery=has_battery)
         self.lights = LightsDriver(hw, clock)
         self.link = LinkWorker(client=client, store=store, modem=hw.modem, clock=clock,
                                post=self.post, telemetry=self.telemetry)
+        self.doorbell = DoorbellWorker(connect=doorbell_connect if client is not None else None, post=self.post)
         self.audio = AudioWorker(backend=hw.audio, amp=hw.amp, store=store, clock=clock, post=self.post,
                                  key_id=key_id, keys=store.keys())
         self._replies: Dict[int, "queue.Queue[str]"] = {}
@@ -109,8 +111,12 @@ class Service:
             return self._list(name)
         if name == "sim" and args[:1] == ("link",):
             self.link.simulated_down = args[1:2] == ("down",)
+            self.doorbell.simulated_down = self.link.simulated_down
             self.link.set_plan(self.link.interval_s, self.link.modem_on, wake=True)
             return "link " + ("down (simulated)" if self.link.simulated_down else "up")
+        if name == "sim" and args[:1] == ("doorbell",):
+            self.doorbell.simulated_silent = args[1:2] == ("silent",)
+            return "doorbell " + ("silent: a half-open socket (simulated)" if self.doorbell.simulated_silent else "normal")
         if name == "checkin":
             ok = self.link.request_checkin(timeout_s)
             snap = self.core.snapshot()
@@ -158,7 +164,8 @@ class Service:
         settings = Settings.from_json(self.store.settings_json())
         return c.Boot(outbox=self.store.outbox_bytes(), inbox=self.store.inbox_unheard(), locked=self.store.locked(),
                       settings=settings, pending_captures=self.store.pending_captures(),
-                      mains=mains, battery_pct=pct, charging=charging, last_played=self.store.inbox_last_played())
+                      mains=mains, battery_pct=pct, charging=charging, last_played=self.store.inbox_last_played(),
+                      doorbell=self.store.doorbell_json())
 
     def start(self) -> None:
         self.hw.mic.set(False)
@@ -167,6 +174,7 @@ class Service:
         self.hw.buttons.watch(self.contact)
         self.post(self.boot_event())
         self.link.start()
+        self.doorbell.start()
         threading.Thread(target=self._power_poll, name="power", daemon=True).start()
         self.thread = threading.Thread(target=self.run, name="core", daemon=True)
         self.thread.start()
@@ -174,6 +182,7 @@ class Service:
     def stop(self) -> None:
         self._stop.set()
         self.link.stop()
+        self.doorbell.stop()
         self.lights.stop()
         self.hw.mic.set(False)
         self.hw.amp.set(False)
@@ -227,6 +236,8 @@ class Service:
             self.link.set_plan(self.link.interval_s, self.link.modem_on, wake=True)
         elif isinstance(a, c.LinkPlan):
             self.link.set_plan(a.interval_s, a.modem_on, a.wake)
+        elif isinstance(a, c.DoorbellPlan):
+            self.doorbell.set_plan(a.url, a.topic)
         elif isinstance(a, c.Reply):
             q = self._replies.get(a.token)
             if q is not None:

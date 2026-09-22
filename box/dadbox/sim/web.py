@@ -65,6 +65,8 @@ class SimApp:
                 "elapsed_s": self.clock.now() - playing["started"], "real": playing["audio"][:4] != b"RIFF"},
             "link_worker": {"simulated_down": self.svc.link.simulated_down, "failures": self.svc.link._failures,
                             "next_in_s": max(0.0, self.svc.link._next_at - self.clock.now())},
+            "doorbell_worker": {"joined": self.svc.doorbell.joined, "failures": self.svc.doorbell.failures,
+                                "rings": self.svc.doorbell.rings, "silent": self.svc.doorbell.simulated_silent},
         })
         world = {"coverage": modem.coverage, "modem_powered": modem.powered, "mains": power.mains,
                  "battery_pct": power.battery_pct, "charging": power.charging, "speaking": self.audio.speaking,

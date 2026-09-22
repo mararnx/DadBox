@@ -196,6 +196,30 @@ The core sets the plan (`LinkPlan(interval_s, modem_on, wake)`) from
 round; the next try is at min(5 s · 2ⁿ, 5 min, interval). The worker never
 gives up and never decides.
 
+### The doorbell
+
+A second thread, `doorbell`, holds the Supabase Realtime channel the server
+names in its check-in answer ([ADR 0021](../docs/decisions/0021-doorbell.md),
+`dadbox/doorbell.py`). It only posts two events: `DoorbellState(joined)` and
+`Ring()`. The core does the rest:
+
+- `DoorbellPlan(url, topic)` opens it only on mains (`state.doorbell_wanted`);
+  unplugging closes it at once, and the core counts a joined doorbell on
+  battery as closed.
+- Joined: the timer stretches to `backstop_minutes` (10). Not joined: 60 s,
+  exactly as before. Every join is a `LinkPlan(wake=True)`.
+- A ring wakes the link at most every `RING_MIN_GAP_S` (5 s); rings inside
+  the gap set `ring_pending` and are answered on the next tick after it. They
+  are never dropped.
+- Heartbeat every 25 s; a join or heartbeat unanswered for 10 s means dead,
+  then reconnect at 5 s · 2ⁿ, at most 5 min. Real time, not the sim clock.
+
+The WebSocket client is RFC 6455 on `socket` + `ssl`, about a hundred lines,
+so the Pi needs no new package. The address is kept in `/data/doorbell.json`.
+In the simulator the fake server hands out `sim://doorbell` and answers like
+Realtime; its socket follows the fake modem's coverage, and
+`dadboxctl sim doorbell silent` makes it half-open.
+
 `Transport` is one method — `request(method, path, headers, body)` — so the
 real `requests` session and the simulator's in-process server are
 interchangeable, and `link.Client` is exercised against the fake in tests
@@ -217,8 +241,9 @@ pin). No normalisation yet (audio-capture Q6).
 ## Boot
 
 `Service.start()`: mic pin low → temp dir wiped → lights → buttons →
-`Boot` event (outbox sizes, unheard inbox, lock, saved settings, pending
-captures, power) → link thread → power poll → core thread. The core's first
+`Boot` event (outbox sizes, unheard inbox, lock, saved settings, saved
+doorbell address, pending captures, power) → link thread → doorbell thread →
+power poll → core thread. The core's first
 actions are `MicPower(False)`, an `Encode` per recovered capture, and a
 `LinkPlan(wake=True)` — the box checks in at once, with `offline_s` from
 the last saved check-in.
@@ -236,7 +261,7 @@ the AT port is read; `house` is `unknown`; `battery_pct`/`charging` are
 JSON lines over `/run/dadbox/ctl.sock` (`$DADBOX_CTL`). `state`, `record
 start|stop`, `play`, `lock on|off`, `led test`, `modem on|off` go through
 the core as `Command` events and come back as `Reply`; `inbox`, `outbox`,
-`checkin`, `sim link down|up` are answered by the service. `checkin` blocks
+`checkin`, `sim link down|up`, `sim doorbell silent|up` are answered by the service. `checkin` blocks
 for the next round and prints its result. Works identically against the
 simulator.
 

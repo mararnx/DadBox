@@ -76,19 +76,34 @@ def should_stop_recording(*, elapsed_s: float, silence_s: float) -> bool:
 
 @dataclass(frozen=True)
 class Poll:
-    """`settings.poll` from the server (PROTOCOL.md, ADR 0015). Minutes."""
+    """`settings.poll` from the server (PROTOCOL.md, ADR 0015, ADR 0021). Minutes."""
     active_minutes: int = 1
     active_window_minutes: int = 90
     idle_minutes: int = 30
+    backstop_minutes: int = 10
 
 
-def poll_plan(poll: Poll, *, mains: bool, since_activity_s: float | None) -> tuple[int, bool]:
+RING_MIN_GAP_S = 5       # at most one ring-triggered round this often; later rings wait, never drop (ADR 0021)
+
+
+def doorbell_wanted(*, mains: bool) -> bool:
+    """The doorbell is open only on mains until the battery exists and its
+    heartbeat cost has been measured (ADR 0021)."""
+    return mains
+
+
+def poll_plan(poll: Poll, *, mains: bool, since_activity_s: float | None,
+              doorbell: bool = False) -> tuple[int, bool]:
     """(seconds to the next check-in, keep the modem on until then).
 
     `since_activity_s` is the time since the last completed upload or played
     message — the things that open a conversation window — or None if there
     has been none since boot. A message arriving is not activity.
+    `doorbell` is true while the doorbell is joined: the timer then only backs
+    it up. A doorbell that is not joined changes nothing (ADR 0021).
     """
+    if mains and doorbell:
+        return poll.backstop_minutes * 60, True
     in_window = since_activity_s is not None and since_activity_s < poll.active_window_minutes * 60
     if mains or in_window:
         return poll.active_minutes * 60, True

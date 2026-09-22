@@ -5,15 +5,22 @@ It implements the `link.Transport` interface directly, so the box's real
 `link.Client` talks to it without an HTTP stack — and the web UI plays the
 parent through the very same routes with the parent's token. What it does
 not do: APNs (it records what it *would* have pushed) and Supabase.
+
+It also rings the doorbell (ADR 0021): `doorbell_connect` hands the box's
+doorbell worker an in-process socket that speaks the same Phoenix messages
+as Supabase Realtime, and the server rings every open one when a message to
+the box completes or the settings change — just as the database trigger does.
 """
 from __future__ import annotations
 
 import json
+import queue
 import re
+import secrets
 import threading
 import time
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .. import container as dbx
 from ..ids import is_ulid
@@ -22,7 +29,7 @@ from ..state import CHUNK_BYTES
 MAX_DURATION_MS = 5 * 60 * 1000
 MAX_MESSAGE_BYTES = 4 * 1024 * 1024
 DEFAULT_SETTINGS = {
-    "poll": {"active_minutes": 1, "active_window_minutes": 90, "idle_minutes": 30},
+    "poll": {"active_minutes": 1, "active_window_minutes": 90, "idle_minutes": 30, "backstop_minutes": 10},
     "quiet_hours": {"start": "20:00", "end": "07:00", "tz": "Europe/Zurich"},
     "led_brightness": 40, "volume": 70,
 }
@@ -49,6 +56,9 @@ class FakeServer:
         self.audit: List[Dict[str, Any]] = []
         self.requests = 0
         self.down = False                       # the world without a server
+        self.doorbell_topic: Optional[str] = "doorbell:" + secrets.token_hex(16)   # None: no doorbell
+        self.doorbell_sockets: List["FakeDoorbellSocket"] = []
+        self.rings_sent = 0
         self._lock = threading.RLock()
         self._counter = 0
 
@@ -218,6 +228,8 @@ class FakeServer:
         row["state"], row["uploaded_at"], row["updated_at"] = "uploaded", _iso(self._wall()), self._wall()
         if row["to"] != "box":
             self.pushes.append({"kind": "message", "to": row["to"], "id": mid, "at": _iso(self._wall())})
+        else:
+            self.ring()
         return self._json(200, self._wire(row))
 
     # --- download ----------------------------------------------------------------------------------
@@ -303,6 +315,7 @@ class FakeServer:
         except ValueError:
             raise _Fail(400, "body must be a JSON object")
         now = _iso(self._wall())
+        before = json.dumps(self.settings, sort_keys=True)
         for k, v in (patch or {}).items():
             if k in ("poll", "quiet_hours"):
                 self.settings[k].update(v or {})
@@ -312,6 +325,8 @@ class FakeServer:
                 self.settings_meta[k] = {"by": who, "at": now}
             else:
                 raise _Fail(403, f"cannot set {k}")
+        if json.dumps(self.settings, sort_keys=True) != before:
+            self.ring()
         return self._json(200, self.device_status())
 
     # --- the box ----------------------------------------------------------------------------------------
@@ -345,7 +360,28 @@ class FakeServer:
         elif t.get("mains") is True or (isinstance(pct, int) and pct >= 30):
             self.alerts.pop("battery_low", None)
         inbox = sorted(r["id"] for r in self.messages.values() if r["to"] == "box" and r["state"] in ("uploaded", "delivered"))
-        return self._json(200, {"settings": self.settings, "inbox": inbox})
+        bell = {"url": "sim://doorbell", "topic": self.doorbell_topic} if self.doorbell_topic else None
+        return self._json(200, {"settings": self.settings, "inbox": inbox, "doorbell": bell})
+
+    # --- the doorbell: what Realtime does, in-process --------------------------------------------------
+
+    def doorbell_connect(self, url: str, alive: Callable[[], bool] = lambda: True) -> "FakeDoorbellSocket":
+        """`alive` is the box's side of the network — the sim passes the fake
+        modem's coverage, so a box out of coverage loses its doorbell as a real one would."""
+        if self.down or not alive():
+            raise ConnectionError("no route (simulated)")
+        sock = FakeDoorbellSocket(self, alive)
+        with self._lock:
+            self.doorbell_sockets.append(sock)
+        return sock
+
+    def ring(self) -> None:
+        """What `ring_doorbell()` does after commit: an empty broadcast on the topic."""
+        with self._lock:
+            socks = list(self.doorbell_sockets)
+            self.rings_sent += 1
+        for sock in socks:
+            sock.deliver_ring()
 
     def tick(self) -> None:
         """What pg_cron does every minute: the box-late alert and unplayed-48h."""
@@ -371,6 +407,60 @@ class _Fail(Exception):
     def __init__(self, status: int, error: str, **extra):
         super().__init__(error)
         self.status, self.error, self.extra = status, error, extra
+
+
+class FakeDoorbellSocket:
+    """One Realtime connection. Answers joins on the current topic and
+    heartbeats; goes silent when the server is down, like a half-open socket."""
+
+    def __init__(self, server: FakeServer, alive: Callable[[], bool] = lambda: True):
+        self.server, self.alive = server, alive
+        self.inbox: "queue.Queue[str]" = queue.Queue()
+        self.topics: set = set()
+        self.closed = False
+
+    def send(self, text: str) -> None:
+        if self.closed:
+            raise ConnectionError("closed")
+        if self._silent():
+            return                                   # nobody answers: the box must notice by itself
+        msg = json.loads(text)
+        ev, ref, topic = msg.get("event"), msg.get("ref"), msg.get("topic")
+        if ev == "phx_join":
+            ok = self.server.doorbell_topic is not None and topic == "realtime:" + self.server.doorbell_topic
+            if ok:
+                self.topics.add(topic)
+            self.inbox.put(json.dumps({"topic": topic, "event": "phx_reply", "ref": ref, "join_ref": ref,
+                                       "payload": {"status": "ok" if ok else "error", "response": {}}}))
+        elif ev == "heartbeat":
+            self.inbox.put(json.dumps({"topic": "phoenix", "event": "phx_reply", "ref": ref,
+                                       "payload": {"status": "ok", "response": {}}}))
+
+    def deliver_ring(self) -> None:
+        if self._silent() or self.closed or self.server.doorbell_topic is None:
+            return
+        topic = "realtime:" + self.server.doorbell_topic
+        if topic in self.topics:
+            self.inbox.put(json.dumps({"topic": topic, "event": "broadcast", "ref": None,
+                                       "payload": {"event": "ring", "payload": {}, "type": "broadcast"}}))
+
+    def _silent(self) -> bool:
+        return self.server.down or not self.alive()
+
+    def recv(self, timeout: float) -> Optional[str]:
+        if self.closed:
+            raise ConnectionError("closed")
+        try:
+            text = self.inbox.get(timeout=max(0.0, timeout))
+        except queue.Empty:
+            return None
+        return None if self._silent() else text          # a half-open socket: what was in flight is lost
+
+    def close(self) -> None:
+        self.closed = True
+        with self.server._lock:
+            if self in self.server.doorbell_sockets:
+                self.server.doorbell_sockets.remove(self)
 
 
 class FakeTransport:

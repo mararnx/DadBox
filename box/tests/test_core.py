@@ -214,7 +214,7 @@ def test_telemetry_has_every_field_in_the_protocol():
     t = core.telemetry(outbox_bytes=0, outbox_oldest_s=0, storage_pct=3, inbox_on_disk=0)
     assert set(t) == {"battery_pct", "charging", "mains", "rssi", "fw", "outbox", "outbox_bytes", "outbox_oldest_s",
                       "storage_pct", "inbox", "uptime_s", "offline_s", "next_checkin_s", "recording", "locked",
-                      "house", "fault"}
+                      "house", "fault", "doorbell"}
     assert t["battery_pct"] is None and t["mains"] is True and t["next_checkin_s"] == 60
 
 
@@ -237,3 +237,68 @@ def test_ctl_commands_answer():
     assert of(out, c.Reply)[0].text == "lock on" and core.s.locked
     out = core.handle(c.Command("state", (), 4))
     assert "lock=on" in of(out, c.Reply)[0].text
+
+
+# --- the doorbell (ADR 0021) --------------------------------------------------------------------
+
+BELL = {"url": "wss://example.test/realtime/v1/websocket?vsn=1.0.0", "topic": "doorbell:abc"}
+
+
+def test_the_server_gives_a_doorbell_and_the_box_opens_it_on_mains_only():
+    clock, core = make()
+    out = core.handle(c.Checkin(True, Settings(), (), doorbell=BELL))
+    assert of(out, c.DoorbellPlan) == [c.DoorbellPlan(BELL["url"], BELL["topic"])]
+    out = core.handle(c.PowerState(mains=False, battery_pct=80))
+    assert of(out, c.DoorbellPlan) == [c.DoorbellPlan()]              # unplugged: closed (battery deferred)
+    out = core.handle(c.PowerState(mains=True, battery_pct=80))
+    assert of(out, c.DoorbellPlan) == [c.DoorbellPlan(BELL["url"], BELL["topic"])]
+
+
+def test_the_server_switches_the_doorbell_off_by_leaving_it_out():
+    clock, core = make()
+    core.handle(c.Checkin(True, Settings(), (), doorbell=BELL))
+    out = core.handle(c.Checkin(True, Settings(), ()))
+    assert of(out, c.DoorbellPlan) == [c.DoorbellPlan()]
+    out = core.handle(c.Checkin(False, error="no route"))               # a failed check-in changes nothing
+    assert not of(out, c.DoorbellPlan)
+
+
+def test_a_join_is_a_knock_and_stretches_the_timer_to_the_backstop():
+    clock, core = make()
+    core.handle(c.Checkin(True, Settings(), (), doorbell=BELL))
+    out = core.handle(c.DoorbellState(True))
+    assert any(p.wake for p in of(out, c.LinkPlan))
+    assert core.s.checkin_interval_s == 600
+    t = core.telemetry(outbox_bytes=0, outbox_oldest_s=0, storage_pct=0, inbox_on_disk=0)
+    assert t["doorbell"] is True and t["next_checkin_s"] == 600
+    out = core.handle(c.DoorbellState(False))
+    assert of(out, c.LinkPlan)[-1].interval_s == 60 and core.s.checkin_interval_s == 60
+
+
+def test_a_joined_doorbell_on_battery_counts_as_closed():
+    clock, core = make()
+    core.handle(c.Checkin(True, Settings(), (), doorbell=BELL))
+    core.handle(c.DoorbellState(True))
+    core.handle(c.PowerState(mains=False, battery_pct=80))
+    t = core.telemetry(outbox_bytes=0, outbox_oldest_s=0, storage_pct=0, inbox_on_disk=0)
+    assert t["doorbell"] is False and core.s.checkin_interval_s == 1800
+
+
+def test_rings_are_answered_at_most_every_five_seconds_and_never_dropped():
+    clock, core = make()
+    out = core.handle(c.Ring())
+    assert [p.wake for p in of(out, c.LinkPlan)] == [True]
+    clock.skip(2)
+    out = core.handle(c.Ring())                                         # a second message, 2 s later
+    assert not any(p.wake for p in of(out, c.LinkPlan))
+    out = core.handle(c.Ring())                                         # and a third: still one round
+    clock.skip(1)
+    assert not any(p.wake for p in of(core.handle(c.Tick()), c.LinkPlan))
+    clock.skip(2.1)
+    assert [p.wake for p in of(core.handle(c.Tick()), c.LinkPlan)] == [True]
+    assert not any(p.wake for p in of(core.handle(c.Tick()), c.LinkPlan))
+
+
+def test_the_doorbell_address_survives_a_reboot():
+    clock, core = make(doorbell=BELL)
+    assert core.doorbell_plan() == c.DoorbellPlan(BELL["url"], BELL["topic"])
