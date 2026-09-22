@@ -94,7 +94,7 @@ Three modes: `IDLE`, `RECORDING`, `PLAYING`. Everything else is overlay
 
 | Press | Idle | Recording | Playing |
 | --- | --- | --- | --- |
-| Record | mic on, capture starts, steady red | stop: **mic off first**, then `StopCapture` | ignored — mic and amp are never on together |
+| Record | mic on, capture starts, steady red (dim blue pulse before) | stop: **mic off first**, then `StopCapture` | ignored — mic and amp are never on together |
 | Play | oldest unheard plays; with nothing new, the last one again | ignored | ignored (no restart, no skip) |
 | Both, 3 s | travel lock toggles; both blink twice | stops the recording, then locks | stops playback (not counted as heard), then locks |
 
@@ -131,13 +131,18 @@ every combination of inputs:
 
 1. **The record button's red channel is 0 or 1, never in between.** That
    pin is the mic's supply. It is 1 only in `RECORDING`, and `led_brightness`,
-   quiet hours and cues never touch it. The lock blink is teal for that
-   reason. On the Pi the driver ignores the frame's red for Record
-   entirely: the pin belongs to `MicPower`.
+   quiet hours and cues never touch it. The ready pulse is blue and the lock
+   blink cyan for that reason. On the Pi the driver ignores the frame's red
+   for Record entirely: the pin belongs to `MicPower`.
+
+   Colours (ADR 0020): Play green — pulsing when a message waits, steady
+   while playing; Record — dim slow blue pulse when a press would record,
+   steady red while recording, dark while playing or locked; got-it — one
+   green pulse on Record.
 2. The child's channel has the five states of `state.Lights` and nothing
    else. Link, power and faults render only on the status LEDs.
 
-Status LEDs (ADR 0020): **LINK steady green** while the last check-in
+Status LEDs (ADR 0020, both green, POWER left): **LINK steady** while the last check-in
 succeeded within 2 × the interval, blink patterns on a 3 s cycle (50 ms)
 when down; **POWER steady** while external power is present; fault =
 alternating at 1 Hz.

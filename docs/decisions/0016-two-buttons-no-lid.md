@@ -1,7 +1,7 @@
 # ADR 0016 — Two lit buttons; no lid, no ring
 
 **Date:** 2026-09-21
-**Status:** accepted (user decision) — supersedes [ADR 0007](0007-lid-gesture.md);
+**Status:** accepted (user decision) — light colours revised by [ADR 0020](0020-no-mute-replay-green-link.md) (Play green, Record's ready pulse); supersedes [ADR 0007](0007-lid-gesture.md);
 revises [ADR 0009](0009-two-led-vocabularies.md) (the child's channel is the
 two button lights, not a ring) and [ADR 0011](0011-aluminium-1590dd-enclosure.md)
 (the plate is screwed down, not hinged)

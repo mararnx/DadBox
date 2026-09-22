@@ -367,7 +367,7 @@ class Core:
             self.s.cue = None
         plan = LightsPlan(lights=self.lights(now), cue=cue, cue_at=self.s.cue_at,
                           brightness=self.s.settings.led_brightness,
-                          resting=self.resting(now), quiet=self.quiet())
+                          resting=self.resting(now), quiet=self.quiet(), locked=self.s.locked)
         if plan != self._lights:
             self._lights = plan
             out.append(SetLights(plan))

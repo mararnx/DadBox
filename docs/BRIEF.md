@@ -48,9 +48,10 @@ Off-the-shelf parts only: no custom PCB, no 3D printing.
 - **Input and display:** two 16 mm stainless buttons with RGB ring lights —
   **Record** (press to start, press again to stop) and **Play** (oldest
   unheard message). Their lights are the child's whole display: steady red
-  while recording, one green pulse for *got it*, a slow warm breathing on Play
-  when a message waits, steady warm while playing, dark otherwise
-  ([ADR 0016](decisions/0016-two-buttons-no-lid.md)). Nothing moves.
+  while recording, one green pulse for *got it*, a pulsing green on Play when
+  a message waits, steady green while playing, and a dim blue pulse on Record
+  that says *ready* ([ADR 0016](decisions/0016-two-buttons-no-lid.md),
+  [ADR 0020](decisions/0020-no-mute-replay-green-link.md)). Nothing moves.
 - **Status LEDs:** LINK and POWER, two small 3 mm LEDs for the adults
   ([ADR 0009](decisions/0009-two-led-vocabularies.md)).
 - **Mic:** DFRobot I2S MEMS module (MSM261S4030H0), powered from the same pin

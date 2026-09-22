@@ -1,4 +1,4 @@
-# ADR 0020 — No mute; Play repeats the last message; LINK steady green; POWER steady on USB power
+# ADR 0020 — No mute; replay; the lights revised: green Play, a ready pulse on Record, two green status LEDs
 
 **Date:** 2026-09-22
 **Status:** accepted (user decisions, taken while driving the simulator) —
@@ -31,6 +31,15 @@ things looked wrong in use.
 4. **POWER is steady while external power is present on the USB port**, with
    or without a battery, charging or full; off when unplugged; blinking below
    20 % on battery. (Decided earlier the same day; recorded here.)
+5. **Both status LEDs are green**, POWER on the left, LINK on the right.
+6. **Play is green**: pulsing while a new message waits (dim after 2 h),
+   steady while playing, otherwise off.
+7. **Record pulses dimly when ready** — whenever a press would start a
+   recording: idle or waiting, not while playing, not locked — and is steady
+   red while recording. The ready pulse is a dim, slow blue: it **cannot
+   contain red**, because the red channel is the microphone's supply pin and
+   is only ever fully on or off (ADR 0016). The got-it pulse stays green.
+   The lock blink is bright cyan on both buttons for the same reason.
 
 ## Alternatives considered
 
@@ -53,4 +62,8 @@ things looked wrong in use.
   series resistor so a bedroom stays dark (to judge with the parts in hand).
   LINK green, POWER amber or white — the BOM says so.
 - ADR 0009's rule stands in spirit: two channels, and the child's has no
-  error state.
+  error state. The ready pulse is a sixth word for the child — *press me* —
+  but not a state: it is how *idle* looks.
+- The ready pulse is on whenever the box is idle: a few mA of blue at low
+  duty, always. Worth measuring on battery; `led_brightness` and the
+  quiet-hours cap scale it.

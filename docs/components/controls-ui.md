@@ -19,9 +19,13 @@ ring light; the plate is screwed down.
   | --- | --- | --- |
   | Recording | **steady red** | dark |
   | Got it — the message is fsynced | one green pulse | — |
-  | Message(s) waiting | — | slow warm breathing; *resting* (dim) after 2 h |
-  | Playing | dark | steady warm |
-  | Idle | dark | dark |
+  | Message(s) waiting | dim blue ready pulse | **pulsing green**; *resting* (dim) after 2 h |
+  | Playing | dark | **steady green** |
+  | Idle, ready to record | **dim, slow blue pulse** | dark |
+  | Travel lock | dark | dark (green pulse persists if a message waits) |
+
+  (Colours as revised by ADR 0020. The ready pulse has no red in it: the red
+  channel is the mic's supply pin and is only ever fully on or off.)
 
   **No error state, ever.** No link, battery or fault appears on them, and
   the number of waiting messages is not shown on the box — the app has it.
@@ -30,8 +34,8 @@ ring light; the plate is screwed down.
   supply are the **same GPIO pin** — a wiring fact, not firmware. That pin is
   only ever on or off: the red light is never dimmed or animated, because
   dimming it would chop the mic's supply.
-- **The adults' channel** is two small status LEDs, LINK (green) and POWER
-  (amber) ([ADR 0009](../decisions/0009-two-led-vocabularies.md), ADR 0020):
+- **The adults' channel** is two small green status LEDs, POWER and LINK
+  ([ADR 0009](../decisions/0009-two-led-vocabularies.md), ADR 0020):
   steady = fine, blink patterns for trouble, alternating = fault — plus the
   app. LINK is steady while the box has checked in within 2 × the current
   interval ([ADR 0015](../decisions/0015-adaptive-polling.md)); POWER is
