@@ -2,6 +2,7 @@
 
 **Date:** 2026-09-21
 **Status:** accepted — while the box has no battery ([ADR 0019](0019-mains-first-battery-deferred.md)) only the mains row applies
+— the mains and conversation-window rows are revised by the doorbell, [ADR 0021](0021-doorbell.md) (proposed)
 
 ## Context
 
@@ -55,7 +56,7 @@ Settings change from `poll_minutes` to a `poll` object
     the backstop anyway. Two mechanisms, one of them untestable from the Mac.
   - The SIM's number becomes an input anyone can text.
 - **Long-poll / held connection on mains** — seconds instead of a minute.
-  Worth doing later if a minute feels slow; carrier NAT timeouts and half-dead
+  Taken up as the doorbell in [ADR 0021](0021-doorbell.md). Worth doing later if a minute feels slow; carrier NAT timeouts and half-dead
   sockets make it the fussier option, and it changes nothing on battery.
 - **Fixed 10 minutes** — see Context.
 - **Window opened by inbound messages too** — a message arriving at 03:00

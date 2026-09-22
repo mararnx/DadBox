@@ -3,6 +3,10 @@
 > **2026-09-22, ADR 0020:** `mute` is removed from `settings` (there is no
 > mute); the box keeps its last played message so Play can repeat it. Server
 > and app: drop `mute` from `PATCH /settings` and from the settings object.
+>
+> **2026-09-22, ADR 0021 (proposed):** the doorbell. The check-in response
+> gains `doorbell`, telemetry gains `doorbell`, `poll` gains
+> `backstop_minutes`. A box or server that ignores all three is still correct.
 
 The contract between the three code streams. Firmware, server and iOS app all
 depend on this document; change it here first, then in the code.
@@ -134,6 +138,8 @@ and speaks HTTPS directly to the server. The server is a managed host
 ([ADR 0017](decisions/0017-managed-hosting-e2ee.md)): there is no third party
 in the path **that can read a message** — and no relay service, which is
 also why there is no SMS wake ([ADR 0015](decisions/0015-adaptive-polling.md)).
+The doorbell ([ADR 0021](decisions/0021-doorbell.md)) runs on the same host
+and carries nothing.
 Data is unlimited; the poll cadence is a battery/latency trade only.
 
 All paths below are relative to one configured base URL (for Supabase:
@@ -202,18 +208,25 @@ One request does everything the box needs between events:
 ```
 POST /device/checkin
   → body: telemetry (below)
-  ← { "settings": {…}, "inbox": ["01J…", "01J…"] }
+  ← { "settings": {…}, "inbox": ["01J…", "01J…"],
+      "doorbell": { "url": "wss://<project>.supabase.co/realtime/v1/websocket?apikey=<publishable>&vsn=1.0.0",
+                    "topic": "doorbell:<32 hex>" } }
 ```
 
-The box checks in on a timer and immediately after any upload. The cadence
-is adaptive ([ADR 0015](decisions/0015-adaptive-polling.md)), chosen by the
-box from `settings.poll`:
+`doorbell` may be absent or `null`: the box then closes any doorbell it has
+and polls. The box keeps the last one in `/data` and uses a new one from the
+next check-in on.
 
-| Box state | Modem | Interval |
-| --- | --- | --- |
-| On mains | stays on | `active_minutes` (default 1) |
-| On battery, conversation window open | stays on | `active_minutes` |
-| On battery, idle | off between check-ins | `idle_minutes` (default 30, app-set 5-60) |
+The box checks in on a timer and at once after any upload, played message,
+ring or doorbell join. The cadence is adaptive
+([ADR 0015](decisions/0015-adaptive-polling.md), [ADR 0021](decisions/0021-doorbell.md)),
+chosen by the box from `settings.poll`:
+
+| Box state | Modem | Doorbell | Interval |
+| --- | --- | --- | --- |
+| On mains, or on battery in a conversation window — doorbell joined | stays on | open | `backstop_minutes` (default 10) |
+| On mains, or on battery in a conversation window — doorbell not joined | stays on | reconnecting | `active_minutes` (default 1) |
+| On battery, idle | off between check-ins | closed | `idle_minutes` (default 30, app-set 5-60) |
 
 A conversation window opens when an upload completes or the child plays a
 message, lasts `active_window_minutes` (default 90), and restarts on each such
@@ -221,6 +234,35 @@ event. A message arriving does not open one. Inbound latency is therefore
 ≤ 1 minute whenever the box is plugged in or the child has just used it, and
 `idle_minutes` otherwise. Every check-in reuses one TLS session and stays a
 few hundred bytes.
+
+### Doorbell (server → box)
+
+A Supabase Realtime **public** broadcast channel on the topic from the
+check-in response ([ADR 0021](decisions/0021-doorbell.md)). Phoenix protocol
+`vsn=1.0.0`:
+
+```
+→ { "topic": "realtime:<topic>", "event": "phx_join", "ref": "1",
+    "payload": { "config": { "broadcast": { "self": false }, "private": false } } }
+← { "event": "phx_reply", "payload": { "status": "ok" }, "ref": "1", … }       joined → check in now
+→ { "topic": "phoenix", "event": "heartbeat", "payload": {}, "ref": "<n>" }     every 25 s
+← { "event": "phx_reply", "payload": { "status": "ok" }, "ref": "<n>", … }      within 10 s, or the socket is dead
+← { "event": "broadcast", "payload": { "event": "ring", "payload": {} }, … }    check in now
+```
+
+- **A ring carries nothing** and means only "check in". The box never reads
+  its payload and never acts on it except by checking in.
+- **The server rings** when a message to `box` becomes `uploaded` and when
+  `settings` change — from the same database transaction, so a ring never
+  precedes the state it announces.
+- **The box answers** at most one ring every 5 s; rings during a round
+  coalesce into one more round.
+- **Joined** means the join was answered `ok` and the last heartbeat was
+  answered. Anything else is *not joined*: the socket is closed and retried
+  at 5 s · 2ⁿ, at most 5 min, and the box polls at `active_minutes` meanwhile.
+- **Every join is followed by a check-in**, so nothing rung while the socket
+  was down is missed.
+- The box never sends anything on the channel but joins and heartbeats.
 
 ## Push (server → iPhone)
 
@@ -245,7 +287,7 @@ Pushes are hints. The truth is whatever `GET /messages` and
 {
   "battery_pct": 68, "charging": false, "mains": false, "rssi": -91, "fw": "0.1.0",
   "outbox": 0, "outbox_bytes": 0, "outbox_oldest_s": 0, "storage_pct": 12,
-  "inbox": 2, "uptime_s": 41022, "offline_s": 0, "next_checkin_s": 1800,
+  "inbox": 2, "uptime_s": 41022, "offline_s": 0, "next_checkin_s": 1800, "doorbell": false,
   "recording": false, "locked": false, "house": "unknown", "fault": null
 }
 ```
@@ -256,6 +298,8 @@ Pushes are hints. The truth is whatever `GET /messages` and
   on mains is not charging. Selects the poll cadence.
 - `next_checkin_s` — when the box intends to check in next. The server and
   the app call the box *late* after 2 × this, not after a fixed interval.
+- `doorbell` — the doorbell is joined as this check-in is sent. The app says
+  "instant" or "every minute"; a doorbell that never joins is visible to an adult.
 - `offline_s` — seconds since the last *successful* check-in, as seen by the
   box. Non-zero on the first check-in after a gap; the app uses it to say
   "the box was offline for 14 h — these 3 messages are from then".
@@ -275,7 +319,7 @@ adult.
 
 ```json
 {
-  "poll": { "active_minutes": 1, "active_window_minutes": 90, "idle_minutes": 30 },
+  "poll": { "active_minutes": 1, "active_window_minutes": 90, "idle_minutes": 30, "backstop_minutes": 10 },
   "quiet_hours": { "start": "20:00", "end": "07:00", "tz": "Europe/Berlin" },
   "led_brightness": 40,
   "volume": 70
