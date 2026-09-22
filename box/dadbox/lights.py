@@ -23,10 +23,7 @@ RGB = Tuple[float, float, float]
 DARK: RGB = (0.0, 0.0, 0.0)
 RED: RGB = (1.0, 0.0, 0.0)
 GREEN: RGB = (0.0, 1.0, 0.0)      # Play: pulsing = a new message, steady = playing (ADR 0020)
-READY: RGB = (0.0, 0.2, 1.0)      # Record: dim slow pulse = ready to record. No red: that channel is the mic pin
 LOCK_BLINK_COLOUR: RGB = (0.0, 1.0, 1.0)   # both blink twice, bright cyan; no red, so the mic pin is never touched by a cue
-READY_LEVEL = 0.5                 # the ready pulse peaks here (× brightness); dim next to a steady button
-READY_PERIOD_S = 3.0
 
 GOT_IT_S = 0.6                    # one green pulse (ARCHITECTURE.md § Indication)
 LOCK_BLINK_S = 1.2                # both blink twice on lock and unlock (ADR 0016)
@@ -50,7 +47,7 @@ class LightsPlan:
     brightness: int = 40          # settings.led_brightness, 0–100
     resting: bool = False         # waiting for > 2 h without interaction
     quiet: bool = False           # quiet hours
-    locked: bool = False          # travel lock: Record shows no ready pulse
+    locked: bool = False          # travel lock (no rendering of its own; kept for the record)
 
 
 @dataclass(frozen=True)
@@ -86,17 +83,13 @@ def render(plan: LightsPlan, t: float) -> Frame:
     record: RGB = DARK
     play: RGB = DARK
 
-    # 2. Playing: play button steady green. Record dark — the mic cannot be used now.
+    # 2. Playing: play button steady green. Record is dark whenever it is not recording.
     if plan.lights is Lights.PLAYING:
         play = _scale(GREEN, k)
-    else:
-        # Ready to record: a dim, slow pulse on Record whenever a press would start a recording.
-        if not plan.locked:
-            record = _scale(READY, k * READY_LEVEL * (0.35 + 0.65 * _breathe(t, READY_PERIOD_S)))
-        # 4. Waiting: play button pulses green; resting (dim) after 2 h.
-        if plan.lights in (Lights.WAITING, Lights.GOT_IT):
-            level = RESTING_LEVEL if plan.resting else (RESTING_LEVEL + (1 - RESTING_LEVEL) * _breathe(t))
-            play = _scale(GREEN, k * level)
+    # 4. Waiting: play button pulses green; resting (dim) after 2 h. 5. Idle: both dark.
+    elif plan.lights in (Lights.WAITING, Lights.GOT_IT):
+        level = RESTING_LEVEL if plan.resting else (RESTING_LEVEL + (1 - RESTING_LEVEL) * _breathe(t))
+        play = _scale(GREEN, k * level)
 
     # Cues overlay for their duration. A cue never touches Record's red.
     if plan.cue is not None:

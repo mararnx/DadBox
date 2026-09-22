@@ -34,13 +34,12 @@ def test_playing_is_steady_green_and_record_is_dark():
         assert f.play == (0.0, 1.0, 0.0) and f.record == (0.0, 0.0, 0.0)
 
 
-def test_record_pulses_dimly_when_ready_and_not_when_locked():
-    plan = LightsPlan(lights=Lights.IDLE, brightness=100)
-    levels = {round(render(plan, t).record[2], 3) for t in [0, 0.75, 1.5, 2.25]}
-    assert len(levels) > 1 and max(levels) <= 0.5 and min(levels) > 0       # dim, pulsing, never off
-    assert all(render(plan, t).record[0] == 0.0 for t in [0, 0.75, 1.5])    # and never any red
-    assert render(LightsPlan(lights=Lights.WAITING, brightness=100), 0.75).record[2] > 0   # also while a message waits
-    assert render(LightsPlan(lights=Lights.IDLE, brightness=100, locked=True), 0.75).record == (0.0, 0.0, 0.0)
+def test_record_is_dark_unless_recording_and_play_is_dark_with_nothing_new():
+    for lights in (Lights.IDLE, Lights.WAITING, Lights.PLAYING):
+        for t in [0, 0.75, 1.5, 2.25]:
+            assert render(LightsPlan(lights=lights, brightness=100), t).record == (0.0, 0.0, 0.0)
+    for t in [0, 0.75, 1.5]:
+        assert render(LightsPlan(lights=Lights.IDLE, brightness=100), t).play == (0.0, 0.0, 0.0)   # replay shows nothing
 
 
 def test_quiet_hours_cap_the_glow():
@@ -52,8 +51,7 @@ def test_quiet_hours_cap_the_glow():
 def test_got_it_is_one_green_pulse_on_record():
     plan = LightsPlan(lights=Lights.IDLE, cue=Cue.GOT_IT, cue_at=10.0, brightness=100)
     assert render(plan, 10.3).record[1] > 0.9
-    after = render(plan, 10.7).record
-    assert after[1] < 0.1 and after[0] == 0.0                     # back to the dim ready pulse
+    assert render(plan, 10.7).record == (0.0, 0.0, 0.0)           # back to dark
 
 
 def test_lock_blinks_both_twice():

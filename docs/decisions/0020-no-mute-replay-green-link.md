@@ -1,4 +1,4 @@
-# ADR 0020 — No mute; replay; the lights revised: green Play, a ready pulse on Record, two green status LEDs
+# ADR 0020 — No mute; replay; the lights revised: green Play, two green status LEDs
 
 **Date:** 2026-09-22
 **Status:** accepted (user decisions, taken while driving the simulator) —
@@ -34,12 +34,13 @@ things looked wrong in use.
 5. **Both status LEDs are green**, POWER on the left, LINK on the right.
 6. **Play is green**: pulsing while a new message waits (dim after 2 h),
    steady while playing, otherwise off.
-7. **Record pulses dimly when ready** — whenever a press would start a
-   recording: idle or waiting, not while playing, not locked — and is steady
-   red while recording. The ready pulse is a dim, slow blue: it **cannot
-   contain red**, because the red channel is the microphone's supply pin and
-   is only ever fully on or off (ADR 0016). The got-it pulse stays green.
-   The lock blink is bright cyan on both buttons for the same reason.
+7. **Record is steady red while recording and dark otherwise.** A dim blue
+   "ready" pulse was tried on 2026-09-22 and withdrawn the next day: idle is
+   dark. (Any cue on Record must avoid red, because the red channel is the
+   microphone's supply pin and is only ever fully on or off, ADR 0016 — hence
+   the green got-it pulse and the cyan lock blink.)
+8. **Play shows nothing for a replay.** With nothing new the button is dark;
+   pressing it still repeats the last message.
 
 ## Alternatives considered
 
@@ -62,8 +63,4 @@ things looked wrong in use.
   series resistor so a bedroom stays dark (to judge with the parts in hand).
   LINK green, POWER amber or white — the BOM says so.
 - ADR 0009's rule stands in spirit: two channels, and the child's has no
-  error state. The ready pulse is a sixth word for the child — *press me* —
-  but not a state: it is how *idle* looks.
-- The ready pulse is on whenever the box is idle: a few mA of blue at low
-  duty, always. Worth measuring on battery; `led_brightness` and the
-  quiet-hours cap scale it.
+  error state. An idle box is dark on the child's side.

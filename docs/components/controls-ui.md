@@ -19,13 +19,12 @@ ring light; the plate is screwed down.
   | --- | --- | --- |
   | Recording | **steady red** | dark |
   | Got it — the message is fsynced | one green pulse | — |
-  | Message(s) waiting | dim blue ready pulse | **pulsing green**; *resting* (dim) after 2 h |
+  | Message(s) waiting | dark | **pulsing green**; *resting* (dim) after 2 h |
   | Playing | dark | **steady green** |
-  | Idle, ready to record | **dim, slow blue pulse** | dark |
+  | Idle | dark | dark — Play repeats the last message, unannounced |
   | Travel lock | dark | dark (green pulse persists if a message waits) |
 
-  (Colours as revised by ADR 0020. The ready pulse has no red in it: the red
-  channel is the mic's supply pin and is only ever fully on or off.)
+  (Colours as revised by ADR 0020.)
 
   **No error state, ever.** No link, battery or fault appears on them, and
   the number of waiting messages is not shown on the box — the app has it.

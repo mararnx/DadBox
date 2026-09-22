@@ -284,7 +284,7 @@ function draw(s) {
   ringStyle($('ring-play'), b.frame.play);
   $('led-link').classList.toggle('on', b.status.link);
   $('led-power').classList.toggle('on', b.status.power);
-  $('w-lights').innerHTML = b.lights === 'RECORDING' ? '<span class="rec-word">RECORDING</span>' : b.lights === 'WAITING' ? '<span class="wait-word">WAITING' + (b.resting ? ' (resting)' : '') + '</span>' : b.lights === 'IDLE' ? (b.locked ? 'LOCKED' : 'IDLE (ready)') : b.lights;
+  $('w-lights').innerHTML = b.lights === 'RECORDING' ? '<span class="rec-word">RECORDING</span>' : b.lights === 'WAITING' ? '<span class="wait-word">WAITING' + (b.resting ? ' (resting)' : '') + '</span>' : b.lights === 'IDLE' ? (b.locked ? 'LOCKED' : 'IDLE') : b.lights;
   $('w-mic').textContent = b.mic ? 'ON (red)' : 'off';
   $('w-amp').textContent = b.amp ? 'ON' : 'off';
   $('state-line').textContent = b.state_line;

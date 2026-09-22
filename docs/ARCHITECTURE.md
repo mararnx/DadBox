@@ -88,12 +88,12 @@ Two vocabularies, deliberately separate ([ADR 0009](decisions/0009-two-led-vocab
 | 1 | Recording | **Steady red.** Never animated, never dimmed. | dark | The mic-is-on signal for everyone in the room. The red LED and the mic's 3.3 V supply are the same GPIO pin: no red light, no mic — so the pin is on or off, not PWM. |
 | 2 | Playing | dark | **Steady green** | The mic cannot be used now, so Record shows nothing. Then falls through to 4 or 5 |
 | 3 | Got it | One green pulse, ~600 ms | — | Only after the message is fsynced to the outbox. Identical online or offline — the pulse means *safe*, not *delivered*. |
-| 4 | Waiting (inbox > 0) | dim ready pulse | **Pulsing green** | After 2 h without interaction → *resting*: dim. Quiet hours: capped. |
-| 5 | Idle | **Dim, slow blue pulse** — *ready to record* | dark | No red in the ready pulse: that channel is the mic pin. Dark when the travel lock is on. |
+| 4 | Waiting (inbox > 0) | dark | **Pulsing green** | After 2 h without interaction → *resting*: dim. Quiet hours: capped. |
+| 5 | Idle | dark | dark | Play still works (it repeats the last message) but shows nothing for it. |
 
-Colours revised 2026-09-22 ([ADR 0020](decisions/0020-no-mute-replay-green-link.md)):
-Play is green (pulsing = new, steady = playing); Record is red only while
-recording, otherwise a dim blue pulse that says *press me*.
+Colours revised 2026-09-22/23 ([ADR 0020](decisions/0020-no-mute-replay-green-link.md)):
+Play is green (pulsing = new, steady = playing); Record is red while
+recording and dark otherwise.
 
 The child's lights have no error state, ever. Nothing on them needs
 interpreting beyond the four words above.
