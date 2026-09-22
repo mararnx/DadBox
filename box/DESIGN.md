@@ -310,6 +310,9 @@ the pushes), and the log.
 
 ### What to check with it, in this order
 
+`tests/sim_checklist.py` drives a fresh simulator through this list over its
+HTTP API in about two minutes (a 20× clock, every step from a clean world).
+
 - [x] a tap is ignored; a 0.5 s hold records; the ring is red exactly while the mic pin is high
 - [x] stop → got-it pulse → outbox → upload → the thread shows it → push `message`
 - [x] parent sends → next check-in → chime → Play breathes → play → `played_at` → push `played` → inbox empty
