@@ -303,6 +303,7 @@ the pushes), and the log.
 | Silence threshold / auto-stop | RMS 400 per 100 ms block, 20 s — tune on real audio |
 | Raw capture lifetime | unlinked right after the sealed container is fsynced |
 | Lock blink colour | teal (no red: the mic pin) |
+| POWER LED | steady = external power present on the USB port; off = unplugged (user, 2026-09-22) |
 
 ## Not built yet
 

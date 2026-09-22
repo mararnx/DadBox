@@ -25,8 +25,9 @@ class Link(Enum):        # status LED, adults' vocabulary — off means fine
 
 
 class Power(Enum):
-    OK = auto()          # off
-    CHARGING = auto()    # steady
+    OK = auto()          # off — on battery, above LOW_PCT
+    MAINS = auto()       # steady — external power present (the USB port); user decision 2026-09-22
+    CHARGING = auto()    # steady — external power present and the pack is charging
     LOW = auto()         # 1 blink / 3 s, below LOW_PCT on battery
     ASLEEP = auto()      # box shut down below SLEEP_PCT; buttons do nothing
 

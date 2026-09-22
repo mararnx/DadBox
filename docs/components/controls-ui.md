@@ -102,8 +102,7 @@ History: the lid, reed contact and NeoPixel ring are in
 7. **LINK "brief on" at each check-in** — helpful while placing the box, but
    on mains that is a flash every minute, all night. Suggest: only for the
    first hour after power-up.
-8. **Charged vs on battery** — both are "POWER off". A parent packing the bag
-   wants to know the pack is full. Suggest: POWER steady while charging, one
-   long blink when the supply is plugged into a full pack, then off.
+8. ~~Charged vs on battery~~ — decided 2026-09-22: POWER is steady whenever
+   external power is present, off when unplugged. "Full" is the app's to say.
 9. **Haptics?** A small vibration on *got it* is cheap and satisfying. Worth a
    motor and one more gated consumer?

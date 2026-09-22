@@ -140,7 +140,7 @@ def render_status(plan: StatusPlan, t: float) -> Tuple[bool, bool]:
     if plan.flash_at is not None and 0 <= t - plan.flash_at < FLASH_S:
         link = True
     power = False
-    if plan.power is Power.CHARGING:
+    if plan.power in (Power.MAINS, Power.CHARGING):
         power = True
     elif plan.power is Power.LOW:
         power = _blink_at(phase, 0.0)

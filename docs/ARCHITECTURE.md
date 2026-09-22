@@ -109,8 +109,8 @@ quiet hours still apply to playback and the chime.
 | LINK | 1 short blink / 3 s | No connection; nothing queued |
 | LINK | 2 short blinks / 3 s | No connection **and messages waiting to go** — safe on disk |
 | LINK | brief on | A check-in or upload just succeeded (useful when placing the box) |
-| POWER | off | On battery above 20 %, or plugged in and full |
-| POWER | steady | Charging |
+| POWER | steady | External power present on the USB port — with or without a battery, charging or full |
+| POWER | off | Unplugged: on battery above 20 % |
 | POWER | 1 blink / 3 s | Below 20 %, on battery |
 | POWER | off, box shut down | Below 5 %: the box shuts down cleanly and the buttons do nothing; the app has the last battery reading |
 | both | alternating | **Fault** — an adult must act: outbox ≥ 80 %, storage error, modem unresponsive, capture failed |

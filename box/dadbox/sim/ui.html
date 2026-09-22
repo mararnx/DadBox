@@ -157,7 +157,7 @@
       </div>
       <div class="row">
         <span class="dim">power</span>
-        <button id="w-mains" onclick="world({mains: !S.world.mains})">mains</button>
+        <button id="w-mains" onclick="world({mains: !S.world.mains})" title="external power on the USB port — POWER LED steady while present">USB power</button>
         <button id="w-batt" onclick="world({battery_pct: S.world.battery_pct === null ? 80 : null})">battery fitted</button>
         <input type="range" id="w-pct" min="0" max="100" oninput="world({battery_pct: +this.value})" title="battery %">
         <span id="w-pct-text" class="mono"></span>
@@ -309,7 +309,7 @@ function draw(s) {
   tog('w-server', !w.server_down, w.server_down ? 'server: DOWN' : 'server: reachable');
   tog('w-simdown', b.link_worker.simulated_down, b.link_worker.simulated_down ? 'sim link: DOWN' : 'sim link: up');
   $('modem-text').textContent = `modem ${w.modem_powered ? 'powered' : 'OFF'}`;
-  tog('w-mains', w.mains, w.mains ? 'mains: plugged in' : 'mains: UNPLUGGED');
+  tog('w-mains', w.mains, w.mains ? 'USB power: present' : 'USB power: ABSENT');
   tog('w-batt', w.battery_pct !== null, w.battery_pct === null ? 'battery: none (ADR 0019)' : 'battery: fitted');
   $('w-pct').disabled = w.battery_pct === null; if (document.activeElement !== $('w-pct')) $('w-pct').value = w.battery_pct ?? 0;
   $('w-pct-text').textContent = w.battery_pct === null ? '' : w.battery_pct + '%';

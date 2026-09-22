@@ -204,6 +204,15 @@ def test_telemetry_has_every_field_in_the_protocol():
     assert t["battery_pct"] is None and t["mains"] is True and t["next_checkin_s"] == 60
 
 
+def test_power_led_says_external_power_present():
+    clock, core = make()
+    assert core.power() is Power.MAINS                            # steady: power on the USB port
+    core.handle(c.PowerState(mains=False))
+    assert core.power() is Power.OK                               # off: unplugged
+    core.handle(c.PowerState(mains=True, battery_pct=100, charging=False))
+    assert core.power() is Power.MAINS                            # full pack on mains: still steady
+
+
 def test_ctl_commands_answer():
     clock, core = make()
     out = core.handle(c.Command("record", ("start",), 1))

@@ -50,5 +50,7 @@ def test_status_patterns():
     blinks = sum(render_status(StatusPlan(link=Link.DOWN_QUEUED), t)[0] for t in [i * 0.01 for i in range(300)])
     assert 8 <= blinks <= 12                              # two 50 ms blinks in 3 s at 10 ms steps
     assert render_status(StatusPlan(power=Power.CHARGING), 2.0)[1] is True
+    assert render_status(StatusPlan(power=Power.MAINS), 2.0)[1] is True
+    assert render_status(StatusPlan(power=Power.OK), 2.0)[1] is False
     a, b = render_status(StatusPlan(fault=Fault.STORAGE), 0.1), render_status(StatusPlan(fault=Fault.STORAGE), 0.6)
     assert a == (True, False) and b == (False, True)

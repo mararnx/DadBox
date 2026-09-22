@@ -341,13 +341,16 @@ class Core:
         return Link.DOWN_QUEUED if self.s.outbox else Link.DOWN
 
     def power(self) -> Power:
+        # Steady means "external power is present" — with or without a battery.
         if self.s.battery_pct is None:
-            return Power.OK                     # no battery fitted: nothing to say (ADR 0019)
+            return Power.MAINS if self.s.mains else Power.OK
         if self.s.battery_pct < rules.SLEEP_PCT and not self.s.mains:
             return Power.ASLEEP
         if self.s.charging:
             return Power.CHARGING
-        if self.s.battery_pct < rules.LOW_PCT and not self.s.mains:
+        if self.s.mains:
+            return Power.MAINS
+        if self.s.battery_pct < rules.LOW_PCT:
             return Power.LOW
         return Power.OK
 

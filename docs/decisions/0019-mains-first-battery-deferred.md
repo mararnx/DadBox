@@ -34,7 +34,8 @@ Pi that cannot sleep. None of that helps get a first box working.
   the plug mid-recording and mid-upload, repeatedly.
 - A recording interrupted by a power cut is recovered at boot: what is on disk
   is trimmed, encoded and queued as if stop had been pressed.
-- The POWER status LED has nothing to say until there is a battery: off.
+- The POWER status LED is steady while external power is present on the USB
+  port and off otherwise (user decision 2026-09-22; ARCHITECTURE.md § Status LEDs).
 - The box cannot go to a grandparent's for a weekend without a socket — which
   is what ADR 0005 was for. That is accepted for now.
 - The app's "quiet vs dead" question gets simpler and blunter: a box that has
