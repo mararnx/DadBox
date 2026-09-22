@@ -51,8 +51,9 @@ for why each piece is what it is. The box is a Linux machine
    [ADR 0015](decisions/0015-adaptive-polling.md)) — downloads it, stores it
    in the inbox.
 3. The Play button breathes warm. One gentle chime — suppressed during quiet
-   hours and by mute.
-4. Child presses Play. Oldest first, one per press.
+   hours.
+4. Child presses Play. Oldest first, one per press. With nothing new waiting,
+   Play repeats the last message heard ([ADR 0020](decisions/0020-no-mute-replay-green-link.md)).
 
 ## Link
 
@@ -75,9 +76,10 @@ Two vocabularies, deliberately separate ([ADR 0009](decisions/0009-two-led-vocab
   *something is waiting*, *I'm listening*, *I'm playing* — plus one pulse for
   *got it*. They never show link, battery or faults. The count of waiting
   messages is not shown on the box; the app has it.
-- **Two small status LEDs** — LINK and POWER, low on the box beside the charge
-  port — are the adults'. Off means fine. Anyone in either house can glance at
-  them; the child never needs to.
+- **Two small status LEDs** — LINK (green) and POWER (amber), low on the box
+  beside the charge port — are the adults'. Steady means fine, blinking means
+  trouble ([ADR 0020](decisions/0020-no-mute-replay-green-link.md)). Anyone in
+  either house can glance at them; the child never needs to.
 
 ### Button lights — priority order, highest wins
 
@@ -98,17 +100,17 @@ Buttons on the outside of a box in a school bag can be pressed by the bag
 ([ADR 0016](decisions/0016-two-buttons-no-lid.md)). A press must last ≥ 0.5 s
 to count; a recording with under 1 s of speech is discarded. **Travel lock:**
 hold both buttons for 3 s — both blink twice and the buttons are dead until the
-same gesture again; it persists across a reboot. App mute and device-enforced
-quiet hours still apply to playback and the chime.
+same gesture again; it persists across a reboot. Device-enforced quiet hours
+still apply to the chime.
 
 ### Status LEDs — the adults' channel
 
 | LED | Pattern | Meaning |
 | --- | --- | --- |
-| LINK | off | Checked in within 2 × the current poll interval — nothing to see |
+| LINK | steady green | Connected and the server answered: checked in within 2 × the current poll interval |
+| LINK | off | Not yet checked in since boot — and never seen after the first minute unless something is wrong |
 | LINK | 1 short blink / 3 s | No connection; nothing queued |
 | LINK | 2 short blinks / 3 s | No connection **and messages waiting to go** — safe on disk |
-| LINK | brief on | A check-in or upload just succeeded (useful when placing the box) |
 | POWER | steady | External power present on the USB port — with or without a battery, charging or full |
 | POWER | off | Unplugged: on battery above 20 % |
 | POWER | 1 blink / 3 s | Below 20 %, on battery |
@@ -116,8 +118,8 @@ quiet hours still apply to playback and the chime.
 | both | alternating | **Fault** — an adult must act: outbox ≥ 80 %, storage error, modem unresponsive, capture failed |
 
 Patterns carry the meaning; colour is redundant, for anyone colour-blind in
-either house. Blinks are ~10 ms at low brightness — invisible in a dark bedroom
-and effectively free.
+either house. Blinks are ~50 ms at low brightness; the steady LEDs are dim
+enough for a bedroom (to judge with the parts in hand).
 
 ### Validation notes
 

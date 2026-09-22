@@ -30,9 +30,7 @@ from .lights import Cue, LightsPlan, StatusPlan, cue_active
 from .settings import Settings, in_quiet_hours
 from .state import Fault, Lights, Link, Power
 
-FW_VERSION = "0.2.0"
-FLASH_LINK_FOR_S = 3600          # LINK "brief on" per check-in, only in the first hour after boot
-REBOOT_CHECKIN_WINDOW_S = 0      # placeholder for a future "check in at once after boot"
+FW_VERSION = "0.3.0"
 
 
 class Mode(Enum):
@@ -58,6 +56,7 @@ class Boot(Event):
     battery_pct: Optional[int] = None
     charging: bool = False
     last_checkin_wall: Optional[float] = None   # for offline_s on the first check-in
+    last_played: Optional[str] = None           # still on disk: Play repeats it when nothing new waits
 
 
 @dataclass(frozen=True)
@@ -271,6 +270,8 @@ class BoxState:
     recording_since: float = 0.0
     silence_s: float = 0.0
     playing_id: Optional[str] = None
+    replaying: bool = False                                 # playing last_played, not something new
+    last_played: Optional[str] = None
     cue: Optional[Cue] = None
     cue_at: float = 0.0
     boot_at: float = 0.0
@@ -288,7 +289,6 @@ class BoxState:
     link_up: bool = False
     rssi: Optional[int] = None
     time_ok: bool = False                                   # clock trusted once a check-in has succeeded
-    flash_at: Optional[float] = None
     shutting_down: bool = False
 
 
@@ -371,8 +371,7 @@ class Core:
         if plan != self._lights:
             self._lights = plan
             out.append(SetLights(plan))
-        flash = self.s.flash_at if self.s.flash_at is not None and now - self.s.flash_at < 1.0 else None
-        status = StatusPlan(link=self.link(now), power=self.power(), fault=self.fault(), flash_at=flash)
+        status = StatusPlan(link=self.link(now), power=self.power(), fault=self.fault())
         if status != self._status:
             self._status = status
             out.append(SetStatus(status))
@@ -400,6 +399,7 @@ class Core:
         s.settings = e.settings
         s.mains, s.battery_pct, s.charging = e.mains, e.battery_pct, e.charging
         s.last_checkin_wall = e.last_checkin_wall
+        s.last_played = e.last_played
         out.append(MicPower(False))                     # the wiring fact, restated at every boot
         out.append(Log(f"boot: outbox {len(s.outbox)}, inbox {len(s.inbox)}, "
                        f"{'locked' if s.locked else 'unlocked'}, {'mains' if s.mains else 'battery'}"))
@@ -483,27 +483,30 @@ class Core:
         if s.mode is not Mode.IDLE:
             out.append(Log("play press ignored: busy"))
             return
-        if not s.inbox:
-            out.append(Log("play press: nothing waiting"))
-            return
-        if s.settings.muted:
-            out.append(Log("play press ignored: muted"))
+        if s.inbox:
+            s.playing_id, s.replaying = s.inbox[0], False
+        elif s.last_played:                                 # nothing new: the last one again (ADR 0020)
+            s.playing_id, s.replaying = s.last_played, True
+        else:
+            out.append(Log("play press: nothing to play"))
             return
         s.mode = Mode.PLAYING
-        s.playing_id = s.inbox[0]
         out.append(Play(s.playing_id, s.settings.volume))
-        out.append(Log(f"playing {s.playing_id}"))
+        out.append(Log(("replaying " if s.replaying else "playing ") + s.playing_id))
 
     def _playback_over(self, now: float, out: List[Action], *, heard: bool) -> None:
         s = self.s
-        mid = s.playing_id
+        mid, replay = s.playing_id, s.replaying
         s.mode = Mode.IDLE
-        s.playing_id = None
+        s.playing_id, s.replaying = None, False
         if mid and heard:
+            s.last_activity_at = now                    # the child used the box: window opens (ADR 0015)
+            if replay:
+                return
             if mid in s.inbox:
                 s.inbox.remove(mid)
             s.waiting_since = now if s.inbox else None
-            s.last_activity_at = now                    # the child used the box: window opens (ADR 0015)
+            s.last_played = mid
             out.append(MarkPlayed(mid))
 
     def _on_CaptureLevel(self, e: CaptureLevel, now: float, out: List[Action]) -> None:
@@ -545,8 +548,6 @@ class Core:
         s.time_ok = True
         s.rssi = e.rssi
         s.faults.discard(Fault.MODEM)
-        if now - s.boot_at < FLASH_LINK_FOR_S:
-            s.flash_at = now
         if e.settings is not None and e.settings != s.settings:
             out.append(Log("settings changed: " + str(e.settings.to_json())))
             s.settings = e.settings
@@ -559,7 +560,7 @@ class Core:
         s.inbox.sort()
         if s.waiting_since is None:
             s.waiting_since = now
-        if s.mode is Mode.IDLE and not s.settings.muted and not self.quiet():
+        if s.mode is Mode.IDLE and not self.quiet():
             out.append(Chime(s.settings.volume))
         out.append(Log(f"new message {e.message_id} waiting ({len(s.inbox)})"))
 
@@ -568,9 +569,11 @@ class Core:
             return
         if not e.ok:
             out.append(Log(f"could not play {e.message_id}", "error"))
-            self.s.mode, self.s.playing_id = Mode.IDLE, None
+            self.s.mode, self.s.playing_id, self.s.replaying = Mode.IDLE, None, False
             if e.message_id in self.s.inbox:
                 self.s.inbox.remove(e.message_id)
+            if self.s.last_played == e.message_id:
+                self.s.last_played = None
             out.append(MarkPlayed(e.message_id, ok=False))
             return
         self._playback_over(now, out, heard=True)
@@ -618,8 +621,9 @@ class Core:
             before = self.s.mode
             self.s.last_interaction_at = now
             self._play_press(now, out)
-            out.append(Reply(e.token, f"playing {self.s.playing_id}" if self.s.mode is Mode.PLAYING and before is not Mode.PLAYING
-                             else "nothing to play" if not self.s.inbox else "not idle or muted"))
+            out.append(Reply(e.token, ("replaying " if self.s.replaying else "playing ") + str(self.s.playing_id)
+                             if self.s.mode is Mode.PLAYING and before is not Mode.PLAYING
+                             else "nothing to play" if not (self.s.inbox or self.s.last_played) else "busy"))
         elif name == "lock":
             want = args[:1] == ("on",)
             if want != self.s.locked:
@@ -666,7 +670,7 @@ class Core:
                 f"fault={self.fault().name} recording={'yes' if s.mode is Mode.RECORDING else 'no'} "
                 f"playing={'yes' if s.mode is Mode.PLAYING else 'no'} lock={'on' if s.locked else 'off'} "
                 f"mains={'yes' if s.mains else 'no'} soc={soc} inbox={len(s.inbox)} outbox={len(s.outbox)} "
-                f"quiet={'yes' if self.quiet() else 'no'} muted={'yes' if s.settings.muted else 'no'} "
+                f"quiet={'yes' if self.quiet() else 'no'} "
                 f"next_checkin={s.checkin_interval_s}s modem={'on' if s.modem_on else 'off'}")
 
     def snapshot(self) -> Dict[str, Any]:
@@ -680,7 +684,7 @@ class Core:
             "silence_s": s.silence_s if s.mode is Mode.RECORDING else 0.0,
             "playing_id": s.playing_id, "mains": s.mains, "battery_pct": s.battery_pct,
             "charging": s.charging, "quiet": self.quiet(), "resting": self.resting(now),
-            "muted": s.settings.muted, "settings": s.settings.to_json(),
+            "replaying": s.replaying, "last_played": s.last_played, "settings": s.settings.to_json(),
             "checkin_interval_s": s.checkin_interval_s, "modem_on": s.modem_on,
             "last_checkin_ago_s": None if s.last_checkin_ok_at is None else now - s.last_checkin_ok_at,
             "link_up": s.link_up, "uptime_s": now - s.boot_at, "time_ok": s.time_ok,

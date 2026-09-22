@@ -1,5 +1,9 @@
 # Protocol v0.3 (draft)
 
+> **2026-09-22, ADR 0020:** `mute` is removed from `settings` (there is no
+> mute); the box keeps its last played message so Play can repeat it. Server
+> and app: drop `mute` from `PATCH /settings` and from the settings object.
+
 The contract between the three code streams. Firmware, server and iOS app all
 depend on this document; change it here first, then in the code.
 
@@ -171,7 +175,7 @@ POST /messages/{id}/played               recipient only; feedback for the sender
 GET    /messages?cursor={c}&limit={n}    → { "messages": [ … ], "cursor": "…", "more": false, "max_seq": 41 }
 GET    /messages/{id}                    one message object — refresh its state
 GET    /device/status                    → { "telemetry": {…}, "last_checkin_at": "…", "late": false,
-                                             "settings": {…}, "settings_meta": { "mute.a": { "by": "parent-a", "at": "…" } } }
+                                             "settings": {…}, "settings_meta": { "volume": { "by": "parent-a", "at": "…" } } }
 PATCH  /settings                         partial settings object → the same shape as /device/status returns
 PUT    /push-token                       { "apns": "<hex>", "environment": "production" | "sandbox" }
 ```
@@ -183,9 +187,8 @@ PUT    /push-token                       { "apns": "<hex>", "environment": "prod
   asking while `more` is true.
   `max_seq` is the highest `seq` the server has seen **from the caller**, so a
   reinstalled app continues its counter instead of reusing one.
-- `PATCH /settings`: a parent may set `poll`, `quiet_hours`, `led_brightness`,
-  `volume`, and **only its own** mute (`mute.a` by `parent-a`, `mute.b` by
-  `parent-b`). Anything else → 403. Every field records who set it and when.
+- `PATCH /settings`: a parent may set `poll`, `quiet_hours`, `led_brightness`
+  and `volume`. Anything else → 403. Every field records who set it and when.
 - `PUT /push-token` is idempotent per identity and device token.
 
 The app keeps its own copy of every message it fetches
@@ -273,15 +276,14 @@ adult.
 ```json
 {
   "poll": { "active_minutes": 1, "active_window_minutes": 90, "idle_minutes": 30 },
-  "mute": { "a": false, "b": false },
   "quiet_hours": { "start": "20:00", "end": "07:00", "tz": "Europe/Berlin" },
   "led_brightness": 40,
   "volume": 70
 }
 ```
 
-Quiet hours: glow yes, chime no, play still works. Mute: no sound at all, glow
-persists; the app shows who set it and when. Both are enforced on the device.
+Quiet hours: glow yes, chime no, play still works — enforced on the device.
+There is no mute ([ADR 0020](decisions/0020-no-mute-replay-green-link.md)).
 
 ## Durability and retention
 
@@ -300,7 +302,8 @@ persists; the app shows who set it and when. Both are enforced on the device.
   There is no delete endpoint in v1. The archive exists twice:
   on the server, and on the phone.
 - The box is not an archive: outbox until the 2xx above; inbox until played
-  (or evicted under pressure).
+  (or evicted under pressure) — plus the **last played message**, kept so a
+  Play press with nothing new repeats it ([ADR 0020](decisions/0020-no-mute-replay-green-link.md)).
 - Unplayed messages are never reaped; after 48 h the app is told.
 - Telemetry history is not the archive: check-ins are pruned at 30 days.
 - No transcription, no speech services, no third-party analytics anywhere.

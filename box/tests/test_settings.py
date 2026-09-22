@@ -22,6 +22,7 @@ def test_quiet_hours_wrap_midnight_in_the_settings_time_zone():
 
 def test_settings_parse_the_servers_shape_and_survive_junk():
     s = Settings.from_json({"poll": {"idle_minutes": 5}, "mute": {"a": True}, "volume": 30})
-    assert s.poll.idle_minutes == 5 and s.poll.active_minutes == 1 and s.muted and s.volume == 30
+    assert s.poll.idle_minutes == 5 and s.poll.active_minutes == 1 and s.volume == 30
+    assert "mute" not in s.to_json()                              # ignored from an older server (ADR 0020)
     assert Settings.from_json(None) == Settings()
     assert Settings.from_json(s.to_json()) == s

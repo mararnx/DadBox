@@ -63,8 +63,8 @@
   .leds { position: absolute; left: 20px; bottom: 14px; display: flex; gap: 22px; }
   .led { display: flex; align-items: center; gap: 6px; font-size: 10px; letter-spacing: .1em; color: rgba(0,0,0,.5); }
   .led i { width: 9px; height: 9px; border-radius: 50%; background: #3b2a2a; box-shadow: inset 0 0 2px #000; }
-  .led i.on { background: #ff5a3c; box-shadow: 0 0 8px 3px rgba(255,90,60,.8); }
-  .led i.pw.on { background: #7dff5a; box-shadow: 0 0 8px 3px rgba(125,255,90,.8); }
+  .led i.on { background: #5dff6a; box-shadow: 0 0 8px 3px rgba(90,255,110,.85); }      /* LINK: green */
+  .led i.pw.on { background: #ffc24a; box-shadow: 0 0 8px 3px rgba(255,194,74,.85); }  /* POWER: amber */
   .port { position: absolute; right: 22px; bottom: 12px; width: 26px; height: 12px; border-radius: 3px; background: #111; box-shadow: inset 0 0 0 2px #444; }
   .ant { position: absolute; right: -18px; top: 20px; width: 10px; height: 60px; border-radius: 5px; background: linear-gradient(90deg, #222, #555, #222); box-shadow: 0 2px 4px rgba(0,0,0,.5); }
   .ant::after { content: ""; position: absolute; left: -6px; top: 44px; width: 22px; height: 10px; border-radius: 3px; background: #7a8087; }
@@ -193,7 +193,6 @@
         <button onclick="parentSend(2)" title="the link dies after two chunks — the app retries later">…link drops mid-upload</button>
       </div>
       <div class="row">
-        <button id="p-mute" onclick="parentSettings({mute: {a: !S.server.device.settings.mute.a}})">mute (parent-a)</button>
         <button id="p-quiet" onclick="toggleQuiet()">quiet hours 20:00–07:00</button>
         <span class="dim">volume</span><input type="range" id="p-vol" min="0" max="100" onchange="parentSettings({volume: +this.value})">
         <span class="dim">brightness</span><input type="range" id="p-bri" min="0" max="100" onchange="parentSettings({led_brightness: +this.value})">
@@ -291,8 +290,8 @@ function draw(s) {
   $('link-text').innerHTML = `${b.link} · check-in every ${b.checkin_interval_s}s · last ${b.last_checkin_ago_s == null ? 'never' : Math.round(b.last_checkin_ago_s) + 's ago'} · next in ${Math.round(b.link_worker.next_in_s)}s · modem ${b.modem_on ? 'stays on' : 'off between'}${b.window_open ? ' · <span class="wait-word">conversation window open</span>' : ''}${b.link_worker.simulated_down ? ' · <span class="rec-word">sim link down</span>' : ''}`;
   $('rec-text').textContent = b.mode === 'recording' ? `${b.recording_s.toFixed(1)} s (silence ${b.silence_s.toFixed(1)} s; stops at 20 s silence or 300 s)` : b.locked ? 'travel lock ON' : '—';
   $('outbox').textContent = b.outbox_ids.length ? b.outbox_ids.join('\n') : 'empty';
-  $('inbox').textContent = b.inbox.length ? b.inbox.join('\n') : (b.inbox_on_disk ? `${b.inbox_on_disk} on disk, played` : 'empty');
-  $('settings').textContent = `mute ${b.muted ? 'ON' : 'off'} · quiet ${b.quiet ? 'NOW' : 'no'} (${b.settings.quiet_hours.start}–${b.settings.quiet_hours.end}) · vol ${b.settings.volume} · bright ${b.settings.led_brightness} · poll ${b.settings.poll.active_minutes}/${b.settings.poll.idle_minutes} min`;
+  $('inbox').textContent = (b.inbox.length ? b.inbox.join('\n') : 'nothing new') + (b.last_played ? `\nlast heard ${b.last_played} — Play repeats it` : '');
+  $('settings').textContent = `quiet ${b.quiet ? 'NOW' : 'no'} (${b.settings.quiet_hours.start}–${b.settings.quiet_hours.end}) · vol ${b.settings.volume} · bright ${b.settings.led_brightness} · poll ${b.settings.poll.active_minutes}/${b.settings.poll.idle_minutes} min`;
   $('telemetry').textContent = JSON.stringify(b.telemetry, null, 1);
   // playing
   const p = b.playing;
@@ -324,7 +323,6 @@ function draw(s) {
   $('parent-panel').classList.toggle('hidden', !srv.device);
   if (srv.device) {
     const st = srv.device.settings;
-    tog('p-mute', st.mute.a, st.mute.a ? 'mute: ON (parent-a)' : 'mute: off');
     tog('p-quiet', st.quiet_hours.start !== st.quiet_hours.end, `quiet hours ${st.quiet_hours.start}–${st.quiet_hours.end}`);
     if (document.activeElement !== $('p-vol')) $('p-vol').value = st.volume;
     if (document.activeElement !== $('p-bri')) $('p-bri').value = st.led_brightness;

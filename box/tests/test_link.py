@@ -75,10 +75,16 @@ def test_inbox_is_downloaded_crc_checked_and_played_is_reported(tmp_path):
     assert worker._round() is True
     assert [e.message_id for e in drain(events) if isinstance(e, c.Downloaded)] == [mid]
     assert store.inbox_unheard() == [mid] and dbx.crc_ok(store.inbox_container(mid))
-    store.inbox_mark(mid, played=True)
+    store.inbox_mark(mid, played=True, played_at=1.0)
     assert worker._round() is True
-    assert srv.messages[mid]["state"] == "played" and store.inbox_count() == 0
+    assert srv.messages[mid]["state"] == "played"
     assert [e.message_id for e in drain(events) if isinstance(e, c.PlayedReported)] == [mid]
+    assert store.inbox_count() == 1 and store.inbox_last_played() == mid     # kept: Play repeats it (ADR 0020)
+    mid2 = parent.send(3.0, audio=b"RIFF" + bytes(50_000))
+    worker._round()
+    store.inbox_mark(mid2, played=True, played_at=2.0)
+    worker._round()
+    assert store.inbox_count() == 1 and store.inbox_last_played() == mid2    # only the newest stays
 
 
 def test_no_coverage_is_a_modem_fault_and_never_a_give_up(tmp_path):

@@ -23,7 +23,6 @@ MAX_DURATION_MS = 5 * 60 * 1000
 MAX_MESSAGE_BYTES = 4 * 1024 * 1024
 DEFAULT_SETTINGS = {
     "poll": {"active_minutes": 1, "active_window_minutes": 90, "idle_minutes": 30},
-    "mute": {"a": False, "b": False},
     "quiet_hours": {"start": "20:00", "end": "07:00", "tz": "Europe/Zurich"},
     "led_brightness": 40, "volume": 70,
 }
@@ -303,16 +302,9 @@ class FakeServer:
             patch = json.loads(body)
         except ValueError:
             raise _Fail(400, "body must be a JSON object")
-        mine = "a" if who == "parent-a" else "b"
         now = _iso(self._wall())
         for k, v in (patch or {}).items():
-            if k == "mute":
-                for side, val in (v or {}).items():
-                    if side != mine:
-                        raise _Fail(403, f"mute.{side} is not yours")
-                    self.settings["mute"][side] = bool(val)
-                    self.settings_meta[f"mute.{side}"] = {"by": who, "at": now}
-            elif k in ("poll", "quiet_hours"):
+            if k in ("poll", "quiet_hours"):
                 self.settings[k].update(v or {})
                 self.settings_meta[k] = {"by": who, "at": now}
             elif k in ("led_brightness", "volume"):

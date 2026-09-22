@@ -57,7 +57,7 @@ implementations.
 
 | Module | Job | Pure? |
 | --- | --- | --- |
-| `core.py` | the state machine: modes, presses, lock, mute, quiet hours, cadence, lights plan, status plan, telemetry | yes |
+| `core.py` | the state machine: modes, presses, lock, replay, quiet hours, cadence, lights plan, status plan, telemetry | yes |
 | `gestures.py` | contacts → presses: ≥ 0.5 s to count, both held 3 s = travel lock, fumbles fire nothing | yes |
 | `lights.py` | `LightsPlan` + time → RGB levels; `StatusPlan` + time → LINK/POWER; **record red is 0 or 1, asserted** | yes |
 | `settings.py` | the server's `settings` object, tolerant parse, quiet-hours test in the settings' time zone | yes |
@@ -95,11 +95,12 @@ Three modes: `IDLE`, `RECORDING`, `PLAYING`. Everything else is overlay
 | Press | Idle | Recording | Playing |
 | --- | --- | --- | --- |
 | Record | mic on, capture starts, steady red | stop: **mic off first**, then `StopCapture` | ignored — mic and amp are never on together |
-| Play | oldest unheard plays (unless muted or empty) | ignored | ignored (no restart, no skip) |
+| Play | oldest unheard plays; with nothing new, the last one again | ignored | ignored (no restart, no skip) |
 | Both, 3 s | travel lock toggles; both blink twice | stops the recording, then locks | stops playback (not counted as heard), then locks |
 
 - A press fires **at 0.5 s of hold**, not on release: the red light answers
-  while the finger is still down. Under 0.5 s nothing happens
+  while the finger is still down (a hold released after 0.5 s but before the
+  next tick still counts — never tick-dependent). Under 0.5 s nothing happens
   ([ADR 0016](../docs/decisions/0016-two-buttons-no-lid.md)).
 - Recording stops itself at the 5-minute cap or after 20 s of continuous
   silence (`dsp.SPEECH_RMS`, per 100 ms block — tune on real recordings).
@@ -108,10 +109,11 @@ Three modes: `IDLE`, `RECORDING`, `PLAYING`. Everything else is overlay
   after the sealed container is fsynced into the outbox
   ([ADR 0010](../docs/decisions/0010-nothing-is-lost.md)). Online and offline
   are identical.
-- **Mute** (either parent): no chime, and the Play press does nothing; the
-  glow persists. **Quiet hours**: no chime, play still works, the glow is
-  capped at 30 %. Both are enforced from the settings on `/data`, so they
-  work after a reboot with no link.
+- **Quiet hours**: no chime, play still works, the glow is capped at 30 %.
+  Enforced from the settings on `/data`, so they work after a reboot with no
+  link. There is no mute ([ADR 0020](../docs/decisions/0020-no-mute-replay-green-link.md)).
+- **Replay**: the last played message stays on disk; Play with nothing new
+  repeats it, lights `PLAYING`, opens the window, and is not reported again.
 - **Waiting → resting** after 2 h without any press: dim, not off. Any press
   resets it.
 - A locked box still shows *waiting* — the glow is information for the
@@ -135,9 +137,10 @@ every combination of inputs:
 2. The child's channel has the five states of `state.Lights` and nothing
    else. Link, power and faults render only on the status LEDs.
 
-Status LEDs: patterns on a 3 s cycle, 50 ms blinks; fault = alternating at
-1 Hz. LINK flashes briefly on each successful check-in **only in the first
-hour after boot** (controls-ui Q7 — decided: yes, first hour).
+Status LEDs (ADR 0020): **LINK steady green** while the last check-in
+succeeded within 2 × the interval, blink patterns on a 3 s cycle (50 ms)
+when down; **POWER steady** while external power is present; fault =
+alternating at 1 Hz.
 
 ## Storage and durability
 
@@ -163,11 +166,11 @@ each file whole or absent. **At boot** `store.pending_captures()` finds any
 it is trimmed, sealed and queued as if stop had been pressed
 ([ADR 0019](../docs/decisions/0019-mains-first-battery-deferred.md)).
 
-Inbox: a message leaves the disk after the server has acknowledged `played`
-(flags `played` → `reported` → removed). Between play and the report the
-`played` flag stops a reboot from playing it twice. A container that will
-not open is flagged `broken` and never re-downloaded (storage-queue Q1 —
-decided: remove on the server's ack, no grace; replay is an app question).
+Inbox: a message is flagged `played` (with `played_at`) when heard, then
+`reported` once the server has acknowledged it; after that every played
+message but the newest is removed (`inbox_prune_played`). The newest stays
+for replay and is passed to the core at boot as `last_played`. A container
+that will not open is flagged `broken` and never re-downloaded.
 
 ## The link
 
@@ -175,7 +178,7 @@ One round, in this order, on the `link` thread:
 
 1. modem on if the plan turned it off; wait for the interface (90 s, then `fault: modem`)
 2. outbox, **oldest `seq` first**, each resumed from `upload-state`
-3. `played` for everything the child heard; then those leave the inbox
+3. `played` for everything the child heard; then all but the newest leave the inbox
 4. `POST /device/checkin` with the core's telemetry; settings saved to `/data`
 5. download every inbox id not on disk; crc before it is accepted; Range-resume of a partial body
 6. modem off if the plan says so; sleep until the next round or a wake
@@ -271,7 +274,7 @@ The web page: the box (hold a button; the record ring's red is drawn from
 the mic pin, not from the lights plan), what is inside it, `dadboxctl`,
 the world (coverage, server up/down, mains/battery, the child talking or
 silent, a broken mic, time speed and skips, the clock at 21:00 for quiet
-hours, "pull the plug"), the parent's phone (send, a dropped upload, mute,
+hours, "pull the plug"), the parent's phone (send, a dropped upload,
 quiet hours, volume, brightness, idle poll, the thread with `played_at`,
 the pushes), and the log.
 
@@ -282,7 +285,7 @@ the pushes), and the log.
 - [x] parent sends → next check-in → chime → Play breathes → play → `played_at` → push `played` → inbox empty
 - [x] coverage off: LINK double-blinks with a queued message; coverage back: it goes
 - [ ] quiet hours (clock → 21:00): no chime, glow dimmed, play works
-- [ ] mute: no chime, play does nothing, glow persists; who set it shows in the parent panel
+- [ ] nothing new + Play: the last message plays again, `played_at` on the server does not change
 - [ ] both buttons 3 s: lock blink, buttons dead, `locked: true` in telemetry, survives restart
 - [ ] +2 h: *resting*; a press wakes it
 - [ ] battery fitted, unplug: 30-minute cadence, modem off between; play → window → 1 min
@@ -297,9 +300,10 @@ the pushes), and the log.
 | --- | --- |
 | Press fires when | at 0.5 s of hold, not on release |
 | Play during playback / Record during playback | ignored |
-| Inbox removal after play | on the server's `played` ack; `played` flag meanwhile |
+| Play with nothing new | repeats the last message (ADR 0020) |
+| Inbox removal after play | on the server's `played` ack, except the newest played message |
 | Quiet-hours glow | capped at 30 % of `led_brightness` |
-| LINK flash per check-in | first hour after boot only |
+| LINK LED | steady green when the server answered within 2 × the interval (ADR 0020) |
 | Silence threshold / auto-stop | RMS 400 per 100 ms block, 20 s — tune on real audio |
 | Raw capture lifetime | unlinked right after the sealed container is fsynced |
 | Lock blink colour | teal (no red: the mic pin) |

@@ -16,7 +16,7 @@ the Mac; only the hardware interfaces in `hal.py` have two implementations —
 
 | Module | Job | Exists |
 | --- | --- | --- |
-| `core` | the state machine: modes, presses, lock, mute, quiet hours, cadence, light plans, telemetry | yes, tested |
+| `core` | the state machine: modes, presses, lock, replay, quiet hours, cadence, light plans, telemetry | yes, tested |
 | `gestures` | contacts → presses (≥ 0.5 s), both held 3 s = travel lock | yes, tested |
 | `lights` | plans → pin levels; **record red is 0 or 1, asserted** | yes, tested |
 | `settings`, `dsp`, `state`, `container` | settings + quiet hours, RMS/trim/chime, the rules, DBX1 + AES-GCM | yes, tested |

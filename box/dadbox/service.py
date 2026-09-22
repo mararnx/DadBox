@@ -149,7 +149,7 @@ class Service:
         sizes = self.store.outbox_bytes()
         return self.core.telemetry(outbox_bytes=sum(sizes.values()),
                                    outbox_oldest_s=self.store.outbox_oldest_age_s(self.clock.wall()),
-                                   storage_pct=self.store.storage_pct(), inbox_on_disk=self.store.inbox_count())
+                                   storage_pct=self.store.storage_pct(), inbox_on_disk=len(self.store.inbox_unheard()))
 
     # --- lifecycle --------------------------------------------------------------------------------
 
@@ -158,7 +158,7 @@ class Service:
         settings = Settings.from_json(self.store.settings_json())
         return c.Boot(outbox=self.store.outbox_bytes(), inbox=self.store.inbox_unheard(), locked=self.store.locked(),
                       settings=settings, pending_captures=self.store.pending_captures(),
-                      mains=mains, battery_pct=pct, charging=charging)
+                      mains=mains, battery_pct=pct, charging=charging, last_played=self.store.inbox_last_played())
 
     def start(self) -> None:
         self.hw.mic.set(False)

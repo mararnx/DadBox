@@ -18,8 +18,8 @@ class Lights(Enum):
     IDLE = auto()        # 5. both dark
 
 
-class Link(Enum):        # status LED, adults' vocabulary — off means fine
-    OK = auto()          # off
+class Link(Enum):        # status LED (green), adults' vocabulary
+    OK = auto()          # steady — connected and the server answered the last check-in (ADR 0020)
     DOWN = auto()        # 1 blink / 3 s
     DOWN_QUEUED = auto() # 2 blinks / 3 s — messages waiting to go, safe on disk
 

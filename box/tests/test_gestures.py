@@ -49,3 +49,11 @@ def test_a_second_button_after_a_fired_press_is_its_own_press():
     g.contact(P, True, 0.6)
     assert g.tick(1.1) == [Press(P)]
     assert g.tick(4.0) == []                 # not a lock: record had already fired
+
+
+def test_a_press_released_before_any_tick_still_counts():
+    g = Gestures()
+    g.contact(R, True, 0.0)
+    assert g.contact(R, False, 0.6) == [Press(R)]     # no tick ran between 0.5 s and the release
+    g.contact(R, True, 1.0)
+    assert g.contact(R, False, 1.3) == []

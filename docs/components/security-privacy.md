@@ -49,12 +49,12 @@ public network. Handle it like it matters.
   that the box records only while the record button is red — a smaller
   signal than an open lid was, so it has to be explained — that the mic has
   no power otherwise, that messages are kept, encrypted, and by whom they can
-  be heard, and that they can see the mute state. Write that down for them —
+  be heard, and that quiet hours are theirs to set too. Write that down for them —
   one page.
 
 ## Questions
 
-1. **What does the co-parent get to see?** Mute state, quiet hours, that it's
+1. **What does the co-parent get to see?** Quiet hours, that it's
    alive. Not the messages. Is that the right line?
 2. **Key ceremony** — generate on the phone; then bake it into the box at
    setup from a `.env` (the box has no camera), or pair over USB? For one box,

@@ -33,7 +33,6 @@ RESTING_LEVEL = 0.15              # *resting*: dim, not off
 QUIET_CAP = 0.3                   # quiet hours: the glow is capped, so it doesn't light a bedroom
 BLINK_S = 0.05                    # status-LED blink width; ~10 ms in the ADR, 50 ms so a human sees it
 STATUS_PERIOD_S = 3.0
-FLASH_S = 0.3                     # LINK "brief on" after a check-in
 
 
 class Cue(Enum):
@@ -119,7 +118,6 @@ class StatusPlan:
     link: Link = Link.DOWN
     power: Power = Power.OK
     fault: Fault = Fault.NONE
-    flash_at: Optional[float] = None   # LINK brief-on after a check-in (first hour after boot only)
 
 
 def _blink_at(phase: float, at: float) -> bool:
@@ -127,18 +125,18 @@ def _blink_at(phase: float, at: float) -> bool:
 
 
 def render_status(plan: StatusPlan, t: float) -> Tuple[bool, bool]:
-    """(LINK on, POWER on) at time `t`. Patterns carry the meaning, not colour."""
+    """(LINK on, POWER on) at time `t`. LINK is a green LED: steady = fine."""
     phase = t % STATUS_PERIOD_S
     if plan.fault is not Fault.NONE:            # both alternate: an adult must act
         half = (t % 1.0) < 0.5
         return half, not half
     link = False
-    if plan.link is Link.DOWN:
+    if plan.link is Link.OK:                    # steady green: connected and the server answered (ADR 0020)
+        link = True
+    elif plan.link is Link.DOWN:
         link = _blink_at(phase, 0.0)
     elif plan.link is Link.DOWN_QUEUED:
         link = _blink_at(phase, 0.0) or _blink_at(phase, 0.25)
-    if plan.flash_at is not None and 0 <= t - plan.flash_at < FLASH_S:
-        link = True
     power = False
     if plan.power in (Power.MAINS, Power.CHARGING):
         power = True

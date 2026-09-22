@@ -30,20 +30,19 @@ ring light; the plate is screwed down.
   supply are the **same GPIO pin** — a wiring fact, not firmware. That pin is
   only ever on or off: the red light is never dimmed or animated, because
   dimming it would chop the mic's supply.
-- **The adults' channel** is two small status LEDs, LINK and POWER
-  ([ADR 0009](../decisions/0009-two-led-vocabularies.md)): off = fine, blink
-  patterns for trouble, alternating = fault — plus the app. LINK goes quiet
-  when the box has checked in within 2 × the current interval
-  ([ADR 0015](../decisions/0015-adaptive-polling.md)).
+- **The adults' channel** is two small status LEDs, LINK (green) and POWER
+  (amber) ([ADR 0009](../decisions/0009-two-led-vocabularies.md), ADR 0020):
+  steady = fine, blink patterns for trouble, alternating = fault — plus the
+  app. LINK is steady while the box has checked in within 2 × the current
+  interval ([ADR 0015](../decisions/0015-adaptive-polling.md)); POWER is
+  steady while external power is present.
 - **The bag.** Buttons on the outside of a box in a school bag: a press must
   last ≥ 0.5 s to count; under 1 s of speech is discarded; **travel lock** —
   hold both buttons 3 s, both blink twice, buttons dead until the same
-  gesture again, persists across reboot; mute and quiet hours still apply to
-  playback and chimes.
+  gesture again, persists across reboot; quiet hours still apply to the chime.
 - **Quiet hours** (default 20:00–07:00, enforced on the device): glow yes,
-  chime no, play still works. **Mute:** no sound at all, glow persists; the
-  app shows who set it and when. No sender identity on the box — the voice
-  says who it is in the first second.
+  chime no, play still works. There is no mute (ADR 0020). No sender identity
+  on the box — the voice says who it is in the first second.
 - **Electrically:** six LED pins (2 × RGB, common cathode, resistors built
   in) driven at 3.3 V straight from GPIO with software PWM, two switch
   inputs on the Pi's internal pull-ups, two status LED pins. Setting
@@ -77,7 +76,7 @@ History: the lid, reed contact and NeoPixel ring are in
   the co-parent ([security-privacy.md](security-privacy.md)).
 - Chimes are the only sound the box makes unbidden. That makes them the only
   thing that can annoy the other household. Keep them short, gentle, and
-  subject to mute and quiet hours.
+  subject to quiet hours.
 
 ## Questions
 
@@ -99,9 +98,8 @@ History: the lid, reed contact and NeoPixel ring are in
    [PROTOCOL.md](../PROTOCOL.md) first.
 6. **Status LED placement** — beside the charge jack, on the back, on the
    underside? Findable by an adult, ignorable by the child.
-7. **LINK "brief on" at each check-in** — helpful while placing the box, but
-   on mains that is a flash every minute, all night. Suggest: only for the
-   first hour after power-up.
+7. ~~LINK "brief on" at each check-in~~ — moot: LINK is steady green while
+   the link is fine (ADR 0020).
 8. ~~Charged vs on battery~~ — decided 2026-09-22: POWER is steady whenever
    external power is present, off when unplugged. "Full" is the app's to say.
 9. **Haptics?** A small vibration on *got it* is cheap and satisfying. Worth a

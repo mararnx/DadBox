@@ -56,11 +56,18 @@ class Gestures:
         else:
             if button not in self.down:
                 return []
-            del self.down[button]
+            held = now - self.down.pop(button)
+            was_fired = button in self.fired
             self.fired.discard(button)
             if not self.down:
-                self.pair = False
-                self.pair_fired = False
+                pair, self.pair, self.pair_fired = self.pair, False, False
+            else:
+                pair = self.pair
+            # A hold that reached 0.5 s counts even if no tick fell between the
+            # mark and the release — the press must never depend on tick timing.
+            if not pair and not was_fired and held >= MIN_PRESS_S:
+                return [Press(button)]
+            return []
         return self.tick(now)
 
     def tick(self, now: float) -> List[Gesture]:

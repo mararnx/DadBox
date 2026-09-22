@@ -4,7 +4,8 @@
       outbox/<id>.dbx      sealed container, fsynced before the got-it pulse; never evicted
       outbox/<id>.json     its metadata (the PUT body) + local state: queued | uploading
       inbox/<id>.dbx       a downloaded container, crc-checked; may be evicted
-      inbox/<id>.json      { played: bool, reported: bool, broken: bool }
+      inbox/<id>.json      { played: bool, played_at: wall, reported: bool, broken: bool }
+                           the newest played message stays: Play with nothing new repeats it (ADR 0020)
       capture/<id>.pcm     the live recording, raw s16le 16 kHz mono, fsynced every second
       capture/<id>.json    when it started (for created_at / time_ok); recovered at boot
       seq                  monotonic per-sender counter — the ordering key
@@ -206,7 +207,7 @@ class Store:
     def inbox_container(self, message_id: str) -> bytes:
         return (self.root / "inbox" / f"{message_id}.dbx").read_bytes()
 
-    def inbox_mark(self, message_id: str, **flags: bool) -> None:
+    def inbox_mark(self, message_id: str, **flags: Any) -> None:
         f = self._inbox_flags(message_id)
         f.update(flags)
         write_json_atomic(self.root / "inbox" / f"{message_id}.json", f)
@@ -225,6 +226,26 @@ class Store:
             if p.exists():
                 p.unlink()
         _fsync_dir(self.root / "inbox")
+
+    def _played(self) -> List[tuple]:
+        """(played_at, id) of every played, unbroken message — newest last."""
+        out = []
+        for p in (self.root / "inbox").glob("*.dbx"):
+            f = self._inbox_flags(p.stem)
+            if f.get("played") and not f.get("broken"):
+                out.append((float(f.get("played_at") or 0), p.stem))
+        return sorted(out)
+
+    def inbox_last_played(self) -> Optional[str]:
+        """What Play repeats when nothing new is waiting."""
+        played = self._played()
+        return played[-1][1] if played else None
+
+    def inbox_prune_played(self, keep: int = 1) -> None:
+        """Drop played messages the server has acknowledged, except the newest `keep`."""
+        for _, mid in self._played()[:-keep] if keep else self._played():
+            if self._inbox_flags(mid).get("reported"):
+                self.inbox_remove(mid)
 
     def inbox_count(self) -> int:
         return len(list((self.root / "inbox").glob("*.dbx")))

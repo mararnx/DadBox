@@ -7,7 +7,7 @@ posts what it learned as events. Order of a round:
     1. modem on (if it was off) and wait for the interface
     2. upload everything in the outbox, oldest seq first, resuming from
        `upload-state`; delete locally only on `complete` 2xx (ADR 0010)
-    3. report messages the child has played; then drop them from the inbox
+    3. report messages the child has played; then drop all but the newest (replay)
     4. check in: telemetry up, settings and inbox ids down
     5. download every inbox id not on disk, crc-checked, and post `Downloaded`
     6. modem off if the plan says so; sleep until the next round or a wake
@@ -226,8 +226,8 @@ class LinkWorker:
             for mid in self.store.inbox_to_report():
                 self.client.played(mid)
                 self.store.inbox_mark(mid, reported=True)
-                self.store.inbox_remove(mid)
                 self.post(PlayedReported(mid))
+            self.store.inbox_prune_played(keep=1)
             settings, inbox = self.client.checkin(self.telemetry())
             self.store.save_settings(settings.to_json())
             self.post(Checkin(True, settings, tuple(inbox), rssi=self.modem.rssi()))

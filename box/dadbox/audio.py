@@ -143,6 +143,6 @@ class AudioWorker:
 
     def mark_played(self, message_id: str, ok: bool) -> None:
         if ok:
-            self.store.inbox_mark(message_id, played=True)
+            self.store.inbox_mark(message_id, played=True, played_at=self.clock.wall())
         else:
             self.store.inbox_mark(message_id, broken=True)

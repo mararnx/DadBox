@@ -33,8 +33,9 @@ a child actually stays close to someone who isn't there.
    no mic, by wiring rather than by promise. A box that lives in two homes
    will be in rooms with other people in them; it must be obvious to everyone
    when it is listening, and incapable of listening otherwise.
-7. **Both households can mute it, and both can see the mute.** A known-off beats
-   a mystery silence — and a box nobody can silence is a box that gets unplugged.
+7. **There is no mute** ([ADR 0020](decisions/0020-no-mute-replay-green-link.md)).
+   Quiet hours, enforced on the device and set from the app, keep it silent
+   at night; the volume setting and the plug are the rest.
 
 ## Hardware (decided — see [bom.csv](../hardware/bom/bom.csv))
 
@@ -163,8 +164,8 @@ being heard. Everything else in the design serves that.
 - One managed host, audio end-to-end encrypted, iOS the only client, no server-side transcode — [ADR 0017](decisions/0017-managed-hosting-e2ee.md)
 - Messages are archived forever — [ADR 0018](decisions/0018-archive-forever.md)
 - The box travels with the child between both homes
-- The co-parent is on board: placement is flexible, consent is a conversation,
-  and they get a mute that is visible in the app
+- The co-parent is on board: placement is flexible, consent is a conversation
+- No mute; Play with nothing new repeats the last message; LINK steady green when the server answers; POWER steady on USB power — [ADR 0020](decisions/0020-no-mute-replay-green-link.md)
 - Ages 6-9: two buttons, no text anywhere; the message count lives in the app
 - **5 minutes** per message. Opus on the wire from day one
 - Building rather than buying — the making is part of the point

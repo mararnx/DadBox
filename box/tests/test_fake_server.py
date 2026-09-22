@@ -81,12 +81,13 @@ def test_range_download_delivered_played_and_scope():
     assert srv.transport("parent-a").request("GET", f"/messages/{mid}/audio")[0] == 200
 
 
-def test_settings_only_your_own_mute():
+def test_settings_record_who_and_there_is_no_mute():
     srv = FakeServer()
     a = Parent(srv, KEY, who="parent-a")
-    r = a.settings({"mute": {"a": True}, "volume": 55})
-    assert r["settings"]["mute"] == {"a": True, "b": False} and r["settings_meta"]["mute.a"]["by"] == "parent-a"
-    status, _, _ = srv.transport("parent-a").request("PATCH", "/settings", body=json.dumps({"mute": {"b": True}}).encode())
+    r = a.settings({"volume": 55, "quiet_hours": {"start": "19:00"}})
+    assert r["settings"]["volume"] == 55 and r["settings_meta"]["volume"]["by"] == "parent-a"
+    assert "mute" not in r["settings"]
+    status, _, _ = srv.transport("parent-a").request("PATCH", "/settings", body=json.dumps({"mute": {"a": True}}).encode())
     assert status == 403
 
 

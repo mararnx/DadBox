@@ -73,17 +73,23 @@ def test_round_trip(box):
     # The parent hears it and answers.
     parent = Parent(server, KEY)
     assert parent.audio(sent["id"])[:4] in (b"OggS", b"RIFF")
-    mid = parent.send(3.0)
+    mid = parent.send(8.0)
     until(lambda: svc.core.snapshot()["lights"] == "WAITING", what="play button glowing")
     assert server.messages[mid]["state"] == "delivered"
 
     # Child plays it: amp on around playback only, played reported, inbox emptied.
     hold(svc, hw, Button.PLAY)
-    until(lambda: svc.core.snapshot()["lights"] == "PLAYING", what="playing")
-    assert hw.amp.on
+    until(lambda: svc.core.snapshot()["lights"] == "PLAYING" and hw.amp.on, what="playing with the amp on")
     until(lambda: server.messages[mid]["state"] == "played", timeout=20, what="played on the server")
-    until(lambda: store.inbox_count() == 0, what="inbox emptied")
-    assert not hw.amp.on and svc.core.snapshot()["lights"] == "IDLE"
+    until(lambda: svc.core.snapshot()["lights"] == "IDLE", what="idle again")
+    assert not hw.amp.on and store.inbox_unheard() == [] and store.inbox_count() == 1   # kept for replay
+
+    # Nothing new: Play repeats the last message; the server is not told twice.
+    played_at = server.messages[mid]["played_at"]
+    hold(svc, hw, Button.PLAY)
+    until(lambda: svc.core.snapshot()["replaying"], what="replaying")
+    until(lambda: svc.core.snapshot()["lights"] == "IDLE", timeout=20, what="replay done")
+    assert server.messages[mid]["played_at"] == played_at
     assert server.telemetry["fw"] and server.telemetry["locked"] is False
 
 
@@ -99,11 +105,12 @@ def test_offline_recording_is_kept_and_sent_when_the_link_returns(box):
     until(lambda: any(m["from"] == "box" and m["state"] == "uploaded" for m in server.messages.values()),
           timeout=20, what="upload after the link returned")
     assert store.outbox_ids() == []
+    assert svc.core.snapshot()["link"] == "OK"                      # LINK steady green again
 
 
 def test_a_short_recording_is_discarded_and_silence_stops_a_forgotten_one(box):
     svc, hw, server, clock, store = box
-    hold(svc, hw, Button.RECORD); clock.sleep(0.3); hold(svc, hw, Button.RECORD)
+    svc.command("record", ("start",)); clock.sleep(0.4); svc.command("record", ("stop",))   # ~0.4 s of speech
     until(lambda: any("discarded" in line for _, _, line in svc.log_lines), what="discard")
     assert store.outbox_ids() == []
     hw.audio.speaking = False

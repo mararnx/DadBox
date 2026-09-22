@@ -12,10 +12,12 @@ a child's bedroom, and play nothing in a school bag.
 - Amp held in shutdown (SD_MODE on GPIO 16) except while playing or chiming.
 - **Play** plays the oldest unheard message, one per press; the button is
   steady warm while it plays and goes back to breathing if more are waiting.
+  With nothing new waiting it repeats the last message heard, which the box
+  keeps on disk for that purpose (ADR 0020).
   `played` is reported at the next check-in, and playing opens the
   conversation window ([ADR 0015](../decisions/0015-adaptive-polling.md)).
-- One gentle chime when a message arrives — suppressed by quiet hours and by
-  mute. Play still works during quiet hours; mute silences everything.
+- One gentle chime when a message arrives — suppressed by quiet hours. Play
+  still works during quiet hours. There is no mute (ADR 0020).
 - Volume is the `volume` setting from the app, applied in software. No
   control on the box.
 - In a bag: the ≥ 0.5 s press and the travel lock
@@ -43,11 +45,9 @@ a child's bedroom, and play nothing in a school bag.
 2. **Chime** — the stock chime, or the parent's own voice saying the child's
    name? The last is lovely and free — it's just a message the parent records
    once.
-3. **Replay** — a played message leaves the inbox
-   ([ADR 0018](../decisions/0018-archive-forever.md)). Can the child hear it
-   again — how, and for how long? The server keeps everything, so this is a
-   protocol and gesture question, not a storage one. Ties to
-   [storage-queue.md](storage-queue.md) Q1.
+3. ~~Replay~~ — decided 2026-09-22 (ADR 0020): the last played message stays
+   on the box and Play repeats it when nothing new is waiting. Older ones are
+   the app's archive.
 4. **Interrupt** — pressing Play during playback: stop, restart, or ignore?
    And Record during playback?
 5. **Headphones** — no. But say so, because someone will ask.

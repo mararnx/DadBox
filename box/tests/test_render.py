@@ -46,7 +46,8 @@ def test_lock_blinks_both_twice():
 
 
 def test_status_patterns():
-    assert render_status(StatusPlan(link=Link.OK), 1.0) == (False, False)
+    assert render_status(StatusPlan(link=Link.OK), 1.0) == (True, False)       # LINK steady green when fine
+    assert render_status(StatusPlan(link=Link.DOWN), 1.0) == (False, False)
     blinks = sum(render_status(StatusPlan(link=Link.DOWN_QUEUED), t)[0] for t in [i * 0.01 for i in range(300)])
     assert 8 <= blinks <= 12                              # two 50 ms blinks in 3 s at 10 ms steps
     assert render_status(StatusPlan(power=Power.CHARGING), 2.0)[1] is True

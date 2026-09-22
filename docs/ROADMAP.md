@@ -32,7 +32,7 @@ means the day the parts arrive, only the box software is unknown.
 - [ ] **M2 — Round trip.** Parent → box, the Play button glows, chime, play.
       This is the point at which the thing exists.
 - [ ] **M3 — Survives reality.** Offline queue, reconnect, adaptive polling,
-      UPS module and battery reporting, quiet hours, mute, travel lock, travel
+      UPS module and battery reporting, quiet hours, travel lock, travel
       between homes for a week without attention.
 - [ ] **M4 — Real object.** Everything in the drilled aluminium enclosure:
       antenna outside, wiring sturdier than jumper wires, endurance-grade SD

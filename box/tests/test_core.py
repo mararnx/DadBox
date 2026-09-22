@@ -87,12 +87,26 @@ def test_a_message_arrives_chimes_and_waits_then_plays_oldest_first():
     assert core.snapshot()["window_open"]                        # playing opened the conversation window
 
 
-def test_mute_silences_everything_but_the_glow_persists():
-    clock, core = make(settings=Settings(mute_a=True))
-    out = core.handle(c.Downloaded(MID))
-    assert not of(out, c.Chime) and core.lights(clock.now()) is Lights.WAITING
+def test_play_with_nothing_new_repeats_the_last_message():
+    clock, core = make()
+    assert not of(press(clock, core, Button.PLAY), c.Play)         # nothing ever heard: nothing to play
+    core.handle(c.Downloaded(MID))
+    press(clock, core, Button.PLAY)
+    core.handle(c.PlaybackEnded(MID))
+    assert core.lights(clock.now()) is Lights.IDLE and core.s.last_played == MID
     out = press(clock, core, Button.PLAY)
-    assert not of(out, c.Play) and core.s.mode is c.Mode.IDLE
+    assert of(out, c.Play)[0].message_id == MID and core.s.replaying
+    assert core.lights(clock.now()) is Lights.PLAYING
+    out = core.handle(c.PlaybackEnded(MID))
+    assert not of(out, c.MarkPlayed)                                # a replay is not reported again
+    assert core.lights(clock.now()) is Lights.IDLE and core.s.last_played == MID
+    core.handle(c.Downloaded("01JAYZ3K7QW9E8RVX2M4N6P8TA"))       # something new wins over the replay
+    assert of(press(clock, core, Button.PLAY), c.Play)[0].message_id == "01JAYZ3K7QW9E8RVX2M4N6P8TA"
+
+
+def test_boot_remembers_the_last_played_message():
+    clock, core = make(last_played=MID)
+    assert of(press(clock, core, Button.PLAY), c.Play)[0].message_id == MID
 
 
 def test_quiet_hours_no_chime_but_play_still_works():
@@ -135,7 +149,7 @@ def test_link_led_is_time_since_the_last_good_checkin():
     clock, core = make()
     assert core.link(clock.now()) is Link.DOWN
     core.handle(c.Checkin(True, Settings(), ()))
-    assert core.link(clock.now()) is Link.OK
+    assert core.link(clock.now()) is Link.OK                     # steady green
     clock.skip(121)
     assert core.link(clock.now()) is Link.DOWN
     core.handle(c.Queued(MID, 10, 1000))
