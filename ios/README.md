@@ -2,8 +2,32 @@
 
 SwiftUI, native, APNs. [ADR 0004](../docs/decisions/0004-native-ios-app.md).
 
-Not built yet — no Xcode project here. Create it when you start:
-iOS app, SwiftUI, bundle id something like `com.<you>.dadbox`.
+First build runs in the simulator. What exists and what doesn't:
+[DESIGN.md § Built so far](DESIGN.md#built-so-far).
+
+```
+DadBoxKit/          protocol logic, no UI — container, envelope, API client, archive store
+DadBox/             the app — SwiftUI
+DadBox.xcodeproj    folder-synchronised: new files in DadBox/ need no project edit
+Config/             Info.plist additions, entitlements
+```
+
+```bash
+cd ios/DadBoxKit && swift test
+```
+
+```bash
+open ios/DadBox.xcodeproj
+```
+
+Run the `DadBox` scheme on a simulator with the launch argument `-demo`, or tap
+*Look around with demo data* on the setup screen. If `swift` or `xcodebuild`
+complain about the Command Line Tools, prefix them with
+`DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`, or switch for good
+with `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.
+
+Before it runs on the iPhone: set the team and a real bundle id in the target's
+Signing settings (the placeholder is `ma.arnold.dadbox.app`).
 
 ## Why native
 
@@ -35,7 +59,7 @@ Two, and it should be hard to add a third. Full design: [DESIGN.md](DESIGN.md).
 
 ## Setup needed
 
-- Apple Developer account — paid membership exists (a free team cannot use APNs at all).
+- Apple Developer account — paid membership since 2026-09-22, Team ID `N94V936YCU` (a free team cannot use APNs at all).
 - Xcode. The logic package (`DadBoxKit`) builds and tests with the Command Line Tools alone.
 - APNs key (.p8) + key id + team id, given to the server.
 

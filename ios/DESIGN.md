@@ -1,6 +1,6 @@
 # iOS app — design
 
-**Status:** draft, 2026-09-21. Nothing built. Written against
+**Status:** 2026-09-21 — first build runs in the simulator against the demo backend; see [§ Built so far](#built-so-far). Written against
 [ADR 0017](../docs/decisions/0017-managed-hosting-e2ee.md) (E2EE, iOS the only
 client), [ADR 0018](../docs/decisions/0018-archive-forever.md) (archive
 forever) and [SERVER-CONCEPT.md](../docs/SERVER-CONCEPT.md). PROTOCOL.md v0.3
@@ -66,8 +66,8 @@ There are two, plus a setup that runs once. It should be hard to add a third.
 - **The archive** is the same timeline, scrolled up: date headers, paged from
   `GET /messages`, audio fetched on demand and kept. No search, no stars, no
   export in v1.
-- Waveforms are computed on the phone after decryption and cached; the server
-  never sees one.
+- No waveforms in v1 — a progress track and a duration. Drawing one means
+  decoding every message up front; not worth it yet.
 
 ### 2. Recorder (bottom of the conversation, grows into a sheet)
 
@@ -107,8 +107,9 @@ means.
 
 ### Setup (once)
 
-1. Scan the QR printed by the server's token script: server URL, identity,
-   bearer token.
+1. Scan (or paste) the code printed by the server's token script:
+   `{"v":1,"url":"https://…","identity":"parent-a","token":"…"}`. HTTPS only,
+   except `localhost` for development.
 2. The app generates the 32-byte key, stores it, and shows it — QR and 43
    base64url characters — to be baked into the box's `.env` and printed for
    the drawer (SERVER-CONCEPT § Encryption).
@@ -141,19 +142,19 @@ Recovery without iCloud: scan the paper copy.
 ## Audio
 
 - **From the box:** Ogg Opus (`codec = 2`), decrypted in memory, played with
-  `AVAudioPlayer(data:)`. **Checked 2026-09-21 on macOS 26.4:** AudioToolbox
-  lists `Oggf` as a file type, and `AVAudioPlayer` / `AVAudioFile` opened a
-  standard Ogg Opus file (hand-muxed from Opus packets; 2.03 s in, 2.03 s
-  out). iOS shares the framework — **confirm on a device**. Fallback if not:
-  ~150 lines of Ogg page parsing feeding `AVAudioConverter`
-  (`kAudioFormatOpus`); no third-party library either way.
+  `AVAudioPlayer(data:)`. **Verified 2026-09-21** on macOS 26.4 and inside the
+  iOS 26.5 simulator runtime: a standard Ogg Opus stream opens from memory,
+  format `opus`, correct duration. No demuxer, no library. Still to hear on
+  the actual iPhone.
 - **To the box:** `AVAudioRecorder`, AAC-LC, 16 kHz mono, 24 kbps, `.m4a`
   (`codec = 3`). About 180 KB/min; five minutes ≈ 900 KB ≈ 28 chunks. Checked
   the same day: CoreAudio encodes exactly that format.
 - `POST …/played` when playback first reaches the end; the unheard dot clears
   then too. Replays are local and silent.
-- Speaker by default; proximity sensor switches to the earpiece.
-  Session is `.playAndRecord` only while recording.
+- Speaker by default; proximity sensor switches to the earpiece. The session
+  is `.playback`; it takes `.playAndRecord` only while recording, or while the
+  phone is actually at an ear (the receiver route needs it) — an app about a
+  child's voice does not hold a recording category idly.
 
 ## Keys and storage
 
@@ -166,19 +167,27 @@ Recovery without iCloud: scan the paper copy.
   received, included in the phone's backup (ADR 0018 counts on it). Plaintext
   exists in memory during playback, and as the one recording draft until it
   is sent.
-- Index: SwiftData in the app-group container — the protocol's message object
-  plus local fields (heard, waveform peaks, cached). Rebuildable from
-  `GET /messages` at any time; the server is the index of record.
+- Index: one JSON file beside the containers (`ArchiveStore`, in DadBoxKit so
+  it is tested on the Mac) — the protocol's message objects plus what only the
+  phone knows: heard, outbox, cursor, next `seq`. Rebuildable from
+  `GET /messages` at any time; the server is the index of record. SwiftData
+  if it ever gets slow — at ten messages a day that is years away.
+- **A fresh install may not number a message until it has synced once.** The
+  store refuses to mint a `seq` before it has seen the server's `max_seq`;
+  the recording stays a draft until then.
 - One set of encryption test vectors in the repo, run by the box's Python
   tests and the Swift tests alike.
 
 ## Network
 
 - One `APIClient`, bearer token, `/v1`. No third-party SDKs of any kind.
-- **Upload** through a background `URLSession`: metadata → 32 KB chunk files →
-  `upload-state` → `complete`. Every step is idempotent by design, so the app
-  retries blindly. A message recorded in a lift goes when the phone next has a
-  link, app running or not.
+- **Upload:** metadata → `upload-state` → the missing 32 KB chunks →
+  `complete`. Every step is idempotent by design, so the app retries blindly
+  from the top. Today this runs in-process under a background-task assertion
+  (~30 s after leaving the app) and again on every foreground; the outbox is
+  durable, so nothing is lost, only late. **Still to do:** move it to a
+  background `URLSession` so a message recorded in a lift goes with the app
+  suspended.
 - **Sync** on foreground and on every push: `GET /device/status`,
   `GET /messages` after the stored cursor, and `GET /messages/{id}` for own
   messages not yet `played` (there are never many).
@@ -200,14 +209,33 @@ Minimum iOS 26: one family, one current phone, and native Ogg Opus. A second
 parent (ADR 0008) is a second provisioning QR and a second `key_id` — same
 build.
 
+## Built so far
+
+| | State |
+| --- | --- |
+| **DadBoxKit** — container, envelope, ULID, wire models, API client, resumable uploader, archive store, box-health and sent-status logic | done · 31 tests, `swift test` |
+| Shared vectors — [docs/testvectors/container-v1.json](../docs/testvectors/container-v1.json) | done · framing and CRC cross-checked in Python; the box's tests must pass them too |
+| App: conversation, recorder (tap-tap-review-send, draft survives a kill), player, Box screen with settings and LED legend, setup + key sheet, Keychain, push registration and routing | builds; verified in the simulator against `DemoBackend` — play, send, *On the box → Played 20:39*, Box screen |
+| `LiveBackend` (PROTOCOL v0.3 over HTTPS) | written, **untested** — there is no server yet. The uploader is tested against an in-memory fake of § Upload |
+| Notification service extension (pre-fetch, retitle with the child's name) | not started — M1 |
+| Background `URLSession` upload | not started — see § Network |
+| On a real iPhone: app icon, microphone, earpiece, iCloud Keychain sync | signing set (team `N94V936YCU`, `ma.arnold.dadbox.app`); the rest not done |
+
+`DemoBackend` is a pretend box and server in memory; it uses the real
+container and envelope and three genuine Ogg Opus clips (made with
+[tools/caf2ogg.py](../tools/caf2ogg.py)). Debug builds take launch arguments —
+`-demo -play 2 -send-draft -screen box` — so the app can be driven from
+`simctl` without touching the screen (`DadBox/DebugHooks.swift`).
+
 ## Build order
 
-1. **DadBoxKit** with the shared test vectors — unblocked today.
-2. Xcode project; setup; conversation, read-only, against `tools/fakebox` and
-   the local server. *(Needs Xcode — this Mac has only the Command Line Tools.)*
-3. Push + notification extension + box-late alert → **M1**.
-4. Recorder + background upload + bubble states → **M2**.
-5. Box screen settings, mute, quiet hours, fault texts → **M3**.
+1. ~~DadBoxKit with the shared test vectors.~~
+2. ~~Xcode project; setup; conversation; recorder; Box — against the demo.~~
+3. Against the real server as soon as it answers `GET /messages` and
+   `GET /device/status`; then `tools/fakebox`.
+4. Push + notification extension + box-late alert → **M1**.
+5. Background upload; on the iPhone → **M2**.
+6. Fault texts and settings against a real box → **M3**.
 
 ## Needed from PROTOCOL v0.3
 
@@ -234,7 +262,7 @@ Not in SERVER-CONCEPT's v0.3 list, and the app cannot work without them:
   revised). No control in the app, no endpoint; tombstones drop out of
   § Needed item 5 until it returns.
 - ~~iOS version~~ — the iPhone runs the latest iOS; minimum iOS 26 stands.
-- Ogg Opus through `AVAudioPlayer` on an actual iPhone (above).
+- Ogg Opus through `AVAudioPlayer`: verified in the iOS 26.5 simulator; still to hear on the iPhone.
 - ~28 background upload tasks per long message: measure time-to-`complete`
   with the app suspended.
 - What `played` means on the box side (start or end of playback) — should

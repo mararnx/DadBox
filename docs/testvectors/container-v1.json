@@ -1,0 +1,38 @@
+[
+  {
+    "codec" : 2,
+    "container_hex" : "4442583101020101803e000078370000010000000000000000000000015ab1d8af44f6106a664b715b83de1a8474e66f740cd738e81cefe6349f3cae1a802ab44c0f88ecef37c2230d27",
+    "duration_ms" : 14200,
+    "id" : "01JAYZ3K7QW9E8RVX2M4N6P8TD",
+    "key_hex" : "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "key_id" : 1,
+    "name" : "box to parent-a, Ogg Opus",
+    "nonce_hex" : "000000000000000000000001",
+    "plaintext_hex" : "4f67675300022074686520626f7820736179732068656c6c6f",
+    "sample_rate" : 16000
+  },
+  {
+    "codec" : 3,
+    "container_hex" : "4442583101030101803e000010a4000001a0a1a2a3a4a5a6a7a8a9aaabe6187c3123bf7bcf2f51c6f3077bc2dd74a95f179abe4867900328896fba6712c66351e8b73b492643811ad7295ba1da633e606f4af930556d7325719441b7838089b358089cdedbc8dfc127e5ccaf0a654c2f3b1093b733fe90126f1a1eb9da",
+    "duration_ms" : 42000,
+    "id" : "01JAYZ4M2N5P7R9T1V3X5Z7B9C",
+    "key_hex" : "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "key_id" : 1,
+    "name" : "parent-a to box, AAC-LC in M4A",
+    "nonce_hex" : "a0a1a2a3a4a5a6a7a8a9aaab",
+    "plaintext_hex" : "0000001c667479704d344120000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+    "sample_rate" : 16000
+  },
+  {
+    "codec" : 2,
+    "container_hex" : "4442583101020101803e0000e803000003ffffffffffffffffffffffffc2d1951923da41f126d1d8ccc5d9a635215cf67442",
+    "duration_ms" : 1000,
+    "id" : "01JB00000000000000000000ZZ",
+    "key_hex" : "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "key_id" : 3,
+    "name" : "rotated key, one byte of audio",
+    "nonce_hex" : "ffffffffffffffffffffffff",
+    "plaintext_hex" : "7f",
+    "sample_rate" : 16000
+  }
+]

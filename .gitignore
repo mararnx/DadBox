@@ -50,3 +50,8 @@ fp-info-cache
 !.env.example
 secrets.h
 credentials.json
+
+# --- Xcode ---
+xcuserdata/
+DerivedData/
+*.xcuserstate
