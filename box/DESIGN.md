@@ -344,8 +344,7 @@ HTTP API in about two minutes (a 20× clock, every step from a clean world).
 ## Not built yet
 
 INA219 gauge and `mains` from battery current; `AT+CSQ` for `rssi`; the
-modem PWRKEY pulse (wiring unknown); loudness normalisation; `systemd`
-watchdog keepalives need `python3-systemd`; OTA beyond `rsync`/`git pull`.
+modem PWRKEY pulse (wiring unknown); loudness normalisation; OTA beyond `rsync`/`git pull`.
 
 ## Tests
 

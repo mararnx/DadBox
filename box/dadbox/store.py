@@ -12,8 +12,8 @@
       lock                 present ⇔ travel lock engaged (survives a reboot)
       settings.json        last settings from the server
       doorbell.json        last doorbell address from the server (ADR 0021)
-      keys/<key_id>.key    32 bytes, hex — root 0600, never in this repo
-      config.env           DADBOX_URL, DADBOX_TOKEN — root 0600
+      keys/<key_id>.key    32 bytes, hex — owned by the service user `dadbox`, 0600; never in this repo
+      config.env           DADBOX_URL, DADBOX_TOKEN — `dadbox`, 0600
 
 Every write is temp → fsync → rename, so a power pull leaves a file whole or
 absent, never half. Directories are fsynced after renames so the rename

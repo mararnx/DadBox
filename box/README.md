@@ -52,5 +52,5 @@ it runs and tests on the Mac. Drivers are thin and swappable.
 - `systemd/dadbox.service` — the unit.
 - `setup/` — `config.txt` lines, the overlay, the `/data` partition, Tailscale.
 - `tests/` — `pytest`, on the Mac.
-- `pyproject.toml` — deps: `requests`, `cryptography`; on the Pi also `gpiozero`, `smbus2`, `systemd-python`.
+- `pyproject.toml` — deps: `requests`, `cryptography`; on the Pi also `gpiozero`, `smbus2`; `lgpio` from apt.
   `ffmpeg` and `alsa-utils` from apt.

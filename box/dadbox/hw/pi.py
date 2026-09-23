@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import logging
 import os
-import re
 import subprocess
 import threading
 import time
@@ -28,7 +27,6 @@ PIN_RECORD_SWITCH, PIN_PLAY_SWITCH = 5, 6
 PIN_LINK_LED, PIN_POWER_LED = 12, 13
 PIN_AMP_SD = 16                  # MAX98357A SD_MODE; the overlay's sdmode pin
 PIN_MODEM_PWRKEY = 26            # SIM7670G HAT PWRKEY — wiring to confirm
-MODEM_IFACE_RE = re.compile(r"^(usb|eth|enx|wwan)")
 ALSA_DEVICE = os.environ.get("DADBOX_ALSA", "default")
 DEBOUNCE_S = 0.02
 
@@ -108,14 +106,22 @@ class PiModem:
         self.pwrkey.on(); time.sleep(1.5); self.pwrkey.off()   # SIMCom-style pulse; confirm from the wiki
 
     def is_up(self) -> bool:
+        """A route out exists — through the modem's USB Ethernet in the field, or
+        Wi-Fi on the bench. The server round then says whether it really works."""
         try:
-            out = subprocess.run(["ip", "-4", "-o", "addr"], capture_output=True, text=True, timeout=5).stdout
+            out = subprocess.run(["ip", "-4", "route", "show", "default"], capture_output=True, text=True, timeout=5).stdout
         except Exception:                                  # noqa: BLE001
             return False
-        return any(MODEM_IFACE_RE.match(line.split()[1]) for line in out.splitlines() if len(line.split()) > 1)
+        return has_default_route(out)
 
     def rssi(self) -> Optional[int]:
         return None                                        # AT+CSQ on the AT port, later
+
+
+def has_default_route(ip_route_output: str) -> bool:
+    """`ip -4 route show default` prints one line per default route, e.g.
+    `default via 192.168.225.1 dev usb0 proto dhcp metric 100`."""
+    return any(line.split()[:1] == ["default"] and " dev " in line for line in ip_route_output.splitlines())
 
 
 class PiPower:

@@ -17,6 +17,7 @@ from pathlib import Path
 from .clock import Clock
 from .ctl import CtlServer, socket_path
 from .link import Client, RequestsTransport
+from .sdnotify import notify, watchdog_interval_s
 from .service import Service
 from .store import Store
 
@@ -38,7 +39,8 @@ def main() -> int:
     from .hw.pi import make_hardware
     hw = make_hardware()
     svc = Service(hw=hw, store=store, clock=Clock(), client=client, has_battery=False)
-    svc.on_shutdown = lambda reason: subprocess.Popen(["sudo", "systemctl", "poweroff"])
+    # One sudoers rule allows exactly this command (box/setup/README.md step 5).
+    svc.on_shutdown = lambda reason: subprocess.Popen(["sudo", "-n", "/usr/bin/systemctl", "poweroff"])
     ctl = CtlServer(socket_path(), svc.command)
 
     done = threading.Event()
@@ -46,21 +48,23 @@ def main() -> int:
         signal.signal(sig, lambda *_: done.set())
     svc.start()
     ctl.start()
-    _watchdog_loop(done)
+    notify("READY=1")
+    _watchdog_loop(done, svc)
     svc.stop()
     ctl.stop()
     return 0
 
 
-def _watchdog_loop(done: threading.Event) -> None:
-    """systemd's WatchdogSec: say we're alive every 20 s while the core thread is."""
-    try:
-        from systemd import daemon        # python3-systemd, optional
-    except ImportError:
-        daemon = None
-    while not done.wait(20):
-        if daemon:
-            daemon.notify("WATCHDOG=1")
+def _watchdog_loop(done: threading.Event, svc: Service) -> None:
+    """systemd's WatchdogSec: say we're alive — but only while the core thread
+    is. A dead core goes quiet, and systemd restarts the service."""
+    every = watchdog_interval_s()
+    while not done.wait(every):
+        if svc.thread.is_alive():
+            notify("WATCHDOG=1")
+        else:
+            log.error("core thread is dead: withholding the watchdog keepalive")
+    notify("STOPPING=1")
 
 
 if __name__ == "__main__":

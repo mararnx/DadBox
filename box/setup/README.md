@@ -1,6 +1,6 @@
 # Box setup — what Claude does over SSH after the first boot
 
-1. **Packages**: `ffmpeg alsa-utils python3-venv python3-systemd i2c-tools` and Tailscale
+1. **Packages**: `ffmpeg alsa-utils python3-venv python3-lgpio i2c-tools` and Tailscale
    (`curl -fsSL https://tailscale.com/install.sh | sh`, then `tailscale up`
    — the auth link is the user's to open).
 2. **`/boot/firmware/config.txt`**
@@ -17,12 +17,25 @@
    by label. `/opt/dadbox` → symlink into `/data/app`.
 4. **Overlay**: `raspi-config nonint enable_overlayfs` — after everything else
    is installed. Disable it only on the bench, never in the field.
-5. **Service**: `.venv` under `/opt/dadbox`, `pip install -e .[pi]`,
-   `systemctl enable --now dadbox`. `dadboxctl` on `$PATH`.
+5. **Service**, which runs as its own user, not root:
+   ```
+   sudo useradd --system --home /data --shell /usr/sbin/nologin \
+        --groups gpio,audio,i2c,dialout dadbox
+   sudo chown -R dadbox:dadbox /data
+   echo 'dadbox ALL=(root) NOPASSWD: /usr/bin/systemctl poweroff' | sudo tee /etc/sudoers.d/dadbox
+   sudo chmod 0440 /etc/sudoers.d/dadbox && sudo visudo -c
+   ```
+   `python3 -m venv --system-site-packages /opt/dadbox/.venv` (so gpiozero
+   finds apt's `lgpio`, which pip would have to compile), `pip install -e .[pi]`, the unit from
+   `systemd/`, `systemctl enable --now dadbox`. `dadboxctl` on `$PATH`.
    Before the first start: `/data/config.env` with `DADBOX_URL` and
-   `DADBOX_TOKEN` (root, 0600) and the family key in `/data/keys/1.key`
-   (64 hex characters, root, 0600) — see `store.py` for the layout. Without
-   them the service runs, records and queues, and cannot send.
+   `DADBOX_TOKEN`, and the family key in `/data/keys/1.key` (64 hex
+   characters) — both **owned by `dadbox`, mode 0600**, or the service cannot
+   read them. See `store.py` for the layout. Without them the service runs,
+   records and queues, and cannot send.
+   The watchdog keepalive needs no package: `dadbox/sdnotify.py` speaks
+   systemd's notify socket directly (a venv cannot see apt's python3-systemd).
+   The sudoers line allows one command, the clean shutdown below 5 % battery.
 6. **Modem** (SIM7670G HAT on the Zero's OTG port): confirm it enumerates as
    a USB Ethernet interface (`ip a`) and find its AT port (`/dev/ttyUSB*`;
    `AT+CSQ`, `AT+CPSI?`). If it does not come up as Ethernet, the mode is set

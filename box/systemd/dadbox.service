@@ -4,8 +4,10 @@ After=network.target sound.target
 Wants=network.target
 
 [Service]
-Type=simple
+Type=notify
 User=dadbox
+# gpio, audio, i2c, dialout (the modem's AT port): see box/setup/README.md step 5
+SupplementaryGroups=gpio audio i2c dialout
 WorkingDirectory=/opt/dadbox
 ExecStart=/opt/dadbox/.venv/bin/python -m dadbox
 Restart=always
@@ -16,9 +18,9 @@ RuntimeDirectoryMode=0770
 ReadWritePaths=/data
 Environment=DADBOX_DATA=/data
 Environment=DADBOX_CTL=/run/dadbox/ctl.sock
-# Keepalives come from python3-systemd (apt); without it, drop WatchdogSec.
+# READY=1 after start, WATCHDOG=1 every 30 s while the core thread lives (dadbox/sdnotify.py).
 WatchdogSec=60
-NotifyAccess=all
+NotifyAccess=main
 
 [Install]
 WantedBy=multi-user.target
