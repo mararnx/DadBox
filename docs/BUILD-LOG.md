@@ -2,6 +2,31 @@
 
 Newest entry at the top. One entry per session at the bench.
 
+## 2026-09-24 — First boot of the real Pi Zero 2 W (software only)
+
+**Did:** Raspberry Pi OS Lite 64-bit (Debian 13, Python 3.13) via Imager,
+`ssh dadbox` over home Wi-Fi. Setup from `box/setup/README.md`: ffmpeg (with
+libopus), ALSA, lgpio, the `googlevoicehat-soundcard` overlay, serial console
+on GPIO 14/15, I²C, hardware watchdog armed by systemd, the `dadbox` service
+user, `/data` (a directory for now), the service and `dadboxctl`. The test
+key and box token from `tools/fakebox/.env`. Full suite on the Zero: 94 tests
+in 29 s. The service runs, checks in with the live server over Wi-Fi, and
+downloaded the 7 messages waiting for the box. **Nothing is wired yet** — no
+buttons, mic, amp or modem.
+**Learned:** Raspberry Pi OS on Debian 13 no longer gives the first user
+passwordless sudo (the user added it). The first boot grows the root
+partition to fill the card, so a separate `/data` partition means
+re-flashing. `config.txt` has no end-of-line comments. The voicehat driver
+**owns GPIO 16** (amp SD_MODE) and raises it only while audio plays, so the
+firmware must not claim it — "GPIO busy". lgpio writes its notification
+pipes into the working directory: `LG_WD=/run/dadbox`, and
+`GPIOZERO_PIN_FACTORY=lgpio` so gpiozero cannot fall back to sysfs. A backlog
+of arrivals chimed seven times at once and the sound card refused the
+overlapping opens: now one chime per burst, never overlapping.
+**Next:** wire the buttons and LEDs and walk the pin map with `dadboxctl led
+test`; then mic and amp (`arecord`/`aplay` on the voicehat card); then the
+modem HAT. Tailscale before the box leaves the bench.
+
 ## 2026-09-22 — Box firmware designed and built on the Mac; virtual box
 
 **Did:** The box's service, end to end, on fake hardware (`box/DESIGN.md`):

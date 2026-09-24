@@ -31,6 +31,7 @@ from .settings import Settings, in_quiet_hours
 from .state import Fault, Lights, Link, Power
 
 FW_VERSION = "0.3.0"
+CHIME_MIN_GAP_S = 30.0           # a burst of arrivals (a backlog after a reboot or an outage) chimes once
 
 
 class Mode(Enum):
@@ -313,6 +314,7 @@ class BoxState:
     rssi: Optional[int] = None
     time_ok: bool = False                                   # clock trusted once a check-in has succeeded
     shutting_down: bool = False
+    last_chime_at: Optional[float] = None
 
 
 class Core:
@@ -633,7 +635,9 @@ class Core:
         s.inbox.sort()
         if s.waiting_since is None:
             s.waiting_since = now
-        if s.mode is Mode.IDLE and not self.quiet():
+        if (s.mode is Mode.IDLE and not self.quiet()
+                and (s.last_chime_at is None or now - s.last_chime_at >= CHIME_MIN_GAP_S)):
+            s.last_chime_at = now
             out.append(Chime(s.settings.volume))
         out.append(Log(f"new message {e.message_id} waiting ({len(s.inbox)})"))
 

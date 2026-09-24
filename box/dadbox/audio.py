@@ -34,6 +34,7 @@ class AudioWorker:
         self._capture_id: Optional[str] = None
         self._stop_play: Optional[Callable[[], None]] = None
         self._lock = threading.Lock()
+        self._chiming = threading.Lock()          # the sound card opens once: chimes never overlap
 
     # --- capture ------------------------------------------------------------------------
 
@@ -117,6 +118,8 @@ class AudioWorker:
                 self._stop_play = None
             self.post(PlaybackEnded(message_id, ok))
 
+        if self._chiming.acquire(timeout=3.0):       # let a chime finish; it owns the sound card for ~0.5 s
+            self._chiming.release()
         self.amp.set(True)
         try:
             with self._lock:
@@ -134,12 +137,15 @@ class AudioWorker:
             stop()
 
     def chime(self, volume: int) -> None:
+        if not self._chiming.acquire(blocking=False):
+            return                                   # one is already sounding
         def run():
             self.amp.set(True)
             try:
                 self.backend.chime(volume)
             finally:
                 self.amp.set(False)
+                self._chiming.release()
         threading.Thread(target=run, name="chime", daemon=True).start()
 
     def mark_played(self, message_id: str, ok: bool) -> None:

@@ -4,17 +4,28 @@
    (`curl -fsSL https://tailscale.com/install.sh | sh`, then `tailscale up`
    — the auth link is the user's to open).
 2. **`/boot/firmware/config.txt`**
+   Change `dtparam=audio=on` to `off`, and append — comments on their own
+   lines only; `config.txt` does not allow a comment after a value:
    ```
-   dtoverlay=googlevoicehat-soundcard   # DFRobot I2S mic + MAX98357A amp on I2S (GPIO 18/19/20/21, sdmode GPIO 16) — do not also load max98357a
-   dtparam=audio=off                    # no onboard PWM audio
-   dtparam=i2c_arm=on                   # INA219 on the UPS Module 3S
+   # I2S mic + MAX98357A amp: GPIO 18/19/20/21; the driver owns GPIO 16 (amp SD_MODE). Do not also load max98357a.
+   dtoverlay=googlevoicehat-soundcard
+   # INA219 on the UPS Module 3S, later
+   dtparam=i2c_arm=on
    dtparam=watchdog=on
+   # serial console on GPIO 14/15 for the debug probe; no Bluetooth, so the full UART goes there
+   enable_uart=1
    dtoverlay=disable-bt
-   dtoverlay=disable-wifi               # in the field; comment out on the bench
-   hdmi_blanking=2
+   # in the field only; the bench needs Wi-Fi
+   #dtoverlay=disable-wifi
    ```
+   Plus, outside `config.txt`: `echo i2c-dev | sudo tee /etc/modules-load.d/i2c-dev.conf`
+   (the `/dev/i2c-1` node), and the hardware watchdog armed by systemd:
+   `/etc/systemd/system.conf.d/watchdog.conf` with `[Manager]` / `RuntimeWatchdogSec=15`.
 3. **`/data`**: a second ext4 partition on the SD card, `noatime`, mounted
-   by label. `/opt/dadbox` → symlink into `/data/app`.
+   by label. `/opt/dadbox` → symlink into `/data/app`. Raspberry Pi OS grows
+   the root partition to fill the card on first boot, so the partition has
+   to be made before that (or the card re-flashed). On the bench, `/data` is
+   a plain directory on the root filesystem (2026-09-24).
 4. **Overlay**: `raspi-config nonint enable_overlayfs` — after everything else
    is installed. Disable it only on the bench, never in the field.
 5. **Service**, which runs as its own user, not root:

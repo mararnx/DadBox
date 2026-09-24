@@ -18,6 +18,10 @@ RuntimeDirectoryMode=0770
 ReadWritePaths=/data
 Environment=DADBOX_DATA=/data
 Environment=DADBOX_CTL=/run/dadbox/ctl.sock
+# GPIO through lgpio only (no silent fallback to sysfs, which current kernels reject).
+# lgpio writes notification pipes into its working directory: give it the runtime dir.
+Environment=GPIOZERO_PIN_FACTORY=lgpio
+Environment=LG_WD=/run/dadbox
 # READY=1 after start, WATCHDOG=1 every 30 s while the core thread lives (dadbox/sdnotify.py).
 WatchdogSec=60
 NotifyAccess=main

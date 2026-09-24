@@ -302,3 +302,13 @@ def test_rings_are_answered_at_most_every_five_seconds_and_never_dropped():
 def test_the_doorbell_address_survives_a_reboot():
     clock, core = make(doorbell=BELL)
     assert core.doorbell_plan() == c.DoorbellPlan(BELL["url"], BELL["topic"])
+
+
+def test_a_burst_of_arrivals_chimes_once():
+    clock, core = make()
+    chimes = []
+    for i, mid in enumerate(["01JAYZ3K7QW9E8RVX2M4N6P8T" + c for c in "ABCDEFG"]):
+        chimes += of(core.handle(c.Downloaded(mid)), c.Chime)
+    assert len(chimes) == 1 and len(core.s.inbox) == 7
+    clock.skip(31)
+    assert of(core.handle(c.Downloaded("01JAYZ3K7QW9E8RVX2M4N6P8TH")), c.Chime)

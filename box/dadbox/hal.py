@@ -10,7 +10,7 @@ Proposed pin map (BCM numbers; verify with the parts in hand — see DESIGN.md):
     GPIO 5    Record switch (to GND, internal pull-up)
     GPIO 6    Play switch   (to GND, internal pull-up)
     GPIO 12   LINK status LED            GPIO 13   POWER status LED
-    GPIO 16   MAX98357A SD_MODE (amp enable; the overlay's sdmode pin)
+    GPIO 16   MAX98357A SD_MODE — driven by the kernel's voicehat driver, only while audio plays
     GPIO 26   Modem power key (SIM7670G HAT PWRKEY — wiring to confirm)
     GPIO 18/19/20/21  I2S (googlevoicehat-soundcard)   GPIO 2/3  I²C (INA219, later)   GPIO 14/15  UART console
 """

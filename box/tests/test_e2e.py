@@ -4,6 +4,7 @@ Record with the mouse-shaped fake buttons, watch the message land on the
 server, answer as the parent, see the play button glow, play it, and see
 `played_at` on the server. Everything the round trip needs, no hardware.
 """
+import platform
 import time
 
 import pytest
@@ -21,6 +22,8 @@ from dadbox.sim.server import FakeServer
 from dadbox.store import Store
 
 KEY = bytes(range(32))
+# 40x on the Mac; the Pi Zero cannot keep a 40x clock honest while running the rest of the suite.
+E2E_SPEED = 10.0 if platform.machine() in ("aarch64", "armv7l") else 40.0
 
 
 def until(cond, timeout=10.0, what="condition"):
@@ -34,7 +37,7 @@ def until(cond, timeout=10.0, what="condition"):
 
 @pytest.fixture
 def box(tmp_path):
-    clock = FakeClock(speed=40.0, wall=1_800_000_000.0)
+    clock = FakeClock(speed=E2E_SPEED, wall=1_800_000_000.0)
     server = FakeServer(clock)
     store = Store(tmp_path)
     store.put_key(1, KEY)
@@ -146,7 +149,7 @@ def test_travel_lock_and_ctl(box):
 def test_a_power_cut_mid_recording_is_recovered_at_boot(tmp_path):
     """What ADR 0019 asks for: the capture is on disk while the child talks; a boot finishes the job."""
     from dadbox.dsp import synthetic_voice
-    clock = FakeClock(speed=40.0, wall=1_800_000_000.0)
+    clock = FakeClock(speed=E2E_SPEED, wall=1_800_000_000.0)
     server = FakeServer(clock)
     store = Store(tmp_path)
     store.put_key(1, KEY)

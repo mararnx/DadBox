@@ -25,7 +25,7 @@ PIN_RECORD_GREEN, PIN_RECORD_BLUE = 27, 22
 PIN_PLAY_RED, PIN_PLAY_GREEN, PIN_PLAY_BLUE = 23, 24, 25
 PIN_RECORD_SWITCH, PIN_PLAY_SWITCH = 5, 6
 PIN_LINK_LED, PIN_POWER_LED = 12, 13
-PIN_AMP_SD = 16                  # MAX98357A SD_MODE; the overlay's sdmode pin
+PIN_AMP_SD = 16                  # MAX98357A SD_MODE — owned by the kernel's voicehat driver, see PiAmpGate
 PIN_MODEM_PWRKEY = 26            # SIM7670G HAT PWRKEY — wiring to confirm
 ALSA_DEVICE = os.environ.get("DADBOX_ALSA", "default")
 DEBOUNCE_S = 0.02
@@ -80,12 +80,17 @@ class PiStatusLeds:
 
 
 class PiAmpGate:
+    """The amp's SD_MODE pin (GPIO 16) belongs to the kernel: the
+    googlevoicehat-soundcard driver claims it as `sdmode` and raises it only
+    while a playback stream is open, low otherwise. Claiming it from user
+    space fails with "GPIO busy" (found on the bench, 2026-09-24). The amp is
+    therefore gated by the driver; this records the intent for the logs."""
+
     def __init__(self):
-        from gpiozero import DigitalOutputDevice
-        self.pin = DigitalOutputDevice(PIN_AMP_SD, initial_value=False)
+        self.on = False
 
     def set(self, on: bool) -> None:
-        self.pin.value = 1 if on else 0
+        self.on = on
 
 
 class PiModem:
