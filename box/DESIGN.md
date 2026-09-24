@@ -266,6 +266,9 @@ simulator.
 
 ## Pin map (proposed — confirm with the parts in hand)
 
+Every wire — per header pin and per part, grounds and 5 V included — is in
+[hardware/schematics/WIRING.md](../hardware/schematics/WIRING.md).
+
 | BCM | Function |
 | --- | --- |
 | 17 | **Record button red ring and the mic's 3.3 V** — one pin, `DigitalOutputDevice`, never PWM |

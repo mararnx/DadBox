@@ -2,7 +2,8 @@
 Pi (`hw/pi.py`, gpiozero and ALSA) and the simulator (`sim/`). The core and
 the workers only ever see these interfaces.
 
-Proposed pin map (BCM numbers; verify with the parts in hand — see DESIGN.md):
+Proposed pin map (BCM numbers; verify with the parts in hand). Every wire, per part and per
+header pin, is in hardware/schematics/WIRING.md — change it together with hw/pi.py:
 
     GPIO 17   Record button red LED **and** the mic's 3.3 V supply — the wiring fact
     GPIO 27   Record button green        GPIO 22   Record button blue

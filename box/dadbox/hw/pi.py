@@ -1,6 +1,6 @@
 """The Pi Zero 2 W drivers: gpiozero for pins, arecord/ffmpeg/aplay for audio.
 
-Pin numbers are BCM and are the proposal in `hal.py`; every one of them is
+Pin numbers are BCM and are the proposal in `hal.py` and hardware/schematics/WIRING.md; every one of them is
 to be confirmed with the parts in hand and then fixed here. Nothing outside
 this file knows a pin number.
 """
