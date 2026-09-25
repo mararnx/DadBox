@@ -16,8 +16,10 @@ the I2S pins were in PCM mode. Solder the headers. The kernel logs "Enabling
 / Disabling audio amp" around each stream: a free check that playback
 happened. `dadbox.local` drops out for minutes after a reboot on this
 network; the Zero's address works.
-**Next:** the user's verdict on clarity and volume; the two buttons and
-their lights (`dadboxctl led test`); then the mic.
+**Heard:** "it sounds amazing" — clear at the default volume (70 %), on the
+bench, in the open (not yet inside the aluminium box).
+**Next:** the two buttons and their lights (`dadboxctl led test`); then the
+mic; listen again once the speaker sits behind the grille.
 
 ## 2026-09-24 — First boot of the real Pi Zero 2 W (software only)
 
