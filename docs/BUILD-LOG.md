@@ -2,6 +2,23 @@
 
 Newest entry at the top. One entry per session at the bench.
 
+## 2026-09-25 — Amp and speaker: the first real message played
+
+**Did:** Wired the MAX98357A (VCC to pin 2, GND, BCLK 12, LRC 35, DIN 40, SD
+36) and the speaker. A test tone through the voicehat card, then five of the
+seven messages waiting for the box, played with `dadboxctl play`: downloaded,
+decrypted, the phone's AAC decoded by ffmpeg, played, reported. The server
+shows `played_at` for all five, and the amp was on for each message's length
+(10.5 s → 10.6 s, 60.9 s → 61.1 s) and off in between.
+**Learned:** Jumper pins pushed through unsoldered holes on the amp board
+gave total silence while every software check passed — the driver raised SD,
+the I2S pins were in PCM mode. Solder the headers. The kernel logs "Enabling
+/ Disabling audio amp" around each stream: a free check that playback
+happened. `dadbox.local` drops out for minutes after a reboot on this
+network; the Zero's address works.
+**Next:** the user's verdict on clarity and volume; the two buttons and
+their lights (`dadboxctl led test`); then the mic.
+
 ## 2026-09-24 — First boot of the real Pi Zero 2 W (software only)
 
 **Did:** Raspberry Pi OS Lite 64-bit (Debian 13, Python 3.13) via Imager,
