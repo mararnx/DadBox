@@ -15,6 +15,24 @@ The Pi Zero 2 W's header runs along one long edge. **Pin 1 is at the
 SD-card end.** Odd pins (1, 3, 5, …) are the row nearer the middle of the
 board; even pins (2, 4, 6, …) are the row on the board's edge.
 
+## One wire per header pin
+
+Every header pin carries exactly one wire. Three signals still reach two
+parts; they are **chained at the parts**, never doubled at the header:
+
+| Header pin | First part | Chained on to | Why this order |
+| --- | --- | --- | --- |
+| 11 · GPIO 17 | Record button, **R tab** | the mic's **VDD**, by a short wire soldered to the same R tab | **The LED comes first.** Any broken wire can then only leave the mic *unpowered* — never powered with the red light dark. Two wires on the pin, or a Y-splice, would allow exactly that. |
+| 12 · GPIO 18 (BCLK) | Amp **BCLK** | the mic's **SCK** | the Zero has one audio interface, fixed on these pins; either order works electrically — amp first matches the bench jumpers as they are |
+| 35 · GPIO 19 (LRCLK) | Amp **LRC** | the mic's **WS** | as above |
+
+Grounds were already one per pin, with the joins at the part (a button's
+C and −, the mic's L/R to its GND).
+
+A chain is soldered at the part: both wires into the same tab or pad (or the
+second wire soldered to the pin on top of the header), heat-shrink over it.
+No two Dupont housings on one pin, anywhere.
+
 ## The header, all 40 pins
 
 | Pin | Function | Goes to | | Pin | Function | Goes to |
@@ -24,7 +42,7 @@ board; even pins (2, 4, 6, …) are the row on the board's edge.
 | 5 | GPIO 3 · SCL | — later: INA219 | | 6 | GND | Modem HAT GND (its pin 6) |
 | 7 | GPIO 4 | — spare | | 8 | GPIO 14 · TXD | Debug probe RX (yellow) |
 | 9 | GND | Mic GND and mic L/R | | 10 | GPIO 15 · RXD | Debug probe TX (orange) |
-| 11 | **GPIO 17** | **Record LED red *and* mic VDD** | | 12 | GPIO 18 · I2S BCLK | Mic SCK **and** amp BCLK |
+| 11 | **GPIO 17** | **Record LED red** (mic VDD chained from its tab) | | 12 | GPIO 18 · I2S BCLK | Amp BCLK (mic SCK chained from the amp) |
 | 13 | GPIO 27 | Record LED green | | 14 | GND | Debug probe GND (black) |
 | 15 | GPIO 22 | Record LED blue | | 16 | GPIO 23 | Play LED red |
 | 17 | 3.3 V | — spare | | 18 | GPIO 24 | Play LED green |
@@ -36,7 +54,7 @@ board; even pins (2, 4, 6, …) are the row on the board's edge.
 | 29 | GPIO 5 | Record button switch NO | | 30 | GND | Record button: switch C and LED − |
 | 31 | GPIO 6 | Play button switch NO | | 32 | GPIO 12 | LINK LED, via resistor |
 | 33 | GPIO 13 | POWER LED, via resistor | | 34 | GND | Both status LED cathodes |
-| 35 | GPIO 19 · I2S LRCLK | Mic WS **and** amp LRC | | 36 | GPIO 16 | Amp SD (driven by the sound driver) |
+| 35 | GPIO 19 · I2S LRCLK | Amp LRC (mic WS chained from the amp) | | 36 | GPIO 16 | Amp SD (driven by the sound driver) |
 | 37 | GPIO 26 | Modem PWRKEY — later | | 38 | GPIO 20 · I2S DIN | Mic SD (data out of the mic) |
 | 39 | GND | Amp GND | | 40 | GPIO 21 · I2S DOUT | Amp DIN (data into the amp) |
 
@@ -51,7 +69,7 @@ Used: 18 signal pins, both 5 V pins, 7 of 8 grounds. Spare: GPIO 4, 7, 8,
 | --- | --- | --- |
 | NO (switch) | 29 | GPIO 5 — input, internal pull-up; pressed = low |
 | C (switch common) | 30 | GND |
-| R (red) | 11 | **GPIO 17 — shared with the mic's VDD** |
+| R (red) | 11 | **GPIO 17.** A second wire from this same tab goes to the mic's VDD |
 | G (green) | 13 | GPIO 27 |
 | B (blue) | 15 | GPIO 22 |
 | − (LED common cathode) | 30 | GND (with C) |
@@ -76,10 +94,10 @@ L/R/SEL.
 
 | Mic pin | Pi pin | Note |
 | --- | --- | --- |
-| VDD (3.3 V) | 11 · GPIO 17 | **Powered by the same pin as the record button's red LED** — no red light, no mic ([ADR 0016](../../docs/decisions/0016-two-buttons-no-lid.md)). Not to the 3.3 V pin. |
+| VDD (3.3 V) | Record button's R tab | **GPIO 17 through the red LED's tab** — no red light, no mic ([ADR 0016](../../docs/decisions/0016-two-buttons-no-lid.md)). Never to the 3.3 V pin, never straight to pin 11. |
 | GND | 9 | |
-| SCK / BCLK | 12 · GPIO 18 | shared with the amp |
-| WS / LRCL | 35 · GPIO 19 | shared with the amp |
+| SCK / BCLK | the amp's BCLK | chained, not to the header |
+| WS / LRCL | the amp's LRC | chained, not to the header |
 | SD / DATA | 38 · GPIO 20 | |
 | L/R / SEL | 9 (GND) | left channel |
 
@@ -89,8 +107,8 @@ L/R/SEL.
 | --- | --- | --- |
 | Vin | 2 · 5 V | |
 | GND | 39 | |
-| BCLK | 12 · GPIO 18 | shared with the mic |
-| LRC | 35 · GPIO 19 | shared with the mic |
+| BCLK | 12 · GPIO 18 | and on to the mic's SCK |
+| LRC | 35 · GPIO 19 | and on to the mic's WS |
 | DIN | 40 · GPIO 21 | |
 | SD | 36 · GPIO 16 | the sound driver raises it only while audio plays; the firmware never touches it |
 | GAIN | — | unconnected: 9 dB |
@@ -150,5 +168,5 @@ own ground ([ADR 0019](../../docs/decisions/0019-mains-first-battery-deferred.md
 - **3.3 V logic only** on every GPIO. The modem HAT's logic is 3.3 V.
 - **GPIO 16 belongs to the sound driver.** Do not reuse it.
 - **GPIO 0/1 (pins 27, 28)** are for HAT EEPROMs; leave them free.
-- Pins 12 and 35 each carry two wires (mic and amp). Splice them, or
-  use a two-into-one jumper; don't stack Dupont housings on one pin.
+- One wire per header pin; the shared signals are chained at the parts
+  (see *One wire per header pin*).
