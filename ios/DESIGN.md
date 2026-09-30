@@ -89,9 +89,10 @@ There are two, plus a setup that runs once. It should be hard to add a third.
 
 ### 3. Box
 
-Words first, numbers second. Every `fault` and both status LEDs are explained
-in a sentence, because the adult in the other house will ask what the blinking
-means.
+Words first, numbers second. Every `fault` is explained in a sentence, and so
+is the Record light (ADR 0024): steady dim blue is *ready*, a slow blue blink (1 s on,
+2 s off) is *not ready*. The box has no status LEDs, so the adult in the other house will
+ask why Record is blinking blue — the fault and offline lines are the answer.
 
 | Section | From |
 | --- | --- |
@@ -99,7 +100,7 @@ means.
 | **Power** — 82 %, on mains, charging | `battery_pct`, `mains`, `charging` |
 | **Link** — signal in words and dBm | `rssi` |
 | **Queue** — "2 recordings waiting to send, oldest 3 h" · inbox count · storage | `outbox`, `outbox_oldest_s`, `inbox`, `storage_pct` |
-| **Fault** — what it is, what to do, what the LEDs are showing | `fault` |
+| **Fault** — what it is, what to do; Record blinks blue meanwhile | `fault` |
 | **Settings** — quiet hours + tz, volume, LED brightness, idle check-in (5–60 min) | `settings`, each with who set it and when |
 | **Mute** — mine: a switch. The other household's: read-only, who and when | `settings.mute` |
 | **Key** — key id, show as QR / 43 characters for the paper copy (Face ID first) | Keychain |
@@ -215,7 +216,7 @@ build.
 | --- | --- |
 | **DadBoxKit** — container, envelope, ULID, wire models, API client, resumable uploader, archive store, box-health and sent-status logic | done · 31 tests, `swift test` |
 | Shared vectors — [docs/testvectors/container-v1.json](../docs/testvectors/container-v1.json) | done · framing and CRC cross-checked in Python; the box's tests must pass them too |
-| App: conversation, recorder (tap-tap-review-send, draft survives a kill), player, Box screen with settings and LED legend, setup + key sheet, Keychain, push registration and routing | builds; verified in the simulator against `DemoBackend` — play, send, *On the box → Played 20:39*, Box screen |
+| App: conversation, recorder (tap-tap-review-send, draft survives a kill), player, Box screen with settings and Record-light legend, setup + key sheet, Keychain, push registration and routing | builds; verified in the simulator against `DemoBackend` — play, send, *On the box → Played 20:39*, Box screen |
 | `LiveBackend` (PROTOCOL v0.3 over HTTPS) | written, **untested** — there is no server yet. The uploader is tested against an in-memory fake of § Upload |
 | Notification service extension (pre-fetch, retitle with the child's name) | not started — M1 |
 | Background `URLSession` upload | not started — see § Network |
