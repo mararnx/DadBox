@@ -59,7 +59,7 @@ implementations.
 | --- | --- | --- |
 | `core.py` | the state machine: modes, presses, lock, replay, quiet hours, cadence, lights plan, status plan, telemetry | yes |
 | `gestures.py` | contacts → presses: ≥ 0.5 s to count, both held 3 s = travel lock, fumbles fire nothing | yes |
-| `lights.py` | `LightsPlan` + time → RGB levels; `StatusPlan` + time → LINK/POWER; **record red is 0 or 1, asserted** | yes |
+| `lights.py` | `LightsPlan` + time → RGB levels; **only recording renders full red, asserted** | yes |
 | `settings.py` | the server's `settings` object, tolerant parse, quiet-hours test in the settings' time zone | yes |
 | `dsp.py` | RMS per 100 ms block, trim, WAV wrapper, chime, a synthetic voice | yes |
 | `state.py` | the rules that pre-date this design: light priority, poll plan, constants | yes |
@@ -80,7 +80,7 @@ Events (in): `Boot`, `Contact(button, down)`, `Tick`, `CaptureLevel`,
 `Downloaded`, `PlaybackEnded`, `PlayedReported`, `LinkState`, `PowerState`,
 `FaultEvent`, `Command`.
 
-Actions (out): `MicPower`, `SetLights`, `SetStatus`, `StartCapture`,
+Actions (out): `MicPower`, `SetLights`, `StartCapture`,
 `StopCapture`, `Encode`, `Play`, `StopPlay`, `Chime`, `PersistLock`,
 `MarkPlayed`, `LinkPlan`, `ModemPower`, `LedTest`, `Shutdown`, `Reply`, `Log`.
 
@@ -96,7 +96,7 @@ Three modes: `IDLE`, `RECORDING`, `PLAYING`. Everything else is overlay
 | --- | --- | --- | --- |
 | Record | mic on, capture starts, steady red | stop: **mic off first**, then `StopCapture` | ignored — mic and amp are never on together |
 | Play | oldest unheard plays; with nothing new, the last one again | ignored | ignored (no restart, no skip) |
-| Both, 3 s | travel lock toggles; both blink twice | stops the recording, then locks | stops playback (not counted as heard), then locks |
+| Both, 3 s | travel lock toggles; Play blinks white twice | stops the recording, then locks | stops playback (not counted as heard), then locks |
 
 - A press fires **at 0.5 s of hold**, not on release: the red light answers
   while the finger is still down (a hold released after 0.5 s but before the
@@ -125,26 +125,26 @@ Three modes: `IDLE`, `RECORDING`, `PLAYING`. Everything else is overlay
 ### Lights: plan, then render
 
 The core emits a `LightsPlan` — which of the five states, an optional cue
-(got-it pulse, lock blink), brightness, resting, quiet. `lights.render()`
+(got-it pulse, lock blink), brightness, resting, quiet, ready. `lights.render()`
 turns it into levels at 30 Hz. Two rules live there and are tested against
 every combination of inputs:
 
 1. **The record button's red channel is 0 or 1, never in between.** That
    pin is the mic's supply. It is 1 only in `RECORDING`, and `led_brightness`,
-   quiet hours and cues never touch it. The got-it pulse is green and the
-   lock blink cyan for that reason. On the Pi the driver ignores the frame's
-   red for Record entirely: the pin belongs to `MicPower`.
+   quiet hours and cues never touch it. Ready / not ready is blue, the got-it
+   pulse green and the lock blink white on Play for that reason. On the Pi
+   the driver ignores the frame's red for Record entirely: the pin belongs
+   to `MicPower`.
 
-   Colours (ADR 0020): Play green — pulsing when a message waits, steady
-   while playing, dark otherwise (a replay is unannounced); Record — steady
-   red while recording, dark otherwise; got-it — one green pulse on Record.
-2. The child's channel has the five states of `state.Lights` and nothing
-   else. Link, power and faults render only on the status LEDs.
-
-Status LEDs (ADR 0020, both green, POWER left): **LINK steady** while the last check-in
-succeeded within 2 × the interval, blink patterns on a 3 s cycle (50 ms)
-when down; **POWER steady** while external power is present; fault =
-alternating at 1 Hz.
+   Colours (ADR 0020, ADR 0024): Play green — pulsing when a message waits,
+   steady while playing, dark otherwise (a replay is unannounced); Record —
+   steady red while recording (GPIO 17, the mic pin), otherwise steady dim
+   blue when ready and a slow blue blink when not, dark while playing or
+   locked; got-it — one green pulse on Record; lock — two white blinks on
+   Play.
+2. The five states of `state.Lights`, plus `LightsPlan.ready` =
+   `Core.ready()`: link OK and no fault. There are no status LEDs (ADR 0024);
+   link, power and faults are otherwise telemetry and the app's.
 
 ## Storage and durability
 
@@ -275,7 +275,6 @@ Every wire — per header pin and per part, grounds and 5 V included — is in
 | 27, 22 | Record button green, blue (software PWM) |
 | 23, 24, 25 | Play button red, green, blue (software PWM) |
 | 5, 6 | Record, Play switches to GND; internal pull-ups; 20 ms debounce in gpiozero |
-| 12, 13 | LINK, POWER status LEDs |
 | 16 | MAX98357A SD_MODE (the overlay's `sdmode` pin) |
 | 26 | Modem PWRKEY → HAT header pin 7 (P4), DIP 3 on; high presses the key (schematic) |
 | 18, 19, 20, 21 | I2S (`googlevoicehat-soundcard`) |
@@ -318,13 +317,13 @@ HTTP API in about two minutes (a 20× clock, every step from a clean world).
 - [x] a tap is ignored; a 0.5 s hold records; the ring is red exactly while the mic pin is high
 - [x] stop → got-it pulse → outbox → upload → the thread shows it → push `message`
 - [x] parent sends → next check-in → chime → Play breathes → play → `played_at` → push `played` → inbox empty
-- [x] coverage off: LINK double-blinks with a queued message; coverage back: it goes
+- [x] coverage off: Record blinks blue, a message still records and queues; coverage back: it goes
 - [ ] quiet hours (clock → 21:00): no chime, glow dimmed, play works
 - [ ] nothing new + Play: the last message plays again, `played_at` on the server does not change
 - [ ] both buttons 3 s: lock blink, buttons dead, `locked: true` in telemetry, survives restart
 - [ ] +2 h: *resting*; a press wakes it
 - [ ] battery fitted, unplug: 30-minute cadence, modem off between; play → window → 1 min
-- [ ] battery < 20 %: POWER blinks, push `battery_low` once; < 5 %: shutdown
+- [ ] battery < 20 %: push `battery_low` once; < 5 %: shutdown
 - [ ] pull the plug mid-recording, restart: the recording is queued, `recovered: true`
 - [ ] server down for 3 minutes: box-late push once, clears on the next check-in
 - [ ] `led test` sweeps every state; the mic pin stays low throughout
@@ -338,11 +337,11 @@ HTTP API in about two minutes (a 20× clock, every step from a clean world).
 | Play with nothing new | repeats the last message (ADR 0020) |
 | Inbox removal after play | on the server's `played` ack, except the newest played message |
 | Quiet-hours glow | capped at 30 % of `led_brightness` |
-| LINK LED | steady green when the server answered within 2 × the interval (ADR 0020) |
+| Record ready (steady dim blue) | the server answered within 2 × the interval and no fault (ADR 0024) |
 | Silence threshold / auto-stop | RMS 400 per 100 ms block, 20 s — tune on real audio |
 | Raw capture lifetime | unlinked right after the sealed container is fsynced |
-| Lock blink colour | teal (no red: the mic pin) |
-| POWER LED | steady = external power present on the USB port; off = unplugged (user, 2026-09-22) |
+| Lock blink | two white blinks on Play (ADR 0024); Record keeps its red for the mic |
+| Record not ready | dim blue blink, 1 s on / 2 s off; dark while locked or playing (ADR 0024) |
 
 ## Not built yet
 

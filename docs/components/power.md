@@ -6,8 +6,8 @@ child's bedroom or bag.
 ## Current design (ADR 0005, ADR 0014, ADR 0019)
 
 **The first box has no battery** ([ADR 0019](../decisions/0019-mains-first-battery-deferred.md)):
-5 V micro-USB, on only while plugged in, `mains: true` / `battery_pct: null`,
-POWER LED off. Pulling the plug is how it turns off, so every write path must
+5 V micro-USB, on only while plugged in, `mains: true` / `battery_pct: null`.
+No POWER LED ([ADR 0024](../decisions/0024-no-status-leds-record-says-ready.md)): unplugged, everything is dark. Pulling the plug is how it turns off, so every write path must
 survive that. What follows is the battery as designed, for when it is fitted;
 the left half of the enclosure floor (93 × 86 mm) stays free for it.
 
@@ -33,8 +33,8 @@ from a 5 V micro-USB supply.
 - **Every consumer is power-gated:** button LEDs, amp (SD pin), mic (the pin
   it shares with the red light), and on battery the modem between check-ins.
   A Pi can't sleep, so gating is the whole budget.
-- **Low battery is the adults' business.** Nothing on the buttons. POWER LED
-  blinks below 20 % and the app nags; below 5 % the box shuts down cleanly
+- **Low battery is the adults' business.** Nothing on the buttons (no POWER LED
+  since ADR 0024); the app nags below 20 %; below 5 % the box shuts down cleanly
   and the app says so.
 
 USB-charged fallback, if the module disappoints: bq24074 + Pololu S13V30F5 +
@@ -51,7 +51,6 @@ MAX17048, in ADR 0014 only.
   | Button LEDs | small | *waiting* drops to *resting* after 2 h; idle is dark |
   | MAX98357A in shutdown | µA | via SD pin |
   | Mic, unpowered | 0 | its supply pin is low |
-  | Status LEDs (LINK, POWER) | ~0 | ~10 ms blinks every 3 s |
   | UPS module itself | to measure | buck losses and quiescent draw |
 
   Playing a message: a few hundred mA for its duration, negligible overall.

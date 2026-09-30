@@ -29,7 +29,7 @@ houses every few days, without anyone in either house doing anything.
 
   The window opens when an upload completes or the child plays a message and
   lasts `active_window_minutes` (90). Telemetry carries `mains` and
-  `next_checkin_s`; the LINK LED and the app call the box late after 2 × the
+  `next_checkin_s`; Record's blue blink and the app call the box late after 2 × the
   current interval.
 - **Antenna:** the box is aluminium ([ADR 0011](../decisions/0011-aluminium-1590dd-enclosure.md)),
   so the antenna is outside: SMA bulkhead pigtail (Delock 88747, MHF/U.FL —
@@ -54,8 +54,8 @@ houses every few days, without anyone in either house doing anything.
   indoor band. Check the two bedrooms, not the street.
 - The HAT's GNSS is not used: no antenna connected, and dead inside the
   aluminium anyway.
-- **A dead modem shows only as silence.** The box can set `fault: modem` on
-  its status LEDs, but it cannot report it — over the modem. This is why the
+- **A dead modem shows only as silence.** The box can show `fault: modem` as
+  Record's blue blink, but it cannot report it — over the modem. This is why the
   app's "no check-in" alert is the most important notification in the system.
 
 ## Questions

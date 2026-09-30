@@ -22,8 +22,10 @@ a child actually stays close to someone who isn't there.
    breaks. This is the single most important constraint and it drives the
    connectivity choice below.
 3. **It never shows an error a child has to interpret.** Offline means the
-   message queues and sends later — and is never lost. The child sees the same
-   thing either way; two small status LEDs tell the adults.
+   message queues and sends later — and is never lost. Recording works the
+   same either way; Record glows dim blue when the box is ready and blinks
+   blue when it is not, and the app says why
+   ([ADR 0024](decisions/0024-no-status-leds-record-says-ready.md)).
 4. **It is always on and always ready.** No boot time, no charging ritual, no
    app that logged itself out.
 5. **A child's recorded voice is the most sensitive data here.** End-to-end
@@ -47,15 +49,16 @@ Off-the-shelf parts only: no custom PCB, no 3D printing.
   Tailscale from anywhere — the box in the other house is one `ssh` away.
 - **Input and display:** two 16 mm stainless buttons with RGB ring lights —
   **Record** (press to start, press again to stop) and **Play** (oldest
-  unheard message). Their lights are the child's whole display: steady red
-  while recording, one green pulse for *got it*, a pulsing green on Play when
-  a message waits, steady green while playing, dark otherwise
+  unheard message). Their lights are the box's whole display: steady red
+  while recording, one green pulse for *got it*, steady dim blue on Record
+  when ready and a slow blue blink when not, a pulsing green on Play when a message waits,
+  steady green while playing
   ([ADR 0016](decisions/0016-two-buttons-no-lid.md),
-  [ADR 0020](decisions/0020-no-mute-replay-green-link.md)). Nothing moves.
-- **Status LEDs:** LINK and POWER, two small 3 mm LEDs for the adults
-  ([ADR 0009](decisions/0009-two-led-vocabularies.md)).
+  [ADR 0020](decisions/0020-no-mute-replay-green-link.md),
+  [ADR 0024](decisions/0024-no-status-leds-record-says-ready.md)). Nothing moves.
+- **No status LEDs.** A dark box is unplugged (ADR 0024).
 - **Mic:** DFRobot I2S MEMS module (MSM261S4030H0), powered from the same pin
-  as the Record button's red light.
+  that lights the Record button red.
 - **Output:** MAX98357A I2S amp + Seeed 5 W 4 Ω speaker in its own plastic
   enclosure.
 - **Modem:** Waveshare SIM7670G LTE Cat-1 HAT on the Pi's USB port — it is
@@ -156,7 +159,8 @@ being heard. Everything else in the design serves that.
 - Two lit buttons, Record and Play; nothing that moves; mic power tied to the red light; travel lock for the bag — [ADR 0016](decisions/0016-two-buttons-no-lid.md) (supersedes the lid of [ADR 0007](decisions/0007-lid-gesture.md))
 - A battery, everything gated; the target is a weekend unplugged — [ADR 0005](decisions/0005-battery-required.md)
 - Two parents in the protocol, one in the build — [ADR 0008](decisions/0008-two-parents-later.md)
-- The button lights are the child's; LINK and POWER LEDs are the adults' — [ADR 0009](decisions/0009-two-led-vocabularies.md)
+- ~~The button lights are the child's; LINK and POWER LEDs are the adults'~~ — [ADR 0009](decisions/0009-two-led-vocabularies.md), superseded
+- No status LEDs; Record steady blue when ready, blinking blue when not; the lock blink is white on Play — [ADR 0024](decisions/0024-no-status-leds-record-says-ready.md)
 - Nothing recorded is ever lost; the outbox is never evicted — [ADR 0010](decisions/0010-nothing-is-lost.md)
 - 1590DD-size aluminium enclosure, plate screwed down, antenna outside — [ADR 0011](decisions/0011-aluminium-1590dd-enclosure.md)
 - SIM **fixed**: Digital Republic Flat 1, 1 Mbit/s, CHF 6/month, also during development — [ADR 0013](decisions/0013-cat1-not-catm.md)
@@ -166,7 +170,7 @@ being heard. Everything else in the design serves that.
 - Messages are archived forever — [ADR 0018](decisions/0018-archive-forever.md)
 - The box travels with the child between both homes
 - The co-parent is on board: placement is flexible, consent is a conversation
-- No mute; Play with nothing new repeats the last message; LINK steady green when the server answers; POWER steady on USB power — [ADR 0020](decisions/0020-no-mute-replay-green-link.md)
+- No mute; Play with nothing new repeats the last message; (its LINK and POWER LEDs are gone, ADR 0024) — [ADR 0020](decisions/0020-no-mute-replay-green-link.md)
 - Ages 6-9: two buttons, no text anywhere; the message count lives in the app
 - **5 minutes** per message. Opus on the wire from day one
 - Building rather than buying — the making is part of the point

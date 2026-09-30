@@ -60,7 +60,6 @@ class SimApp:
             "state_line": self.svc.core.state_line(),
             "mic": self.hw.mic.is_on(), "amp": self.hw.amp.on,
             "frame": {"record": list(frame.record), "play": list(frame.play)},
-            "status": {"link": self.hw.status.link, "power": self.hw.status.power},
             "telemetry": self.svc.telemetry(),
             "outbox_ids": self.store.outbox_ids(), "inbox_on_disk": self.store.inbox_count(),
             "playing": None if not playing else {

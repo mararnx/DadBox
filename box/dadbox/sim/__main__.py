@@ -26,7 +26,7 @@ from ..store import Store
 from ..doorbell import connect_ws
 from .audio import SimAudio
 from .net import GatedTransport, Network, gated_connect
-from .hal import (FakeAmpGate, FakeButtonLights, FakeButtons, FakeMicGate, FakeModem, FakePower, FakeStatusLeds)
+from .hal import (FakeAmpGate, FakeButtonLights, FakeButtons, FakeMicGate, FakeModem, FakePower)
 from .parent import Parent
 from .server import FakeServer
 from .web import SimApp, serve
@@ -69,7 +69,7 @@ def main() -> int:
         client = Client(server.transport("box"))
 
     audio = SimAudio(clock, a.voice)
-    hw = Hardware(buttons=FakeButtons(), lights=FakeButtonLights(), status=FakeStatusLeds(), mic=FakeMicGate(),
+    hw = Hardware(buttons=FakeButtons(), lights=FakeButtonLights(), mic=FakeMicGate(),
                   amp=FakeAmpGate(), modem=FakeModem(), power=FakePower(mains=True, battery_pct=a.battery), audio=audio)
     net = Network(hw.modem.is_up)
     if server is None:     # the real server: coverage and "server down" act through the gate

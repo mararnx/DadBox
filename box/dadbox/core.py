@@ -26,7 +26,7 @@ from . import state as rules
 from .clock import Clock
 from .gestures import Button, Gestures, LockGesture, Press
 from .ids import ulid
-from .lights import Cue, LightsPlan, StatusPlan, cue_active
+from .lights import Cue, LightsPlan, cue_active
 from .settings import Settings, in_quiet_hours
 from .state import Fault, Lights, Link, Power
 
@@ -186,11 +186,6 @@ class SetLights(Action):
 
 
 @dataclass(frozen=True)
-class SetStatus(Action):
-    plan: StatusPlan
-
-
-@dataclass(frozen=True)
 class StartCapture(Action):
     message_id: str
     created_at_wall: float
@@ -324,7 +319,6 @@ class Core:
         self.s = BoxState()
         self.gestures = Gestures()
         self._lights: Optional[LightsPlan] = None
-        self._status: Optional[StatusPlan] = None
         self._link_plan: Optional[Tuple[int, bool]] = None
         self._doorbell_plan: Optional[DoorbellPlan] = None
 
@@ -366,6 +360,11 @@ class Core:
             return Link.OK
         return Link.DOWN_QUEUED if self.s.outbox else Link.DOWN
 
+    def ready(self, now: float) -> bool:
+        """Record's steady dim blue (ADR 0024): the server answered recently and nothing
+        is faulty. Otherwise Record blinks blue — the box's only fault light."""
+        return self.link(now) is Link.OK and self.fault() is Fault.NONE
+
     def power(self) -> Power:
         # Steady means "external power is present" — with or without a battery.
         if self.s.battery_pct is None:
@@ -393,14 +392,11 @@ class Core:
             self.s.cue = None
         plan = LightsPlan(lights=self.lights(now), cue=cue, cue_at=self.s.cue_at,
                           brightness=self.s.settings.led_brightness,
-                          resting=self.resting(now), quiet=self.quiet(), locked=self.s.locked)
+                          resting=self.resting(now), quiet=self.quiet(), locked=self.s.locked,
+                          ready=self.ready(now))
         if plan != self._lights:
             self._lights = plan
             out.append(SetLights(plan))
-        status = StatusPlan(link=self.link(now), power=self.power(), fault=self.fault())
-        if status != self._status:
-            self._status = status
-            out.append(SetStatus(status))
         interval, modem_on = self.plan(now)
         if (interval, modem_on) != self._link_plan:
             self._link_plan = (interval, modem_on)
@@ -755,7 +751,7 @@ class Core:
         now = self.clock.now()
         s = self.s
         return {
-            "mode": s.mode.value, "lights": self.lights(now).name, "link": self.link(now).name,
+            "mode": s.mode.value, "lights": self.lights(now).name, "link": self.link(now).name, "ready": self.ready(now),
             "power": self.power().name, "fault": self.fault().name, "locked": s.locked,
             "inbox": list(s.inbox), "outbox": dict(s.outbox), "recording_id": s.recording_id,
             "recording_s": (now - s.recording_since) if s.mode is Mode.RECORDING else 0.0,

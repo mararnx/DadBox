@@ -10,7 +10,6 @@ header pin, is in hardware/schematics/WIRING.md — change it together with hw/p
     GPIO 23   Play button red            GPIO 24   Play button green      GPIO 25   Play button blue
     GPIO 5    Record switch (to GND, internal pull-up)
     GPIO 6    Play switch   (to GND, internal pull-up)
-    GPIO 12   LINK status LED            GPIO 13   POWER status LED
     GPIO 16   MAX98357A SD_MODE — driven by the kernel's voicehat driver, only while audio plays
     GPIO 26   Modem power key → HAT header pin 7 (P4 = PWR, DIP switch 3 on; high = pressed)
     GPIO 18/19/20/21  I2S (googlevoicehat-soundcard)   GPIO 2/3  I²C (INA219, later)   GPIO 14/15  UART console
@@ -32,10 +31,6 @@ class ButtonLights(Protocol):
     def write(self, frame: Frame) -> None:
         """Levels 0..1 for both RGB rings. The driver must ignore `frame.record[0]`:
         that pin belongs to `MicGate`, and the renderer keeps it 0 or 1 anyway."""
-
-
-class StatusLeds(Protocol):
-    def write(self, link_on: bool, power_on: bool) -> None: ...
 
 
 class MicGate(Protocol):
@@ -86,7 +81,7 @@ class AudioBackend(Protocol):
 class Hardware:
     """The bundle the service is handed."""
 
-    def __init__(self, *, buttons: Buttons, lights: ButtonLights, status: StatusLeds, mic: MicGate,
+    def __init__(self, *, buttons: Buttons, lights: ButtonLights, mic: MicGate,
                  amp: AmpGate, modem: Modem, power: PowerGauge, audio: AudioBackend):
-        self.buttons, self.lights, self.status = buttons, lights, status
+        self.buttons, self.lights = buttons, lights
         self.mic, self.amp, self.modem, self.power, self.audio = mic, amp, modem, power, audio

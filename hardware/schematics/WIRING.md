@@ -5,7 +5,9 @@ live in `box/dadbox/hw/pi.py` and must match this file; change both
 together. Numbers are **physical header pins** (1–40) unless written
 "GPIO n" (BCM numbering, what the software uses).
 
-**Status (2026-09-24):** proposed, nothing wired yet. The I2S pins and
+**Status (2026-09-30):** proposed, nothing wired yet. There are no status
+LEDs; the box's only lights are the two buttons
+([ADR 0024](../../docs/decisions/0024-no-status-leds-record-says-ready.md)). The I2S pins and
 GPIO 16 are fixed by the `googlevoicehat-soundcard` overlay; everything else
 is our choice and can move if a wire is awkward — change `pi.py` too.
 
@@ -27,7 +29,7 @@ parts; they are **chained at the parts**, never doubled at the header:
 | 35 · GPIO 19 (LRCLK) | Amp **LRC** | the mic's **WS** | as above |
 
 Grounds were already one per pin, with the joins at the part (a button's
-C and −, the mic's L/R to its GND).
+C− and a gold switch tab, the mic's L/R to its GND).
 
 A chain is soldered at the part: both wires into the same tab or pad (or the
 second wire soldered to the pin on top of the header), heat-shrink over it.
@@ -46,46 +48,64 @@ No two Dupont housings on one pin, anywhere.
 | 13 | GPIO 27 | Record LED green | | 14 | GND | Debug probe GND (black) |
 | 15 | GPIO 22 | Record LED blue | | 16 | GPIO 23 | Play LED red |
 | 17 | 3.3 V | — spare | | 18 | GPIO 24 | Play LED green |
-| 19 | GPIO 10 | — spare | | 20 | GND | Play button: switch C and LED − |
+| 19 | GPIO 10 | — spare | | 20 | GND | Play button: gold switch tab and C− |
 | 21 | GPIO 9 | — spare | | 22 | GPIO 25 | Play LED blue |
 | 23 | GPIO 11 | — spare | | 24 | GPIO 8 | — spare |
 | 25 | GND | — spare | | 26 | GPIO 7 | — spare |
 | 27 | ID_SD | — leave free (HAT EEPROM) | | 28 | ID_SC | — leave free |
-| 29 | GPIO 5 | Record button switch NO | | 30 | GND | Record button: switch C and LED − |
-| 31 | GPIO 6 | Play button switch NO | | 32 | GPIO 12 | LINK LED, via resistor |
-| 33 | GPIO 13 | POWER LED, via resistor | | 34 | GND | Both status LED cathodes |
+| 29 | GPIO 5 | Record button, gold switch tab | | 30 | GND | Record button: other gold tab and C− |
+| 31 | GPIO 6 | Play button, gold switch tab | | 32 | GPIO 12 | — spare |
+| 33 | GPIO 13 | — spare | | 34 | GND | — spare |
 | 35 | GPIO 19 · I2S LRCLK | Amp LRC (mic WS chained from the amp) | | 36 | GPIO 16 | Amp SD (driven by the sound driver) |
 | 37 | GPIO 26 | Modem PWRKEY → HAT pin 7 | | 38 | GPIO 20 · I2S DIN | Mic SD (data out of the mic) |
 | 39 | GND | Amp GND | | 40 | GPIO 21 · I2S DOUT | Amp DIN (data into the amp) |
 
-Used: 18 signal pins, both 5 V pins, 7 of 8 grounds. Spare: GPIO 4, 7, 8,
-9, 10, 11, both 3.3 V pins, one ground (25).
+Used: 16 signal pins, both 5 V pins, 6 of 8 grounds. Spare: GPIO 4, 7, 8,
+9, 10, 11, 12, 13, both 3.3 V pins, two grounds (25, 34).
 
 ## Per part
 
+### The buttons, seen from the back
+
+Six tabs (photo, 2026-09-30). Four silver tabs for the LED, labelled on the
+body; two gold tabs, unlabelled, for the switch:
+
+```
+          C−   [ ]   [ ]   R          silver: C− top-left, R top-right
+    gold [ ]                 [ ] gold  gold: the switch, left and right
+          B    [ ]   [ ]   G          silver: B bottom-left, G bottom-right
+```
+
+- **C−** is the LED's common cathode, not the switch. It goes to ground.
+- The two **gold tabs** are a plain normally-open contact: no polarity,
+  either one to the GPIO and the other to ground. Check with a meter's
+  continuity beep: silent at rest, beeps while pressed.
+- One ground wire per button: solder a short link from C− to one gold tab
+  and run the ground from there.
+- Confirm the colours once before soldering: 3.3 V (pin 1) on R, G or B,
+  ground on C−. The resistors are built in, so no series resistor is needed.
+
 ### Record button — 16 mm, RGB ring, common cathode, resistors built in
 
-| Button terminal | Pi pin | GPIO |
+| Button tab | Pi pin | GPIO |
 | --- | --- | --- |
-| NO (switch) | 29 | GPIO 5 — input, internal pull-up; pressed = low |
-| C (switch common) | 30 | GND |
-| R (red) | 11 | **GPIO 17.** A second wire from this same tab goes to the mic's VDD |
-| G (green) | 13 | GPIO 27 |
-| B (blue) | 15 | GPIO 22 |
-| − (LED common cathode) | 30 | GND (with C) |
-
-C and − can be joined at the button and run as one ground wire.
+| gold (switch) | 29 | GPIO 5 — input, internal pull-up; pressed = low |
+| other gold (switch) | 30 | GND |
+| R | 11 | **GPIO 17.** A second wire from this same tab goes to the mic's VDD |
+| G | 13 | GPIO 27 |
+| B | 15 | GPIO 22 |
+| C− (LED common cathode) | 30 | GND — linked to the other gold tab at the button |
 
 ### Play button — same part
 
-| Button terminal | Pi pin | GPIO |
+| Button tab | Pi pin | GPIO |
 | --- | --- | --- |
-| NO | 31 | GPIO 6 |
-| C | 20 | GND |
+| gold (switch) | 31 | GPIO 6 |
+| other gold (switch) | 20 | GND |
 | R | 16 | GPIO 23 |
 | G | 18 | GPIO 24 |
 | B | 22 | GPIO 25 |
-| − | 20 | GND (with C) |
+| C− | 20 | GND — linked to the other gold tab at the button |
 
 ### Microphone — DFRobot I2S MEMS (MSM261S4030H0)
 
@@ -113,17 +133,6 @@ L/R/SEL.
 | SD | 36 · GPIO 16 | the sound driver raises it only while audio plays; the firmware never touches it |
 | GAIN | — | unconnected: 9 dB |
 | Speaker + / − | — | the Seeed 4 Ω speaker on the screw terminal |
-
-### Status LEDs — two 3 mm green LEDs
-
-| From | Through | To | Note |
-| --- | --- | --- | --- |
-| Pin 32 · GPIO 12 | 220 Ω | LINK LED anode (long leg) | on the panel: right |
-| Pin 33 · GPIO 13 | 220 Ω | POWER LED anode (long leg) | on the panel: left ([ADR 0020](../../docs/decisions/0020-no-mute-replay-green-link.md)) |
-| Both cathodes (short leg, flat side) | — | Pin 34 · GND | |
-
-They are on most of the time ("steady means fine"). If 220 Ω is too bright
-in a bedroom, raise it to 1–2.2 kΩ.
 
 ### Modem — Waveshare SIM7670G HAT, beside the Zero, not stacked
 

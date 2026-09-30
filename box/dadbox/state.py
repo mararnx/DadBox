@@ -1,8 +1,9 @@
 """State machines. Pure Python — no hardware imports — so this runs on the Mac.
 
-The two button lights are the child's vocabulary (ADR 0009, ADR 0016).
-Priority order, highest wins. They never show link, battery or faults; there
-is deliberately no error state.
+The two button lights are the box's only lights (ADR 0016, ADR 0024).
+`Lights` is their priority order, highest wins. On top of it, Record says
+whether the box is ready: steady dim blue when the server answered recently
+and nothing is faulty, a slow blue blink when not. There are no status LEDs.
 """
 from __future__ import annotations
 
@@ -15,24 +16,24 @@ class Lights(Enum):
     PLAYING = auto()     # 2. play button steady warm
     GOT_IT = auto()      # 3. recording stopped AND the message is fsynced — one green pulse, ~600 ms
     WAITING = auto()     # 4. inbox > 0 — play button breathes warm; resting (dim) after 2 h
-    IDLE = auto()        # 5. both dark
+    IDLE = auto()        # 5. Play dark; Record shows ready (steady blue) or not (blinking blue)
 
 
-class Link(Enum):        # status LED (green), adults' vocabulary
-    OK = auto()          # steady — connected and the server answered the last check-in (ADR 0020)
-    DOWN = auto()        # 1 blink / 3 s
-    DOWN_QUEUED = auto() # 2 blinks / 3 s — messages waiting to go, safe on disk
+class Link(Enum):        # Record steady blue when OK, blinking blue otherwise (ADR 0024); telemetry
+    OK = auto()          # connected and the server answered within 2 × the check-in interval
+    DOWN = auto()
+    DOWN_QUEUED = auto() # down, and messages are waiting to go, safe on disk
 
 
-class Power(Enum):
-    OK = auto()          # off — on battery, above LOW_PCT
-    MAINS = auto()       # steady — external power present (the USB port); user decision 2026-09-22
-    CHARGING = auto()    # steady — external power present and the pack is charging
-    LOW = auto()         # 1 blink / 3 s, below LOW_PCT on battery
+class Power(Enum):      # telemetry and the app only; no light (ADR 0024)
+    OK = auto()          # on battery, above LOW_PCT
+    MAINS = auto()       # external power present (the USB port)
+    CHARGING = auto()    # external power present and the pack is charging
+    LOW = auto()         # below LOW_PCT on battery
     ASLEEP = auto()      # box shut down below SLEEP_PCT; buttons do nothing
 
 
-class Fault(Enum):       # any non-NONE → LINK and POWER alternate
+class Fault(Enum):       # any non-NONE → Record blinks blue, and a push (ADR 0024)
     NONE = auto()
     STORAGE = auto()
     MODEM = auto()

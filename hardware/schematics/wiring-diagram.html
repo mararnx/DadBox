@@ -1,0 +1,486 @@
+<title>DadBox Wiring Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: drawing-sheet title block, then one wide map (header in the middle, parts left and right), then a card per part. Same tokens as the enclosure layout sheet. */
+:root{
+  --ground:#E9EDEC; --paper:#F7F9F8; --ink:#1B2226; --muted:#56646A; --line:#C3CCCB; --faint:#DCE2E1;
+  --alu:#C9D1D3; --alu-line:#8E999D; --pcb:#DCE7D6; --pcb-line:#6F8A67; --housing:#2B3134; --accent:#2C5FC4;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Barlow","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --c-v5:#C8102E; --c-gnd:#23292C; --c-red:#F0602F; --c-green:#1E9A4B; --c-blue:#2566D8; --c-sw:#8C979C;
+  --c-bclk:#D9A300; --c-lrc:#8A52D6; --c-din:#0E9AA0; --c-micsd:#D0408E; --c-ampsd:#9C6B2E; --c-key:#6E4B2A;
+  --c-dim:#E07A93; --c-dbgo:#F08A1C; --c-dbgy:#E6C400; --c-usb:#9AA4A8; --c-spk:#4A5358;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#111618; --paper:#182023; --ink:#E4EAEA; --muted:#9AA8AC; --line:#34403F; --faint:#232C2E;
+    --alu:#3A4549; --alu-line:#7C898D; --pcb:#1C2A1E; --pcb-line:#58744F; --housing:#070A0B; --accent:#7EA6F5;
+    --c-v5:#FF5A6E; --c-gnd:#B8C2C6; --c-red:#FF8A5C; --c-green:#4FD17F; --c-blue:#6C9CFF; --c-sw:#7D8A90;
+    --c-bclk:#F2C530; --c-lrc:#B488FF; --c-din:#3CCFD4; --c-micsd:#F279B8; --c-ampsd:#D29A58; --c-key:#B98552;
+    --c-dim:#F7A3B7; --c-dbgo:#FFA84A; --c-dbgy:#FFE24D; --c-usb:#5D686D; --c-spk:#A3AEB3;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#111618; --paper:#182023; --ink:#E4EAEA; --muted:#9AA8AC; --line:#34403F; --faint:#232C2E;
+  --alu:#3A4549; --alu-line:#7C898D; --pcb:#1C2A1E; --pcb-line:#58744F; --housing:#070A0B; --accent:#7EA6F5;
+  --c-v5:#FF5A6E; --c-gnd:#B8C2C6; --c-red:#FF8A5C; --c-green:#4FD17F; --c-blue:#6C9CFF; --c-sw:#7D8A90;
+  --c-bclk:#F2C530; --c-lrc:#B488FF; --c-din:#3CCFD4; --c-micsd:#F279B8; --c-ampsd:#D29A58; --c-key:#B98552;
+  --c-dim:#F7A3B7; --c-dbgo:#FFA84A; --c-dbgy:#FFE24D; --c-usb:#5D686D; --c-spk:#A3AEB3;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:16px/1.55 var(--body);margin:0}
+.wrap{max-width:1500px;margin:0 auto;padding-inline:20px;padding-block:24px 64px;display:grid;gap:18px}
+h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:.01em;text-wrap:balance;margin:0}
+h1{font-size:clamp(30px,5vw,44px);line-height:1.05}
+h2{font-size:26px;line-height:1.1}
+h3{font-size:21px}
+p{margin:0}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13.5px}
+.label{font-family:var(--display);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+.titleblock{display:grid;grid-template-columns:minmax(0,1fr) auto;border:1.5px solid var(--ink);background:var(--paper)}
+.titleblock .name{padding:18px 20px;display:grid;gap:8px;border-right:1.5px solid var(--ink)}
+.titleblock .lede{max-width:70ch;color:var(--muted)}
+.tb-cells{display:grid;grid-template-columns:repeat(2,minmax(120px,auto))}
+.tb-cells div{padding:8px 14px;border-bottom:1px solid var(--line);border-left:1px solid var(--line)}
+.tb-cells div:nth-last-child(-n+2){border-bottom:0}
+.tb-cells b{display:block;font-family:var(--mono);font-weight:500;font-size:14px}
+@media (max-width:760px){.titleblock{grid-template-columns:1fr}.titleblock .name{border-right:0;border-bottom:1.5px solid var(--ink)}}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.toolbar .label{margin-right:4px}
+button{font:500 14px/1 var(--body);color:var(--ink);background:var(--paper);border:1px solid var(--line);padding:8px 12px;border-radius:4px;cursor:pointer}
+button:hover{border-color:var(--ink)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+.sheet{background:var(--paper);border:1px solid var(--line);overflow-x:auto}
+.sheet svg{display:block;width:100%;min-width:1180px;height:auto}
+figure{margin:0}
+figcaption{padding:10px 16px 14px;color:var(--muted);font-size:14.5px;border-top:1px solid var(--faint);max-width:120ch}
+
+/* svg */
+svg text{fill:var(--ink)}
+.halo{fill:none;stroke:var(--paper);stroke-width:8;stroke-linecap:round;stroke-linejoin:round}
+.core{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.w.cable .halo{stroke-width:12}
+.w.bench .core{stroke-dasharray:9 6}
+.w.chain .core{stroke-dasharray:none}
+.w,.part,.pin,.plab{transition:opacity .18s}
+.w:hover .core{stroke-width:5 !important}
+#map:has(.w:hover) .w:not(:hover){opacity:.25}
+#map[data-focus="record"] .w:not([data-p~="record"]),#map[data-focus="record"] .part:not([data-p~="record"]),#map[data-focus="record"] .pin.used:not([data-p~="record"]),#map[data-focus="record"] .plab.on:not([data-p~="record"]){opacity:.1}
+#map[data-focus="mic"] .w:not([data-p~="mic"]),#map[data-focus="mic"] .part:not([data-p~="mic"]),#map[data-focus="mic"] .pin.used:not([data-p~="mic"]),#map[data-focus="mic"] .plab.on:not([data-p~="mic"]){opacity:.1}
+#map[data-focus="play"] .w:not([data-p~="play"]),#map[data-focus="play"] .part:not([data-p~="play"]),#map[data-focus="play"] .pin.used:not([data-p~="play"]),#map[data-focus="play"] .plab.on:not([data-p~="play"]){opacity:.1}
+#map[data-focus="amp"] .w:not([data-p~="amp"]),#map[data-focus="amp"] .part:not([data-p~="amp"]),#map[data-focus="amp"] .pin.used:not([data-p~="amp"]),#map[data-focus="amp"] .plab.on:not([data-p~="amp"]){opacity:.1}
+#map[data-focus="modem"] .w:not([data-p~="modem"]),#map[data-focus="modem"] .part:not([data-p~="modem"]),#map[data-focus="modem"] .pin.used:not([data-p~="modem"]),#map[data-focus="modem"] .plab.on:not([data-p~="modem"]){opacity:.1}
+#map[data-focus="psu"] .w:not([data-p~="psu"]),#map[data-focus="psu"] .part:not([data-p~="psu"]),#map[data-focus="psu"] .pin.used:not([data-p~="psu"]),#map[data-focus="psu"] .plab.on:not([data-p~="psu"]){opacity:.1}
+#map[data-focus="debug"] .w:not([data-p~="debug"]),#map[data-focus="debug"] .part:not([data-p~="debug"]),#map[data-focus="debug"] .pin.used:not([data-p~="debug"]),#map[data-focus="debug"] .plab.on:not([data-p~="debug"]){opacity:.1}
+.pcb{fill:var(--pcb);stroke:var(--pcb-line);stroke-width:1.5}
+.hole{fill:var(--paper);stroke:var(--pcb-line)}
+.sd{fill:var(--alu);stroke:var(--alu-line)}
+.port{fill:var(--alu);stroke:var(--alu-line)}
+.housing{fill:var(--housing)}
+.pin circle,.pin rect{fill:var(--faint);stroke:var(--alu-line);stroke-width:1}
+.pin .pnum{font:600 9px var(--mono);fill:var(--muted)}
+.pin.used circle,.pin.used rect{fill:#D4A937;stroke:#8C6A12;stroke-width:1.2}
+.pin.used .pnum{fill:#1B2226}
+.plab{font:500 10.5px var(--mono);fill:var(--muted);opacity:.55}
+.plab.on{fill:var(--ink);opacity:1}
+.plab,.silk.lab{paint-order:stroke;stroke:var(--pcb);stroke-width:4px;stroke-linejoin:round}
+.silk{font:500 11px var(--mono);fill:var(--pcb-line)}
+.silk.strong{font:600 13px var(--display);letter-spacing:.06em;text-transform:uppercase}
+.box{fill:var(--paper);stroke:var(--ink);stroke-width:1.5}
+.box.bench{stroke-dasharray:6 4}
+.ptitle{font:600 19px var(--display);letter-spacing:.01em}
+.psub{font:400 12px var(--body);fill:var(--muted)}
+.pad{fill:#D4A937;stroke:#8C6A12;stroke-width:1.2}
+.pad.open{fill:var(--paper);stroke:var(--muted)}
+.padname{font:600 12.5px var(--mono)}
+.padnote{font:400 11px var(--mono);fill:var(--muted)}
+.cap{font:400 11px var(--body);fill:var(--muted)}
+.cap.hot{fill:var(--c-green);font-weight:600}
+.alu{fill:var(--alu);stroke:var(--alu-line)}
+.cap:is(circle){fill:var(--faint);stroke:var(--alu-line)}
+circle.cap{fill:var(--faint);stroke:var(--alu-line)}
+.spk{fill:var(--alu);stroke:var(--alu-line);stroke-width:1.5}
+.sym{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.dio{fill:var(--ink);stroke:var(--paper);stroke-width:1.5}
+.dbar{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+.node{fill:var(--ink)}
+.dip{fill:var(--faint);stroke:var(--alu-line)}
+.dipk{fill:var(--muted)}
+.dipk.on{fill:var(--c-green)}
+.tag{font:600 11px var(--mono);letter-spacing:.04em}
+
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px 18px;list-style:none;margin:0;padding:14px 16px;background:var(--paper);border:1px solid var(--line)}
+.legend li{display:flex;align-items:center;gap:10px;font-size:14.5px}
+.legend .sw{width:28px;height:5px;border-radius:3px;flex:none}
+.legend .dash{background:repeating-linear-gradient(90deg,var(--ink) 0 7px,transparent 7px 11px)}
+
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.rule{background:var(--paper);border:1px solid var(--line);border-top:3px solid var(--c-red);padding:14px 16px;display:grid;gap:6px}
+.rule:nth-child(2){border-top-color:var(--c-bclk)}
+.rule:nth-child(3){border-top-color:var(--c-gnd)}
+.rule p{color:var(--muted);font-size:15px}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,440px),1fr));gap:14px}
+.card{background:var(--paper);border:1px solid var(--line);padding:14px 16px 10px;display:grid;gap:8px;align-content:start;min-width:0}
+.card header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.card button{padding:6px 10px;font-size:13px}
+.card .lede{color:var(--muted);font-size:14.5px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:6px 8px 6px 0;border-top:1px solid var(--faint);vertical-align:top}
+thead th{font-family:var(--display);font-weight:500;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-top:0}
+tbody th{font-family:var(--mono);font-weight:600;font-size:13.5px;white-space:nowrap}
+td.mono{white-space:nowrap}
+.foot{color:var(--muted);font-size:14px}
+@media (prefers-reduced-motion:reduce){.w,.part,.pin,.plab{transition:none}}
+</style>
+
+<div class="wrap">
+  <div class="titleblock">
+    <div class="name">
+      <span class="label">DadBox · hardware/schematics</span>
+      <h1>Wiring map</h1>
+      <p class="lede">Every wire in the first box, from the Pi Zero 2 W's 40-pin header to each part's terminals. There are no status LEDs: Record glows dim blue when the box is ready and blinks blue when it is not. Red is only ever the mic. One wire per header pin. Where a signal reaches two parts, it is chained at the part, never doubled at the header. Hover a wire to trace it, or pick a part to see only its wires.</p>
+    </div>
+    <div class="tb-cells">
+      <div><span class="label">Source</span><b>WIRING.md</b></div>
+      <div><span class="label">Firmware</span><b>hw/pi.py</b></div>
+      <div><span class="label">Header pins</span><b>24 used</b></div>
+      <div><span class="label">Spare</span><b>16 pins</b></div>
+      <div><span class="label">Status</span><b>ADR 0024</b></div>
+      <div><span class="label">Drawn</span><b>2026-09-30</b></div>
+    </div>
+  </div>
+
+  <div class="toolbar" role="group" aria-label="Show wires for">
+    <span class="label">Show</span>
+    <button type="button" class="f on" data-f="all" id="f-all">Everything</button><button type="button" class="f" data-f="record" id="f-record">Record button</button><button type="button" class="f" data-f="mic" id="f-mic">Microphone</button><button type="button" class="f" data-f="play" id="f-play">Play button</button><button type="button" class="f" data-f="amp" id="f-amp">Amp + speaker</button><button type="button" class="f" data-f="modem" id="f-modem">Modem HAT</button><button type="button" class="f" data-f="psu" id="f-psu">Power</button><button type="button" class="f" data-f="debug" id="f-debug">Debug probe</button>
+  </div>
+
+  <figure class="sheet">
+    <svg id="map" viewBox="0 0 1860 1110" role="img" aria-label="Wiring map: the Pi Zero 2 W header in the middle with 24 wires routed to the microphone, record button, modem HAT and supply on the left, and the amplifier, debug probe and play button on the right.">
+      <rect class="pcb" x="780" y="170" width="280" height="910" rx="14"/>
+<circle class="hole" cx="796" cy="186" r="7"/>
+<circle class="hole" cx="1044" cy="186" r="7"/>
+<circle class="hole" cx="796" cy="1064" r="7"/>
+<circle class="hole" cx="1044" cy="1064" r="7"/>
+<rect class="sd" x="884.0" y="162" width="72" height="22" rx="3"/>
+<text x="920.0" y="204" class="silk" text-anchor="middle" >SD card end · pin 1 here</text>
+<text x="920.0" y="1044" class="silk strong" text-anchor="middle" >Raspberry Pi Zero 2 W</text>
+<text x="920.0" y="1060" class="silk" text-anchor="middle" >header drawn enlarged</text>
+<rect class="port" x="768" y="725" width="22" height="18" rx="2"/>
+<rect class="port" x="768" y="765" width="22" height="18" rx="2"/>
+<rect class="housing" x="882" y="220" width="76" height="800" rx="4"/>
+<g class="pin" ><rect x="891" y="231" width="18" height="18" rx="2"/><text x="900" y="243.5" class="pnum" text-anchor="middle" >1</text></g>
+<g class="pin used c-v5" data-p="amp"><circle cx="940" cy="240" r="9.5"/><text x="940" y="243.5" class="pnum" text-anchor="middle" >2</text></g>
+<g class="pin" ><circle cx="900" cy="280" r="9.5"/><text x="900" y="283.5" class="pnum" text-anchor="middle" >3</text></g>
+<g class="pin used c-v5" data-p="modem"><circle cx="940" cy="280" r="9.5"/><text x="940" y="283.5" class="pnum" text-anchor="middle" >4</text></g>
+<g class="pin" ><circle cx="900" cy="320" r="9.5"/><text x="900" y="323.5" class="pnum" text-anchor="middle" >5</text></g>
+<g class="pin used c-gnd" data-p="modem"><circle cx="940" cy="320" r="9.5"/><text x="940" y="323.5" class="pnum" text-anchor="middle" >6</text></g>
+<g class="pin" ><circle cx="900" cy="360" r="9.5"/><text x="900" y="363.5" class="pnum" text-anchor="middle" >7</text></g>
+<g class="pin used c-dbgy" data-p="debug"><circle cx="940" cy="360" r="9.5"/><text x="940" y="363.5" class="pnum" text-anchor="middle" >8</text></g>
+<g class="pin used c-gnd" data-p="mic"><circle cx="900" cy="400" r="9.5"/><text x="900" y="403.5" class="pnum" text-anchor="middle" >9</text></g>
+<g class="pin used c-dbgo" data-p="debug"><circle cx="940" cy="400" r="9.5"/><text x="940" y="403.5" class="pnum" text-anchor="middle" >10</text></g>
+<g class="pin used c-red" data-p="record"><circle cx="900" cy="440" r="9.5"/><text x="900" y="443.5" class="pnum" text-anchor="middle" >11</text></g>
+<g class="pin used c-bclk" data-p="amp"><circle cx="940" cy="440" r="9.5"/><text x="940" y="443.5" class="pnum" text-anchor="middle" >12</text></g>
+<g class="pin used c-green" data-p="record"><circle cx="900" cy="480" r="9.5"/><text x="900" y="483.5" class="pnum" text-anchor="middle" >13</text></g>
+<g class="pin used c-gnd" data-p="debug"><circle cx="940" cy="480" r="9.5"/><text x="940" y="483.5" class="pnum" text-anchor="middle" >14</text></g>
+<g class="pin used c-blue" data-p="record"><circle cx="900" cy="520" r="9.5"/><text x="900" y="523.5" class="pnum" text-anchor="middle" >15</text></g>
+<g class="pin used c-red" data-p="play"><circle cx="940" cy="520" r="9.5"/><text x="940" y="523.5" class="pnum" text-anchor="middle" >16</text></g>
+<g class="pin" ><circle cx="900" cy="560" r="9.5"/><text x="900" y="563.5" class="pnum" text-anchor="middle" >17</text></g>
+<g class="pin used c-green" data-p="play"><circle cx="940" cy="560" r="9.5"/><text x="940" y="563.5" class="pnum" text-anchor="middle" >18</text></g>
+<g class="pin" ><circle cx="900" cy="600" r="9.5"/><text x="900" y="603.5" class="pnum" text-anchor="middle" >19</text></g>
+<g class="pin used c-gnd" data-p="play"><circle cx="940" cy="600" r="9.5"/><text x="940" y="603.5" class="pnum" text-anchor="middle" >20</text></g>
+<g class="pin" ><circle cx="900" cy="640" r="9.5"/><text x="900" y="643.5" class="pnum" text-anchor="middle" >21</text></g>
+<g class="pin used c-blue" data-p="play"><circle cx="940" cy="640" r="9.5"/><text x="940" y="643.5" class="pnum" text-anchor="middle" >22</text></g>
+<g class="pin" ><circle cx="900" cy="680" r="9.5"/><text x="900" y="683.5" class="pnum" text-anchor="middle" >23</text></g>
+<g class="pin" ><circle cx="940" cy="680" r="9.5"/><text x="940" y="683.5" class="pnum" text-anchor="middle" >24</text></g>
+<g class="pin" ><circle cx="900" cy="720" r="9.5"/><text x="900" y="723.5" class="pnum" text-anchor="middle" >25</text></g>
+<g class="pin" ><circle cx="940" cy="720" r="9.5"/><text x="940" y="723.5" class="pnum" text-anchor="middle" >26</text></g>
+<g class="pin" ><circle cx="900" cy="760" r="9.5"/><text x="900" y="763.5" class="pnum" text-anchor="middle" >27</text></g>
+<g class="pin" ><circle cx="940" cy="760" r="9.5"/><text x="940" y="763.5" class="pnum" text-anchor="middle" >28</text></g>
+<g class="pin used c-sw" data-p="record"><circle cx="900" cy="800" r="9.5"/><text x="900" y="803.5" class="pnum" text-anchor="middle" >29</text></g>
+<g class="pin used c-gnd" data-p="record"><circle cx="940" cy="800" r="9.5"/><text x="940" y="803.5" class="pnum" text-anchor="middle" >30</text></g>
+<g class="pin used c-sw" data-p="play"><circle cx="900" cy="840" r="9.5"/><text x="900" y="843.5" class="pnum" text-anchor="middle" >31</text></g>
+<g class="pin" ><circle cx="940" cy="840" r="9.5"/><text x="940" y="843.5" class="pnum" text-anchor="middle" >32</text></g>
+<g class="pin" ><circle cx="900" cy="880" r="9.5"/><text x="900" y="883.5" class="pnum" text-anchor="middle" >33</text></g>
+<g class="pin" ><circle cx="940" cy="880" r="9.5"/><text x="940" y="883.5" class="pnum" text-anchor="middle" >34</text></g>
+<g class="pin used c-lrc" data-p="amp"><circle cx="900" cy="920" r="9.5"/><text x="900" y="923.5" class="pnum" text-anchor="middle" >35</text></g>
+<g class="pin used c-ampsd" data-p="amp"><circle cx="940" cy="920" r="9.5"/><text x="940" y="923.5" class="pnum" text-anchor="middle" >36</text></g>
+<g class="pin used c-key" data-p="modem"><circle cx="900" cy="960" r="9.5"/><text x="900" y="963.5" class="pnum" text-anchor="middle" >37</text></g>
+<g class="pin used c-micsd" data-p="mic"><circle cx="940" cy="960" r="9.5"/><text x="940" y="963.5" class="pnum" text-anchor="middle" >38</text></g>
+<g class="pin used c-gnd" data-p="amp"><circle cx="900" cy="1000" r="9.5"/><text x="900" y="1003.5" class="pnum" text-anchor="middle" >39</text></g>
+<g class="pin used c-din" data-p="amp"><circle cx="940" cy="1000" r="9.5"/><text x="940" y="1003.5" class="pnum" text-anchor="middle" >40</text></g>
+      <g class="w cable" data-p="modem"><title>USB data: Zero inner micro-USB (via OTG adapter) → HAT USB-C</title><path class="halo" d="M470,734 L768,734"/><path class="core" d="M470,734 L768,734" style="stroke:var(--c-usb);stroke-width:7"/></g>
+<g class="w cable" data-p="psu"><title>5 V supply → Zero outer micro-USB, PWR IN</title><path class="halo" d="M470,1010 L751,1010 Q758,1010 758,1003 L758,779 Q758,774 763,774 L768,774"/><path class="core" d="M470,1010 L751,1010 Q758,1010 758,1003 L758,779 Q758,774 763,774 L768,774" style="stroke:var(--c-v5);stroke-width:7"/></g>
+<g class="w " data-p="mic"><title>pin 9 · GND → I²S MEMS microphone GND: GND</title><path class="halo" d="M900,400 L732,400 Q725,400 725,393 L725,275 Q725,268 718,268 L470,268"/><path class="core" d="M900,400 L732,400 Q725,400 725,393 L725,275 Q725,268 718,268 L470,268" style="stroke:var(--c-gnd);stroke-width:3.2"/></g>
+<g class="w " data-p="mic"><title>pin 38 · GPIO 20 · DIN → I²S MEMS microphone SD: I²S data in (mic → Pi)</title><path class="halo" d="M940,960 L940,973 Q940,980 933,980 L580,980 Q573,980 573,973 L573,249 Q573,242 566,242 L470,242"/><path class="core" d="M940,960 L940,973 Q940,980 933,980 L580,980 Q573,980 573,973 L573,249 Q573,242 566,242 L470,242" style="stroke:var(--c-micsd);stroke-width:3.2"/></g>
+<g class="w " data-p="record"><title>pin 11 · GPIO 17 → Record button R: GPIO 17 · red ring, mic power</title><path class="halo" d="M900,440 L630,440 Q623,440 623,447 L623,453 Q623,460 616,460 L470,460"/><path class="core" d="M900,440 L630,440 Q623,440 623,447 L623,453 Q623,460 616,460 L470,460" style="stroke:var(--c-red);stroke-width:3.2"/></g>
+<g class="w " data-p="record"><title>pin 13 · GPIO 27 → Record button G: green ring</title><path class="halo" d="M900,480 L677,480 Q674,480 674,483 L674,483 Q674,486 671,486 L470,486"/><path class="core" d="M900,480 L677,480 Q674,480 674,483 L674,483 Q674,486 671,486 L470,486" style="stroke:var(--c-green);stroke-width:3.2"/></g>
+<g class="w " data-p="record"><title>pin 15 · GPIO 22 → Record button B: blue ring</title><path class="halo" d="M900,520 L653,520 Q649,520 649,516 L649,516 Q649,512 645,512 L470,512"/><path class="core" d="M900,520 L653,520 Q649,520 649,516 L649,516 Q649,512 645,512 L470,512" style="stroke:var(--c-blue);stroke-width:3.2"/></g>
+<g class="w " data-p="record"><title>pin 29 · GPIO 5 → Record button NO: switch · pull-up, pressed = low</title><path class="halo" d="M900,800 L757,800 Q750,800 750,793 L750,545 Q750,538 743,538 L470,538"/><path class="core" d="M900,800 L757,800 Q750,800 750,793 L750,545 Q750,538 743,538 L470,538" style="stroke:var(--c-sw);stroke-width:3.2"/></g>
+<g class="w " data-p="record"><title>pin 30 · GND → Record button C: GND · switch C and LED −</title><path class="halo" d="M940,800 L940,813 Q940,820 933,820 L706,820 Q699,820 699,813 L699,571 Q699,564 692,564 L470,564"/><path class="core" d="M940,800 L940,813 Q940,820 933,820 L706,820 Q699,820 699,813 L699,571 Q699,564 692,564 L470,564" style="stroke:var(--c-gnd);stroke-width:3.2"/></g>
+<g class="w " data-p="modem"><title>pin 4 · 5V → Modem HAT V5: 5 V</title><path class="halo" d="M940,280 L940,267 Q940,260 933,260 L529,260 Q522,260 522,267 L522,753 Q522,760 515,760 L470,760"/><path class="core" d="M940,280 L940,267 Q940,260 933,260 L529,260 Q522,260 522,267 L522,753 Q522,760 515,760 L470,760" style="stroke:var(--c-v5);stroke-width:3.2"/></g>
+<g class="w " data-p="modem"><title>pin 6 · GND → Modem HAT GND: GND</title><path class="halo" d="M940,320 L940,307 Q940,300 933,300 L605,300 Q598,300 598,307 L598,779 Q598,786 591,786 L470,786"/><path class="core" d="M940,320 L940,307 Q940,300 933,300 L605,300 Q598,300 598,307 L598,779 Q598,786 591,786 L470,786" style="stroke:var(--c-gnd);stroke-width:3.2"/></g>
+<g class="w " data-p="modem"><title>pin 37 · GPIO 26 → Modem HAT P4: PWRKEY · high = key pressed</title><path class="halo" d="M900,960 L554,960 Q547,960 547,953 L547,819 Q547,812 540,812 L470,812"/><path class="core" d="M900,960 L554,960 Q547,960 547,953 L547,819 Q547,812 540,812 L470,812" style="stroke:var(--c-key);stroke-width:3.2"/></g>
+<g class="w " data-p="amp"><title>pin 2 · 5V → Amplifier VIN: 5 V</title><path class="halo" d="M940,240 L1166,240 Q1173,240 1173,247 L1173,339 Q1173,346 1180,346 L1400,346"/><path class="core" d="M940,240 L1166,240 Q1173,240 1173,247 L1173,339 Q1173,346 1180,346 L1400,346" style="stroke:var(--c-v5);stroke-width:3.2"/></g>
+<g class="w " data-p="amp"><title>pin 12 · GPIO 18 · BCLK → Amplifier BCLK: I²S bit clock</title><path class="halo" d="M940,440 L1122,440 Q1129,440 1129,433 L1129,197 Q1129,190 1136,190 L1400,190"/><path class="core" d="M940,440 L1122,440 Q1129,440 1129,433 L1129,197 Q1129,190 1136,190 L1400,190" style="stroke:var(--c-bclk);stroke-width:3.2"/></g>
+<g class="w " data-p="amp"><title>pin 35 · GPIO 19 · LRCLK → Amplifier LRC: I²S word clock</title><path class="halo" d="M900,920 L900,933 Q900,940 907,940 L1187,940 Q1194,940 1194,933 L1194,223 Q1194,216 1201,216 L1400,216"/><path class="core" d="M900,920 L900,933 Q900,940 907,940 L1187,940 Q1194,940 1194,933 L1194,223 Q1194,216 1201,216 L1400,216" style="stroke:var(--c-lrc);stroke-width:3.2"/></g>
+<g class="w " data-p="amp"><title>pin 40 · GPIO 21 · DOUT → Amplifier DIN: I²S data out (Pi → amp)</title><path class="halo" d="M940,1000 L1274,1000 Q1281,1000 1281,993 L1281,249 Q1281,242 1288,242 L1400,242"/><path class="core" d="M940,1000 L1274,1000 Q1281,1000 1281,993 L1281,249 Q1281,242 1288,242 L1400,242" style="stroke:var(--c-din);stroke-width:3.2"/></g>
+<g class="w " data-p="amp"><title>pin 36 · GPIO 16 → Amplifier SD: amp enable · owned by the sound driver</title><path class="halo" d="M940,920 L1144,920 Q1151,920 1151,913 L1151,275 Q1151,268 1158,268 L1400,268"/><path class="core" d="M940,920 L1144,920 Q1151,920 1151,913 L1151,275 Q1151,268 1158,268 L1400,268" style="stroke:var(--c-ampsd);stroke-width:3.2"/></g>
+<g class="w " data-p="amp"><title>pin 39 · GND → Amplifier GND: GND</title><path class="halo" d="M900,1000 L900,1013 Q900,1020 907,1020 L1296,1020 Q1303,1020 1303,1013 L1303,327 Q1303,320 1310,320 L1400,320"/><path class="core" d="M900,1000 L900,1013 Q900,1020 907,1020 L1296,1020 Q1303,1020 1303,1013 L1303,327 Q1303,320 1310,320 L1400,320" style="stroke:var(--c-gnd);stroke-width:3.2"/></g>
+<g class="w bench" data-p="debug"><title>pin 8 · GPIO 14 · TXD → Debug probe RX: Pi TXD → probe RX</title><path class="halo" d="M940,360 L1339,360 Q1346,360 1346,367 L1346,489 Q1346,496 1353,496 L1400,496"/><path class="core" d="M940,360 L1339,360 Q1346,360 1346,367 L1346,489 Q1346,496 1353,496 L1400,496" style="stroke:var(--c-dbgy);stroke-width:3.2"/></g>
+<g class="w bench" data-p="debug"><title>pin 10 · GPIO 15 · RXD → Debug probe TX: probe TX → Pi RXD</title><path class="halo" d="M940,400 L1079,400 Q1086,400 1086,407 L1086,463 Q1086,470 1093,470 L1400,470"/><path class="core" d="M940,400 L1079,400 Q1086,400 1086,407 L1086,463 Q1086,470 1093,470 L1400,470" style="stroke:var(--c-dbgo);stroke-width:3.2"/></g>
+<g class="w bench" data-p="debug"><title>pin 14 · GND → Debug probe GND: GND</title><path class="halo" d="M940,480 L1318,480 Q1325,480 1325,487 L1325,515 Q1325,522 1332,522 L1400,522"/><path class="core" d="M940,480 L1318,480 Q1325,480 1325,487 L1325,515 Q1325,522 1332,522 L1400,522" style="stroke:var(--c-gnd);stroke-width:3.2"/></g>
+<g class="w " data-p="play"><title>pin 16 · GPIO 23 → Play button R: red ring</title><path class="halo" d="M940,520 L1253,520 Q1260,520 1260,527 L1260,633 Q1260,640 1267,640 L1400,640"/><path class="core" d="M940,520 L1253,520 Q1260,520 1260,527 L1260,633 Q1260,640 1267,640 L1400,640" style="stroke:var(--c-red);stroke-width:3.2"/></g>
+<g class="w " data-p="play"><title>pin 18 · GPIO 24 → Play button G: green ring</title><path class="halo" d="M940,560 L1231,560 Q1238,560 1238,567 L1238,659 Q1238,666 1245,666 L1400,666"/><path class="core" d="M940,560 L1231,560 Q1238,560 1238,567 L1238,659 Q1238,666 1245,666 L1400,666" style="stroke:var(--c-green);stroke-width:3.2"/></g>
+<g class="w " data-p="play"><title>pin 22 · GPIO 25 → Play button B: blue ring</title><path class="halo" d="M940,640 L1101,640 Q1108,640 1108,647 L1108,685 Q1108,692 1115,692 L1400,692"/><path class="core" d="M940,640 L1101,640 Q1108,640 1108,647 L1108,685 Q1108,692 1115,692 L1400,692" style="stroke:var(--c-blue);stroke-width:3.2"/></g>
+<g class="w " data-p="play"><title>pin 31 · GPIO 6 → Play button NO: switch · pull-up, pressed = low</title><path class="halo" d="M900,840 L900,853 Q900,860 907,860 L1361,860 Q1368,860 1368,853 L1368,725 Q1368,718 1375,718 L1400,718"/><path class="core" d="M900,840 L900,853 Q900,860 907,860 L1361,860 Q1368,860 1368,853 L1368,725 Q1368,718 1375,718 L1400,718" style="stroke:var(--c-sw);stroke-width:3.2"/></g>
+<g class="w " data-p="play"><title>pin 20 · GND → Play button C: GND · switch C and LED −</title><path class="halo" d="M940,600 L1209,600 Q1216,600 1216,607 L1216,737 Q1216,744 1223,744 L1400,744"/><path class="core" d="M940,600 L1209,600 Q1216,600 1216,607 L1216,737 Q1216,744 1223,744 L1400,744" style="stroke:var(--c-gnd);stroke-width:3.2"/></g>
+<g class="w chain" data-p="mic record"><title>Chain: record R tab → mic VDD (GPIO 17 through the red LED&#x27;s tab)</title><path class="halo" d="M470,460 L479,460 Q486,460 486,453 L486,327 Q486,320 479,320 L470,320"/><path class="core" d="M470,460 L479,460 Q486,460 486,453 L486,327 Q486,320 479,320 L470,320" style="stroke:var(--c-red);stroke-width:3.2"/></g>
+<g class="w chain" data-p="mic amp"><title>Chain: amp BCLK → mic SCK</title><path class="halo" d="M1400,190 L1397,190 Q1394,190 1394,187 L1394,107 Q1394,100 1387,100 L495,100 Q488,100 488,107 L488,183 Q488,190 481,190 L470,190"/><path class="core" d="M1400,190 L1397,190 Q1394,190 1394,187 L1394,107 Q1394,100 1387,100 L495,100 Q488,100 488,107 L488,183 Q488,190 481,190 L470,190" style="stroke:var(--c-bclk);stroke-width:3.2"/></g>
+<g class="w chain" data-p="mic amp"><title>Chain: amp LRC → mic WS</title><path class="halo" d="M1400,216 L1393,216 Q1386,216 1386,209 L1386,121 Q1386,114 1379,114 L505,114 Q498,114 498,121 L498,209 Q498,216 491,216 L470,216"/><path class="core" d="M1400,216 L1393,216 Q1386,216 1386,209 L1386,121 Q1386,114 1379,114 L505,114 Q498,114 498,121 L498,209 Q498,216 491,216 L470,216" style="stroke:var(--c-lrc);stroke-width:3.2"/></g>
+<g class="w jumper" data-p="record"><title>Record button: C− linked to a gold switch tab at the button</title><path class="halo" d="M470,564 L478,564 Q482,564 482,568 L482,586 Q482,590 478,590 L470,590"/><path class="core" d="M470,564 L478,564 Q482,564 482,568 L482,586 Q482,590 478,590 L470,590" style="stroke:var(--c-gnd);stroke-width:2.4"/></g>
+<g class="w jumper" data-p="play"><title>Play button: C− linked to a gold switch tab at the button</title><path class="halo" d="M1400,744 L1392,744 Q1388,744 1388,748 L1388,766 Q1388,770 1392,770 L1400,770"/><path class="core" d="M1400,744 L1392,744 Q1388,744 1388,748 L1388,766 Q1388,770 1392,770 L1400,770" style="stroke:var(--c-gnd);stroke-width:2.4"/></g>
+<g class="w jumper" data-p="mic"><title>Mic: L/R tied to GND at the mic (left channel)</title><path class="halo" d="M470,268 L478,268 Q482,268 482,272 L482,290 Q482,294 478,294 L470,294"/><path class="core" d="M470,268 L478,268 Q482,268 482,272 L482,290 Q482,294 478,294 L470,294" style="stroke:var(--c-gnd);stroke-width:2.4"/></g>
+      <g class="part" data-p="mic">
+<rect class="box" x="110" y="130" width="360" height="220" rx="6"/>
+<text x="126" y="154" class="ptitle" text-anchor="start" >I²S MEMS microphone</text>
+<text x="126" y="172" class="psub" text-anchor="start" >DFRobot · MSM261S4030H0 · 3.3 V</text>
+<circle class="pad" cx="470" cy="190" r="5.5"/>
+<text x="456" y="194" class="padname" text-anchor="end" >SCK</text>
+<text x="400" y="194" class="padnote" text-anchor="end" >chained from amp BCLK</text>
+<circle class="pad" cx="470" cy="216" r="5.5"/>
+<text x="456" y="220" class="padname" text-anchor="end" >WS</text>
+<text x="400" y="220" class="padnote" text-anchor="end" >chained from amp LRC</text>
+<circle class="pad" cx="470" cy="242" r="5.5"/>
+<text x="456" y="246" class="padname" text-anchor="end" >SD</text>
+<text x="400" y="246" class="padnote" text-anchor="end" >pin 38 · GPIO 20</text>
+<circle class="pad" cx="470" cy="268" r="5.5"/>
+<text x="456" y="272" class="padname" text-anchor="end" >GND</text>
+<text x="400" y="272" class="padnote" text-anchor="end" >pin 9</text>
+<circle class="pad" cx="470" cy="294" r="5.5"/>
+<text x="456" y="298" class="padname" text-anchor="end" >L/R</text>
+<text x="400" y="298" class="padnote" text-anchor="end" >jumper to GND · left</text>
+<circle class="pad" cx="470" cy="320" r="5.5"/>
+<text x="456" y="324" class="padname" text-anchor="end" >VDD</text>
+<text x="400" y="324" class="padnote" text-anchor="end" >from record R tab</text>
+</g>
+<g class="part" data-p="record">
+<rect class="box" x="110" y="400" width="360" height="220" rx="6"/>
+<text x="126" y="424" class="ptitle" text-anchor="start" >Record button</text>
+<text x="126" y="442" class="psub" text-anchor="start" >16 mm RGB ring · common cathode</text>
+<circle class="pad" cx="470" cy="460" r="5.5"/>
+<text x="456" y="464" class="padname" text-anchor="end" >R</text>
+<text x="400" y="464" class="padnote" text-anchor="end" >pin 11 · GPIO 17</text>
+<circle class="pad" cx="470" cy="486" r="5.5"/>
+<text x="456" y="490" class="padname" text-anchor="end" >G</text>
+<text x="400" y="490" class="padnote" text-anchor="end" >pin 13 · GPIO 27</text>
+<circle class="pad" cx="470" cy="512" r="5.5"/>
+<text x="456" y="516" class="padname" text-anchor="end" >B</text>
+<text x="400" y="516" class="padnote" text-anchor="end" >pin 15 · GPIO 22</text>
+<circle class="pad" cx="470" cy="538" r="5.5"/>
+<text x="456" y="542" class="padname" text-anchor="end" >gold</text>
+<text x="400" y="542" class="padnote" text-anchor="end" >pin 29 · GPIO 5</text>
+<circle class="pad" cx="470" cy="564" r="5.5"/>
+<text x="456" y="568" class="padname" text-anchor="end" >gold</text>
+<text x="400" y="568" class="padnote" text-anchor="end" >pin 30 · GND</text>
+<circle class="pad" cx="470" cy="590" r="5.5"/>
+<text x="456" y="594" class="padname" text-anchor="end" >C−</text>
+<text x="400" y="594" class="padnote" text-anchor="end" >link to gold</text>
+</g>
+<g class="part" data-p="modem">
+<rect class="box" x="110" y="674" width="360" height="236" rx="6"/>
+<text x="126" y="698" class="ptitle" text-anchor="start" >Modem HAT</text>
+<text x="126" y="716" class="psub" text-anchor="start" >Waveshare SIM7670G · under the Zero (ADR 0023)</text>
+<circle class="pad" cx="470" cy="734" r="5.5"/>
+<text x="456" y="738" class="padname" text-anchor="end" >USB-C</text>
+<text x="400" y="738" class="padnote" text-anchor="end" >data → Zero USB</text>
+<circle class="pad" cx="470" cy="760" r="5.5"/>
+<text x="456" y="764" class="padname" text-anchor="end" >pin 2</text>
+<text x="400" y="764" class="padnote" text-anchor="end" >5 V ← Zero pin 4</text>
+<circle class="pad" cx="470" cy="786" r="5.5"/>
+<text x="456" y="790" class="padname" text-anchor="end" >pin 6</text>
+<text x="400" y="790" class="padnote" text-anchor="end" >GND ← Zero pin 6</text>
+<circle class="pad" cx="470" cy="812" r="5.5"/>
+<text x="456" y="816" class="padname" text-anchor="end" >pin 7</text>
+<text x="400" y="816" class="padnote" text-anchor="end" >PWRKEY ← pin 37</text>
+</g>
+<g class="part" data-p="psu">
+<rect class="box" x="110" y="950" width="360" height="96" rx="6"/>
+<text x="126" y="974" class="ptitle" text-anchor="start" >5 V 2.5 A supply</text>
+<text x="126" y="992" class="psub" text-anchor="start" >mains · the off switch is the plug</text>
+<circle class="pad" cx="470" cy="1010" r="5.5"/>
+<text x="456" y="1014" class="padname" text-anchor="end" >plug</text>
+<text x="400" y="1014" class="padnote" text-anchor="end" >micro-USB → PWR IN</text>
+</g>
+<g class="part" data-p="amp">
+<rect class="box" x="1400" y="130" width="300" height="246" rx="6"/>
+<text x="1416" y="154" class="ptitle" text-anchor="start" >Amplifier</text>
+<text x="1416" y="172" class="psub" text-anchor="start" >Adafruit MAX98357A · 5 V</text>
+<circle class="pad" cx="1400" cy="190" r="5.5"/>
+<text x="1414" y="194" class="padname" text-anchor="start" >BCLK</text>
+<text x="1470" y="194" class="padnote" text-anchor="start" >pin 12 · GPIO 18</text>
+<circle class="pad" cx="1400" cy="216" r="5.5"/>
+<text x="1414" y="220" class="padname" text-anchor="start" >LRC</text>
+<text x="1470" y="220" class="padnote" text-anchor="start" >pin 35 · GPIO 19</text>
+<circle class="pad" cx="1400" cy="242" r="5.5"/>
+<text x="1414" y="246" class="padname" text-anchor="start" >DIN</text>
+<text x="1470" y="246" class="padnote" text-anchor="start" >pin 40 · GPIO 21</text>
+<circle class="pad" cx="1400" cy="268" r="5.5"/>
+<text x="1414" y="272" class="padname" text-anchor="start" >SD</text>
+<text x="1470" y="272" class="padnote" text-anchor="start" >pin 36 · GPIO 16</text>
+<circle class="pad open" cx="1400" cy="294" r="5.5"/>
+<text x="1414" y="298" class="padname" text-anchor="start" >GAIN</text>
+<text x="1470" y="298" class="padnote" text-anchor="start" >open · 9 dB</text>
+<circle class="pad" cx="1400" cy="320" r="5.5"/>
+<text x="1414" y="324" class="padname" text-anchor="start" >GND</text>
+<text x="1470" y="324" class="padnote" text-anchor="start" >pin 39</text>
+<circle class="pad" cx="1400" cy="346" r="5.5"/>
+<text x="1414" y="350" class="padname" text-anchor="start" >Vin</text>
+<text x="1470" y="350" class="padnote" text-anchor="start" >pin 2 · 5 V</text>
+</g>
+<g class="part" data-p="debug">
+<rect class="box bench" x="1400" y="410" width="360" height="142" rx="6"/>
+<text x="1416" y="434" class="ptitle" text-anchor="start" >Debug probe</text>
+<text x="1416" y="452" class="psub" text-anchor="start" >USB-UART · bench only · 115 200 baud</text>
+<circle class="pad" cx="1400" cy="470" r="5.5"/>
+<text x="1414" y="474" class="padname" text-anchor="start" >TX</text>
+<text x="1470" y="474" class="padnote" text-anchor="start" >orange → pin 10</text>
+<circle class="pad" cx="1400" cy="496" r="5.5"/>
+<text x="1414" y="500" class="padname" text-anchor="start" >RX</text>
+<text x="1470" y="500" class="padnote" text-anchor="start" >yellow ← pin 8</text>
+<circle class="pad" cx="1400" cy="522" r="5.5"/>
+<text x="1414" y="526" class="padname" text-anchor="start" >GND</text>
+<text x="1470" y="526" class="padnote" text-anchor="start" >black → pin 14</text>
+</g>
+<g class="part" data-p="play">
+<rect class="box" x="1400" y="580" width="360" height="220" rx="6"/>
+<text x="1416" y="604" class="ptitle" text-anchor="start" >Play button</text>
+<text x="1416" y="622" class="psub" text-anchor="start" >16 mm RGB ring · common cathode</text>
+<circle class="pad" cx="1400" cy="640" r="5.5"/>
+<text x="1414" y="644" class="padname" text-anchor="start" >R</text>
+<text x="1470" y="644" class="padnote" text-anchor="start" >pin 16 · GPIO 23</text>
+<circle class="pad" cx="1400" cy="666" r="5.5"/>
+<text x="1414" y="670" class="padname" text-anchor="start" >G</text>
+<text x="1470" y="670" class="padnote" text-anchor="start" >pin 18 · GPIO 24</text>
+<circle class="pad" cx="1400" cy="692" r="5.5"/>
+<text x="1414" y="696" class="padname" text-anchor="start" >B</text>
+<text x="1470" y="696" class="padnote" text-anchor="start" >pin 22 · GPIO 25</text>
+<circle class="pad" cx="1400" cy="718" r="5.5"/>
+<text x="1414" y="722" class="padname" text-anchor="start" >gold</text>
+<text x="1470" y="722" class="padnote" text-anchor="start" >pin 31 · GPIO 6</text>
+<circle class="pad" cx="1400" cy="744" r="5.5"/>
+<text x="1414" y="748" class="padname" text-anchor="start" >gold</text>
+<text x="1470" y="748" class="padnote" text-anchor="start" >pin 20 · GND</text>
+<circle class="pad" cx="1400" cy="770" r="5.5"/>
+<text x="1414" y="774" class="padname" text-anchor="start" >C−</text>
+<text x="1470" y="774" class="padnote" text-anchor="start" >link to gold</text>
+</g>
+<g class="part" data-p="record"><circle class="alu" cx="162" cy="530" r="33"/><path d="M164.7,504.1 A26,26 0 0 1 185.8,540.6" style="stroke:var(--c-red);stroke-width:5;fill:none;stroke-linecap:round"/><path d="M183.0,545.3 A26,26 0 0 1 141.0,545.3" style="stroke:var(--c-green);stroke-width:5;fill:none;stroke-linecap:round"/><path d="M138.2,540.6 A26,26 0 0 1 159.3,504.1" style="stroke:var(--c-blue);stroke-width:5;fill:none;stroke-linecap:round"/><circle class="cap" cx="162" cy="530" r="19"/><text x="162" y="586" class="cap" text-anchor="middle" >Ø16 mm</text></g>
+<g class="part" data-p="play"><circle class="alu" cx="1708" cy="710" r="33"/><path d="M1710.7,684.1 A26,26 0 0 1 1731.8,720.6" style="stroke:var(--c-red);stroke-width:5;fill:none;stroke-linecap:round"/><path d="M1729.0,725.3 A26,26 0 0 1 1687.0,725.3" style="stroke:var(--c-green);stroke-width:5;fill:none;stroke-linecap:round"/><path d="M1684.2,720.6 A26,26 0 0 1 1705.3,684.1" style="stroke:var(--c-blue);stroke-width:5;fill:none;stroke-linecap:round"/><circle class="cap" cx="1708" cy="710" r="19"/><text x="1708" y="766" class="cap" text-anchor="middle" >Ø16 mm</text></g>
+<g class="part" data-p="mic"><rect class="alu" x="132" y="204" width="54" height="54" rx="4"/><circle class="cap" cx="159" cy="231" r="7"/><text x="159" y="276" class="cap" text-anchor="middle" >powered only</text><text x="159" y="290" class="cap" text-anchor="middle" >while red is lit</text></g>
+<g class="part" data-p="amp"><rect class="alu" x="1670" y="248" width="22" height="40" rx="2"/><text x="1664" y="238" class="cap" text-anchor="end" >screw terminal</text><path class="spk" d="M1752,262 h16 l24,-22 v80 l-24,-22 h-16 z"/><text x="1780" y="338" class="cap" text-anchor="middle" >Seeed 4 Ω</text><text x="1780" y="352" class="cap" text-anchor="middle" >speaker</text></g>
+<g class="w " data-p="amp"><title>Speaker +</title><path class="halo" d="M1692,260 L1752,260"/><path class="core" d="M1692,260 L1752,260" style="stroke:var(--c-spk);stroke-width:2.6"/></g>
+<g class="w " data-p="amp"><title>Speaker −</title><path class="halo" d="M1692,276 L1752,276"/><path class="core" d="M1692,276 L1752,276" style="stroke:var(--c-spk);stroke-width:2.6"/></g>
+<g class="part" data-p="modem"><path class="sym" d="M110,874 H66 V830 M66,830 l-10,-16 M66,830 l10,-16 M66,830 v-18"/><text x="66" y="894" class="cap" text-anchor="middle" >LTE</text><text x="126" y="878" class="cap" text-anchor="start" >IPEX1 → SMA through the wall</text></g>
+<g class="part" data-p="modem"><text x="126" y="838" class="cap" text-anchor="start" >DIP switches</text><rect class="dip" x="126" y="846" width="14" height="22" rx="2"/><rect class="dipk" x="128" y="857" width="10" height="9" rx="1"/><text x="144" y="856" class="cap" text-anchor="start" >TXD</text><text x="144" y="867" class="cap" text-anchor="start" >off</text><rect class="dip" x="170" y="846" width="14" height="22" rx="2"/><rect class="dipk" x="172" y="857" width="10" height="9" rx="1"/><text x="188" y="856" class="cap" text-anchor="start" >RXD</text><text x="188" y="867" class="cap" text-anchor="start" >off</text><rect class="dip" x="214" y="846" width="14" height="22" rx="2"/><rect class="dipk on" x="216" y="848" width="10" height="9" rx="1"/><text x="232" y="856" class="cap" text-anchor="start" >PWR</text><text x="232" y="867" class="cap hot" text-anchor="start" >on</text><rect class="dip" x="258" y="846" width="14" height="22" rx="2"/><rect class="dipk" x="260" y="857" width="10" height="9" rx="1"/><text x="276" y="856" class="cap" text-anchor="start" >BOOT</text><text x="276" y="867" class="cap" text-anchor="start" >off</text></g>
+<g class="part" data-p="psu"><rect class="alu" x="360" y="1008" width="36" height="26" rx="4"/><path class="sym" d="M368,1008 v-10 M388,1008 v-10"/></g>
+      <text x="540" y="725" class="cap" text-anchor="start" >OTG adapter + USB-A→C cable</text>
+<text x="540" y="1001" class="cap" text-anchor="start" >micro-USB plug</text>
+<text x="796" y="738" class="silk lab" text-anchor="start" >USB</text>
+<text x="796" y="778" class="silk lab" text-anchor="start" >PWR IN</text>
+<text x="878" y="234" class="plab" text-anchor="end" >3V3</text>
+<text x="962" y="234" class="plab on" text-anchor="start" data-p="amp">5V</text>
+<text x="878" y="274" class="plab" text-anchor="end" >GPIO 2 · SDA</text>
+<text x="962" y="274" class="plab on" text-anchor="start" data-p="modem">5V</text>
+<text x="878" y="314" class="plab" text-anchor="end" >GPIO 3 · SCL</text>
+<text x="962" y="314" class="plab on" text-anchor="start" data-p="modem">GND</text>
+<text x="878" y="354" class="plab" text-anchor="end" >GPIO 4</text>
+<text x="962" y="354" class="plab on" text-anchor="start" data-p="debug">GPIO 14 · TXD</text>
+<text x="878" y="394" class="plab on" text-anchor="end" data-p="mic">GND</text>
+<text x="962" y="394" class="plab on" text-anchor="start" data-p="debug">GPIO 15 · RXD</text>
+<text x="878" y="434" class="plab on" text-anchor="end" data-p="record">GPIO 17</text>
+<text x="962" y="434" class="plab on" text-anchor="start" data-p="amp">GPIO 18 · BCLK</text>
+<text x="878" y="474" class="plab on" text-anchor="end" data-p="record">GPIO 27</text>
+<text x="962" y="474" class="plab on" text-anchor="start" data-p="debug">GND</text>
+<text x="878" y="514" class="plab on" text-anchor="end" data-p="record">GPIO 22</text>
+<text x="962" y="514" class="plab on" text-anchor="start" data-p="play">GPIO 23</text>
+<text x="878" y="554" class="plab" text-anchor="end" >3V3</text>
+<text x="962" y="554" class="plab on" text-anchor="start" data-p="play">GPIO 24</text>
+<text x="878" y="594" class="plab" text-anchor="end" >GPIO 10</text>
+<text x="962" y="594" class="plab on" text-anchor="start" data-p="play">GND</text>
+<text x="878" y="634" class="plab" text-anchor="end" >GPIO 9</text>
+<text x="962" y="634" class="plab on" text-anchor="start" data-p="play">GPIO 25</text>
+<text x="878" y="674" class="plab" text-anchor="end" >GPIO 11</text>
+<text x="962" y="674" class="plab" text-anchor="start" >GPIO 8</text>
+<text x="878" y="714" class="plab" text-anchor="end" >GND</text>
+<text x="962" y="714" class="plab" text-anchor="start" >GPIO 7</text>
+<text x="878" y="754" class="plab" text-anchor="end" >ID_SD</text>
+<text x="962" y="754" class="plab" text-anchor="start" >ID_SC</text>
+<text x="878" y="794" class="plab on" text-anchor="end" data-p="record">GPIO 5</text>
+<text x="962" y="794" class="plab on" text-anchor="start" data-p="record">GND</text>
+<text x="878" y="834" class="plab on" text-anchor="end" data-p="play">GPIO 6</text>
+<text x="962" y="834" class="plab" text-anchor="start" >GPIO 12</text>
+<text x="878" y="874" class="plab" text-anchor="end" >GPIO 13</text>
+<text x="962" y="874" class="plab" text-anchor="start" >GND</text>
+<text x="878" y="914" class="plab on" text-anchor="end" data-p="amp">GPIO 19 · LRCLK</text>
+<text x="962" y="914" class="plab on" text-anchor="start" data-p="amp">GPIO 16</text>
+<text x="878" y="954" class="plab on" text-anchor="end" data-p="modem">GPIO 26</text>
+<text x="962" y="954" class="plab on" text-anchor="start" data-p="mic">GPIO 20 · DIN</text>
+<text x="878" y="994" class="plab on" text-anchor="end" data-p="amp">GND</text>
+<text x="962" y="994" class="plab on" text-anchor="start" data-p="amp">GPIO 21 · DOUT</text>
+    </svg>
+    <figcaption>Pin numbers are physical header pins. Pin 1 (square pad) is at the SD-card end; odd pins are the inner row. The header is drawn wider than it is so every wire can leave its own pin, and wires that belong to the other side cross between two rows of pins. Dashed wires are bench-only. The USB ports' positions are approximate.</figcaption>
+  </figure>
+
+  <ul class="legend" aria-label="Wire colours">
+    <li><span class="sw" style="background:var(--c-v5)"></span>5 V</li><li><span class="sw" style="background:var(--c-gnd)"></span>GND (black wire)</li><li><span class="sw" style="background:var(--c-red)"></span>GPIO 17 · red ring + mic power</li><li><span class="sw" style="background:var(--c-green)"></span>green ring</li><li><span class="sw" style="background:var(--c-blue)"></span>blue ring</li><li><span class="sw" style="background:var(--c-sw)"></span>button switch NO</li><li><span class="sw" style="background:var(--c-bclk)"></span>I²S BCLK</li><li><span class="sw" style="background:var(--c-lrc)"></span>I²S LRCLK</li><li><span class="sw" style="background:var(--c-din)"></span>I²S data to amp</li><li><span class="sw" style="background:var(--c-micsd)"></span>I²S data from mic</li><li><span class="sw" style="background:var(--c-ampsd)"></span>amp SD (driver)</li><li><span class="sw" style="background:var(--c-key)"></span>modem PWRKEY</li><li><span class="sw" style="background:var(--c-dbgo)"></span>probe TX (orange)</li><li><span class="sw" style="background:var(--c-dbgy)"></span>probe RX (yellow)</li><li><span class="sw" style="background:var(--c-usb)"></span>USB data cable</li>
+    <li><span class="sw dash"></span>bench only, removed in the field</li>
+  </ul>
+
+  <div class="rules">
+    <div class="rule"><h3>No red light, no mic</h3><p>Pin 11 (GPIO 17) goes to the record button's R tab first. A second wire from that same tab powers the mic's VDD. A broken wire can only leave the mic unpowered, never powered with the red light dark.</p></div>
+    <div class="rule"><h3>One audio interface, two parts</h3><p>BCLK (pin 12) and LRCLK (pin 35) go to the amp. Short wires chain them from the amp's pads to the mic's SCK and WS. The mic's data comes back on its own pin, 38.</p></div>
+    <div class="rule"><h3>Chains are soldered</h3><p>Both wires into the same tab or pad, heat-shrink over it. No two Dupont housings on one pin, anywhere. On each button C− (the LED's cathode) is linked to one gold switch tab; the mic's L/R is joined to its GND. All at the part.</p></div>
+  </div>
+
+  <h2>Each part</h2>
+  <div class="cards">
+    <section class="card" data-p="record"><header><h3>Record button</h3><button type="button" class="show" data-f="record">Show on map</button></header><p class="lede">16 mm, RGB ring, common cathode, resistors built in.</p><div class="tw"><table><thead><tr><th>Terminal</th><th>Goes to</th><th>Note</th></tr></thead><tbody><tr><th>gold</th><td class="mono">29 · GPIO 5</td><td>switch; either gold tab. Input, internal pull-up; pressed = low</td></tr><tr><th>other gold</th><td class="mono">30 · GND</td><td>one ground wire, linked to C− at the button</td></tr><tr><th>R</th><td class="mono">11 · GPIO 17</td><td><b>first</b> stop of GPIO 17; a second wire from this tab goes to the mic's VDD</td></tr><tr><th>G</th><td class="mono">13 · GPIO 27</td><td></td></tr><tr><th>B</th><td class="mono">15 · GPIO 22</td><td></td></tr><tr><th>C−</th><td class="mono">other gold</td><td>LED common cathode, not the switch</td></tr></tbody></table></div></section>
+<section class="card" data-p="mic"><header><h3>Microphone</h3><button type="button" class="show" data-f="mic">Show on map</button></header><p class="lede">DFRobot I²S MEMS (MSM261S4030H0). Labels vary: SCK/BCLK, WS/LRCL, SD/DATA, L/R/SEL.</p><div class="tw"><table><thead><tr><th>Terminal</th><th>Goes to</th><th>Note</th></tr></thead><tbody><tr><th>VDD</th><td class="mono">record R tab</td><td>GPIO 17 through the red LED's tab. Never the 3.3 V pin, never straight to pin 11</td></tr><tr><th>GND</th><td class="mono">9</td><td></td></tr><tr><th>SCK</th><td class="mono">amp BCLK</td><td>chained, not to the header</td></tr><tr><th>WS</th><td class="mono">amp LRC</td><td>chained, not to the header</td></tr><tr><th>SD</th><td class="mono">38 · GPIO 20</td><td>data out of the mic</td></tr><tr><th>L/R</th><td class="mono">GND</td><td>jumper at the mic; left channel</td></tr></tbody></table></div></section>
+<section class="card" data-p="play"><header><h3>Play button</h3><button type="button" class="show" data-f="play">Show on map</button></header><p class="lede">Same part as the record button.</p><div class="tw"><table><thead><tr><th>Terminal</th><th>Goes to</th><th>Note</th></tr></thead><tbody><tr><th>gold</th><td class="mono">31 · GPIO 6</td><td>switch; either gold tab. Pull-up; pressed = low</td></tr><tr><th>other gold</th><td class="mono">20 · GND</td><td>linked to C− at the button</td></tr><tr><th>R</th><td class="mono">16 · GPIO 23</td><td></td></tr><tr><th>G</th><td class="mono">18 · GPIO 24</td><td></td></tr><tr><th>B</th><td class="mono">22 · GPIO 25</td><td></td></tr><tr><th>C−</th><td class="mono">other gold</td><td>LED common cathode, not the switch</td></tr></tbody></table></div></section>
+<section class="card" data-p="amp"><header><h3>Amplifier and speaker</h3><button type="button" class="show" data-f="amp">Show on map</button></header><p class="lede">Adafruit MAX98357A; Seeed 4 Ω speaker on the screw terminal.</p><div class="tw"><table><thead><tr><th>Terminal</th><th>Goes to</th><th>Note</th></tr></thead><tbody><tr><th>Vin</th><td class="mono">2 · 5 V</td><td></td></tr><tr><th>GND</th><td class="mono">39</td><td></td></tr><tr><th>BCLK</th><td class="mono">12 · GPIO 18</td><td>and on to the mic's SCK</td></tr><tr><th>LRC</th><td class="mono">35 · GPIO 19</td><td>and on to the mic's WS</td></tr><tr><th>DIN</th><td class="mono">40 · GPIO 21</td><td>data into the amp</td></tr><tr><th>SD</th><td class="mono">36 · GPIO 16</td><td>the sound driver raises it while audio plays; firmware never touches it</td></tr><tr><th>GAIN</th><td class="mono">—</td><td>unconnected: 9 dB</td></tr><tr><th>+ / −</th><td class="mono">speaker</td><td>screw terminal</td></tr></tbody></table></div></section>
+<section class="card" data-p="modem"><header><h3>Modem HAT</h3><button type="button" class="show" data-f="modem">Show on map</button></header><p class="lede">Waveshare SIM7670G; the Zero sits on it on standoffs (ADR 0023).</p><div class="tw"><table><thead><tr><th>Terminal</th><th>Goes to</th><th>Note</th></tr></thead><tbody><tr><th>USB-C</th><td class="mono">Zero inner micro-USB</td><td>OTG adapter + USB-A→C cable; shows up as a network interface</td></tr><tr><th>pin 2 · 5 V</th><td class="mono">Zero pin 4</td><td>stiffer supply for transmit bursts</td></tr><tr><th>pin 6 · GND</th><td class="mono">Zero pin 6</td><td></td></tr><tr><th>pin 7 · P4</th><td class="mono">Zero pin 37 · GPIO 26</td><td>high turns on a transistor that pulls PWRKEY low</td></tr><tr><th>DIP</th><td class="mono"></td><td>1 TXD off · 2 RXD off · 3 PWR on · 4 BOOT off</td></tr><tr><th>LTE</th><td class="mono">antenna</td><td>IPEX1 pigtail → SMA through the wall. Never transmit without it</td></tr><tr><th>SIM</th><td class="mono"></td><td>insert before power; no hot-swap</td></tr></tbody></table></div></section>
+<section class="card" data-p="psu"><header><h3>Power</h3><button type="button" class="show" data-f="psu">Show on map</button></header><p class="lede">Mains only for the first box; pulling the plug is how it turns off (ADR 0019).</p><div class="tw"><table><thead><tr><th>Terminal</th><th>Goes to</th><th>Note</th></tr></thead><tbody><tr><th>5 V 2.5 A</th><td class="mono">Zero outer micro-USB</td><td>“PWR IN”</td></tr><tr><th>5 V rail</th><td class="mono">pins 2 and 4</td><td>feeds the amp and the modem HAT</td></tr><tr><th>later</th><td class="mono">pins 3 and 5</td><td>the UPS module's INA219 on I²C</td></tr></tbody></table></div></section>
+<section class="card" data-p="debug"><header><h3>Debug probe</h3><button type="button" class="show" data-f="debug">Show on map</button></header><p class="lede">Bench only. Receive meets transmit. 115 200 baud, full UART, kernel console.</p><div class="tw"><table><thead><tr><th>Terminal</th><th>Goes to</th><th>Note</th></tr></thead><tbody><tr><th>orange · TX</th><td class="mono">10 · RXD</td><td></td></tr><tr><th>yellow · RX</th><td class="mono">8 · TXD</td><td></td></tr><tr><th>black · GND</th><td class="mono">14</td><td></td></tr></tbody></table></div></section>
+  </div>
+
+  <p class="foot">Limits: at most about 16 mA per GPIO and 50 mA for all of them together; 3.3 V logic on every GPIO; GPIO 16 belongs to the sound driver; pins 27 and 28 stay free for HAT EEPROMs. Spare for later: GPIO 4, 7, 8, 9, 10, 11, both 3.3 V pins, ground on pin 25, and pins 3 and 5 for the battery gauge.</p>
+</div>
+
+<script>
+(function(){
+  var map=document.getElementById('map');
+  var btns=document.querySelectorAll('.toolbar .f');
+  function focus(k){
+    if(k==='all'){delete map.dataset.focus}else{map.dataset.focus=k}
+    btns.forEach(function(b){b.classList.toggle('on',b.dataset.f===k)});
+    try{localStorage.setItem('dadbox-wiring-focus',k)}catch(e){}
+  }
+  btns.forEach(function(b){b.addEventListener('click',function(){focus(b.dataset.f)})});
+  document.querySelectorAll('.card .show').forEach(function(b){
+    b.addEventListener('click',function(){focus(b.dataset.f);map.scrollIntoView({behavior:'smooth',block:'center'})});
+  });
+  try{var k=localStorage.getItem('dadbox-wiring-focus');if(k&&document.getElementById('f-'+k))focus(k)}catch(e){}
+})();
+</script>

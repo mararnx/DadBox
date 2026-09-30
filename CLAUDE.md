@@ -52,9 +52,11 @@ before making assumptions about the design.
 
 ## Design rules that are not negotiable
 
-- **The buttons' lights have no error state.** They speak only to the child:
-  waiting, recording, playing, got-it. Link, battery and faults live on two
-  small status LEDs — the adults' channel — and in the app. A child never
+- **The buttons' lights are the box's only lights, and they have one "not
+  ready" state** ([ADR 0024](docs/decisions/0024-no-status-leds-record-says-ready.md)).
+  They say waiting, recording, playing, got-it and, on Record, ready (steady
+  dim blue) or not ready (slow blue blink). There are no status LEDs. Why the box is not
+  ready (link, server, fault) is the app's to explain. A child never
   interprets a fault.
 - **Nothing a child recorded is ever lost.** The got-it pulse comes only after
   fsync; the outbox is never evicted; deletion only on the server's 2xx to

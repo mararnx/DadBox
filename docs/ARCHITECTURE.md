@@ -69,75 +69,62 @@ rather than guessing.
 
 ## Indication
 
-Two vocabularies, deliberately separate ([ADR 0009](decisions/0009-two-led-vocabularies.md),
-[ADR 0016](decisions/0016-two-buttons-no-lid.md)):
+One channel: the two buttons' lights. There are no status LEDs
+([ADR 0024](decisions/0024-no-status-leds-record-says-ready.md), revising
+[ADR 0009](decisions/0009-two-led-vocabularies.md) and
+[ADR 0020](decisions/0020-no-mute-replay-green-link.md)).
 
-- **The two buttons' lights** are the child's. They say three things —
-  *something is waiting*, *I'm listening*, *I'm playing* — plus one pulse for
-  *got it*. They never show link, battery or faults. The count of waiting
-  messages is not shown on the box; the app has it.
-- **Two small green status LEDs** — POWER and LINK, in that order, low on
-  the box beside the charge port — are the adults'. Steady means fine,
-  blinking means trouble ([ADR 0020](decisions/0020-no-mute-replay-green-link.md)).
-  Anyone in either house can glance at them; the child never needs to.
+- **Play** says *something is waiting* and *I'm playing*.
+- **Record** says *I'm listening* (full red), *got it* (a green pulse), and,
+  the rest of the time, *ready* (steady dim blue) or *not ready* (slow blue
+  blink).
+- **Dark all over** means unplugged: pulling the plug is how the box turns off.
+- The count of waiting messages, the battery, and *why* the box is not ready
+  are the app's.
 
 ### Button lights — priority order, highest wins
 
 | # | State | Record button | Play button | Notes |
 | --- | --- | --- | --- | --- |
-| 1 | Recording | **Steady red.** Never animated, never dimmed. | dark | The mic-is-on signal for everyone in the room. The red LED and the mic's 3.3 V supply are the same GPIO pin: no red light, no mic — so the pin is on or off, not PWM. |
-| 2 | Playing | dark | **Steady green** | The mic cannot be used now, so Record shows nothing. Then falls through to 4 or 5 |
+| 1 | Recording | **Steady red.** Never animated, never dimmed. | dark | The mic-is-on signal for everyone in the room. The red LED and the mic's 3.3 V supply are the same GPIO pin: no red light, no mic — so the pin is on or off, not PWM, and nothing else on Record is red. |
+| 2 | Playing | dark | **Steady green** | A Record press is ignored during playback, so Record shows nothing. Then falls through to 4 or 5 |
 | 3 | Got it | One green pulse, ~600 ms | — | Only after the message is fsynced to the outbox. Identical online or offline — the pulse means *safe*, not *delivered*. |
-| 4 | Waiting (inbox > 0) | dark | **Pulsing green** | After 2 h without interaction → *resting*: dim. Quiet hours: capped. |
-| 5 | Idle | dark | dark | Play still works (it repeats the last message) but shows nothing for it. |
+| 4 | Waiting (inbox > 0) | ready / not ready | **Pulsing green** | After 2 h without interaction → *resting*: dim. Quiet hours: capped. |
+| 5 | Idle | ready / not ready | dark | Play still works (it repeats the last message) but shows nothing for it. |
 
-Colours revised 2026-09-22/23 ([ADR 0020](decisions/0020-no-mute-replay-green-link.md)):
-Play is green (pulsing = new, steady = playing); Record is red while
-recording and dark otherwise.
+**Ready / not ready**, on Record whenever it is not recording:
 
-The child's lights have no error state, ever. Nothing on them needs
-interpreting beyond the four words above.
+| Record | Meaning |
+| --- | --- |
+| steady dim blue | Ready: the server answered within 2 × the current poll interval, and nothing is faulty |
+| dim blue blink, 1 s on / 2 s off | Not ready: no network, no server, or a fault (storage, capture, modem). Recording still works; the message waits on disk |
+| dark | Playing, travel lock on — or unplugged |
+
+Steady vs blinking carries the meaning; colour is redundant. Quiet hours cap
+it like every other glow.
 
 ### Buttons and the bag
 
 Buttons on the outside of a box in a school bag can be pressed by the bag
 ([ADR 0016](decisions/0016-two-buttons-no-lid.md)). A press must last ≥ 0.5 s
 to count; a recording with under 1 s of speech is discarded. **Travel lock:**
-hold both buttons for 3 s — both blink twice and the buttons are dead until the
+hold both buttons for 3 s — Play blinks white twice and the buttons are dead until the
 same gesture again; it persists across a reboot. Device-enforced quiet hours
 still apply to the chime.
-
-### Status LEDs — the adults' channel
-
-| LED | Pattern | Meaning |
-| --- | --- | --- |
-| LINK | steady green | Connected and the server answered: checked in within 2 × the current poll interval |
-| LINK | off | Not yet checked in since boot — and never seen after the first minute unless something is wrong |
-| LINK | 1 short blink / 3 s | No connection; nothing queued |
-| LINK | 2 short blinks / 3 s | No connection **and messages waiting to go** — safe on disk |
-| POWER | steady | External power present on the USB port — with or without a battery, charging or full |
-| POWER | off | Unplugged: on battery above 20 % |
-| POWER | 1 blink / 3 s | Below 20 %, on battery |
-| POWER | off, box shut down | Below 5 %: the box shuts down cleanly and the buttons do nothing; the app has the last battery reading |
-| both | alternating | **Fault** — an adult must act: outbox ≥ 80 %, storage error, modem unresponsive, capture failed |
-
-Patterns carry the meaning; colour is redundant, for anyone colour-blind in
-either house. Blinks are ~50 ms at low brightness; the steady LEDs are dim
-enough for a bedroom (to judge with the parts in hand).
 
 ### Validation notes
 
 - *Recording* outranks everything because it is the safety signal. It is the
-  only red the child's lights ever show and it is never animated, so a
-  bystander can tell "mic on" from "message waiting" without knowing the
-  vocabulary. A lit button is a small sign; the wiring keeps it honest.
+  only red Record ever shows and it is never animated, so a bystander can
+  tell "mic on" from "ready" without knowing the vocabulary. A lit button is
+  a small sign; the wiring keeps it honest.
 - *Got it* is identical online and offline on purpose. The child is promised
-  *safe*; delivery is the adults' business (LINK, and the app).
+  *safe*; delivery is the adults' business (the blue blink, and the app).
 - *Waiting* is one button LED driven from a GPIO pin — cheap, but a message
   can wait all weekend in a dark bedroom. Hence *resting* after 2 h: the glow
   survives, dimmer.
-- Link is not the child's concern. Both households can still tell a quiet box
-  from a dead one: that is what LINK is for.
+- The blue blink says only "not ready". The child is not asked to act on it; the app
+  says why. A box that is dark is unplugged.
 
 ## Nothing is lost
 
@@ -177,7 +164,6 @@ A Pi cannot sleep, so the budget is about what stays on:
 | SIM7670G Cat-1 modem HAT | Its power key from a GPIO (wiring to verify; a high-side switch on its 5 V feed if the measured standby says so). On battery: on for check-ins, uploads and the 90-min conversation window only. On mains: stays on ([ADR 0015](decisions/0015-adaptive-polling.md)) | ~150 mA on; ~3–10 mA averaged on battery |
 | Mic (~1 mA at 3.3 V) | the Record button's red-LED pin — one GPIO for both | 0 unless recording |
 | Button LEDs (2 × RGB, 3.3 V from GPIO, software PWM) | GPIO; dark when idle | 0 when idle; breathing and *resting* — to measure |
-| Status LEDs | ~10 ms blinks | negligible |
 | Amp | MAX98357A SD pin | µA |
 | UPS module's converter losses | — | ~10 % on top |
 

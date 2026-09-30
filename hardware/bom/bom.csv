@@ -6,7 +6,6 @@ phase,qty,ref,part,description,why,price_chf,source,url,status,notes
 1,1,U5,MAX98357 I2S amp module (spare),Same chip as U4,Spare,7.90,bastelgarage,,ordered 2026-09-21,Listed by the shop as MAX98367
 1,1,LS1,Seeed 5W 4ohm speaker in plastic enclosure,50x45x22mm,Enclosed back volume,7.90,bastelgarage,https://www.bastelgarage.ch/5w-4ohm-lautsprecher-in-kunststoffgehause,ordered 2026-09-21,Alt: bare 40mm 17mm-tall speaker 8.90
 1,2,SW2,16mm stainless momentary button raised head with RGB ring,IP65 5V (works at 3.3V) common cathode resistors built in; NO contact; flange 21.8mm; 23.1mm long; head 2.3mm proud,Record and Play - the whole child-facing UI (ADR 0016),19.90,bastelgarage,https://www.bastelgarage.ch/16mm-drucktaster-erhoht-mit-rgb-beleuchtung-5v-edelstahl,ordered 2026-09-21,16mm hole; ~20mm behind the panel so wall or top plate. LEDs from GPIO at 3.3V. Record button's red LED shares the mic's supply pin
-1,2,DS2-3,3mm green LED + 220R,POWER and LINK status LEDs (both green; POWER left),Adults' channel - ADR 0009; steady = fine - ADR 0020,2.00,any,,not ordered,Dim parts / large resistor: they are on all the time
 1,1,J1,5V 2.5A micro-USB supply,Powers the Pi until the UPS module (phase 3),Bench supply,0,in hand,,have,User's own. vcgencmd get_throttled tells if it sags - then the official Pi 12.5W PSU (pi-shop.ch 11.90)
 1,1,DBG,Raspberry Pi Debug Probe,UART on GPIO14/15,Bench console - tools/serial_capture.py,12.70,galaxus,,ordered 2026-09-21,
 1,1,W1,Jumper wires,Module-to-header wiring,Bench wiring - no perfboard,,,,ordered 2026-09-21,Something sturdier before the box travels in a bag (open)
@@ -21,6 +20,6 @@ phase,qty,ref,part,description,why,price_chf,source,url,status,notes
 3,1,J2,12.6V 2A 3S Li-ion charger,Same barrel plug as the one included with the UPS module,House B,~12,any,,deferred - ADR 0019,Match the plug with the first one in hand
 3,1,P1,Panel-mount DC barrel jack,Round hole; match the UPS module's charger plug,Charging port through the wall,~4,any,,deferred - ADR 0019,Buy with the UPS module in hand
 4,1,ENC,1590DD-size die-cast aluminium enclosure (Temu clone),188x119x37.5mm outside,The box - ADR 0011,12.94,temu,,ordered 2026-09-21,Not the Hammond - measure the inside before layout or drilling
-4,1,T2,M35 cobalt step drill 5-23mm,Tool,Every hole in the box: buttons (16) charge port SMA (6.5) status LEDs (3) speaker grille,8.48,temu,,ordered 2026-09-21,
+4,1,T2,M35 cobalt step drill 5-23mm,Tool,Every hole in the box: buttons (16) charge port SMA (6.5) speaker grille,8.48,temu,,ordered 2026-09-21,
 4,1,SD2,SanDisk High Endurance 32GB microSD,The deployed card - the bench card becomes the spare image,The SD card is the whole machine,22.95,brack,https://www.brack.ch/sandisk-microsdhc-karte-high-endurance-uhs-i-32-gb-935760,not ordered,Before the box leaves home
 4,1,HW,Rubber feet,Self-adhesive,So the box does not slide when a wall button is pressed,~5,hornbach,https://www.hornbach.ch/de/p/tarrox-rutsch-laermschutzpuffer-selbstklebend-transparent-o-10-x-3-mm-32-stueck/10565335/,not ordered,

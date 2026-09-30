@@ -1,7 +1,7 @@
 # ADR 0016 — Two lit buttons; no lid, no ring
 
 **Date:** 2026-09-21
-**Status:** accepted (user decision) — light colours revised by [ADR 0020](0020-no-mute-replay-green-link.md) (Play green); supersedes [ADR 0007](0007-lid-gesture.md);
+**Status:** accepted (user decision) — light colours revised by [ADR 0020](0020-no-mute-replay-green-link.md) (Play green); the status LEDs go, Record shows ready in blue and the lock blink moves to Play in [ADR 0024](0024-no-status-leds-record-says-ready.md); supersedes [ADR 0007](0007-lid-gesture.md);
 revises [ADR 0009](0009-two-led-vocabularies.md) (the child's channel is the
 two button lights, not a ring) and [ADR 0011](0011-aluminium-1590dd-enclosure.md)
 (the plate is screwed down, not hinged)
@@ -72,7 +72,7 @@ What this gives up, stated plainly, because ADR 0007 existed for these:
      in a bag. Decide with the box in hand.
   2. A press must last ≥ 0.5 s to count.
   3. A recording with under 1 s of speech is discarded (already the rule).
-  4. **Travel lock:** hold both buttons for 3 s → both blink twice and the
+  4. **Travel lock:** hold both buttons for 3 s → both blink twice (Play blinks white twice since ADR 0024) and the
      buttons are dead until the same gesture again. Survives reboot.
   5. Mute and quiet hours from the app still apply to playback.
 - **"Obvious to the room" is weaker.** An open lid is unmistakable; a red ring

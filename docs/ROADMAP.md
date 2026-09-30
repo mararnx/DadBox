@@ -49,7 +49,7 @@ means the day the parts arrive, only the box software is unknown.
 | Notecard is the wrong shape | A bare LTE modem and our own server | [0006](decisions/0006-bare-modem-not-notecard.md) |
 | Travels ≠ operates unplugged | A weekend unplugged, everything gated | [0005](decisions/0005-battery-required.md) |
 | Two parents | In the protocol now, in the build later | [0008](decisions/0008-two-parents-later.md) |
-| No-connection state; child's display overloaded | Button lights = child's; LINK + POWER LEDs = adults' | [0009](decisions/0009-two-led-vocabularies.md) |
+| No-connection state; child's display overloaded | Button lights only; Record steady blue = ready, blue blink = not ready | [0009](decisions/0009-two-led-vocabularies.md), [0024](decisions/0024-no-status-leds-record-says-ready.md) |
 | Eviction could lose a recording | Outbox never evicted; pulse only after fsync | [0010](decisions/0010-nothing-is-lost.md) |
 | Enclosure | 1590DD-size die-cast aluminium; plate screwed down; antenna outside; round holes only | [0011](decisions/0011-aluminium-1590dd-enclosure.md) |
 | Four boards → one | LILYGO T-SIM7080G-S3 → superseded by 0014 | [0012](decisions/0012-lilygo-t-sim7080g-s3.md) |

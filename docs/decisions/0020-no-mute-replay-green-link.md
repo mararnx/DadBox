@@ -1,7 +1,9 @@
 # ADR 0020 — No mute; replay; the lights revised: green Play, two green status LEDs
 
 **Date:** 2026-09-22
-**Status:** accepted (user decisions, taken while driving the simulator) —
+**Status:** accepted (user decisions, taken while driving the simulator);
+§3–5 and §7 revised by [ADR 0024](0024-no-status-leds-record-says-ready.md)
+(no status LEDs; Record steady blue when ready, blinking blue when not; the lock blink is white on Play) —
 revises [ADR 0009](0009-two-led-vocabularies.md) ("off means fine" becomes
 "steady means fine" for both status LEDs) and the mute of BRIEF principle 7;
 closes controls-ui Q7/Q8, audio-playback Q3, storage-queue Q1
@@ -38,7 +40,8 @@ things looked wrong in use.
    "ready" pulse was tried on 2026-09-22 and withdrawn the next day: idle is
    dark. (Any cue on Record must avoid red, because the red channel is the
    microphone's supply pin and is only ever fully on or off, ADR 0016 — hence
-   the green got-it pulse and the cyan lock blink.)
+   the green got-it pulse and the cyan lock blink.) ADR 0024 puts ready /
+   not ready on Record in blue and moves the lock blink to Play, in white.
 8. **Play shows nothing for a replay.** With nothing new the button is dark;
    pressing it still repeats the last message.
 

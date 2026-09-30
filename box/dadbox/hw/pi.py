@@ -24,7 +24,6 @@ PIN_MIC_AND_RECORD_RED = 17      # one pin: the mic's VDD and the record button'
 PIN_RECORD_GREEN, PIN_RECORD_BLUE = 27, 22
 PIN_PLAY_RED, PIN_PLAY_GREEN, PIN_PLAY_BLUE = 23, 24, 25
 PIN_RECORD_SWITCH, PIN_PLAY_SWITCH = 5, 6
-PIN_LINK_LED, PIN_POWER_LED = 12, 13
 PIN_AMP_SD = 16                  # MAX98357A SD_MODE — owned by the kernel's voicehat driver, see PiAmpGate
 PIN_MODEM_PWRKEY = 26            # wire to the HAT's header pin 7 (P4 = PWR), DIP 3 on; high = key pressed
 MODEM_AT_PORT = os.environ.get("DADBOX_MODEM_AT", "/dev/ttyACM0")   # the HAT enumerates as 05c6:9330, AT on ACM0
@@ -69,15 +68,6 @@ class PiButtonLights:
         _, g, b = frame.record
         self.rg.value, self.rb.value = g, b
         self.pr.value, self.pg.value, self.pb.value = frame.play
-
-
-class PiStatusLeds:
-    def __init__(self):
-        from gpiozero import LED
-        self.link, self.power = LED(PIN_LINK_LED), LED(PIN_POWER_LED)
-
-    def write(self, link_on: bool, power_on: bool) -> None:
-        self.link.value, self.power.value = link_on, power_on
 
 
 class PiAmpGate:
@@ -268,5 +258,5 @@ class PiAudio:
 
 
 def make_hardware() -> Hardware:
-    return Hardware(buttons=PiButtons(), lights=PiButtonLights(), status=PiStatusLeds(), mic=PiMicGate(),
+    return Hardware(buttons=PiButtons(), lights=PiButtonLights(), mic=PiMicGate(),
                     amp=PiAmpGate(), modem=PiModem(), power=PiPower(), audio=PiAudio())

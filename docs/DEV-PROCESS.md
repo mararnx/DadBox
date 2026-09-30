@@ -62,7 +62,7 @@ dadboxctl checkin        force one now, print the response
 dadboxctl modem on|off   the HAT's power key (wiring to verify with the part in hand)
 dadboxctl led test       sweep every button-light state for 2 s each — you watch once
 dadboxctl lock on|off    travel lock — same as holding both buttons for 3 s
-dadboxctl sim link down  no link: queue must fill, LINK LED must double-blink
+dadboxctl sim link down  no link: queue must fill, Record must blink blue
 ```
 
 Build it in M0, before the audio: it is how the audio gets debugged.
