@@ -37,6 +37,17 @@ import Testing
         #expect(s.settings.mute.b && s.settingsMeta["mute.b"]?.by == .parentB)
     }
 
+    @Test func decodesTelemetryWithoutASignalReading() throws {
+        let json = """
+        { "battery_pct": null, "charging": null, "mains": true, "rssi": null, "fw": "0.3.0",
+          "outbox": 0, "outbox_bytes": 0, "outbox_oldest_s": 0, "storage_pct": 1, "inbox": 0,
+          "uptime_s": 60, "offline_s": 0, "next_checkin_s": 60, "recording": false, "locked": false,
+          "house": "unknown", "fault": null }
+        """
+        let t = try WireJSON.decoder().decode(Telemetry.self, from: Data(json.utf8))
+        #expect(t.rssi == nil && t.mains)
+    }
+
     @Test func aPatchCarriesOnlyWhatChanged() throws {
         var p = SettingsPatch()
         p.mute = ["a": true]

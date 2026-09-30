@@ -77,7 +77,7 @@ public struct Telemetry: Codable, Equatable, Sendable {
     public var batteryPct: Int?      // null while no battery is fitted (ADR 0019)
     public var charging: Bool?
     public var mains: Bool
-    public var rssi: Int
+    public var rssi: Int?            // null when the modem does not answer
     public var fw: String
     public var outbox: Int
     public var outboxBytes: Int
@@ -99,7 +99,7 @@ public struct Telemetry: Codable, Equatable, Sendable {
         case nextCheckinS = "next_checkin_s"
     }
 
-    public init(batteryPct: Int?, charging: Bool?, mains: Bool, rssi: Int, fw: String, outbox: Int, outboxBytes: Int,
+    public init(batteryPct: Int?, charging: Bool?, mains: Bool, rssi: Int?, fw: String, outbox: Int, outboxBytes: Int,
                 outboxOldestS: Int, storagePct: Int, inbox: Int, uptimeS: Int, offlineS: Int, nextCheckinS: Int,
                 recording: Bool, locked: Bool, house: String, fault: Fault?) {
         self.batteryPct = batteryPct; self.charging = charging; self.mains = mains; self.rssi = rssi; self.fw = fw

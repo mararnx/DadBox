@@ -19,37 +19,37 @@ ring light; the plate is screwed down.
   | --- | --- | --- |
   | Recording | **steady red** | dark |
   | Got it — the message is fsynced | one green pulse | — |
-  | Message(s) waiting | dark | **pulsing green**; *resting* (dim) after 2 h |
+  | Message(s) waiting | ready / not ready | **pulsing green**; *resting* (dim) after 2 h |
   | Playing | dark | **steady green** |
-  | Idle | dark | dark — Play repeats the last message, unannounced |
-  | Travel lock | dark | dark (green pulse persists if a message waits) |
+  | Idle | ready / not ready | dark — Play repeats the last message, unannounced |
+  | Travel lock | dark | two white blinks when it engages or releases; then dark (green pulse persists if a message waits) |
 
-  (Colours as revised by ADR 0020.)
+  **Ready** = steady dim blue: the server answered recently and nothing is
+  faulty. **Not ready** = slow blue blink (1 s on, 2 s off): no network, no
+  server, or a fault
+  ([ADR 0024](../decisions/0024-no-status-leds-record-says-ready.md)).
+  Unplugged = everything dark. (Colours as revised by ADR 0020 and ADR 0024.)
 
-  **No error state, ever.** No link, battery or fault appears on them, and
-  the number of waiting messages is not shown on the box — the app has it.
+  **One "not ready" state, nothing more.** Why the box is not ready, the
+  battery and the number of waiting messages are the app's.
   Priority order is in [ARCHITECTURE.md § Indication](../ARCHITECTURE.md#indication).
 - **No red light, no mic.** The record button's red LED and the mic's 3.3 V
   supply are the **same GPIO pin** — a wiring fact, not firmware. That pin is
   only ever on or off: the red light is never dimmed or animated, because
-  dimming it would chop the mic's supply.
-- **The adults' channel** is two small green status LEDs, POWER and LINK
-  ([ADR 0009](../decisions/0009-two-led-vocabularies.md), ADR 0020):
-  steady = fine, blink patterns for trouble, alternating = fault — plus the
-  app. LINK is steady while the box has checked in within 2 × the current
-  interval ([ADR 0015](../decisions/0015-adaptive-polling.md)); POWER is
-  steady while external power is present.
+  dimming it would chop the mic's supply. Hence ready / not ready in blue.
+- **There are no status LEDs** (ADR 0024). A dark box is unplugged; "not
+  ready" is Record's blue blink; the details are in the app.
 - **The bag.** Buttons on the outside of a box in a school bag: a press must
   last ≥ 0.5 s to count; under 1 s of speech is discarded; **travel lock** —
-  hold both buttons 3 s, both blink twice, buttons dead until the same
+  hold both buttons 3 s, Play blinks white twice, buttons dead until the same
   gesture again, persists across reboot; quiet hours still apply to the chime.
 - **Quiet hours** (default 20:00–07:00, enforced on the device): glow yes,
   chime no, play still works. There is no mute (ADR 0020). No sender identity
   on the box — the voice says who it is in the first second.
 - **Electrically:** six LED pins (2 × RGB, common cathode, resistors built
   in) driven at 3.3 V straight from GPIO with software PWM, two switch
-  inputs on the Pi's internal pull-ups, two status LED pins. Setting
-  `led_brightness` scales everything except the red recording light.
+  inputs on the Pi's internal pull-ups. Setting `led_brightness` scales
+  everything except the red recording light.
 - `dadboxctl record start|stop`, `play`, `led test`, `lock on|off` drive all
   of it without touching the box.
 
@@ -69,11 +69,11 @@ History: the lid, reed contact and NeoPixel ring are in
   able to tell "mic on" from "message waiting" without the key. It is also a
   different button.
 - *Got it* is identical online and offline. The pulse promises *safe*, not
-  *delivered*; delivery is the adults' channel.
+  *delivered*; delivery is the app's.
 - Which button and how it moves (steady, one pulse, breathing) carry the
   meaning; colour is redundant, for anyone colour-blind in either household.
-- The status LEDs use patterns, not colours, and ~10 ms blinks — invisible in
-  a dark bedroom and effectively free.
+- Ready and not ready differ by pattern (steady vs blinking), not only by
+  colour. Judge the dim blue (`READY_LEVEL`) on the bench, day and night.
 - "Obvious to the room" is weaker than an open lid: a red ring on a 16 mm
   button is a small light. The wiring tie keeps the promise honest; say so to
   the co-parent ([security-privacy.md](security-privacy.md)).
@@ -99,11 +99,8 @@ History: the lid, reed contact and NeoPixel ring are in
 5. **Travel lock, seen from outside** — does a locked box still show
    *waiting*? Should the app show the lock? That needs a telemetry field —
    [PROTOCOL.md](../PROTOCOL.md) first.
-6. **Status LED placement** — beside the charge jack, on the back, on the
-   underside? Findable by an adult, ignorable by the child.
-7. ~~LINK "brief on" at each check-in~~ — moot: LINK is steady green while
-   the link is fine (ADR 0020).
-8. ~~Charged vs on battery~~ — decided 2026-09-22: POWER is steady whenever
-   external power is present, off when unplugged. "Full" is the app's to say.
+6. ~~Status LED placement~~ — moot: no status LEDs (ADR 0024).
+7. ~~LINK "brief on" at each check-in~~ — moot: no status LEDs (ADR 0024).
+8. ~~Charged vs on battery~~ — moot: no POWER LED (ADR 0024); the app says it.
 9. **Haptics?** A small vibration on *got it* is cheap and satisfying. Worth a
    motor and one more gated consumer?

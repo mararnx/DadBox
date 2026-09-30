@@ -295,6 +295,9 @@ Pushes are hints. The truth is whatever `GET /messages` and
 
 - `battery_pct`, `charging` — `null` while no battery is fitted
   ([ADR 0019](decisions/0019-mains-first-battery-deferred.md)); `mains` is then always true.
+- `rssi` — the modem's received signal in dBm (`AT+CSQ`: −113 + 2 × n), read at
+  each check-in; `null` when the modem does not answer. Over Wi-Fi on the bench
+  it is still the modem's signal, not the Wi-Fi's.
 - `mains` — external power present. Not the same as `charging`: a full pack
   on mains is not charging. Selects the poll cadence.
 - `next_checkin_s` — when the box intends to check in next. The server and
@@ -306,9 +309,10 @@ Pushes are hints. The truth is whatever `GET /messages` and
   "the box was offline for 14 h — these 3 messages are from then".
 - `outbox_oldest_s` — age of the oldest unsent message. The other half of that
   sentence.
-- `storage_pct` — outbox flash in use. The fault pattern shows at 80 %.
-- `fault` — `null`, or one of `storage`, `modem`, `capture`, `charger`. Mirrors
-  the alternating status-LED pattern so the app can say what the LEDs mean.
+- `storage_pct` — outbox flash in use. At 80 % the box reports `fault: storage`.
+- `fault` — `null`, or one of `storage`, `modem`, `capture`, `charger`. Any
+  fault makes Record blink blue on the box, so the app can say why
+  ([ADR 0024](decisions/0024-no-status-leds-record-says-ready.md)).
 - `locked` — the travel lock is engaged ([ADR 0016](decisions/0016-two-buttons-no-lid.md)).
   Without it, a locked box in a bag looks like a child who stopped talking.
 - `house` is `unknown | a | b`, reserved for a dock ID resistor.

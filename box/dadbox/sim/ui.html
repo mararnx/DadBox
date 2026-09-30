@@ -60,10 +60,6 @@
   .lbl.r { left: 76px; } .lbl.p { right: 84px; }
   .grille { position: absolute; left: 160px; top: 76px; width: 56px; height: 92px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; padding: 3px; }
   .grille i { width: 6px; height: 6px; border-radius: 50%; background: #2a2e33; box-shadow: inset 0 1px 1px #000; }
-  .leds { position: absolute; left: 20px; bottom: 14px; display: flex; gap: 22px; }
-  .led { display: flex; align-items: center; gap: 6px; font-size: 10px; letter-spacing: .1em; color: rgba(0,0,0,.5); }
-  .led i { width: 9px; height: 9px; border-radius: 50%; background: #3b2a2a; box-shadow: inset 0 0 2px #000; }
-  .led i.on { background: #5dff6a; box-shadow: 0 0 8px 3px rgba(90,255,110,.85); }      /* both green (ADR 0020) */
   .port { position: absolute; right: 22px; bottom: 12px; width: 26px; height: 12px; border-radius: 3px; background: #111; box-shadow: inset 0 0 0 2px #444; }
   .ant { position: absolute; right: -18px; top: 20px; width: 10px; height: 60px; border-radius: 5px; background: linear-gradient(90deg, #222, #555, #222); box-shadow: 0 2px 4px rgba(0,0,0,.5); }
   .ant::after { content: ""; position: absolute; left: -6px; top: 44px; width: 22px; height: 10px; border-radius: 3px; background: #7a8087; }
@@ -95,10 +91,6 @@
           <div class="grille" id="grille"></div>
           <div class="btn play" id="btn-play"><div class="ring" id="ring-play"></div><div class="head"></div></div>
           <div class="lbl r">record</div><div class="lbl p">play</div>
-          <div class="leds">
-            <div class="led"><i id="led-power"></i>POWER</div>
-            <div class="led"><i id="led-link"></i>LINK</div>
-          </div>
           <div class="port" title="5 V micro-USB"></div>
         </div>
         <div class="caption">Hold a button with the mouse (or <span class="kbd">R</span> / <span class="kbd">P</span>). A press counts after 0.5 s. Both for 3 s: travel lock.</div>
@@ -157,7 +149,7 @@
       </div>
       <div class="row">
         <span class="dim">power</span>
-        <button id="w-mains" onclick="world({mains: !S.world.mains})" title="external power on the USB port — POWER LED steady while present">USB power</button>
+        <button id="w-mains" onclick="world({mains: !S.world.mains})" title="external power on the USB port — unplugged, the box is off">USB power</button>
         <button id="w-batt" onclick="world({battery_pct: S.world.battery_pct === null ? 80 : null})">battery fitted</button>
         <input type="range" id="w-pct" min="0" max="100" oninput="world({battery_pct: +this.value})" title="battery %">
         <span id="w-pct-text" class="mono"></span>
@@ -282,8 +274,6 @@ function draw(s) {
   const rec = [b.mic ? 1 : 0, b.frame.record[1], b.frame.record[2]];
   ringStyle($('ring-record'), rec);
   ringStyle($('ring-play'), b.frame.play);
-  $('led-link').classList.toggle('on', b.status.link);
-  $('led-power').classList.toggle('on', b.status.power);
   $('w-lights').innerHTML = b.lights === 'RECORDING' ? '<span class="rec-word">RECORDING</span>' : b.lights === 'WAITING' ? '<span class="wait-word">WAITING' + (b.resting ? ' (resting)' : '') + '</span>' : b.lights === 'IDLE' ? (b.locked ? 'LOCKED' : 'IDLE') : b.lights;
   $('w-mic').textContent = b.mic ? 'ON (red)' : 'off';
   $('w-amp').textContent = b.amp ? 'ON' : 'off';

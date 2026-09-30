@@ -69,9 +69,9 @@ def doorbell():
 check("doorbell: normal ⇄ HALF-OPEN (flag flips)", doorbell)
 
 def usb():
-    W(mains=False); until(lambda s: not s["world"]["mains"] and s["box"]["power"] == "OK" and not s["box"]["status"]["power"], "POWER off")
-    W(mains=True); until(lambda s: s["world"]["mains"] and s["box"]["power"] == "MAINS" and s["box"]["status"]["power"], "POWER steady")
-check("USB power: present ⇄ ABSENT — POWER LED steady / off", usb)
+    W(mains=False); until(lambda s: not s["world"]["mains"] and s["box"]["power"] == "OK", "unplugged")
+    W(mains=True); until(lambda s: s["world"]["mains"] and s["box"]["power"] == "MAINS", "plugged in")
+check("USB power: present ⇄ ABSENT", usb)
 
 def battery():
     W(battery_pct=80); until(lambda s: s["world"]["battery_pct"] == 80 and s["box"]["telemetry"]["battery_pct"] == 80, "fitted at 80")

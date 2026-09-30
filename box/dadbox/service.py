@@ -20,7 +20,7 @@ from .clock import Clock
 from .doorbell import Connect, DoorbellWorker, connect_ws
 from .gestures import Button
 from .hal import Hardware
-from .lights import LightsPlan, StatusPlan, render, render_status
+from .lights import LightsPlan, render
 from .link import Client, LinkWorker
 from .settings import Settings
 from .state import Lights
@@ -33,12 +33,11 @@ RENDER_HZ = 30
 
 
 class LightsDriver:
-    """Renders the child's and the adults' channels at RENDER_HZ."""
+    """Renders the two button lights at RENDER_HZ."""
 
     def __init__(self, hw: Hardware, clock: Clock):
         self.hw, self.clock = hw, clock
         self.plan = LightsPlan()
-        self.status = StatusPlan()
         self._lock = threading.Lock()
         self._stop = threading.Event()
         self._test_until = 0.0
@@ -47,10 +46,6 @@ class LightsDriver:
     def set_plan(self, plan: LightsPlan) -> None:
         with self._lock:
             self.plan = plan
-
-    def set_status(self, status: StatusPlan) -> None:
-        with self._lock:
-            self.status = status
 
     def test(self) -> None:
         """`dadboxctl led test`: every button-light state for 2 s each. The
@@ -68,13 +63,12 @@ class LightsDriver:
         while not self._stop.is_set():
             now = self.clock.now()
             with self._lock:
-                plan, status, test_until = self.plan, self.status, self._test_until
+                plan, test_until = self.plan, self._test_until
             if now < test_until:
                 idx = int((test_until - now) / 2.0) % len(Lights)
-                plan = LightsPlan(lights=list(Lights)[idx], brightness=100)
+                plan = LightsPlan(lights=list(Lights)[idx], brightness=100, ready=idx % 2 == 0)
             frame = render(plan, now)
             self.hw.lights.write(frame)
-            self.hw.status.write(*render_status(status, now))
             self._stop.wait(1.0 / RENDER_HZ)
 
 
@@ -215,8 +209,6 @@ class Service:
             self.hw.mic.set(a.on)
         elif isinstance(a, c.SetLights):
             self.lights.set_plan(a.plan)
-        elif isinstance(a, c.SetStatus):
-            self.lights.set_status(a.plan)
         elif isinstance(a, c.StartCapture):
             self.audio.start_capture(a.message_id, a.created_at_wall, a.time_ok)
         elif isinstance(a, c.StopCapture):

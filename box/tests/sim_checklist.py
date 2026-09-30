@@ -101,20 +101,20 @@ check("nothing new + Play → replays the last message; server not told twice", 
 
 def t_offline():
     world(coverage=False)
-    # The doorbell (ADR 0021) notices a dead socket by a real-time heartbeat; the LED follows 2 x the interval.
+    # The doorbell (ADR 0021) notices a dead socket by a real-time heartbeat; Record follows 2 x the interval.
     for _ in range(120):
         st = state()["box"]
         if st["link"] == "DOWN": break
         world(skip_s=max(60, st["checkin_interval_s"])); time.sleep(0.5)
     else: raise AssertionError("LINK never went down: " + state()["box"]["state_line"])
-    assert state()["box"]["frame"]["record"][0] == 0
+    assert not state()["box"]["ready"] and state()["box"]["frame"]["record"][0] == 0   # Record blinks blue (ADR 0024)
     ctl("record", "start"); sim_sleep(4); ctl("record", "stop")
     until(lambda s: s["box"]["link"] == "DOWN_QUEUED" and s["box"]["outbox_ids"], "double-blink, queued", 20)
     n = len([m for m in state()["server"]["messages"] if m["from"] == "box"])
     world(coverage=True); world(skip_s=120)
     until(lambda s: len([m for m in s["server"]["messages"] if m["from"] == "box" and m["state"] == "uploaded"]) == n + 1
           and s["box"]["link"] == "OK", "sent when the link returned", 30)
-check("no coverage: LINK blinks, queued message double-blinks, sent when back", t_offline)
+check("no coverage: Record blinks blue, a message still records and is sent when back", t_offline)
 
 def t_quiet():
     world(wall_hhmm="21:00"); until(lambda s: s["box"]["quiet"], "quiet hours")
@@ -174,13 +174,13 @@ def t_late():
         world(server_down=True)
         for _ in range(3): world(skip_s=interval); sim_sleep(3)
         until(lambda s: len([p for p in s["server"]["pushes"] if p["kind"] == "box_late"]) == before + 1, "box_late push", 20)
-        until(lambda s: s["box"]["link"] in ("DOWN", "DOWN_QUEUED"), "LINK blinking")
+        until(lambda s: s["box"]["link"] in ("DOWN", "DOWN_QUEUED"), "Record blinking blue")
     finally:
         world(server_down=False)
     world(skip_s=60); until(lambda s: s["box"]["link"] == "OK" and not s["server"]["device"]["late"], "cleared", 20)
     world(skip_s=60); sim_sleep(3)
     assert len([p for p in state()["server"]["pushes"] if p["kind"] == "box_late"]) == before + 1
-check("server down: LINK blinks, box_late push once; clears on the next check-in", t_late)
+check("server down: Record blinks blue, box_late push once; clears on the next check-in", t_late)
 
 def t_ledtest():
     ctl("led", "test"); seen = set()
@@ -200,10 +200,10 @@ check("< 1 s of speech discarded; 20 s of silence stops a forgotten recording", 
 def t_fault():
     world(server_down=False, fail_capture=True); ctl("record", "start"); until(lambda s: s["box"]["fault"] == "CAPTURE", "fault: capture")
     world(skip_s=state()["box"]["checkin_interval_s"]); until(lambda s: any(p["kind"] == "fault" for p in s["server"]["pushes"]), "fault push", 20)
-    assert state()["box"]["lights"] in ("IDLE", "WAITING")           # never on the buttons
+    assert not state()["box"]["ready"]                                # Record blinks blue (ADR 0024)
     world(fail_capture=False); ctl("record", "start"); sim_sleep(3); ctl("record", "stop")
     until(lambda s: s["box"]["fault"] == "NONE", "cleared by a good recording", 20)
-check("a broken mic: fault on the status LEDs and a push, never on the buttons", t_fault)
+check("a broken mic: Record blinks blue and a push goes out", t_fault)
 
 proc.terminate()
 print(f"\n{sum(ok for ok, _ in results)}/{len(results)} passed")

@@ -24,8 +24,8 @@ and nothing lingers on the device longer than it must.
   An inbox message is removed after play and may be evicted under pressure;
   the server keeps everything and re-serves it.
 - Capacity is the card — gigabytes against ~120 KB/min. Telemetry carries
-  `storage_pct`; at 80 %, or on any storage error, the status LEDs show the
-  fault pattern and telemetry says `fault: storage`.
+  `storage_pct`; at 80 %, or on any storage error, Record blinks blue
+  (ADR 0024) and telemetry says `fault: storage`.
 - **Cards:** the kit's 16 GB card on the bench; an endurance-grade card
   (SanDisk High Endurance) before the box leaves home. The bench card becomes
   the spare image in a drawer.

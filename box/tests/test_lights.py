@@ -9,7 +9,8 @@ def test_priority_order():
     assert lights_state(recording=False, playing=False, got_it_pulse=False, inbox=0) is Lights.IDLE
 
 
-def test_there_is_no_error_state():
+def test_the_states_are_the_childs():
+    # Not-ready (blue blink on Record) is an overlay of LightsPlan.ready, not a state (ADR 0024).
     assert {s.name for s in Lights} == {"RECORDING", "PLAYING", "GOT_IT", "WAITING", "IDLE"}
 
 

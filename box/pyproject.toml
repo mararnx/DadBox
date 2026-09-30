@@ -15,3 +15,7 @@ dev = ["pytest>=8"]
 
 [project.scripts]
 dadboxctl = "dadbox.ctl:main"
+
+[tool.setuptools.packages.find]
+# setup/ holds bench scripts (modem_check.py), not part of the package
+include = ["dadbox*"]

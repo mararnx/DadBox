@@ -16,7 +16,7 @@ from dadbox.hal import Hardware
 from dadbox.link import Client
 from dadbox.service import Service
 from dadbox.sim.audio import SimAudio
-from dadbox.sim.hal import (FakeAmpGate, FakeButtonLights, FakeButtons, FakeMicGate, FakeModem, FakePower, FakeStatusLeds)
+from dadbox.sim.hal import (FakeAmpGate, FakeButtonLights, FakeButtons, FakeMicGate, FakeModem, FakePower)
 from dadbox.sim.parent import Parent
 from dadbox.sim.server import FakeServer
 from dadbox.store import Store
@@ -41,7 +41,7 @@ def box(tmp_path):
     server = FakeServer(clock)
     store = Store(tmp_path)
     store.put_key(1, KEY)
-    hw = Hardware(buttons=FakeButtons(), lights=FakeButtonLights(), status=FakeStatusLeds(), mic=FakeMicGate(),
+    hw = Hardware(buttons=FakeButtons(), lights=FakeButtonLights(), mic=FakeMicGate(),
                   amp=FakeAmpGate(), modem=FakeModem(), power=FakePower(), audio=SimAudio(clock))
     svc = Service(hw=hw, store=store, clock=clock, client=Client(server.transport("box")),
                   doorbell_connect=lambda url: server.doorbell_connect(url, hw.modem.is_up))
@@ -155,7 +155,7 @@ def test_a_power_cut_mid_recording_is_recovered_at_boot(tmp_path):
     store.put_key(1, KEY)
     mid = "01JAYZ3K7QW9E8RVX2M4N6P8TD"
     store.begin_capture(mid, {"created_at": "2026-09-22T10:00:00Z", "time_ok": False}).write_bytes(synthetic_voice(3.0))
-    hw = Hardware(buttons=FakeButtons(), lights=FakeButtonLights(), status=FakeStatusLeds(), mic=FakeMicGate(),
+    hw = Hardware(buttons=FakeButtons(), lights=FakeButtonLights(), mic=FakeMicGate(),
                   amp=FakeAmpGate(), modem=FakeModem(), power=FakePower(), audio=SimAudio(clock))
     svc = Service(hw=hw, store=store, clock=clock, client=Client(server.transport("box")))
     svc.start()
@@ -173,7 +173,7 @@ def test_the_doorbell_delivers_a_reply_in_seconds_at_real_speed(tmp_path):
     server = FakeServer(clock)
     store = Store(tmp_path)
     store.put_key(1, KEY)
-    hw = Hardware(buttons=FakeButtons(), lights=FakeButtonLights(), status=FakeStatusLeds(), mic=FakeMicGate(),
+    hw = Hardware(buttons=FakeButtons(), lights=FakeButtonLights(), mic=FakeMicGate(),
                   amp=FakeAmpGate(), modem=FakeModem(), power=FakePower(), audio=SimAudio(clock))
     svc = Service(hw=hw, store=store, clock=clock, client=Client(server.transport("box")),
                   doorbell_connect=lambda url: server.doorbell_connect(url, hw.modem.is_up))

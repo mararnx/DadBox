@@ -52,15 +52,6 @@ class FakeButtonLights:
         self.frame = frame
 
 
-class FakeStatusLeds:
-    def __init__(self):
-        self.link = False
-        self.power = False
-
-    def write(self, link_on: bool, power_on: bool) -> None:
-        self.link, self.power = link_on, power_on
-
-
 class FakeAmpGate:
     def __init__(self):
         self.on = False
