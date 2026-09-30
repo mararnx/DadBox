@@ -21,6 +21,38 @@ Delock 65927 adapter; the socket moves to the back-left corner and the
 antenna to its right (`hardware/LAYOUT.md`), because the new flange is
 ~30 mm, not 16.
 
+## 2026-09-30 (afternoon) — Re-flashed: read-only root, /data partition, Tailscale, signal in the app
+
+**Did:** Re-flashed the card so root could go read-only (the old root filled
+the card, and ext4 cannot shrink while mounted). Before first boot, on the
+Mac: `resize` out of `cmdline.txt`, `growpart` off in `user-data`. Root then
+grown to 8 GB and `/data` made in the other 20.6 GB (`sfdisk`, no `parted`
+on the image); the old `/data` restored with its 2 inbox messages. Setup
+redone from `box/setup/README.md`. Then the overlay (`overlayroot`),
+boot partition read-only, journal in RAM, zram-only swap, cloud-init off.
+Tailscale with its state on `/data`: `ssh dadbox` is the Tailscale name,
+reachable over LTE; `ssh dadbox-lan` the home network. The box now sends
+`rssi` from `AT+CSQ` (−75 dBm on the server) and the app shows it, or says
+there is no reading. From the HAT schematic: its PWR line is header pin 7
+(P4) via DIP switch 3; the wire from Zero pin 37 is on, DIP 3 not yet, so
+the power key is untested. The box runs the repo's current code
+(`4c3ae52`, status LEDs gone). Clean image of the boot and root partitions,
+plus `/data`, in `~/DadBox-backups/2026-09-30-clean/` on the Mac.
+**Learned:** `overlayroot=tmpfs` alone overlays **every** fstab mount under
+`/` in RAM, `/data` included: a recording would have vanished at the next
+power cut. `overlayroot=tmpfs:recurse=0`, and `findmnt /data` must say
+`ext4 rw`. `usb0` wins the default route (metric 100): the first `apt`
+pulled 115 MB over LTE and took 20 minutes; Wi-Fi was several times
+faster. The SIM is unlimited, so LTE stays first, as in the field. macOS
+`openrsync` ignores `--chmod` and the Mac's files are mode 600: the service
+could not read its own code — `box/deploy.sh` fixes modes on the Pi.
+`setup/modem_check.py` made setuptools see a second package; `pyproject`
+names `dadbox*` now.
+**Next:** the power-cut test — pulls while idle, mid-boot and mid-recording,
+checking Wi-Fi, `/data` against a checksum list and a check-in each time;
+DIP 3 on and the power key, then the firmware presses it when the modem
+stops answering; soldering the buttons and the mic.
+
 ## 2026-09-30 — Modem HAT: a real check-in over LTE
 
 **Did:** Fitted the SIM7670G HAT (header plus OTG USB) with a Sunrise SIM.

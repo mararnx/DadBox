@@ -1,8 +1,11 @@
 # Box setup — what Claude does over SSH after the first boot
 
 1. **Packages**: `ffmpeg alsa-utils python3-venv python3-lgpio i2c-tools` and Tailscale
-   (`curl -fsSL https://tailscale.com/install.sh | sh`, then `tailscale up`
-   — the auth link is the user's to open).
+   (`curl -fsSL https://tailscale.com/install.sh | sh`). Its state must
+   outlive the overlay: `/data/tailscale` (0700) bind-mounted on
+   `/var/lib/tailscale` from fstab (`bind,x-systemd.requires-mounts-for=/data`),
+   before `tailscale up --hostname=dadbox` — the auth link is the user's to
+   open. `ssh dadbox` is then the Tailscale name, `ssh dadbox-lan` the home network.
 2. **`/boot/firmware/config.txt`**
    Change `dtparam=audio=on` to `off`, and append — comments on their own
    lines only; `config.txt` does not allow a comment after a value:
@@ -38,8 +41,18 @@
    Growing a mounted root is safe; shrinking one is not possible, which is
    why this happens before the first boot. `/opt/dadbox` → symlink to
    `/data/app`; the deploying user joins group `dadbox` (`/data` is 0750).
-4. **Overlay**: `raspi-config nonint enable_overlayfs` — after everything else
-   is installed. Disable it only on the bench, never in the field.
+4. **Overlay** — last, after everything else is installed and the service runs:
+   - `Storage=volatile`, `RuntimeMaxUse=16M` in `/etc/systemd/journald.conf.d/`;
+     `Mechanism=zram` in `/etc/rpi/swap.conf.d/` (a swap *file* would land in RAM);
+     `touch /etc/cloud/cloud-init.disabled` (it must never rewrite the network config).
+   - `raspi-config nonint enable_overlayfs` and `enable_bootro`, then in
+     `/boot/firmware/cmdline.txt` change `overlayroot=tmpfs` to
+     **`overlayroot=tmpfs:recurse=0`**. Without it overlayroot puts every
+     fstab mount under `/` in RAM too — `/data` included, and a recording would
+     vanish at the next power cut. After the reboot `findmnt /data` must show
+     `/dev/mmcblk0p3 ext4 rw`, not `overlay`.
+   - Changing anything on root afterwards: `sudo raspi-config nonint disable_overlayfs`,
+     reboot, change, enable, reboot. Only on the bench, never in the field.
 5. **Service**, which runs as its own user, not root:
    ```
    sudo useradd --system --home /data --shell /usr/sbin/nologin \
@@ -48,6 +61,8 @@
    echo 'dadbox ALL=(root) NOPASSWD: /usr/bin/systemctl poweroff' | sudo tee /etc/sudoers.d/dadbox
    sudo chmod 0440 /etc/sudoers.d/dadbox && sudo visudo -c
    ```
+   Code goes on with `box/deploy.sh` (rsync, then group `dadbox` and modes
+   fixed on the Pi — macOS openrsync ignores `--chmod`).
    `python3 -m venv --system-site-packages /opt/dadbox/.venv` (so gpiozero
    finds apt's `lgpio`, which pip would have to compile), `pip install -e .[pi]`, the unit from
    `systemd/`, `systemctl enable --now dadbox`. `dadboxctl` on `$PATH`.
