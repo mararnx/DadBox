@@ -277,7 +277,7 @@ Every wire — per header pin and per part, grounds and 5 V included — is in
 | 5, 6 | Record, Play switches to GND; internal pull-ups; 20 ms debounce in gpiozero |
 | 12, 13 | LINK, POWER status LEDs |
 | 16 | MAX98357A SD_MODE (the overlay's `sdmode` pin) |
-| 26 | Modem PWRKEY — wiring to confirm from the Waveshare wiki |
+| 26 | Modem PWRKEY → HAT header pin 7 (P4), DIP 3 on; high presses the key (schematic) |
 | 18, 19, 20, 21 | I2S (`googlevoicehat-soundcard`) |
 | 2, 3 | I²C — INA219 on the UPS module, later |
 | 14, 15 | UART console |
@@ -347,7 +347,7 @@ HTTP API in about two minutes (a 20× clock, every step from a clean world).
 ## Not built yet
 
 INA219 gauge and `mains` from battery current; `AT+CSQ` for `rssi`; the
-modem PWRKEY pulse (wiring unknown); loudness normalisation; OTA beyond `rsync`/`git pull`.
+modem PWRKEY pulse (wired, not yet proven); loudness normalisation; OTA beyond `rsync`/`git pull`.
 
 ## Tests
 

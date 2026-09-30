@@ -26,7 +26,8 @@ PIN_PLAY_RED, PIN_PLAY_GREEN, PIN_PLAY_BLUE = 23, 24, 25
 PIN_RECORD_SWITCH, PIN_PLAY_SWITCH = 5, 6
 PIN_LINK_LED, PIN_POWER_LED = 12, 13
 PIN_AMP_SD = 16                  # MAX98357A SD_MODE — owned by the kernel's voicehat driver, see PiAmpGate
-PIN_MODEM_PWRKEY = 26            # SIM7670G HAT PWRKEY — wiring to confirm
+PIN_MODEM_PWRKEY = 26            # wire to the HAT's header pin 7 (P4 = PWR), DIP 3 on; high = key pressed
+MODEM_AT_PORT = os.environ.get("DADBOX_MODEM_AT", "/dev/ttyACM0")   # the HAT enumerates as 05c6:9330, AT on ACM0
 ALSA_DEVICE = os.environ.get("DADBOX_ALSA", "default")
 DEBOUNCE_S = 0.02
 
@@ -94,7 +95,9 @@ class PiAmpGate:
 
 
 class PiModem:
-    """USB Ethernet interface from the SIM7670G HAT; power key on a GPIO (to confirm)."""
+    """RNDIS `usb0` from the SIM7670G HAT, AT commands on `ttyACM0`, power key on GPIO 26.
+    The power key is not yet proven on the bench: the first box is mains only and never
+    switches the modem off (ADR 0019), so `power` only matters once the battery is fitted."""
 
     def __init__(self):
         try:
@@ -108,7 +111,7 @@ class PiModem:
         if self._want_on == on or self.pwrkey is None:
             return
         self._want_on = on
-        self.pwrkey.on(); time.sleep(1.5); self.pwrkey.off()   # SIMCom-style pulse; confirm from the wiki
+        self.pwrkey.on(); time.sleep(0.5 if on else 3.0); self.pwrkey.off()   # SIM767x: on ≥ 50 ms, off ≥ 2.5 s
 
     def is_up(self) -> bool:
         """A route out exists — through the modem's USB Ethernet in the field, or
@@ -120,7 +123,42 @@ class PiModem:
         return has_default_route(out)
 
     def rssi(self) -> Optional[int]:
-        return None                                        # AT+CSQ on the AT port, later
+        """Received signal strength in dBm from `AT+CSQ`, or None when the modem does not answer."""
+        try:
+            return csq_to_dbm(at_command(MODEM_AT_PORT, "AT+CSQ"))
+        except Exception as e:                             # noqa: BLE001 — no modem, busy port: no reading
+            log.debug("rssi: %s", e)
+            return None
+
+
+def at_command(port: str, line: str, timeout_s: float = 2.0) -> str:
+    """One AT command on a raw tty; returns what came back up to OK or ERROR."""
+    import select
+    import termios
+    fd = os.open(port, os.O_RDWR | os.O_NOCTTY | os.O_NONBLOCK)
+    try:
+        attrs = termios.tcgetattr(fd)
+        attrs[0] = attrs[1] = attrs[3] = 0                 # raw: no input/output processing, no echo
+        attrs[2] = termios.CS8 | termios.CREAD | termios.CLOCAL
+        termios.tcsetattr(fd, termios.TCSANOW, attrs)
+        termios.tcflush(fd, termios.TCIOFLUSH)
+        os.write(fd, (line + "\r").encode())
+        buf, end = b"", time.monotonic() + timeout_s
+        while time.monotonic() < end and not buf.rstrip().endswith((b"OK", b"ERROR")):
+            if select.select([fd], [], [], 0.1)[0]:
+                buf += os.read(fd, 1024)
+        return buf.decode(errors="replace")
+    finally:
+        os.close(fd)
+
+
+def csq_to_dbm(reply: str) -> Optional[int]:
+    """`+CSQ: 20,0` → -73 dBm (3GPP 27.007: 0 is ≤ -113, 31 is ≥ -51, 99 unknown)."""
+    for line in reply.splitlines():
+        if line.startswith("+CSQ:"):
+            n = int(line.split(":")[1].split(",")[0])
+            return None if n == 99 else -113 + 2 * min(n, 31)
+    return None
 
 
 def has_default_route(ip_route_output: str) -> bool:

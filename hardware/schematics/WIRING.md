@@ -55,7 +55,7 @@ No two Dupont housings on one pin, anywhere.
 | 31 | GPIO 6 | Play button switch NO | | 32 | GPIO 12 | LINK LED, via resistor |
 | 33 | GPIO 13 | POWER LED, via resistor | | 34 | GND | Both status LED cathodes |
 | 35 | GPIO 19 · I2S LRCLK | Amp LRC (mic WS chained from the amp) | | 36 | GPIO 16 | Amp SD (driven by the sound driver) |
-| 37 | GPIO 26 | Modem PWRKEY — later | | 38 | GPIO 20 · I2S DIN | Mic SD (data out of the mic) |
+| 37 | GPIO 26 | Modem PWRKEY → HAT pin 7 | | 38 | GPIO 20 · I2S DIN | Mic SD (data out of the mic) |
 | 39 | GND | Amp GND | | 40 | GPIO 21 · I2S DOUT | Amp DIN (data into the amp) |
 
 Used: 18 signal pins, both 5 V pins, 7 of 8 grounds. Spare: GPIO 4, 7, 8,
@@ -132,8 +132,8 @@ in a bedroom, raise it to 1–2.2 kΩ.
 | Data | Zero's inner micro-USB, "USB" | HAT Type-C | OTG adapter + USB-A-to-C cable; appears as a network interface |
 | 5 V | Zero pin 4 | HAT header pin 2 | stiffer supply for transmit bursts |
 | GND | Zero pin 6 | HAT header pin 6 | |
-| PWRKEY | Zero pin 37 · GPIO 26 | HAT's PWR line (via its DIP switch) | **later** — which HAT pin carries it is still to be found |
-| DIP switches | — | TXD and RXD **off** | keeps GPIO 14/15 free for the console |
+| PWRKEY | Zero pin 37 · GPIO 26 | HAT header **pin 7** (P4), DIP switch 3 (PWR) **on** | from the HAT schematic: high on P4 turns a transistor on that pulls PWRKEY low. The HAT also pulses PWRKEY itself at power-up, so the modem starts without it |
+| DIP switches | — | 1 TXD, 2 RXD **off**; 3 PWR **on**; 4 BOOT **off** | TXD/RXD would put the modem's UART on GPIO 14/15, the console; BOOT is for firmware flashing |
 | Antenna | HAT "LTE" IPEX1 | pigtail → SMA through the wall → stub | never transmit without it |
 | SIM | HAT slot | — | insert before power; no hot-swap |
 

@@ -36,7 +36,7 @@ struct BoxView: View {
                     Row("Mains", t.mains ? "Plugged in" : "On battery")
                 }
                 Section("Link") {
-                    Row("Signal", "\(signalWord(t.rssi)) · \(t.rssi) dBm")
+                    Row("Signal", t.rssi.map { "\(signalWord($0)) · \($0) dBm" } ?? "No reading from the modem")
                     Row("Checks in", "every \(BoxHealth.span(Double(t.nextCheckinS)))")
                     if t.offlineS > 0 { Row("Was offline for", BoxHealth.span(Double(t.offlineS))) }
                 }

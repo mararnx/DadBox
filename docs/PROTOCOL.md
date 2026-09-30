@@ -295,6 +295,9 @@ Pushes are hints. The truth is whatever `GET /messages` and
 
 - `battery_pct`, `charging` — `null` while no battery is fitted
   ([ADR 0019](decisions/0019-mains-first-battery-deferred.md)); `mains` is then always true.
+- `rssi` — the modem's received signal in dBm (`AT+CSQ`: −113 + 2 × n), read at
+  each check-in; `null` when the modem does not answer. Over Wi-Fi on the bench
+  it is still the modem's signal, not the Wi-Fi's.
 - `mains` — external power present. Not the same as `charging`: a full pack
   on mains is not charging. Selects the poll cadence.
 - `next_checkin_s` — when the box intends to check in next. The server and

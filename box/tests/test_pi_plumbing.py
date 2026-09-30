@@ -35,3 +35,13 @@ def test_default_route_on_the_bench_and_in_the_field():
     assert has_default_route("default via 192.168.225.1 dev usb0 proto dhcp metric 100\n")
     assert not has_default_route("")
     assert not has_default_route("192.168.1.0/24 dev wlan0 proto kernel scope link\n")
+
+
+def test_csq_reply_to_dbm():
+    from dadbox.hw.pi import csq_to_dbm
+    assert csq_to_dbm("AT+CSQ\r\n+CSQ: 20,0\r\n\r\nOK\r\n") == -73
+    assert csq_to_dbm("+CSQ: 0,99\r\nOK") == -113
+    assert csq_to_dbm("+CSQ: 31,0\r\nOK") == -51
+    assert csq_to_dbm("+CSQ: 99,99\r\nOK") is None       # not known or not detectable
+    assert csq_to_dbm("ERROR") is None
+    assert csq_to_dbm("") is None
