@@ -55,7 +55,7 @@ struct BoxView: View {
             if let s = model.status?.settings { SettingsSections(settings: s) }
 
             Section {
-                DisclosureGroup("What the two small lights mean") { LEDLegend() }
+                DisclosureGroup("What the Record light means") { LEDLegend() }
             }
 
             Section {
@@ -113,7 +113,7 @@ private struct FaultSection: View {
             VStack(alignment: .leading, spacing: 6) {
                 Label(title, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.red).font(.headline)
                 Text(advice).font(.subheadline)
-                Text("On the box, the two small lights blink alternately. The buttons look normal — the child sees nothing.")
+                Text("On the box, Record blinks blue instead of glowing steady dim blue. Recording still works — messages wait safely on the box.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
         }
@@ -225,25 +225,23 @@ private struct SettingsSections: View {
     }
 }
 
-/// ARCHITECTURE.md § Status LEDs — so the adult in the other house can be told what the blinking means.
+/// ARCHITECTURE.md § Indication (ADR 0024) — so the adult in the other house can be told what the blue blinking means.
 private struct LEDLegend: View {
-    private let rows: [(String, String, String)] = [
-        ("LINK", "off", "Connected. Nothing to see."),
-        ("LINK", "1 blink / 3 s", "No connection; nothing waiting."),
-        ("LINK", "2 blinks / 3 s", "No connection, and recordings waiting to go — safe on the box."),
-        ("POWER", "off", "Fine: on battery above 20 %, or plugged in and full."),
-        ("POWER", "steady", "Charging."),
-        ("POWER", "1 blink / 3 s", "Below 20 %, on battery."),
-        ("both", "alternating", "Fault — an adult needs to act. This screen says which."),
+    private let rows: [(String, String)] = [
+        ("Steady dim blue", "Ready. The server heard from the box within the last two check-ins, and nothing is wrong."),
+        ("Slow blue blink, 1 s on / 2 s off", "Not ready: no network, no server, or a fault. Recording still works — messages wait on the box and go when it is back. This screen says why."),
+        ("Steady red", "Recording. The microphone is on only then."),
+        ("One green pulse", "Got it: the recording is safe on the box. Not yet delivered — that is this screen's job."),
+        ("Dark", "Playing a message, locked for travel — or unplugged."),
     ]
     var body: some View {
-        ForEach(rows, id: \.2) { led, pattern, meaning in
+        ForEach(rows, id: \.0) { pattern, meaning in
             VStack(alignment: .leading, spacing: 2) {
-                Text("\(led) · \(pattern)").font(.subheadline.weight(.medium))
+                Text(pattern).font(.subheadline.weight(.medium))
                 Text(meaning).font(.footnote).foregroundStyle(.secondary)
             }
         }
-        Text("The buttons' own lights never show any of this. They speak only to the child.")
+        Text("Play is about messages — green — and blinks white twice for the travel lock. Why the box is not ready — no connection, or a fault — is only on this screen.")
             .font(.footnote).foregroundStyle(.secondary)
     }
 }
