@@ -21,11 +21,23 @@
    Plus, outside `config.txt`: `echo i2c-dev | sudo tee /etc/modules-load.d/i2c-dev.conf`
    (the `/dev/i2c-1` node), and the hardware watchdog armed by systemd:
    `/etc/systemd/system.conf.d/watchdog.conf` with `[Manager]` / `RuntimeWatchdogSec=15`.
-3. **`/data`**: a second ext4 partition on the SD card, `noatime`, mounted
-   by label. `/opt/dadbox` → symlink into `/data/app`. Raspberry Pi OS grows
-   the root partition to fill the card on first boot, so the partition has
-   to be made before that (or the card re-flashed). On the bench, `/data` is
-   a plain directory on the root filesystem (2026-09-24).
+3. **`/data`**: a third ext4 partition, `noatime`, mounted by label; root
+   stays at 8 GB. Before the first boot, on the Mac, in the card's `bootfs`:
+   delete the word `resize` from `cmdline.txt`, and add to `user-data`
+   `growpart: {mode: "off"}` and `resize_rootfs: false` (the initramfs and
+   cloud-init would each grow root over the whole card) — and set the user's
+   `sudo:` to `"ALL=(ALL) NOPASSWD:ALL"`. After the first boot (root is
+   2.3 GB), with `sfdisk` (the image has no `parted`):
+   ```
+   echo ",16777216" | sudo sfdisk -N 2 --no-reread /dev/mmcblk0       # root → 8 GiB
+   echo "17842176,,83" | sudo sfdisk -a --no-reread /dev/mmcblk0      # p3: the rest
+   sudo partx -u /dev/mmcblk0 && sudo partx -a /dev/mmcblk0; sudo resize2fs /dev/mmcblk0p2
+   sudo mkfs.ext4 -L data /dev/mmcblk0p3
+   echo "LABEL=data  /data  ext4  defaults,noatime  0  2" | sudo tee -a /etc/fstab
+   ```
+   Growing a mounted root is safe; shrinking one is not possible, which is
+   why this happens before the first boot. `/opt/dadbox` → symlink to
+   `/data/app`; the deploying user joins group `dadbox` (`/data` is 0750).
 4. **Overlay**: `raspi-config nonint enable_overlayfs` — after everything else
    is installed. Disable it only on the bench, never in the field.
 5. **Service**, which runs as its own user, not root:
@@ -55,11 +67,14 @@
    then `AT+DIALMODE=0` (auto-dial; at `1` the modem registers and gets an
    address but forwards nothing) and `AT$MYCONFIG="usbnetmode",0` (RNDIS),
    then `AT+CRESET`. All three are stored in the modem and survive a power
-   cycle. NetworkManager gives `usb0` metric 100, ahead of Wi-Fi's 600, so
-   all traffic leaves over LTE when the modem is up.
+   cycle. NetworkManager puts `usb0` on the `netplan-eth0` connection at
+   metric 100, ahead of Wi-Fi's 600: everything leaves over LTE, as in the
+   field (the SIM is unlimited). For a big `apt` install on the bench, Wi-Fi
+   is several times faster — `sudo ip route del default dev usb0` until the
+   next reboot.
 7. **Power tuning**: `arm_freq`/`over_voltage` down, `maxcpus=1` in
    `cmdline.txt` for idle; read each step from the INA219 once the UPS
    Module 3S is fitted.
 
-The button lights and the status LEDs are plain GPIO at 3.3 V (software PWM
+The button lights are plain GPIO at 3.3 V (software PWM
 through `gpiozero`) — nothing to enable in `config.txt`.
