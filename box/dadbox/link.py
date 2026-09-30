@@ -46,7 +46,20 @@ class Transport(Protocol):
 
 
 class LinkError(Exception):
-    pass
+    """The server answered, but not with what the round needed. `status` is its HTTP code, if any."""
+
+    def __init__(self, message: str, status: Optional[int] = None):
+        super().__init__(message)
+        self.status = status
+
+
+class SeqTaken(LinkError):
+    """409 on metadata: another message already has this seq. The server
+    holds up to `max_seq` from this box (ADR 0025)."""
+
+    def __init__(self, max_seq: int):
+        super().__init__(f"seq taken; server holds up to {max_seq}", 409)
+        self.max_seq = max_seq
 
 
 class RequestsTransport:
@@ -83,11 +96,13 @@ class Client:
     def upload(self, message_id: str, container: bytes, meta: Dict[str, Any], *, cancelled: Callable[[], bool] = lambda: False) -> bool:
         """Idempotent, resumable. True when the server has said 2xx to `complete`."""
         status, body = self._json("PUT", f"/messages/{message_id}", meta)
+        if status == 409 and isinstance(body, dict) and isinstance(body.get("max_seq"), int):
+            raise SeqTaken(body["max_seq"])
         if status >= 400:
-            raise LinkError(f"PUT metadata {status}: {body}")
+            raise LinkError(f"PUT metadata {status}: {body}", status)
         status, st = self._json("GET", f"/messages/{message_id}/upload-state")
         if status >= 400:
-            raise LinkError(f"upload-state {status}")
+            raise LinkError(f"upload-state {status}", status)
         if st.get("complete"):
             return self._complete(message_id)
         have = set(st.get("received", []))
@@ -102,23 +117,24 @@ class Client:
                                           headers={"X-Chunk-Total": str(total), "Content-Type": "application/octet-stream"},
                                           body=chunk)
             if status >= 400:
-                raise LinkError(f"chunk {i} {status}")
+                raise LinkError(f"chunk {i} {status}", status)
         return self._complete(message_id)
 
     def _complete(self, message_id: str) -> bool:
         status, body = self._json("POST", f"/messages/{message_id}/complete")
         if 200 <= status < 300:
             return True
-        raise LinkError(f"complete {status}: {body}")
+        raise LinkError(f"complete {status}: {body}", status)
 
-    def checkin(self, telemetry: Dict[str, Any]) -> Tuple[Settings, List[str], Optional[Dict[str, str]]]:
-        """(settings, inbox ids, doorbell {url, topic} or None). An absent or
-        malformed doorbell means none: the box polls (ADR 0021)."""
+    def checkin(self, telemetry: Dict[str, Any]) -> Tuple[Settings, List[str], Optional[Dict[str, str]], Optional[int]]:
+        """(settings, inbox ids, doorbell {url, topic} or None, max_seq or None).
+        An absent or malformed doorbell means none: the box polls (ADR 0021)."""
         status, body = self._json("POST", "/device/checkin", telemetry)
         if status >= 400 or not isinstance(body, dict):
-            raise LinkError(f"checkin {status}: {body}")
+            raise LinkError(f"checkin {status}: {body}", status)
+        max_seq = body.get("max_seq")
         return (Settings.from_json(body.get("settings")), [m for m in body.get("inbox", []) if isinstance(m, str)],
-                parse_doorbell(body.get("doorbell")))
+                parse_doorbell(body.get("doorbell")), max_seq if isinstance(max_seq, int) else None)
 
     def download(self, message_id: str, have: bytes = b"") -> bytes:
         """Range-resumable: `have` is what an earlier attempt already got."""
@@ -245,13 +261,22 @@ class LinkWorker:
             self.post(FaultEvent(Fault.MODEM, False))
             self.post(LinkState(True))
             for mid in self.store.outbox_ids():
-                self._upload(mid)
+                try:
+                    self._upload(mid)
+                except LinkError as e:
+                    if e.status is None or not 400 <= e.status < 500:
+                        raise                    # the link or the server is in trouble: end the round
+                    # The server refused this one message. Keep it — never evict the outbox —
+                    # and go on: one stuck message must not make the whole box look offline.
+                    log.error("upload %s refused, kept for the next round: %s", mid, e)
             for mid in self.store.inbox_to_report():
                 self.client.played(mid)
                 self.store.inbox_mark(mid, reported=True)
                 self.post(PlayedReported(mid))
             self.store.inbox_prune_played(keep=1)
-            settings, inbox, doorbell = self.client.checkin(self.telemetry())
+            settings, inbox, doorbell, max_seq = self.client.checkin(self.telemetry())
+            if max_seq is not None:
+                self.store.raise_seq(max_seq)   # a re-flashed box continues its counter (ADR 0025)
             self.store.save_settings(settings.to_json())
             if doorbell != self.store.doorbell_json():
                 self.store.save_doorbell(doorbell)
@@ -275,7 +300,16 @@ class LinkWorker:
         meta = self.store.outbox_meta(mid)
         body = {k: meta[k] for k in ("seq", "to", "created_at", "time_ok", "duration_ms", "codec", "key_id", "bytes")}
         self.store.outbox_set_state(mid, "uploading")
-        if self.client.upload(mid, self.store.outbox_container(mid), body, cancelled=lambda: self.simulated_down):
+        try:
+            ok = self.client.upload(mid, self.store.outbox_container(mid), body, cancelled=lambda: self.simulated_down)
+        except SeqTaken as e:
+            # The server has never seen this id, and its seq belongs to another
+            # message: our counter restarted. Continue above the server's and retry once.
+            self.store.raise_seq(e.max_seq)
+            body["seq"] = self.store.outbox_renumber(mid)
+            log.warning("seq of %s was taken; renumbered to %d", mid, body["seq"])
+            ok = self.client.upload(mid, self.store.outbox_container(mid), body, cancelled=lambda: self.simulated_down)
+        if ok:
             self.store.outbox_remove(mid)        # the 2xx has been given: two copies became one (ADR 0010)
             self.post(UploadDone(mid))
 

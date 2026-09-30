@@ -105,6 +105,13 @@ app.use('*', async (c, next) => {
 const parentsOnly = async (c: Context<Env>, next: () => Promise<void>) =>
   isParent(c.get('who')) ? await next() : fail(c, 403, 'parents only')
 
+// The highest `seq` the server holds from a sender, or null: where a restarted counter continues.
+async function maxSeq(who: Identity): Promise<number | null> {
+  const { data } = await db.from('messages').select('seq').eq('sender', who)
+    .order('seq', { ascending: false }).limit(1).maybeSingle()
+  return (data?.seq as number | undefined) ?? null
+}
+
 // --- Messages: upload (either direction) -----------------------------------------------
 // `id` is minted by the recording end and is the idempotency key: a retry of
 // any of these requests is the same request.
@@ -124,7 +131,8 @@ app.put('/messages/:id', async (c) => {
     })
     if (error && error.code !== '23505') return fail(c, 503, 'could not store metadata')
     row = await loadMessage(id)          // ours, or the one a racing retry just made
-    if (!row) return fail(c, 409, 'seq already used by another message')
+    // The sender's counter restarted: tell it where to continue (ADR 0025).
+    if (!row) return fail(c, 409, 'seq already used by another message', { max_seq: await maxSeq(who) })
   }
   if (row.sender !== who || !sameMetadata(row, meta)) return fail(c, 409, 'this id exists with different metadata')
   return c.json(toWire(row))
@@ -266,13 +274,11 @@ app.get('/messages', parentsOnly, async (c) => {
   if (error) return fail(c, 503, 'could not list messages')
   const rows = (data ?? []) as MessageRow[]
   const last = rows[rows.length - 1]
-  const { data: top } = await db.from('messages').select('seq').eq('sender', who)
-    .order('seq', { ascending: false }).limit(1).maybeSingle()
   return c.json({
     messages: rows.map(toWire),
     cursor: last ? encodeCursor(last.updated_at, last.id) : raw ?? null,
     more: rows.length === limit,
-    max_seq: top?.seq ?? null,
+    max_seq: await maxSeq(who),
   })
 })
 
@@ -337,6 +343,7 @@ app.post('/device/checkin', async (c) => {
   // The database knows the topic; the address around it is this project's Realtime (ADR 0021).
   const { doorbell_topic: topic, ...reply } = data as Record<string, unknown>
   reply.doorbell = doorbellFor(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_ANON_KEY'), topic)
+  reply.max_seq = await maxSeq('box')     // a re-flashed box continues its counter (ADR 0025)
 
   // Faults and a low battery reach an adult once, not every minute.
   later((async () => {

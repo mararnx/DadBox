@@ -62,7 +62,7 @@ def test_the_box_token_never_lists_and_parents_see_their_thread():
     p = Parent(srv, KEY)
     mid = p.send(2.0, audio=b"RIFF" + bytes(100))
     assert [m["id"] for m in p.thread()] == [mid]
-    settings, inbox, _ = Client(srv.transport("box")).checkin({"next_checkin_s": 60})
+    settings, inbox, _, _ = Client(srv.transport("box")).checkin({"next_checkin_s": 60})
     assert inbox == [mid] and settings.poll.active_minutes == 1
 
 

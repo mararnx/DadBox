@@ -96,10 +96,18 @@ class Store:
         os.chmod(path, 0o600)
 
     def next_seq(self) -> int:
-        f = self.root / "seq"
-        n = int(f.read_text() or 0) + 1 if f.exists() else 1
-        write_atomic(f, str(n).encode())
+        n = self._seq() + 1
+        write_atomic(self.root / "seq", str(n).encode())
         return n
+
+    def _seq(self) -> int:
+        f = self.root / "seq"
+        return int(f.read_text() or 0) if f.exists() else 0
+
+    def raise_seq(self, floor: int) -> None:
+        """Never mint a seq at or below one the server already holds (ADR 0025)."""
+        if floor > self._seq():
+            write_atomic(self.root / "seq", str(floor).encode())
 
     def locked(self) -> bool:
         return (self.root / "lock").exists()
@@ -169,6 +177,13 @@ class Store:
 
     def outbox_container(self, message_id: str) -> bytes:
         return (self.root / "outbox" / f"{message_id}.dbx").read_bytes()
+
+    def outbox_renumber(self, message_id: str) -> int:
+        """A new seq for a message the server has never seen — seq is not in
+        the sealed container, so only the metadata changes (ADR 0025)."""
+        seq = self.next_seq()
+        write_json_atomic(self.root / "outbox" / f"{message_id}.json", dict(self.outbox_meta(message_id), seq=seq))
+        return seq
 
     def outbox_set_state(self, message_id: str, state: str) -> None:
         meta = self.outbox_meta(message_id)

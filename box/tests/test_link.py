@@ -68,6 +68,52 @@ def test_a_dropped_link_keeps_the_outbox_and_the_next_round_resumes(tmp_path):
     assert transport.count - before < total + 4     # resumed: fewer chunk requests than a fresh upload
 
 
+def test_a_reflashed_box_renumbers_and_continues_above_the_server(tmp_path):
+    """/data/seq lost: the first message reuses seq 1, the server says 409 with its
+    max_seq, and the box renumbers above it instead of failing forever (ADR 0025)."""
+    clock, srv, store, events, transport, worker = setup(tmp_path / "before")
+    for mid in ("01JAYZ3K7QW9E8RVX2M4N6P8T1", "01JAYZ3K7QW9E8RVX2M4N6P8T2", "01JAYZ3K7QW9E8RVX2M4N6P8T3"):
+        enqueue(store, mid)
+    assert worker._round() is True
+    fresh = Store(tmp_path / "after")                # the re-flashed card
+    fresh.put_key(1, KEY)
+    worker.store = fresh
+    enqueue(fresh, "01JAYZ3K7QW9E8RVX2M4N6P8TX")     # seq 1 again
+    enqueue(fresh, "01JAYZ3K7QW9E8RVX2M4N6P8TY")     # seq 2 again
+    assert worker._round() is True
+    assert fresh.outbox_ids() == []
+    assert srv.messages["01JAYZ3K7QW9E8RVX2M4N6P8TX"]["seq"] == 4    # order kept
+    assert srv.messages["01JAYZ3K7QW9E8RVX2M4N6P8TY"]["seq"] == 5
+    assert fresh.next_seq() == 6
+
+
+def test_checkin_raises_the_counter_before_the_next_recording(tmp_path):
+    clock, srv, store, events, transport, worker = setup(tmp_path / "before")
+    enqueue(store, "01JAYZ3K7QW9E8RVX2M4N6P8T1")
+    enqueue(store, "01JAYZ3K7QW9E8RVX2M4N6P8T2")
+    assert worker._round() is True
+    fresh = Store(tmp_path / "after")
+    worker.store = fresh
+    assert worker._round() is True                   # nothing to upload; the check-in says max_seq 2
+    assert fresh.next_seq() == 3
+    fresh.raise_seq(1)                               # the counter never goes down
+    assert fresh.next_seq() == 4
+
+
+def test_a_message_the_server_refuses_is_kept_and_the_box_still_checks_in(tmp_path):
+    clock, srv, store, events, transport, worker = setup(tmp_path)
+    cont = enqueue(store, "01JAYZ3K7QW9E8RVX2M4N6P8TD")
+    meta = store.outbox_meta("01JAYZ3K7QW9E8RVX2M4N6P8TD")
+    store.enqueue("01JAYZ3K7QW9E8RVX2M4N6P8TD", cont, dict(meta, codec=99))     # the server says 400
+    enqueue(store, "01JAYZ3K7QW9E8RVX2M4N6P8TE")
+    assert worker._round() is True
+    ev = drain(events)
+    assert store.outbox_ids() == ["01JAYZ3K7QW9E8RVX2M4N6P8TD"]                 # kept, never evicted
+    assert [e.message_id for e in ev if isinstance(e, c.UploadDone)] == ["01JAYZ3K7QW9E8RVX2M4N6P8TE"]
+    assert [e for e in ev if isinstance(e, c.Checkin)][-1].ok
+    assert not [e for e in ev if isinstance(e, c.LinkState) and not e.up]
+
+
 def test_inbox_is_downloaded_crc_checked_and_played_is_reported(tmp_path):
     clock, srv, store, events, transport, worker = setup(tmp_path)
     parent = Parent(srv, KEY)

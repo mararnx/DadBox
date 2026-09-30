@@ -144,7 +144,7 @@ class FakeServer:
         row = self.messages.get(mid)
         if row is None:
             if any(r["seq"] == meta["seq"] and r["from"] == who for r in self.messages.values()):
-                raise _Fail(409, "seq already used by another message")
+                raise _Fail(409, "seq already used by another message", max_seq=self._max_seq(who))
             row = dict(meta, id=mid, **{"from": who}, state="uploading", uploaded_at=None, delivered_at=None,
                        played_at=None, updated_at=self._wall(), chunk_total=-(-meta["bytes"] // CHUNK_BYTES))
             self.messages[mid] = row
@@ -288,9 +288,12 @@ class FakeServer:
         self._parents_only(who)
         rows = sorted((r for r in self.messages.values() if r["state"] != "uploading" and who in (r["from"], r["to"])),
                       key=lambda r: (r["updated_at"], r["id"]))
-        mine = [r["seq"] for r in self.messages.values() if r["from"] == who]
         return self._json(200, {"messages": [self._wire(r) for r in rows], "cursor": None, "more": False,
-                                "max_seq": max(mine) if mine else None})
+                                "max_seq": self._max_seq(who)})
+
+    def _max_seq(self, who):
+        mine = [r["seq"] for r in self.messages.values() if r["from"] == who]
+        return max(mine) if mine else None
 
     def _get_message(self, who, mid):
         self._parents_only(who)
@@ -361,7 +364,8 @@ class FakeServer:
             self.alerts.pop("battery_low", None)
         inbox = sorted(r["id"] for r in self.messages.values() if r["to"] == "box" and r["state"] in ("uploaded", "delivered"))
         bell = {"url": "sim://doorbell", "topic": self.doorbell_topic} if self.doorbell_topic else None
-        return self._json(200, {"settings": self.settings, "inbox": inbox, "doorbell": bell})
+        return self._json(200, {"settings": self.settings, "inbox": inbox, "doorbell": bell,
+                                "max_seq": self._max_seq("box")})
 
     # --- the doorbell: what Realtime does, in-process --------------------------------------------------
 
