@@ -14,9 +14,12 @@ round stopped at that upload and never checked in, so from 18:00 to 18:10 the
 box was `link=DOWN`. Moving the (synthetic) note out of the outbox brought it
 straight back. Fixed in ADR 0025: `max_seq` on check-in and on the 409, the
 box renumbers and retries, and a 4xx on one message no longer stops the
-check-in. The upload time over LTE is still unmeasured.
-**Next:** deploy the server function and `box/deploy.sh`, then re-run the
-3-minute upload and time it. Add `/data/seq` to the `/data` backup.
+check-in. Deployed both; the first check-in raised `/data/seq` from 1 to 10.
+Re-run: the same 3-minute note (seq 11, 339,493 bytes, 11 chunks) went from
+queued to `complete` in **8.5 s**, 8.2 s of it uploading: ~41 KB/s (~330 kbit/s)
+of payload, 400,593 bytes on `usb0` including TLS, HTTP and the SSH session.
+**Next:** time it on the real antenna in the child's room; add `/data/seq`
+to the `/data` backup.
 
 ## 2026-09-30 — USB-C panel coupler: powers the box one way up only
 
