@@ -7,6 +7,11 @@
 > **2026-09-22, ADR 0021:** the doorbell, on mains only. The check-in response
 > gains `doorbell`, telemetry gains `doorbell`, `poll` gains
 > `backstop_minutes`. A box or server that ignores all three is still correct.
+>
+> **2026-09-30, ADR 0025:** a sender whose counter restarted recovers. The
+> check-in response gains `max_seq`; the `409` for a `seq` already used gains
+> `max_seq`; the box renumbers a message the server has never seen and goes
+> on. A server's 4xx on one message no longer stops the box checking in.
 
 The contract between the three code streams. Firmware, server and iOS app all
 depend on this document; change it here first, then in the code.
@@ -121,8 +126,11 @@ same message. The server never mints ids.
 clock, and are `null` until they happen. "Played 19:12" is the sender's whole
 feedback loop; `state` alone cannot say it.
 
-`seq` is a monotonic per-sender counter kept in NVS. **It is the ordering key,
-not `created_at`.** The box has no RTC battery: after a cold start it does not
+`seq` is a monotonic per-sender counter kept on the sender (the box: `/data/seq`).
+**It is the ordering key, not `created_at`.** A counter can restart — a
+re-flashed card, a reinstalled app — so a sender never mints a `seq` at or
+below the `max_seq` the server last told it, and recovers when the server
+says a `seq` is taken ([ADR 0025](decisions/0025-seq-recovery.md)). The box has no RTC battery: after a cold start it does not
 know the time until it next connects, and messages recorded in that window get
 a best-effort `created_at` with `time_ok: false`. The app shows those as
 "recorded while offline" rather than inventing a time.
@@ -158,7 +166,13 @@ POST /messages/{id}/complete             server verifies crc32, sets uploaded �
 The metadata body is the message object without `id`, `from`, `state` and the
 server timestamps: `seq`, `to`, `created_at`, `time_ok`, `duration_ms`,
 `codec`, `key_id`, `bytes` — `bytes` being the size of the whole container.
-The same `id` with different metadata is `409`. `X-Chunk-Total` is
+The same `id` with different metadata is `409`. A new `id` with a `seq` the
+sender has already used is `409 { "error": "seq already used by another
+message", "max_seq": 41 }`: the server has never seen this `id`, and `seq` is
+not inside the sealed container, so the sender raises its counter above
+`max_seq`, gives the message the next `seq` — persisted before it retries —
+and sends the metadata again. A message the server already holds keeps its
+`seq`. `X-Chunk-Total` is
 ⌈bytes / 32768⌉; every chunk is exactly 32 KB except the last. `complete`
 answers `409 { "missing": [3,4] }` while chunks are missing and `422` when the
 assembled container contradicts its metadata, is not encrypted, or fails its
@@ -208,10 +222,14 @@ One request does everything the box needs between events:
 ```
 POST /device/checkin
   → body: telemetry (below)
-  ← { "settings": {…}, "inbox": ["01J…", "01J…"],
+  ← { "settings": {…}, "inbox": ["01J…", "01J…"], "max_seq": 41,
       "doorbell": { "url": "wss://<project>.supabase.co/realtime/v1/websocket?apikey=<publishable>&vsn=1.0.0",
                     "topic": "doorbell:<32 hex>" } }
 ```
+
+`max_seq` is the highest `seq` the server holds from the box, or `null`; the
+box raises its counter to it, so a re-flashed box's first recording does not
+reuse a number.
 
 `doorbell` may be absent or `null`: the box then closes any doorbell it has
 and polls. The box keeps the last one in `/data` and uses a new one from the
@@ -338,6 +356,10 @@ There is no mute ([ADR 0020](decisions/0020-no-mute-replay-green-link.md)).
 
 [ADR 0010](decisions/0010-nothing-is-lost.md): nothing a child recorded is lost.
 
+- A server's 4xx to one message's upload does not end the round: the box
+  keeps that message, uploads the rest, and still checks in, so one stuck
+  message never makes the whole box look offline. Only a transport failure
+  or a 5xx ends a round.
 - The box gives its *got it* pulse only after the container is fsynced to the
   outbox. The **outbox is never evicted.**
 - `POST /messages/{id}/complete` returns 2xx **only after** the server has
