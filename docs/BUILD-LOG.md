@@ -2,6 +2,34 @@
 
 Newest entry at the top. One entry per session at the bench.
 
+## 2026-09-30 — Modem HAT: a real check-in over LTE
+
+**Did:** Fitted the SIM7670G HAT (header plus OTG USB) with a Sunrise SIM.
+It came up as a Qualcomm composite device, `05c6:9330`: RNDIS `usb0` and
+four `ttyACM` ports. SIM7670G-MNGV, firmware V1.9.05; registered on Sunrise
+228-02, LTE band 3 first, band 20 later, `CSQ 20`, RSRP −97 to −104 dBm on
+the bench antenna. APN `internet`. `AT+DIALMODE=0` and `AT+CRESET` gave
+data: ping 1.1.1.1 in 16–66 ms and public address 194.230.144.156 through
+`usb0` only. It survives a power cycle with nothing re-applied. Then
+`dadboxctl checkin` over LTE: ok, 2 messages in the inbox, ~1.1 KB each way
+on `usb0`. `throttled=0x0` throughout: no under-voltage from the modem on
+the bench supply. New `box/setup/modem_check.py` (stdlib only) does the whole
+check in one command.
+**Learned:** At `DIALMODE 1`, as it shipped, the modem registers, has a carrier
+address and answers on 192.168.0.1, yet forwards nothing — easy to misread
+as a coverage or APN problem. The AT ports are `ttyACM*`, not `ttyUSB*`.
+`usb0` wins the default route over Wi-Fi (metric 100 vs 600), so on the
+bench every byte is SIM data. **The Wi-Fi profile had vanished before the
+modem went on:** the Imager's netplan files in `/etc/netplan/` were 0 bytes,
+dated 25 Sep 16:41 — a power pull right after a write, with the overlay not
+yet on. Recovered over the serial console with `nmcli`. It had also left
+the SD card unseated once today (solid LED, no boot). Shut down before
+pulling the plug until the read-only overlay is on.
+**Next:** the PWRKEY wiring (GPIO 26 in `hw/pi.py` is still a guess — the
+modem powers on by itself from USB); `rssi` from `AT+CSQ` on `ttyACM0` for
+the app; which antenna connector the HAT uses (the wiki lists IPEX1 and
+SMA), then order the antennas; turn the overlay on.
+
 ## 2026-09-25 — Amp and speaker: the first real message played
 
 **Did:** Wired the MAX98357A (VCC to pin 2, GND, BCLK 12, LRC 35, DIN 40, SD

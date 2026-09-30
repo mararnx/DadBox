@@ -47,12 +47,16 @@
    The watchdog keepalive needs no package: `dadbox/sdnotify.py` speaks
    systemd's notify socket directly (a venv cannot see apt's python3-systemd).
    The sudoers line allows one command, the clean shutdown below 5 % battery.
-6. **Modem** (SIM7670G HAT on the Zero's OTG port): confirm it enumerates as
-   a USB Ethernet interface (`ip a`) and find its AT port (`/dev/ttyUSB*`;
-   `AT+CSQ`, `AT+CPSI?`). If it does not come up as Ethernet, the mode is set
-   once over AT — the exact command is to be confirmed from the Waveshare wiki
-   with the part in hand. Then `curl ifconfig.me`, and check that the mode
-   survives a reboot and a power-key cycle.
+6. **Modem** (SIM7670G HAT on the Zero's OTG port). It enumerates as
+   Qualcomm `05c6:9330`, not SIMCom's ID: `usb0` (RNDIS, the modem's own
+   192.168.0.1 gateway) and AT ports `/dev/ttyACM0`–`3` (cdc_acm, AT on
+   `ttyACM0`). `sudo python3 setup/modem_check.py --apn internet` reports SIM,
+   registration, band and data through `usb0` only. Once per modem: the APN,
+   then `AT+DIALMODE=0` (auto-dial; at `1` the modem registers and gets an
+   address but forwards nothing) and `AT$MYCONFIG="usbnetmode",0` (RNDIS),
+   then `AT+CRESET`. All three are stored in the modem and survive a power
+   cycle. NetworkManager gives `usb0` metric 100, ahead of Wi-Fi's 600, so
+   all traffic leaves over LTE when the modem is up.
 7. **Power tuning**: `arm_freq`/`over_voltage` down, `maxcpus=1` in
    `cmdline.txt` for idle; read each step from the INA219 once the UPS
    Module 3S is fitted.
