@@ -10,27 +10,30 @@
   --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
   --body:"Barlow","Helvetica Neue",Arial,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-  --c-v5:#C8102E; --c-gnd:#23292C; --c-red:#F0602F; --c-green:#1E9A4B; --c-blue:#2566D8; --c-sw:#8C979C;
-  --c-bclk:#D9A300; --c-lrc:#8A52D6; --c-din:#0E9AA0; --c-micsd:#D0408E; --c-ampsd:#9C6B2E; --c-key:#6E4B2A;
-  --c-dim:#E07A93; --c-dbgo:#F08A1C; --c-dbgy:#E6C400; --c-usb:#9AA4A8; --c-spk:#4A5358;
+  --c-red:#F0602F; --c-green:#1E9A4B; --c-blue:#2566D8;
+  --w-black:#1F2326; --w-brown:#8A5A33; --w-red:#D62839; --w-orange:#F28A1E; --w-yellow:#F3C613;
+  --w-green:#1F9D4C; --w-blue:#2563D9; --w-purple:#7B4CC8; --w-grey:#A3A9AD; --w-white:#F7F7F4;
+  --w-cable:#6E787D; --edge:rgba(27,34,38,.55);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme:dark;
     --ground:#111618; --paper:#182023; --ink:#E4EAEA; --muted:#9AA8AC; --line:#34403F; --faint:#232C2E;
     --alu:#3A4549; --alu-line:#7C898D; --pcb:#1C2A1E; --pcb-line:#58744F; --housing:#070A0B; --accent:#7EA6F5;
-    --c-v5:#FF5A6E; --c-gnd:#B8C2C6; --c-red:#FF8A5C; --c-green:#4FD17F; --c-blue:#6C9CFF; --c-sw:#7D8A90;
-    --c-bclk:#F2C530; --c-lrc:#B488FF; --c-din:#3CCFD4; --c-micsd:#F279B8; --c-ampsd:#D29A58; --c-key:#B98552;
-    --c-dim:#F7A3B7; --c-dbgo:#FFA84A; --c-dbgy:#FFE24D; --c-usb:#5D686D; --c-spk:#A3AEB3;
+    --c-red:#FF8A5C; --c-green:#4FD17F; --c-blue:#6C9CFF;
+    --w-black:#15181A; --w-brown:#A8734A; --w-red:#F0475A; --w-orange:#FF9F3D; --w-yellow:#FFD83D;
+    --w-green:#3CC46E; --w-blue:#4C86FF; --w-purple:#9D72EE; --w-grey:#9AA2A6; --w-white:#F2F2EE;
+    --w-cable:#56616A; --edge:rgba(228,234,234,.6);
   }
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
   --ground:#111618; --paper:#182023; --ink:#E4EAEA; --muted:#9AA8AC; --line:#34403F; --faint:#232C2E;
   --alu:#3A4549; --alu-line:#7C898D; --pcb:#1C2A1E; --pcb-line:#58744F; --housing:#070A0B; --accent:#7EA6F5;
-  --c-v5:#FF5A6E; --c-gnd:#B8C2C6; --c-red:#FF8A5C; --c-green:#4FD17F; --c-blue:#6C9CFF; --c-sw:#7D8A90;
-  --c-bclk:#F2C530; --c-lrc:#B488FF; --c-din:#3CCFD4; --c-micsd:#F279B8; --c-ampsd:#D29A58; --c-key:#B98552;
-  --c-dim:#F7A3B7; --c-dbgo:#FFA84A; --c-dbgy:#FFE24D; --c-usb:#5D686D; --c-spk:#A3AEB3;
+  --c-red:#FF8A5C; --c-green:#4FD17F; --c-blue:#6C9CFF;
+  --w-black:#15181A; --w-brown:#A8734A; --w-red:#F0475A; --w-orange:#FF9F3D; --w-yellow:#FFD83D;
+  --w-green:#3CC46E; --w-blue:#4C86FF; --w-purple:#9D72EE; --w-grey:#9AA2A6; --w-white:#F2F2EE;
+  --w-cable:#56616A; --edge:rgba(228,234,234,.6);
 }
 *{box-sizing:border-box}
 body{background:var(--ground);color:var(--ink);font:16px/1.55 var(--body);margin:0}
@@ -67,9 +70,10 @@ figcaption{padding:10px 16px 14px;color:var(--muted);font-size:14.5px;border-top
 /* svg */
 svg text{fill:var(--ink)}
 .halo{fill:none;stroke:var(--paper);stroke-width:8;stroke-linecap:round;stroke-linejoin:round}
+.edge{fill:none;stroke:var(--edge);stroke-linecap:round;stroke-linejoin:round}
 .core{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .w.cable .halo{stroke-width:12}
-.w.bench .core{stroke-dasharray:9 6}
+.w.bench .core,.w.bench .edge{stroke-dasharray:9 6}
 .w.chain .core{stroke-dasharray:none}
 .w,.part,.pin,.plab{transition:opacity .18s}
 .w:hover .core{stroke-width:5 !important}
@@ -112,15 +116,18 @@ circle.cap{fill:var(--faint);stroke:var(--alu-line)}
 .dipk.on{fill:var(--c-green)}
 .tag{font:600 11px var(--mono);letter-spacing:.04em}
 
-.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px 18px;list-style:none;margin:0;padding:14px 16px;background:var(--paper);border:1px solid var(--line)}
-.legend li{display:flex;align-items:center;gap:10px;font-size:14.5px}
-.legend .sw{width:28px;height:5px;border-radius:3px;flex:none}
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:6px 18px;list-style:none;margin:0;padding:14px 16px;background:var(--paper);border:1px solid var(--line)}
+.legend li{display:grid;grid-template-columns:32px 64px 40px minmax(0,1fr);align-items:center;gap:8px;font-size:14.5px}
+.legend b{font-weight:600}
+.legend .n{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.legend .use{color:var(--muted)}
+.legend .sw{width:32px;height:7px;border-radius:4px;box-shadow:0 0 0 1px var(--edge)}
 .legend .dash{background:repeating-linear-gradient(90deg,var(--ink) 0 7px,transparent 7px 11px)}
 
 .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
 .rule{background:var(--paper);border:1px solid var(--line);border-top:3px solid var(--c-red);padding:14px 16px;display:grid;gap:6px}
-.rule:nth-child(2){border-top-color:var(--c-bclk)}
-.rule:nth-child(3){border-top-color:var(--c-gnd)}
+.rule:nth-child(2){border-top-color:var(--w-yellow)}
+.rule:nth-child(3){border-top-color:var(--w-black)}
 .rule p{color:var(--muted);font-size:15px}
 
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,440px),1fr));gap:14px}
@@ -170,9 +177,11 @@ td.mono{white-space:nowrap}
     <figcaption>Pin numbers are physical header pins. Pin 1 (square pad) is at the SD-card end; odd pins are the inner row. The header is drawn wider than it is so every wire can leave its own pin, and wires that belong to the other side cross between two rows of pins. Dashed wires are bench-only. The USB ports' positions are approximate.</figcaption>
   </figure>
 
+  <h2>Wire colours</h2>
+  <p class="foot">The ten colours of the ribbon cable in hand. Red is 5 V and black is ground everywhere; the two buttons are wired alike; each I²S clock keeps its colour from the header through the amp to the mic. The count is how many wires of each colour to cut.</p>
   <ul class="legend" aria-label="Wire colours">
     %%LEGEND%%
-    <li><span class="sw dash"></span>bench only, removed in the field</li>
+    <li><span class="sw dash"></span><b>dashed</b><span class="n"></span><span class="use">debug probe, its own orange / yellow / black cable; bench only</span></li>
   </ul>
 
   <div class="rules">

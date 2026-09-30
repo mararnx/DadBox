@@ -63,6 +63,28 @@ No two Dupont housings on one pin, anywhere.
 Used: 16 signal pins, both 5 V pins, 6 of 8 grounds. Spare: GPIO 4, 7, 8,
 9, 10, 11, 12, 13, both 3.3 V pins, two grounds (25, 34).
 
+## Wire colours
+
+From the ten-colour ribbon cable in hand (photo, 2026-09-30). Red is 5 V and
+black is ground everywhere; both buttons are wired alike; each I²S clock keeps
+its colour from the header through the amp to the mic. The wiring map
+(`wiring-diagram.html`) draws every wire in these colours.
+
+| Colour | Cut | Pins → part |
+| --- | --: | --- |
+| black | 5 + jumpers | 9 mic GND · 30 record gold/C− · 20 play gold/C− · 39 amp GND · 6 modem GND; short offcuts for C− ↔ gold and mic L/R ↔ GND |
+| red | 2 | 2 amp Vin · 4 modem 5 V |
+| orange | 3 | 11 record R · 16 play R · record R tab → mic VDD |
+| green | 3 | 13 record G · 18 play G · 40 amp DIN |
+| blue | 2 | 15 record B · 22 play B |
+| white | 2 | 29 record switch · 31 play switch |
+| yellow | 2 | 12 amp BCLK · amp BCLK → mic SCK |
+| purple | 2 | 35 amp LRC · amp LRC → mic WS |
+| brown | 1 | 38 mic SD |
+| grey | 2 | 36 amp SD · 37 modem PWRKEY |
+
+The debug probe (pins 8, 10, 14) uses its own orange / yellow / black cable.
+
 ## Per part
 
 ### The buttons, seen from the back

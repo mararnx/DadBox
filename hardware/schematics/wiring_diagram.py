@@ -91,33 +91,36 @@ def pad_xy(k, key):
 
 
 # ---- the wires -------------------------------------------------------------
-# (pin, part, pad, colour token, what it is). Gap = crosses the header between rows.
+# (pin, part, pad, wire colour, what it is). The colours are the ten in the ribbon
+# cable in hand (photo, 2026-09-30): red = 5 V, black = ground everywhere; both
+# buttons are wired alike (R orange, G green, B blue, switch white, ground black);
+# the I²S clocks keep their colour through the chain to the mic.
 
 WIRES = [
-    (9, "mic", "GND", "gnd", "GND"),
-    (38, "mic", "SD", "micsd", "I²S data in (mic → Pi)"),
-    (11, "record", "R", "red", "GPIO 17 · red ring, mic power"),
+    (9, "mic", "GND", "black", "GND"),
+    (38, "mic", "SD", "brown", "I²S data in (mic → Pi)"),
+    (11, "record", "R", "orange", "GPIO 17 · red ring, mic power"),
     (13, "record", "G", "green", "green ring"),
     (15, "record", "B", "blue", "blue ring"),
-    (29, "record", "NO", "sw", "switch · pull-up, pressed = low"),
-    (30, "record", "C", "gnd", "GND · switch C and LED −"),
-    (4, "modem", "V5", "v5", "5 V"),
-    (6, "modem", "GND", "gnd", "GND"),
-    (37, "modem", "P4", "key", "PWRKEY · high = key pressed"),
-    (2, "amp", "VIN", "v5", "5 V"),
-    (12, "amp", "BCLK", "bclk", "I²S bit clock"),
-    (35, "amp", "LRC", "lrc", "I²S word clock"),
-    (40, "amp", "DIN", "din", "I²S data out (Pi → amp)"),
-    (36, "amp", "SD", "ampsd", "amp enable · owned by the sound driver"),
-    (39, "amp", "GND", "gnd", "GND"),
-    (8, "debug", "RX", "dbgy", "Pi TXD → probe RX"),
-    (10, "debug", "TX", "dbgo", "probe TX → Pi RXD"),
-    (14, "debug", "GND", "gnd", "GND"),
-    (16, "play", "R", "red", "red ring"),
+    (29, "record", "NO", "white", "switch · pull-up, pressed = low"),
+    (30, "record", "C", "black", "GND · switch C and LED −"),
+    (4, "modem", "V5", "red", "5 V"),
+    (6, "modem", "GND", "black", "GND"),
+    (37, "modem", "P4", "grey", "PWRKEY · high = key pressed"),
+    (2, "amp", "VIN", "red", "5 V"),
+    (12, "amp", "BCLK", "yellow", "I²S bit clock"),
+    (35, "amp", "LRC", "purple", "I²S word clock"),
+    (40, "amp", "DIN", "green", "I²S data out (Pi → amp)"),
+    (36, "amp", "SD", "grey", "amp enable · owned by the sound driver"),
+    (39, "amp", "GND", "black", "GND"),
+    (8, "debug", "RX", "yellow", "Pi TXD → probe RX"),
+    (10, "debug", "TX", "orange", "probe TX → Pi RXD"),
+    (14, "debug", "GND", "black", "GND"),
+    (16, "play", "R", "orange", "red ring"),
     (18, "play", "G", "green", "green ring"),
     (22, "play", "B", "blue", "blue ring"),
-    (31, "play", "NO", "sw", "switch · pull-up, pressed = low"),
-    (20, "play", "C", "gnd", "GND · switch C and LED −"),
+    (31, "play", "NO", "white", "switch · pull-up, pressed = low"),
+    (20, "play", "C", "black", "GND · switch C and LED −"),
 ]
 # wires that must cross the header to reach their side, and the gap they use
 GAP = {4: -1, 6: -1, 30: +1, 38: +1, 31: +1, 33: +1, 35: +1, 39: +1}
@@ -215,7 +218,8 @@ def esc(s):
 def wire(d, color, parts, title, cls="", width=3.2):
     return (f'<g class="w {cls}" data-p="{" ".join(parts)}"><title>{esc(title)}</title>'
             f'<path class="halo" d="{d}"/>'
-            f'<path class="core" d="{d}" style="stroke:var(--c-{color});stroke-width:{width}"/></g>')
+            f'<path class="edge" d="{d}" style="stroke-width:{width + 2}"/>'
+            f'<path class="core" d="{d}" style="stroke:var(--w-{color});stroke-width:{width}"/></g>')
 
 
 def text(x, y, s, cls="", anchor="start", extra=""):
@@ -241,10 +245,10 @@ def build_svg():
     usb_y = pad_xy("modem", "USB")[1]
     pwr_y = usb_y + 40
     psu_y = pad_xy("psu", "OUT")[1]
-    wires_svg.append(wire(rounded([(L_EDGE, usb_y), (bx0 - 12, usb_y)]), "usb", ["modem"],
+    wires_svg.append(wire(rounded([(L_EDGE, usb_y), (bx0 - 12, usb_y)]), "cable", ["modem"],
                           "USB data: Zero inner micro-USB (via OTG adapter) → HAT USB-C", "cable", 7))
     wires_svg.append(wire(rounded([(L_EDGE, psu_y), (bx0 - 22, psu_y), (bx0 - 22, pwr_y), (bx0 - 12, pwr_y)]),
-                          "v5", ["psu"], "5 V supply → Zero outer micro-USB, PWR IN", "cable", 7))
+                          "cable", ["psu"], "5 V supply → Zero outer micro-USB, PWR IN", "cable", 7))
     notes.append(text(L_EDGE + 70, usb_y - 9, "OTG adapter + USB-A→C cable", "cap"))
     notes.append(text(L_EDGE + 70, psu_y - 9, "micro-USB plug", "cap"))
 
@@ -255,16 +259,16 @@ def build_svg():
         tx, ty = pad_xy(part, pad)
         pts = route(side, lead, ys, chans[pin], tx, ty)
         cls = "bench" if part == "debug" else ""
-        title = f"pin {pin} · {PIN_NAME[pin]} → {PARTS[part]['title']} {pad}: {what}"
+        title = f"{color} wire · pin {pin} · {PIN_NAME[pin]} → {PARTS[part]['title']} {pad}: {what}"
         wires_svg.append(wire(rounded(pts), color, [part], title, cls))
 
     # -- chains at the parts --
     rx, ry = pad_xy("record", "R")
     vx, vy = pad_xy("mic", "VDD")
-    wires_svg.append(wire(rounded([(rx, ry), (rx + 16, ry), (rx + 16, vy), (vx, vy)]), "red",
+    wires_svg.append(wire(rounded([(rx, ry), (rx + 16, ry), (rx + 16, vy), (vx, vy)]), "orange",
                           ["mic", "record"], "Chain: record R tab → mic VDD (GPIO 17 through the red LED's tab)", "chain"))
-    for key, mkey, color, top, xr, xl in (("BCLK", "SCK", "bclk", 100, 1394, 488),
-                                          ("LRC", "WS", "lrc", 114, 1386, 498)):
+    for key, mkey, color, top, xr, xl in (("BCLK", "SCK", "yellow", 100, 1394, 488),
+                                          ("LRC", "WS", "purple", 114, 1386, 498)):
         ax, ay = pad_xy("amp", key)
         mx, my = pad_xy("mic", mkey)
         pts = [(ax, ay), (xr, ay), (xr, top), (xl, top), (xl, my), (mx, my)]
@@ -275,11 +279,11 @@ def build_svg():
         x, y1 = pad_xy(part, "C")
         _, y2 = pad_xy(part, "K")
         dx = 12 if PARTS[part]["side"] == "L" else -12
-        wires_svg.append(wire(rounded([(x, y1), (x + dx, y1), (x + dx, y2), (x, y2)], 4), "gnd", [part],
+        wires_svg.append(wire(rounded([(x, y1), (x + dx, y1), (x + dx, y2), (x, y2)], 4), "black", [part],
                               f"{PARTS[part]['title']}: C− linked to a gold switch tab at the button", "jumper", 2.4))
     x, y1 = pad_xy("mic", "GND")
     _, y2 = pad_xy("mic", "LR")
-    wires_svg.append(wire(rounded([(x, y1), (x + 12, y1), (x + 12, y2), (x, y2)], 4), "gnd", ["mic"],
+    wires_svg.append(wire(rounded([(x, y1), (x + 12, y1), (x + 12, y2), (x, y2)], 4), "black", ["mic"],
                           "Mic: L/R tied to GND at the mic (left channel)", "jumper", 2.4))
 
     # -- the board and header --
@@ -321,6 +325,9 @@ def build_svg():
         g.append(text(tx if left else x0 + 16, y0 + 42, p["sub"], "psub", "start"))
         for key, name, note in p["pads"]:
             px, py = pad_xy(k, key)
+            colour = PAD_COLOUR.get((k, key))
+            if colour:
+                note = f"{colour} · {note}"
             open_ = key == "GAIN"
             g.append(f'<circle class="pad{" open" if open_ else ""}" cx="{px}" cy="{py}" r="5.5"/>')
             if left:
@@ -374,8 +381,8 @@ def illustrations():
              f'{text(x0 + w - 36, y0 + 108, "screw terminal", "cap", "end")}'
              f'<path class="spk" d="M{sx - 28},{sy - 18} h16 l24,-22 v80 l-24,-22 h-16 z"/>'
              f'{text(sx, sy + 58, "Seeed 4 Ω", "cap", "middle")}{text(sx, sy + 72, "speaker", "cap", "middle")}</g>')
-    for dy, lab in ((-8, "+"), (8, "−")):
-        g.append(wire(rounded([(x0 + w - 8, y0 + 138 + dy), (sx - 28, y0 + 138 + dy)]), "spk", ["amp"],
+    for dy, lab, col in ((-8, "+", "red"), (8, "−", "black")):
+        g.append(wire(rounded([(x0 + w - 8, y0 + 138 + dy), (sx - 28, y0 + 138 + dy)]), col, ["amp"],
                       f"Speaker {lab}", "", 2.6))
     # modem: antenna, DIP switches, SIM
     x0, y0, w, h = part_box("modem")
@@ -401,14 +408,37 @@ def illustrations():
     return "\n".join(g)
 
 
-LEGEND = [
-    ("v5", "5 V"), ("gnd", "GND (black wire)"), ("red", "GPIO 17 · red ring + mic power"),
-    ("green", "green ring"), ("blue", "blue ring"), ("sw", "button switch NO"),
-    ("bclk", "I²S BCLK"), ("lrc", "I²S LRCLK"), ("din", "I²S data to amp"),
-    ("micsd", "I²S data from mic"), ("ampsd", "amp SD (driver)"), ("key", "modem PWRKEY"),
-("dbgo", "probe TX (orange)"), ("dbgy", "probe RX (yellow)"),
-    ("usb", "USB data cable"),
-]
+COLOURS = ["black", "brown", "red", "orange", "yellow", "green", "blue", "purple", "grey", "white"]
+USES = {
+    "black": "ground, every part; also the short jumpers at the parts",
+    "brown": "mic data → pin 38",
+    "red": "5 V → amp and modem HAT",
+    "orange": "button red rings; record R tab → mic VDD",
+    "yellow": "I²S bit clock: pin 12 → amp BCLK → mic SCK",
+    "green": "button green rings; amp DIN",
+    "blue": "button blue rings",
+    "purple": "I²S word clock: pin 35 → amp LRC → mic WS",
+    "grey": "amp SD; modem PWRKEY",
+    "white": "button switches",
+}
+
+
+# the colour arriving at each pad, for the pad labels
+PAD_COLOUR = {(part, pad): colour for pin, part, pad, colour, what in WIRES}
+PAD_COLOUR.update({("mic", "VDD"): "orange", ("mic", "SCK"): "yellow", ("mic", "WS"): "purple",
+                   ("record", "K"): "black", ("play", "K"): "black", ("mic", "LR"): "black"})
+
+
+def colour_counts():
+    """Wires to cut per colour: header wires plus the chains (not jumpers, not the probe's own cable)."""
+    n = {c: 0 for c in COLOURS}
+    for pin, part, pad, colour, what in WIRES:
+        if part != "debug":
+            n[colour] += 1
+    for c in ("orange", "yellow", "purple"):     # the three chains to the mic
+        n[c] += 1
+    return n
+
 
 FILTERS = [("all", "Everything"), ("record", "Record button"), ("mic", "Microphone"),
            ("play", "Play button"), ("amp", "Amp + speaker"),
@@ -464,7 +494,9 @@ def main():
         f'#map[data-focus="{k}"] .w:not([data-p~="{k}"]),#map[data-focus="{k}"] .part:not([data-p~="{k}"]),'
         f'#map[data-focus="{k}"] .pin.used:not([data-p~="{k}"]),#map[data-focus="{k}"] .plab.on:not([data-p~="{k}"])'
         f'{{opacity:.1}}' for k, _ in FILTERS[1:])
-    legend = "".join(f'<li><span class="sw" style="background:var(--c-{c})"></span>{esc(t)}</li>' for c, t in LEGEND)
+    n = colour_counts()
+    legend = "".join(f'<li><span class="sw" style="background:var(--w-{c})"></span><b>{c}</b> <span class="n">× {n[c]}</span>'
+                     f'<span class="use">{esc(USES[c])}</span></li>' for c in COLOURS)
     filters = "".join(f'<button type="button" class="f{" on" if k == "all" else ""}" data-f="{k}" id="f-{k}">{esc(t)}</button>'
                       for k, t in FILTERS)
     page = TEMPLATE
