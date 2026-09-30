@@ -2,6 +2,25 @@
 
 Newest entry at the top. One entry per session at the bench.
 
+## 2026-09-30 — USB-C panel coupler: powers the box one way up only
+
+**Did:** Tried the Exsys EX-49195 (USB-C socket to socket, panel mount) as the
+5 V inlet with a USB-C → micro-USB lead inside. The Pi boots with the plug
+one way up and stays dark the other way. Exsys's own datasheet says so:
+"the connections are not reversible due to the technical specifications of
+USB-C".
+**Learned:** A USB-C supply only switches 5 V on after it sees the sink's CC
+resistor, and a plug carries one CC wire while a socket has two — a
+socket-to-socket coupler joins each CC pin straight through, so the wire
+meets its partner in only half the orientations. Power pins were never the
+problem. A socket with a cable tail passes both CC lines, and the resistor
+then has to be in whatever sits on the tail: test the socket-to-micro-USB
+adapter straight on the USB-C supply before drilling.
+**Next:** order the Exsys EX-49222 (same 22.3 mm hole, 30 cm tail) and a
+Delock 65927 adapter; the socket moves to the back-left corner and the
+antenna to its right (`hardware/LAYOUT.md`), because the new flange is
+~30 mm, not 16.
+
 ## 2026-09-30 — Modem HAT: a real check-in over LTE
 
 **Did:** Fitted the SIM7670G HAT (header plus OTG USB) with a Sunrise SIM.

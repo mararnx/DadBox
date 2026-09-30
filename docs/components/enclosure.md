@@ -13,13 +13,19 @@ measured before any layout or drilling.**
 
 - **Round holes only**, all with a 5–23 mm step drill: 2 × 16 mm buttons
   (flange Ø21.8, ~20 mm behind the panel), the DC charge jack, a 6.5 mm SMA
-  bulkhead, 2 × 3 mm status LEDs, a drilled speaker grille pattern.
+  bulkhead, a drilled speaker grille pattern. No status LEDs
+  ([ADR 0024](../decisions/0024-no-status-leds-record-says-ready.md)).
 - **Off-the-shelf parts only** — no hole saw, no acrylic, no 3D printing, no
   custom PCB.
 - **Antenna outside**, because the box is a Faraday cage: SMA bulkhead
   through a wall, short rigid stub on it ([connectivity.md](connectivity.md)).
-- **Inside:** Pi Zero 2 W (65 × 30), the modem HAT (65 × 30) **flat beside
-  the Pi, not stacked**, on the OTG cable; the Seeed speaker in its own
+- **Layout** ([hardware/LAYOUT.md](../../hardware/LAYOUT.md),
+  [ADR 0023](../decisions/0023-enclosure-layout.md), proposed, revised
+  2026-09-29): the tub the right way up with the Pi on the modem HAT
+  (85 × 56.7, the Pi on its standoffs) and the amp on its floor; the flat lid
+  is the top face with the buttons, grille and mic hole; antenna and 5 V socket
+  in the back wall. Leads soldered into the Pi.
+- **Inside:** Pi Zero 2 W on the SIM7670G HAT; the Seeed speaker in its own
   plastic enclosure (50 × 45 × 22); mic, amp; and from phase 3 the UPS
   Module 3S (93 × 86, height to measure) with a panel-mount DC jack in the
   wall ([power.md](power.md)). Until then a 5 V micro-USB supply.
@@ -38,7 +44,8 @@ chosen is in [hardware/EVALUATION.md](../../hardware/EVALUATION.md).
   dead inside the closed box. Deploys over home Wi-Fi are a plate-off job; in
   the field it is Tailscale over LTE.
 - The depth is the constraint: ~32–33 mm inside the Hammond. Three stacked
-  boards would use all of it, hence the HAT beside the Pi. The speaker is
+  boards would use all of it; the Pi-on-HAT stack is ~23 mm with soldered
+  leads, and nothing hangs above it. The speaker is
   22 mm, the buttons ~20 mm behind the panel.
 - The enclosure is still the acoustic system. The speaker brings its own back
   volume, so what is left to get wrong is the grille — holes too few or too
@@ -53,13 +60,14 @@ chosen is in [hardware/EVALUATION.md](../../hardware/EVALUATION.md).
 ## Questions
 
 1. **Measure the clone** — inside length, width and depth, wall and plate
-   thickness, and how far the screw bosses reach into the corners. Nothing is
-   laid out or drilled before this.
-2. **Buttons in a wall or in the top plate?** Both fit at ~20 mm depth. See
-   [controls-ui.md](controls-ui.md) Q1; decide with the box in hand.
-3. **Layout** — does everything sit on one level once the UPS module's
-   height is known, with ~20 mm clear behind each button and 22 mm for the
-   speaker? Reserve the module's 93 × 86 before drilling for phase 1.
+   thickness, and how far the screw bosses reach into the corners. Then
+   `python3 hardware/cad/layout.py L W H` and print the templates. Nothing is
+   drilled before this.
+2. ~~Buttons in a wall or in the top plate?~~ — the lid, at the left end near
+   the front edge (ADR 0023, proposed).
+3. ~~Layout~~ — [hardware/LAYOUT.md](../../hardware/LAYOUT.md). It leaves no
+   room for the deferred UPS Module 3S: a battery later means a slim flat pack
+   or a taller box.
 4. **Speaker grille and cavity** — hole size, pitch and pattern; speaker
    against the plate or a wall; a gasket between its housing and the metal?
    By ear, cardboard first.

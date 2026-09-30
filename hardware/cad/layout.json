@@ -1,0 +1,519 @@
+{
+ "about": "DadBox enclosure layout. Single source for hardware/cad/layout.py (checks, 1:1 drill templates) and enclosure-layout.html. Units mm. Interior frame: x from the inner LEFT wall (as the child faces the front), y from the inner FRONT wall, z up from the tub floor; the lid's inner face is at z = H. The tub stands the right way up: its floor is the BOTTOM, the flat lid is the TOP FACE (ADR 0023 as revised 2026-09-29). Anchors: ax left|right says which wall x is measured from (to the part's near edge, or to a cylinder's centre); ay front|back likewise for y. z values may be expressions in H.",
+ "box": {
+  "outer": [
+   188,
+   120,
+   37.5
+  ],
+  "outer_source": "Temu listing 188 x 120 x 37 mm / order 188 x 119 x 37.5 mm",
+  "inner": [
+   180,
+   112,
+   31
+  ],
+  "inner_note": "Planning values, not measured: wall ~3 mm at the rim plus ~1 mm draft toward the tub floor, tub floor ~3 mm, lid ~3 mm. Replace with calipers.",
+  "top_t": 3,
+  "base_t": 3,
+  "tub_h": 34.5
+ },
+ "bosses": {
+  "dia": 10,
+  "at": [
+   [
+    "left",
+    5,
+    "front",
+    5
+   ],
+   [
+    "right",
+    5,
+    "front",
+    5
+   ],
+   [
+    "left",
+    5,
+    "back",
+    5
+   ],
+   [
+    "right",
+    5,
+    "back",
+    5
+   ],
+   [
+    "mid",
+    0,
+    "front",
+    4
+   ],
+   [
+    "mid",
+    0,
+    "back",
+    4
+   ]
+  ],
+  "note": "Lid-screw columns, full height, threaded at the rim. Six on this clone: the lid has four corner holes and two mid-way along the long walls (photo 2026-09-29)."
+ },
+ "parts": [
+  {
+   "id": "hat",
+   "label": "Modem HAT",
+   "sub": "Waveshare SIM7670G, 85 x 56.7",
+   "group": "floor",
+   "asm": "stack",
+   "shape": "box",
+   "ax": "left",
+   "x": 110,
+   "ay": "front",
+   "y": 22,
+   "w": 56.7,
+   "d": 85,
+   "z0": 5,
+   "z1": 13,
+   "fix": "4 x M2.5 nylon standoffs, 5 mm, on the tub floor with M2.5 x 6 pan-head screws from below (hidden under the box, beside the rubber feet). Mark the holes through the board itself. USB-A ports toward the front wall, Pi's ports toward the speaker."
+  },
+  {
+   "id": "pi",
+   "label": "Pi Zero 2 W",
+   "sub": "65 x 30 on the HAT's standoffs",
+   "group": "floor",
+   "asm": "stack",
+   "shape": "box",
+   "ax": "left",
+   "x": 134,
+   "ay": "front",
+   "y": 32,
+   "w": 30,
+   "d": 65,
+   "z0": 17.6,
+   "z1": 19.2,
+   "fix": "On the HAT's own brass standoffs, as delivered. Its micro-USB ports face the speaker: use an angled micro-USB plug for PWR IN if a straight one hits."
+  },
+  {
+   "id": "leads",
+   "label": "Soldered leads",
+   "sub": "no header, no dupont",
+   "group": "floor",
+   "asm": "stack",
+   "shape": "box",
+   "ax": "left",
+   "x": 134,
+   "ay": "front",
+   "y": 32,
+   "w": 30,
+   "d": 65,
+   "z0": 19.2,
+   "z1": 23,
+   "ghost": true,
+   "fix": "Wires soldered straight into the Pi's GPIO holes, bent flat, tied to an adhesive mount. A straight header with dupont plugs stands ~22 mm above the Pi and would hit the lid."
+  },
+  {
+   "id": "amp",
+   "label": "Amp",
+   "sub": "MAX98357A",
+   "group": "floor",
+   "shape": "box",
+   "ax": "left",
+   "x": 10,
+   "ay": "front",
+   "y": 62,
+   "w": 18,
+   "d": 19,
+   "z0": 2,
+   "z1": 11,
+   "fix": "2 mm double-sided foam tape (VHB) on insulating film on the tub floor; trim the pins flush underneath first. One cable tie over its leads to an adhesive mount."
+  },
+  {
+   "id": "foam",
+   "label": "Foam block",
+   "sub": "holds the speaker up",
+   "group": "floor",
+   "shape": "box",
+   "rel": "speaker",
+   "dx": 5,
+   "dy": 5,
+   "w": 35,
+   "d": 40,
+   "z0": 0,
+   "z1": "H-23",
+   "fix": "Closed-cell foam cut to fill the gap under the speaker, glued to the tub floor. It presses the speaker up against the lid when the lid is screwed on."
+  },
+  {
+   "id": "speaker",
+   "label": "Speaker",
+   "sub": "Seeed 5 W, 45 x 50 x 22",
+   "group": "ceiling",
+   "shape": "box",
+   "ax": "left",
+   "x": 61,
+   "ay": "front",
+   "y": 37,
+   "w": 45,
+   "d": 50,
+   "z0": "H-23",
+   "z1": "H",
+   "hole": {
+    "face": "top",
+    "kind": "grille",
+    "dia": 5,
+    "pitch": 7,
+    "rings": 2,
+    "drill": "step drill 5 mm (first step)"
+   },
+   "fix": "Cone facing up under the grille. The foam ring with the round hole sits between cone face and lid: it is the seal. The foam block below presses it up; no screws through the lid."
+  },
+  {
+   "id": "ear_f",
+   "label": "",
+   "group": "ceiling",
+   "shape": "box",
+   "rel": "speaker",
+   "dx": 16.5,
+   "dy": -7,
+   "w": 12,
+   "d": 7,
+   "z0": "H-4",
+   "z1": "H",
+   "part_of": "speaker"
+  },
+  {
+   "id": "ear_b",
+   "label": "",
+   "group": "ceiling",
+   "shape": "box",
+   "rel": "speaker",
+   "dx": 16.5,
+   "dy": 50,
+   "w": 12,
+   "d": 7,
+   "z0": "H-4",
+   "z1": "H",
+   "part_of": "speaker"
+  },
+  {
+   "id": "rec",
+   "label": "Record",
+   "sub": "16 mm, full red = mic on",
+   "group": "ceiling",
+   "shape": "cyl",
+   "ax": "left",
+   "x": 16,
+   "ay": "front",
+   "y": 24,
+   "dia": 22,
+   "z0": "H-26",
+   "z1": "H",
+   "hole": {
+    "face": "top",
+    "kind": "round",
+    "dia": 16,
+    "drill": "step drill 15, then round file to 16"
+   },
+   "fix": "Its own nut from inside the lid, gasket outside under the flange, a drop of medium threadlocker. Keep 26 mm clear below it for the body, solder tabs and leads."
+  },
+  {
+   "id": "play",
+   "label": "Play",
+   "sub": "16 mm, green",
+   "group": "ceiling",
+   "shape": "cyl",
+   "ax": "left",
+   "x": 46,
+   "ay": "front",
+   "y": 24,
+   "dia": 22,
+   "z0": "H-26",
+   "z1": "H",
+   "hole": {
+    "face": "top",
+    "kind": "round",
+    "dia": 16,
+    "drill": "step drill 15, then round file to 16"
+   },
+   "fix": "As Record."
+  },
+  {
+   "id": "mic",
+   "label": "Mic",
+   "sub": "DFRobot I2S",
+   "group": "ceiling",
+   "shape": "cyl",
+   "ax": "left",
+   "x": 110,
+   "ay": "front",
+   "y": 20,
+   "dia": 16,
+   "z0": "H-14",
+   "z1": "H",
+   "hole": {
+    "face": "top",
+    "kind": "round",
+    "dia": 2,
+    "drill": "2 mm twist drill"
+   },
+   "fix": "Sound hole centred on a 2 mm hole in the lid, sealed with a ring punched from foam tape; the foam column below presses it up (as in the mock-up), a bead of hot glue holds it to the lid while you assemble. Never records while the speaker plays, so beside it is fine."
+  },
+  {
+   "id": "sma",
+   "label": "Antenna",
+   "sub": "SMA bulkhead, stub folds up",
+   "group": "wall",
+   "wall": "back",
+   "shape": "box",
+   "ax": "left",
+   "x": 48,
+   "ay": "back",
+   "y": 0,
+   "w": 10,
+   "d": 13,
+   "z0": "H/2-5",
+   "z1": "H/2+5",
+   "hole": {
+    "face": "back",
+    "kind": "round",
+    "dia": 6.5,
+    "drill": "step drill 7 mm"
+   },
+   "fix": "Nut and lock washer, medium threadlocker. Its body grounds the aluminium to the modem. The hinged stub folds upright. The U.FL end clips onto the HAT's LTE connector."
+  },
+  {
+   "id": "usbc",
+   "label": "5 V in",
+   "sub": "USB-C panel socket",
+   "group": "wall",
+   "wall": "back",
+   "shape": "box",
+   "ax": "left",
+   "x": 12,
+   "ay": "back",
+   "y": 0,
+   "w": 30,
+   "d": 25,
+   "z0": "H/2-15",
+   "z1": "H/2+15",
+   "hole": {
+    "face": "back",
+    "kind": "round",
+    "dia": 22.3,
+    "drill": "22.3 mm for the EX-49222 (it takes 22.3 to 24) - step drill"
+   },
+   "fix": "Its own nut. Its 30 cm tail (USB-C plug) runs along the back wall behind the speaker into a USB-C-socket-to-micro-USB adapter at the Pi's PWR IN; coil the slack under the speaker. Not a socket-to-socket coupler: a plug has one CC wire, a coupler two, so the supply comes on one way up only."
+  }
+ ],
+ "battery": {
+  "id": "ups",
+  "label": "UPS Module 3S (deferred)",
+  "group": "floor",
+  "shape": "box",
+  "ax": "left",
+  "x": 6,
+  "ay": "back",
+  "y": 6,
+  "w": 93,
+  "d": 86,
+  "z0": 0,
+  "z1": 28,
+  "note": "Height is an estimate: 18650 cells in holders on a board. Shown only to test whether it could be added later."
+ },
+ "wires": [
+  {
+   "from": "rec",
+   "to": "pi",
+   "n": 6,
+   "what": "switch, R via D1 (+ mic VDD) and D2, G, B, GND"
+  },
+  {
+   "from": "play",
+   "to": "pi",
+   "n": 5,
+   "what": "switch, R, G, B, GND"
+  },
+  {
+   "from": "mic",
+   "to": "pi",
+   "n": 5,
+   "what": "VDD (BCM17, from D1's anode), GND, BCLK, LRCLK, DATA"
+  },
+  {
+   "from": "amp",
+   "to": "pi",
+   "n": 6,
+   "what": "5 V, GND, BCLK, LRCLK, DIN, SD"
+  },
+  {
+   "from": "amp",
+   "to": "speaker",
+   "n": 2,
+   "what": "speaker + and -"
+  },
+  {
+   "from": "usbc",
+   "to": "pi",
+   "n": 1,
+   "what": "socket tail + USB-C to micro-USB adapter, PWR IN"
+  },
+  {
+   "from": "sma",
+   "to": "hat",
+   "n": 1,
+   "what": "U.FL coax pigtail"
+  }
+ ],
+ "harness": [
+  [
+   "Record switch",
+   "BCM 5",
+   29,
+   "other leg to GND"
+  ],
+  [
+   "Record red (full) + mic VDD",
+   "BCM 17",
+   11,
+   "through D1 to the R tab; mic VDD from D1's anode: no red light, no mic power"
+  ],
+  [
+   "Record red (dim, yellow)",
+   "BCM 4",
+   7,
+   "through D2 to the R tab; never reaches the mic (ADR 0024)"
+  ],
+  [
+   "Record green / blue",
+   "BCM 27 / 22",
+   "13 / 15",
+   "common cathode to GND"
+  ],
+  [
+   "Play switch",
+   "BCM 6",
+   31,
+   "other leg to GND"
+  ],
+  [
+   "Play red / green / blue",
+   "BCM 23 / 24 / 25",
+   "16 / 18 / 22",
+   "common cathode to GND"
+  ],
+  [
+   "I2S clock (mic + amp)",
+   "BCM 18",
+   12,
+   "BCLK to both"
+  ],
+  [
+   "I2S word select (mic + amp)",
+   "BCM 19",
+   35,
+   "LRCLK to both"
+  ],
+  [
+   "Mic data",
+   "BCM 20",
+   38,
+   "mic DOUT to Pi; mic L/R pin to GND"
+  ],
+  [
+   "Amp data",
+   "BCM 21",
+   40,
+   "Pi to amp DIN"
+  ],
+  [
+   "Amp enable",
+   "BCM 16",
+   36,
+   "amp SD"
+  ],
+  [
+   "Amp power",
+   "5 V",
+   2,
+   "and GND on pin 6"
+  ],
+  [
+   "Modem power key",
+   "BCM 26",
+   37,
+   "to confirm from the Waveshare wiki"
+  ]
+ ],
+ "kit": [
+  [
+   "M2.5 nylon standoff, screw and nut assortment",
+   "~12",
+   "Bastelgarage / Galaxus"
+  ],
+  [
+   "3M VHB or 2 mm double-sided foam tape",
+   "~10",
+   "Hornbach / Galaxus"
+  ],
+  [
+   "Closed-cell EVA foam sheet, 10 mm",
+   "~6",
+   "craft shop / Hornbach"
+  ],
+  [
+   "Adhesive cable-tie mounts 20 x 20 + small ties",
+   "~6",
+   "Hornbach"
+  ],
+  [
+   "Silicone wire 26 AWG, several colours",
+   "~10",
+   "Bastelgarage"
+  ],
+  [
+   "Heat-shrink assortment",
+   "~8",
+   "Bastelgarage / Hornbach"
+  ],
+  [
+   "Medium threadlocker (Loctite 243 class)",
+   "~9",
+   "Hornbach"
+  ],
+  [
+   "Kapton tape or a plastic sheet to insulate",
+   "~6",
+   "Bastelgarage / stationery"
+  ],
+  [
+   "HSS twist drills 2, 2.7 mm + centre punch + deburring tool",
+   "~15",
+   "Hornbach"
+  ],
+  [
+   "Small half-round file (15 to 16 mm holes)",
+   "~8",
+   "Hornbach"
+  ],
+  [
+   "USB-C panel socket with 30 cm tail to a USB-C plug (Exsys EX-49222, 22.3 mm hole)",
+   "16.90",
+   "exsys.ch - not the socket-to-socket EX-49195"
+  ],
+  [
+   "USB-C socket to micro-USB plug adapter (the tail to Pi PWR IN), Delock 65927",
+   "~8",
+   "Brack - test it on the USB-C supply first"
+  ],
+  [
+   "Short micro-USB (Pi OTG) to USB-C (HAT) lead, angled if you find one",
+   "~6",
+   "any - or the HAT's own cable if it is short"
+  ],
+  [
+   "2-part epoxy, hot-glue gun",
+   "~12",
+   "Hornbach"
+  ]
+ ]
+}

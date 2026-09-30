@@ -1,0 +1,562 @@
+<title>DadBox Enclosure Layout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#E9EDEC; --paper:#F7F9F8; --ink:#1B2226; --muted:#56646A; --line:#C3CCCB; --faint:#DCE2E1;
+  --alu:#9AA5A9; --alu-fill:#C9D1D3;
+  --floor:#2C5FC4; --floor-fill:#D6E1F7;
+  --ceil:#A8680F; --ceil-fill:#F3E1C2;
+  --wall:#4F7431; --wall-fill:#DDE9CF;
+  --bad:#C0342A; --bad-fill:#F6D5D1; --ok:#2B7F50; --ok-fill:#D3EBDD; --warn:#9A6A00; --warn-fill:#F4E6C0;
+  --wire:#6C7A80;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Barlow","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#111618; --paper:#182023; --ink:#E4EAEA; --muted:#9AA8AC; --line:#34403F; --faint:#232C2E;
+    --alu:#6E7C80; --alu-fill:#3A4549;
+    --floor:#7EA6F5; --floor-fill:#1E2E4F; --ceil:#E3AE59; --ceil-fill:#3E2F17; --wall:#9CC477; --wall-fill:#26341C;
+    --bad:#F07A6E; --bad-fill:#4A1D19; --ok:#6FCB95; --ok-fill:#173A28; --warn:#E9C05E; --warn-fill:#3D3113; --wire:#8C9A9F;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#111618; --paper:#182023; --ink:#E4EAEA; --muted:#9AA8AC; --line:#34403F; --faint:#232C2E;
+  --alu:#6E7C80; --alu-fill:#3A4549;
+  --floor:#7EA6F5; --floor-fill:#1E2E4F; --ceil:#E3AE59; --ceil-fill:#3E2F17; --wall:#9CC477; --wall-fill:#26341C;
+  --bad:#F07A6E; --bad-fill:#4A1D19; --ok:#6FCB95; --ok-fill:#173A28; --warn:#E9C05E; --warn-fill:#3D3113; --wire:#8C9A9F;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:16px/1.55 var(--body);margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:24px 64px}
+h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:.01em;text-wrap:balance;margin:0}
+h1{font-size:clamp(30px,5vw,44px);line-height:1.05}
+h2{font-size:26px;line-height:1.1}
+h3{font-size:19px}
+p{margin:0}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.label{font-family:var(--display);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+/* title block */
+.titleblock{display:grid;grid-template-columns:1fr auto;gap:0;border:1.5px solid var(--ink);background:var(--paper)}
+.titleblock .name{padding:18px 20px;display:grid;gap:8px;border-right:1.5px solid var(--ink)}
+.titleblock .lede{max-width:62ch;color:var(--muted)}
+.tb-cells{display:grid;grid-template-columns:repeat(2,minmax(110px,auto))}
+.tb-cells div{padding:8px 14px;border-bottom:1px solid var(--line);border-left:1px solid var(--line)}
+.tb-cells div:nth-last-child(-n+2){border-bottom:0}
+.tb-cells b{display:block;font-family:var(--mono);font-weight:500;font-size:14px}
+@media (max-width:760px){.titleblock{grid-template-columns:1fr}.titleblock .name{border-right:0;border-bottom:1.5px solid var(--ink)}}
+/* control strip */
+.strip{margin-top:18px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px}
+@media (max-width:900px){.strip{grid-template-columns:1fr}}
+.panel{background:var(--paper);border:1px solid var(--line);padding:16px 18px}
+.dims{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.field{display:grid;gap:4px}
+.field input{width:92px;font:500 16px var(--mono);padding:6px 8px;border:1px solid var(--line);background:var(--ground);color:var(--ink)}
+.field input:focus-visible,button:focus-visible,input[type=range]:focus-visible,input[type=checkbox]:focus-visible{outline:2px solid var(--floor);outline-offset:2px}
+button{font:600 14px var(--display);letter-spacing:.06em;text-transform:uppercase;padding:8px 12px;border:1px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer}
+button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.chip{padding:10px 12px;border-left:4px solid var(--line);background:var(--ground)}
+.chip .v{font:500 24px var(--mono);line-height:1.1}
+.chip.ok{border-color:var(--ok)}.chip.warn{border-color:var(--warn)}.chip.bad{border-color:var(--bad)}
+.chip small{display:block;color:var(--muted);font-size:13px;line-height:1.3}
+.note{font-size:14px;color:var(--muted);margin-top:10px}
+/* sections */
+section{margin-top:40px}
+.sechead{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:baseline;justify-content:space-between;border-bottom:1.5px solid var(--ink);padding-bottom:8px;margin-bottom:16px}
+.sechead p{color:var(--muted);max-width:70ch}
+.controls{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.controls label{display:flex;gap:6px;align-items:center;font-size:15px}
+.fig{background:var(--paper);border:1px solid var(--line);overflow-x:auto}
+.fig svg{display:block;width:100%;height:auto;min-width:560px}
+.two{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px}
+@media (max-width:980px){.two{grid-template-columns:1fr}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted);margin-top:10px}
+.sw{display:inline-block;width:14px;height:10px;margin-right:6px;vertical-align:-1px;border:1.5px solid}
+.sw.floor{background:var(--floor-fill);border-color:var(--floor)}.sw.ceiling{background:var(--ceil-fill);border-color:var(--ceil);border-style:dashed}
+.sw.wall{background:var(--wall-fill);border-color:var(--wall)}.sw.bad{background:var(--bad-fill);border-color:var(--bad)}
+/* svg classes */
+.g-floor{fill:var(--floor-fill);stroke:var(--floor)}
+.g-ceiling{fill:var(--ceil-fill);stroke:var(--ceil)}
+.g-wall{fill:var(--wall-fill);stroke:var(--wall)}
+.g-boss{fill:var(--alu-fill);stroke:var(--alu)}
+.g-bad{fill:var(--bad-fill);stroke:var(--bad)}
+.g-alu{fill:var(--alu-fill);stroke:var(--alu)}
+.t{fill:var(--ink);font-family:var(--display);font-weight:600}
+.tm{fill:var(--muted);font-family:var(--mono)}
+.stroke-ink{stroke:var(--ink)}
+.wire{fill:none;stroke:var(--wire);stroke-dasharray:3 3}
+.hole{fill:var(--paper);stroke:var(--ink)}
+/* tables */
+.tablewrap{overflow-x:auto;background:var(--paper);border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--faint)}
+th{font:600 13px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--ground);white-space:nowrap}
+td.num{font-family:var(--mono);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.tag{display:inline-block;font:600 12px var(--display);letter-spacing:.06em;text-transform:uppercase;padding:1px 7px;border:1px solid}
+.tag.floor{color:var(--floor);border-color:var(--floor)}.tag.ceiling{color:var(--ceil);border-color:var(--ceil)}.tag.wall{color:var(--wall);border-color:var(--wall)}
+ol.steps{margin:0;padding-left:22px;display:grid;gap:10px;max-width:78ch}
+ul.plain{margin:0;padding-left:20px;display:grid;gap:6px;max-width:78ch}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.callout{border-left:4px solid var(--bad);background:var(--bad-fill);padding:12px 14px;max-width:80ch}
+.callout.info{border-color:var(--floor);background:var(--floor-fill)}
+code{font-family:var(--mono);font-size:.92em}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="titleblock">
+    <div class="name">
+      <span class="label">DadBox · build sheet</span>
+      <h1>Inside the aluminium box</h1>
+      <p class="lede">Every part placed to scale in the 1590DD-size clone: the tub stands the right way up and carries the electronics on its floor; the flat lid is the top face, with the buttons, the speaker grille and the mic hole.</p>
+    </div>
+    <div class="tb-cells">
+      <div><span class="label">Outside</span><b id="tb-outer">188 × 120 × 37.5</b></div>
+      <div><span class="label">Inside</span><b id="tb-inner">180 × 112 × 31</b></div>
+      <div><span class="label">Units</span><b>mm</b></div>
+      <div><span class="label">Source</span><b>layout.json</b></div>
+      <div><span class="label">Status</span><b>planning values</b></div>
+      <div><span class="label">Date</span><b>2026-09-29</b></div>
+    </div>
+  </header>
+
+  <div class="strip">
+    <div class="panel">
+      <div class="label" style="margin-bottom:10px">Inside dimensions — type your measurements</div>
+      <div class="dims">
+        <div class="field"><label class="label" for="in-L">Length</label><input id="in-L" type="number" step="0.5" min="150" max="190" inputmode="decimal"></div>
+        <div class="field"><label class="label" for="in-W">Width</label><input id="in-W" type="number" step="0.5" min="90" max="120" inputmode="decimal"></div>
+        <div class="field"><label class="label" for="in-H">Depth</label><input id="in-H" type="number" step="0.5" min="20" max="37" inputmode="decimal"></div>
+        <button id="reset" type="button">Planning values</button>
+      </div>
+      <p class="note" id="calc-note">How the planning values were reached: outside 188 × 120 × 37.5 from the listing. Walls are about 3 mm at the rim, plus about 1 mm of casting draft toward the tub floor, which gives 180 × 112. The tub floor and the lid are about 3 mm each, which gives 31 mm of depth. Measure yours with calipers at the rim and at the floor, and use the smaller figures.</p>
+    </div>
+    <div class="panel">
+      <div class="label" style="margin-bottom:10px">Does it fit?</div>
+      <div class="chips" id="chips"></div>
+      <div class="controls" style="margin-top:12px">
+        <label><input type="checkbox" id="tg-battery"> Try the deferred battery (UPS Module 3S)</label>
+      </div>
+      <div id="battery-note" class="callout" style="margin-top:10px" hidden></div>
+    </div>
+  </div>
+
+  <section id="iso">
+    <div class="sechead">
+      <h2>Exploded view</h2>
+      <div class="controls">
+        <label for="ex">Explode</label><input id="ex" type="range" min="0" max="1" step="0.01" style="width:160px">
+        <button type="button" id="view-l" aria-pressed="false">From front-left</button>
+        <button type="button" id="view-r" aria-pressed="true">From front-right</button>
+      </div>
+    </div>
+    <div class="fig"><svg id="svg-iso" role="img" aria-label="Exploded isometric view of the box and its parts"></svg></div>
+    <div class="legend">
+      <span><i class="sw floor"></i>On the tub floor</span>
+      <span><i class="sw ceiling"></i>Under the lid (comes off with it)</span>
+      <span><i class="sw wall"></i>Through the back wall</span>
+      <span><i class="sw bad"></i>Collision</span>
+    </div>
+  </section>
+
+  <section id="plan">
+    <div class="sechead">
+      <h2>Plan and section</h2>
+      <div class="controls">
+        <label><input type="checkbox" id="ly-floor" checked> Tub floor</label>
+        <label><input type="checkbox" id="ly-ceiling" checked> Lid</label>
+        <label><input type="checkbox" id="ly-wall" checked> Walls</label>
+        <label><input type="checkbox" id="ly-wires" checked> Wires</label>
+      </div>
+    </div>
+    <div class="two">
+      <div>
+        <div class="fig"><svg id="svg-plan" role="img" aria-label="Plan view from above, front edge at the bottom"></svg></div>
+        <p class="note">Seen from above, with the child's side at the bottom. The figures next to each hole are its centre measured from the outside: from the left edge, then from the front edge.</p>
+      </div>
+      <div>
+        <div class="fig"><svg id="svg-sec" role="img" aria-label="Section through the box"></svg></div>
+        <div class="controls" style="margin-top:10px">
+          <button type="button" data-cut="y:24" aria-pressed="false">Through the buttons</button>
+          <button type="button" data-cut="y:60" aria-pressed="false">Through speaker and stack</button>
+          <button type="button" data-cut="x:150" aria-pressed="false">Side cut through the stack</button>
+        </div>
+        <div class="controls" style="margin-top:10px">
+          <label for="cut" id="cut-label">Cut at y =</label><input id="cut" type="range" min="0" max="112" step="1" style="width:200px"><span class="mono" id="cut-v"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="drill">
+    <div class="sechead">
+      <h2>Holes to drill</h2>
+      <p>Print the 1:1 templates from <code>hardware/cad/</code> at 100 %, check the 50 mm bar with a ruler, tape them on, centre-punch.</p>
+    </div>
+    <div class="tablewrap"><table id="tbl-holes"><thead><tr><th>Face</th><th>For</th><th>Centre (outside)</th><th>Ø</th><th>How</th></tr></thead><tbody></tbody></table></div>
+    <p class="note">Your step drill steps in 2 mm: 5, 7, 9 … 23. So the 16 mm button holes are drilled at 15 and opened with a half-round file until the thread just goes through. At 17 the flange still covers the hole, but the button can wobble before the nut is tight. Drill the templates <code>template-top-face.svg</code>, <code>template-back-wall.svg</code> and <code>template-tub-floor.svg</code>. Rerun <code>python3 hardware/cad/layout.py L W H</code> with your measurements first.</p>
+  </section>
+
+  <section id="fix">
+    <div class="sechead">
+      <h2>How each part is held</h2>
+      <p>The six lid screws are the only heads on show. Everything under the lid is held by its own nut, by tape, or pressed up from below by foam on the tub floor. What sits on the tub floor is screwed or taped to it.</p>
+    </div>
+    <div class="tablewrap"><table id="tbl-fix"><thead><tr><th>Part</th><th>Where</th><th>Held by</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section id="wiring">
+    <div class="sechead">
+      <h2>Wiring</h2>
+      <p>The leads are soldered straight into the Pi's GPIO holes, with no header and no dupont plugs. A dupont plug stands about 22 mm above the Pi and would hit the lid. Soldered leads also stay put in a school bag.</p>
+    </div>
+    <div class="cols">
+      <div class="tablewrap"><table id="tbl-harness"><thead><tr><th>Signal</th><th>Pi pin</th><th>Phys.</th><th>Note</th></tr></thead><tbody></tbody></table></div>
+      <div class="tablewrap"><table id="tbl-wires"><thead><tr><th>Bundle</th><th>Wires</th><th>Length</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <p class="note">The pin map is the proposed one in <code>box/DESIGN.md</code>; it is confirmed on the bench before anything is soldered for good. Lengths include a service loop, so the lid can be lifted and folded back without unplugging anything but the antenna.</p>
+  </section>
+
+  <section id="kit">
+    <div class="sechead">
+      <h2>Fixing kit to buy</h2>
+      <p>All off the shelf. Prices are rough.</p>
+    </div>
+    <div class="tablewrap"><table id="tbl-kit"><thead><tr><th>Item</th><th>CHF</th><th>Where</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section id="order">
+    <div class="sechead"><h2>Before you drill, and in what order</h2></div>
+    <div class="cols">
+      <div class="panel">
+        <h3 style="margin-bottom:10px">Measure these first</h3>
+        <ul class="plain">
+          <li>Inside length and width at the rim and at the tub floor. Enter the smaller of each above.</li>
+          <li>Depth from the rim to the tub floor, and the lid's thickness.</li>
+          <li>Where the screw bosses are: four corners only, or two more in the middle of the long walls. Measure their diameter.</li>
+          <li>The Pi-on-HAT stack from the bottom of the HAT to the top of the Pi. The plan assumes 23 mm with soldered leads.</li>
+          <li>Where the HAT's LTE antenna connector is, and whether its antenna cable already ends in an SMA bulkhead. If it does, you don't need the Delock pigtail.</li>
+          <li>Where the mic's sound hole is: on the chip's side or through the board.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3 style="margin-bottom:10px">Build order</h3>
+        <ol class="steps">
+          <li>Update the three dimensions above and in <code>layout.py</code>. Print the templates.</li>
+          <li>Mock-up in cardboard. Lay the parts in the tub and hold the speaker to a cardboard grille, and listen.</li>
+          <li>Drill the lid, then the back wall, then the tub floor. Deburr every hole and blow out the chips.</li>
+          <li>Fit the buttons, the antenna bulkhead and the power socket. Threadlock the nuts.</li>
+          <li>Tape the speaker and the mic under their holes.</li>
+          <li>Screw the stack to the tub floor on standoffs and tape down the amp. Glue on the foam block.</li>
+          <li>Solder the harness and heat-shrink every joint. Tie the bundles to adhesive mounts.</li>
+          <li>Bench test with the box open. Then close it and check the speaker is pressed up and nothing rattles.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script id="layout-data" type="application/json">{"about":"DadBox enclosure layout. Single source for hardware/cad/layout.py (checks, 1:1 drill templates) and enclosure-layout.html. Units mm. Interior frame: x from the inner LEFT wall (as the child faces the front), y from the inner FRONT wall, z up from the tub floor; the lid's inner face is at z = H. The tub stands the right way up: its floor is the BOTTOM, the flat lid is the TOP FACE (ADR 0023 as revised 2026-09-29). Anchors: ax left|right says which wall x is measured from (to the part's near edge, or to a cylinder's centre); ay front|back likewise for y. z values may be expressions in H.","box":{"outer":[188,120,37.5],"outer_source":"Temu listing 188 x 120 x 37 mm / order 188 x 119 x 37.5 mm","inner":[180,112,31],"inner_note":"Planning values, not measured: wall ~3 mm at the rim plus ~1 mm draft toward the tub floor, tub floor ~3 mm, lid ~3 mm. Replace with calipers.","top_t":3,"base_t":3,"tub_h":34.5},"bosses":{"dia":10,"at":[["left",5,"front",5],["right",5,"front",5],["left",5,"back",5],["right",5,"back",5],["mid",0,"front",4],["mid",0,"back",4]],"note":"Lid-screw columns, full height, threaded at the rim. Six on this clone: the lid has four corner holes and two mid-way along the long walls (photo 2026-09-29)."},"parts":[{"id":"hat","label":"Modem HAT","sub":"Waveshare SIM7670G, 85 x 56.7","group":"floor","asm":"stack","shape":"box","ax":"left","x":110,"ay":"front","y":22,"w":56.7,"d":85,"z0":5,"z1":13,"fix":"4 x M2.5 nylon standoffs, 5 mm, on the tub floor with M2.5 x 6 pan-head screws from below (hidden under the box, beside the rubber feet). Mark the holes through the board itself. USB-A ports toward the front wall, Pi's ports toward the speaker."},{"id":"pi","label":"Pi Zero 2 W","sub":"65 x 30 on the HAT's standoffs","group":"floor","asm":"stack","shape":"box","ax":"left","x":134,"ay":"front","y":32,"w":30,"d":65,"z0":17.6,"z1":19.2,"fix":"On the HAT's own brass standoffs, as delivered. Its micro-USB ports face the speaker: use an angled micro-USB plug for PWR IN if a straight one hits."},{"id":"leads","label":"Soldered leads","sub":"no header, no dupont","group":"floor","asm":"stack","shape":"box","ax":"left","x":134,"ay":"front","y":32,"w":30,"d":65,"z0":19.2,"z1":23,"ghost":true,"fix":"Wires soldered straight into the Pi's GPIO holes, bent flat, tied to an adhesive mount. A straight header with dupont plugs stands ~22 mm above the Pi and would hit the lid."},{"id":"amp","label":"Amp","sub":"MAX98357A","group":"floor","shape":"box","ax":"left","x":10,"ay":"front","y":62,"w":18,"d":19,"z0":2,"z1":11,"fix":"2 mm double-sided foam tape (VHB) on insulating film on the tub floor; trim the pins flush underneath first. One cable tie over its leads to an adhesive mount."},{"id":"foam","label":"Foam block","sub":"holds the speaker up","group":"floor","shape":"box","rel":"speaker","dx":5,"dy":5,"w":35,"d":40,"z0":0,"z1":"H-23","fix":"Closed-cell foam cut to fill the gap under the speaker, glued to the tub floor. It presses the speaker up against the lid when the lid is screwed on."},{"id":"speaker","label":"Speaker","sub":"Seeed 5 W, 45 x 50 x 22","group":"ceiling","shape":"box","ax":"left","x":61,"ay":"front","y":37,"w":45,"d":50,"z0":"H-23","z1":"H","hole":{"face":"top","kind":"grille","dia":5,"pitch":7,"rings":2,"drill":"step drill 5 mm (first step)"},"fix":"Cone facing up under the grille. The foam ring with the round hole sits between cone face and lid: it is the seal. The foam block below presses it up; no screws through the lid."},{"id":"ear_f","label":"","group":"ceiling","shape":"box","rel":"speaker","dx":16.5,"dy":-7,"w":12,"d":7,"z0":"H-4","z1":"H","part_of":"speaker"},{"id":"ear_b","label":"","group":"ceiling","shape":"box","rel":"speaker","dx":16.5,"dy":50,"w":12,"d":7,"z0":"H-4","z1":"H","part_of":"speaker"},{"id":"rec","label":"Record","sub":"16 mm, full red = mic on","group":"ceiling","shape":"cyl","ax":"left","x":16,"ay":"front","y":24,"dia":22,"z0":"H-26","z1":"H","hole":{"face":"top","kind":"round","dia":16,"drill":"step drill 15, then round file to 16"},"fix":"Its own nut from inside the lid, gasket outside under the flange, a drop of medium threadlocker. Keep 26 mm clear below it for the body, solder tabs and leads."},{"id":"play","label":"Play","sub":"16 mm, green","group":"ceiling","shape":"cyl","ax":"left","x":46,"ay":"front","y":24,"dia":22,"z0":"H-26","z1":"H","hole":{"face":"top","kind":"round","dia":16,"drill":"step drill 15, then round file to 16"},"fix":"As Record."},{"id":"mic","label":"Mic","sub":"DFRobot I2S","group":"ceiling","shape":"cyl","ax":"left","x":110,"ay":"front","y":20,"dia":16,"z0":"H-14","z1":"H","hole":{"face":"top","kind":"round","dia":2,"drill":"2 mm twist drill"},"fix":"Sound hole centred on a 2 mm hole in the lid, sealed with a ring punched from foam tape; the foam column below presses it up (as in the mock-up), a bead of hot glue holds it to the lid while you assemble. Never records while the speaker plays, so beside it is fine."},{"id":"sma","label":"Antenna","sub":"SMA bulkhead, stub folds up","group":"wall","wall":"back","shape":"box","ax":"left","x":48,"ay":"back","y":0,"w":10,"d":13,"z0":"H/2-5","z1":"H/2+5","hole":{"face":"back","kind":"round","dia":6.5,"drill":"step drill 7 mm"},"fix":"Nut and lock washer, medium threadlocker. Its body grounds the aluminium to the modem. The hinged stub folds upright. The U.FL end clips onto the HAT's LTE connector."},{"id":"usbc","label":"5 V in","sub":"USB-C panel socket","group":"wall","wall":"back","shape":"box","ax":"left","x":12,"ay":"back","y":0,"w":30,"d":25,"z0":"H/2-15","z1":"H/2+15","hole":{"face":"back","kind":"round","dia":22.3,"drill":"22.3 mm for the EX-49222 (it takes 22.3 to 24) - step drill"},"fix":"Its own nut. Its 30 cm tail (USB-C plug) runs along the back wall behind the speaker into a USB-C-socket-to-micro-USB adapter at the Pi's PWR IN; coil the slack under the speaker. Not a socket-to-socket coupler: a plug has one CC wire, a coupler two, so the supply comes on one way up only."}],"battery":{"id":"ups","label":"UPS Module 3S (deferred)","group":"floor","shape":"box","ax":"left","x":6,"ay":"back","y":6,"w":93,"d":86,"z0":0,"z1":28,"note":"Height is an estimate: 18650 cells in holders on a board. Shown only to test whether it could be added later."},"wires":[{"from":"rec","to":"pi","n":6,"what":"switch, R via D1 (+ mic VDD) and D2, G, B, GND"},{"from":"play","to":"pi","n":5,"what":"switch, R, G, B, GND"},{"from":"mic","to":"pi","n":5,"what":"VDD (BCM17, from D1's anode), GND, BCLK, LRCLK, DATA"},{"from":"amp","to":"pi","n":6,"what":"5 V, GND, BCLK, LRCLK, DIN, SD"},{"from":"amp","to":"speaker","n":2,"what":"speaker + and -"},{"from":"usbc","to":"pi","n":1,"what":"socket tail + USB-C to micro-USB adapter, PWR IN"},{"from":"sma","to":"hat","n":1,"what":"U.FL coax pigtail"}],"harness":[["Record switch","BCM 5",29,"other leg to GND"],["Record red (full) + mic VDD","BCM 17",11,"through D1 to the R tab; mic VDD from D1's anode: no red light, no mic power"],["Record red (dim, yellow)","BCM 4",7,"through D2 to the R tab; never reaches the mic (ADR 0024)"],["Record green / blue","BCM 27 / 22","13 / 15","common cathode to GND"],["Play switch","BCM 6",31,"other leg to GND"],["Play red / green / blue","BCM 23 / 24 / 25","16 / 18 / 22","common cathode to GND"],["I2S clock (mic + amp)","BCM 18",12,"BCLK to both"],["I2S word select (mic + amp)","BCM 19",35,"LRCLK to both"],["Mic data","BCM 20",38,"mic DOUT to Pi; mic L/R pin to GND"],["Amp data","BCM 21",40,"Pi to amp DIN"],["Amp enable","BCM 16",36,"amp SD"],["Amp power","5 V",2,"and GND on pin 6"],["Modem power key","BCM 26",37,"to confirm from the Waveshare wiki"]],"kit":[["M2.5 nylon standoff, screw and nut assortment","~12","Bastelgarage / Galaxus"],["3M VHB or 2 mm double-sided foam tape","~10","Hornbach / Galaxus"],["Closed-cell EVA foam sheet, 10 mm","~6","craft shop / Hornbach"],["Adhesive cable-tie mounts 20 x 20 + small ties","~6","Hornbach"],["Silicone wire 26 AWG, several colours","~10","Bastelgarage"],["Heat-shrink assortment","~8","Bastelgarage / Hornbach"],["Medium threadlocker (Loctite 243 class)","~9","Hornbach"],["Kapton tape or a plastic sheet to insulate","~6","Bastelgarage / stationery"],["HSS twist drills 2, 2.7 mm + centre punch + deburring tool","~15","Hornbach"],["Small half-round file (15 to 16 mm holes)","~8","Hornbach"],["USB-C panel socket with 30 cm tail to a USB-C plug (Exsys EX-49222, 22.3 mm hole)","16.90","exsys.ch - not the socket-to-socket EX-49195"],["USB-C socket to micro-USB plug adapter (the tail to Pi PWR IN), Delock 65927","~8","Brack - test it on the USB-C supply first"],["Short micro-USB (Pi OTG) to USB-C (HAT) lead, angled if you find one","~6","any - or the HAT's own cable if it is short"],["2-part epoxy, hot-glue gun","~12","Hornbach"]]}</script>
+<script>
+(function(){
+const DATA = JSON.parse(document.getElementById('layout-data').textContent);
+const PLAN = DATA.box.inner.slice();
+const OUT = DATA.box.outer;
+const S = {L:PLAN[0], W:PLAN[1], H:PLAN[2], ex:0.6, az:35, battery:false, layers:{floor:true,ceiling:true,wall:true,wires:true}, cutAxis:'y', cut:24};
+try { const s = JSON.parse(localStorage.getItem('dbx-layout-v1') || 'null'); if (s) { Object.assign(S, s); S.layers = Object.assign({floor:true,ceiling:true,wall:true,wires:true}, s.layers || {}); } } catch (e) {}
+const save = () => { try { localStorage.setItem('dbx-layout-v1', JSON.stringify(S)); } catch (e) {} };
+const NS = 'http://www.w3.org/2000/svg';
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const f1 = v => (Math.round(v * 10) / 10).toString();
+
+function ev(v, H){ return typeof v === 'string' ? Function('H', 'return ' + v)(H) : v; }
+
+function resolve(withBattery){
+  const {L, W, H} = S; const out = {};
+  const list = DATA.parts.slice(); if (withBattery) list.push(DATA.battery);
+  list.sort((a, b) => ('rel' in a) - ('rel' in b));
+  for (const p of list){
+    const q = Object.assign({}, p); q.z0 = ev(p.z0, H); q.z1 = ev(p.z1, H);
+    if (p.rel){ const b = out[p.rel]; q.x0 = b.x0 + p.dx; q.y0 = b.y0 + p.dy; q.x1 = q.x0 + p.w; q.y1 = q.y0 + p.d; }
+    else if (p.shape === 'cyl'){ const r = p.dia / 2; q.cx = p.ax === 'left' ? p.x : L - p.x; q.cy = p.ay === 'front' ? p.y : W - p.y; q.x0 = q.cx - r; q.x1 = q.cx + r; q.y0 = q.cy - r; q.y1 = q.cy + r; }
+    else { q.x0 = p.ax === 'left' ? p.x : L - p.x - p.w; q.y0 = p.ay === 'front' ? p.y : W - p.y - p.d; q.x1 = q.x0 + p.w; q.y1 = q.y0 + p.d; }
+    if (q.cx === undefined){ q.cx = (q.x0 + q.x1) / 2; q.cy = (q.y0 + q.y1) / 2; }
+    out[p.id] = q;
+  }
+  const bd = DATA.bosses.dia;
+  DATA.bosses.at.forEach(([hx, ox, hy, oy], i) => {
+    const cx = hx === 'left' ? ox : hx === 'right' ? L - ox : L / 2; const cy = hy === 'front' ? oy : W - oy;
+    out['boss' + i] = {id:'boss' + i, label:'', shape:'cyl', group:'boss', dia:bd, cx, cy, x0:cx - bd/2, x1:cx + bd/2, y0:cy - bd/2, y1:cy + bd/2, z0:0, z1:H};
+  });
+  return out;
+}
+function xyGap(a, b){
+  if (a.shape === 'cyl' && b.shape === 'cyl') return Math.hypot(a.cx - b.cx, a.cy - b.cy) - a.dia/2 - b.dia/2;
+  if (a.shape === 'cyl' || b.shape === 'cyl'){
+    const c = a.shape === 'cyl' ? a : b, r = a.shape === 'cyl' ? b : a;
+    const dx = Math.max(r.x0 - c.cx, 0, c.cx - r.x1), dy = Math.max(r.y0 - c.cy, 0, c.cy - r.y1);
+    return (dx === 0 && dy === 0) ? -c.dia/2 : Math.hypot(dx, dy) - c.dia/2;
+  }
+  const dx = Math.max(b.x0 - a.x1, a.x0 - b.x1), dy = Math.max(b.y0 - a.y1, a.y0 - b.y1);
+  return (dx > 0 && dy > 0) ? Math.hypot(dx, dy) : Math.max(dx, dy);
+}
+function related(a, b){
+  if (a.asm && a.asm === b.asm) return true;
+  const ids = [a.id, b.id];
+  if ([a, b].some(p => ids.includes(p.part_of) || ids.includes(p.rel))) return true;
+  return a.group === 'boss' && b.group === 'boss';
+}
+function check(parts){
+  const items = Object.values(parts), issues = [], gaps = [], bad = new Set();
+  items.forEach((a, i) => {
+    if (a.group !== 'boss' && (a.x0 < -0.01 || a.y0 < -0.01 || a.x1 > S.L + 0.01 || a.y1 > S.W + 0.01)){ issues.push([a.id, 'wall']); bad.add(a.id); }
+    for (const b of items.slice(i + 1)){
+      if (related(a, b)) continue;
+      if (Math.min(a.z1, b.z1) - Math.max(a.z0, b.z0) <= 0.01) continue;
+      const g = xyGap(a, b);
+      if (g < -0.01){ issues.push([a.id, b.id, -g]); bad.add(a.id); bad.add(b.id); } else gaps.push([g, a.id, b.id]);
+    }
+  });
+  gaps.sort((x, y) => x[0] - y[0]);
+  const stackTop = Math.max(...items.filter(p => p.asm === 'stack').map(p => p.z1));
+  return {issues, gaps, bad, above: S.H - stackTop, under: parts.rec.z0, foam: parts.foam.z1 - parts.foam.z0};
+}
+function grille(cx, cy, h){
+  const pts = [[cx, cy]], p = h.pitch;
+  for (let ring = 1; ring <= h.rings; ring++) for (let k = 0; k < 6; k++){
+    const a0 = Math.PI/3 * k, a1 = Math.PI/3 * (k + 1);
+    for (let s = 0; s < ring; s++){ const t = s / ring;
+      pts.push([cx + ring * p * ((1 - t) * Math.cos(a0) + t * Math.cos(a1)), cy + ring * p * ((1 - t) * Math.sin(a0) + t * Math.sin(a1))]); }
+  }
+  return pts;
+}
+const offs = () => [(OUT[0] - S.L) / 2, (OUT[1] - S.W) / 2];
+const nameOf = id => ({hat:'Modem HAT', pi:'Pi Zero 2 W', leads:'Pi leads', amp:'Amp', foam:'Foam block', speaker:'Speaker', rec:'Record', play:'Play', mic:'Mic', sma:'Antenna', usbc:'5 V in', ups:'UPS Module 3S'}[id] || (id.startsWith('boss') ? 'screw boss' : id));
+
+/* ---------- chips ---------- */
+function renderChips(r){
+  const c = (v, okAt, warnAt) => v >= okAt ? 'ok' : v >= warnAt ? 'warn' : 'bad';
+  const n = r.issues.length;
+  const tight = r.gaps.find(g => !g[1].startsWith('boss') || !g[2].startsWith('boss'));
+  const chips = [
+    [c(r.above, 5, 2), f1(r.above) + ' mm', 'free above the Pi stack'],
+    [c(r.under, 3, 1), f1(r.under) + ' mm', 'under the buttons, for leads only'],
+    [c(r.foam, 3, 1), f1(r.foam) + ' mm', 'foam block under the speaker'],
+    [n ? 'bad' : 'ok', n ? String(n) : 'None', n ? 'collisions — see the red parts' : 'collisions'],
+  ];
+  if (tight) chips.push([c(tight[0], 3, 1), f1(tight[0]) + ' mm', 'tightest: ' + nameOf(tight[1]) + ' / ' + nameOf(tight[2])]);
+  $('chips').innerHTML = chips.map(([k, v, s]) => `<div class="chip ${k}"><div class="v">${esc(v)}</div><small>${esc(s)}</small></div>`).join('');
+}
+
+/* ---------- iso ---------- */
+function camera(){
+  const a = S.az * Math.PI / 180, e = 30 * Math.PI / 180;
+  return {r:[Math.cos(a), Math.sin(a), 0], up:[-Math.sin(a) * Math.sin(e), Math.cos(a) * Math.sin(e), Math.cos(e)], c:[Math.sin(a) * Math.cos(e), -Math.cos(a) * Math.cos(e), Math.sin(e)]};
+}
+const dot = (p, v) => p[0] * v[0] + p[1] * v[1] + p[2] * v[2];
+function prism(poly, z0, z1){ // poly: [[x,y],...] counter-clockwise from above
+  const faces = [{pts: poly.map(([x, y]) => [x, y, z1]), n:[0, 0, 1]}, {pts: poly.slice().reverse().map(([x, y]) => [x, y, z0]), n:[0, 0, -1]}];
+  for (let i = 0; i < poly.length; i++){
+    const [x0, y0] = poly[i], [x1, y1] = poly[(i + 1) % poly.length];
+    faces.push({pts:[[x0, y0, z0], [x1, y1, z0], [x1, y1, z1], [x0, y0, z1]], n:[y1 - y0, -(x1 - x0), 0]});
+  }
+  return faces;
+}
+const rectPoly = (x0, y0, x1, y1) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+const circPoly = (cx, cy, r, n = 20) => Array.from({length:n}, (_, i) => [cx + r * Math.cos(2 * Math.PI * i / n), cy + r * Math.sin(2 * Math.PI * i / n)]);
+function renderIso(parts, r){
+  const cam = camera(), [ox, oy] = offs(), {L, W, H} = S, lift = S.ex * 72;
+  const objs = [];
+  const add = (poly, z0, z1, cls, opts = {}) => objs.push(Object.assign({poly, z0, z1, cls}, opts));
+  add(rectPoly(-ox, -oy, L + ox, W + oy), -DATA.box.base_t, 0, 'g-alu', {order:-1, op:1});
+  for (const p of Object.values(parts)){
+    if (p.group === 'boss') continue;
+    const dz = p.group === 'ceiling' ? lift : 0;
+    const cls = r.bad.has(p.id) ? 'g-bad' : 'g-' + (p.group === 'boss' ? 'boss' : p.group);
+    const poly = p.shape === 'cyl' ? circPoly(p.cx, p.cy, p.dia / 2) : rectPoly(p.x0, p.y0, p.x1, p.y1);
+    const LAB = {hat:'Modem HAT', pi:'Pi Zero 2 W', amp:'Amp', speaker:'Speaker', rec:'Record', play:'Play', mic:'Mic', sma:'Antenna', usbc:'5 V in', ups:'UPS 3S'};
+    add(poly, p.z0 + dz, p.z1 + dz, cls, {id:p.id, op:p.ghost ? .55 : 1, label: LAB[p.id] || '', at: p.id === 'hat' ? [p.x0 + 6, p.y0 + 4] : null});
+  }
+  for (const b of Object.values(parts).filter(p => p.group === 'boss')) add(circPoly(b.cx, b.cy, b.dia / 2, 12), 0, S.H, 'g-boss', {op:.5});
+  // tub
+  const far = S.az > 0 ? ['back', 'left'] : ['back', 'right'];
+  const walls = {front: rectPoly(-ox, -oy, L + ox, 0), back: rectPoly(-ox, W, L + ox, W + oy), left: rectPoly(-ox, 0, 0, W), right: rectPoly(L, 0, L + ox, W)};
+  for (const [k, poly] of Object.entries(walls)) add(poly, -DATA.box.base_t, H, 'g-alu', {order: far.includes(k) ? 0.5 : 2, op: far.includes(k) ? .55 : .16, tub:true});
+  add(rectPoly(-ox, -oy, L + ox, W + oy), H + lift, H + DATA.box.top_t + lift, 'g-alu', {order:3, op:.22, tub:true});
+  // painter
+  const depth = o => { const cx = o.poly.reduce((s, q) => s + q[0], 0) / o.poly.length, cy = o.poly.reduce((s, q) => s + q[1], 0) / o.poly.length; return dot([cx, cy, (o.z0 + o.z1) / 2], cam.c); };
+  objs.forEach(o => { o.key = (o.order !== undefined ? o.order * 1e4 : 1e4) + (o.order !== undefined ? 0 : depth(o)); });
+  objs.sort((a, b) => a.key - b.key);
+  const P = p => [dot(p, cam.r), -dot(p, cam.up)];
+  let minx = 1e9, miny = 1e9, maxx = -1e9, maxy = -1e9;
+  const polys = [], labels = [];
+  for (const o of objs){
+    for (const f of prism(o.poly, o.z0, o.z1)){
+      if (dot(f.n, cam.c) <= 1e-9) continue;
+      const pts = f.pts.map(P);
+      pts.forEach(([x, y]) => { minx = Math.min(minx, x); maxx = Math.max(maxx, x); miny = Math.min(miny, y); maxy = Math.max(maxy, y); });
+      const shade = f.n[2] > 0 ? 1 : (dot(f.n, [1, 0.3, 0]) > 0 ? .86 : .74);
+      polys.push(`<polygon points="${pts.map(q => q.map(v => v.toFixed(1)).join(',')).join(' ')}" class="${o.cls}" fill-opacity="${(o.op * shade).toFixed(2)}" stroke-width="${o.tub ? .3 : .45}" stroke-linejoin="round"${o.tub ? ' stroke-opacity=".7"' : ''}/>`);
+    }
+    if (o.label){ const c = o.at || o.poly.reduce((s, q) => [s[0] + q[0] / o.poly.length, s[1] + q[1] / o.poly.length], [0, 0]); labels.push([P([c[0], c[1], o.z1]), o.label, o.cls]); }
+  }
+  // holes on the top face
+  const top = H + DATA.box.top_t + lift, holeMarks = [];
+  for (const p of Object.values(parts)){
+    const h = p.hole; if (!h || h.face !== 'top') continue;
+    const pts = h.kind === 'grille' ? grille(p.cx, p.cy, h) : [[p.cx, p.cy]];
+    for (const [x, y] of pts){ const rr = Math.max(h.dia / 2, 1.2); holeMarks.push(`<polygon class="hole" stroke-width=".35" points="${circPoly(x, y, rr, 14).map(([a, b]) => P([a, b, top]).map(v => v.toFixed(1)).join(',')).join(' ')}"/>`); }
+  }
+  // face tags
+  const tag = (p3, txt, anchor = 'middle') => { if (!txt) return ''; const [x, y] = P(p3); return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" class="tm" font-size="4.6" text-anchor="${anchor}">${txt}</text>`; };
+  const tags = [tag([L / 2, -oy - 12, -3], 'FRONT · child side'), tag([-ox, W + oy, top + 6], lift > 20 ? 'the lid is the top face: buttons, grille, mic' : '', 'start'), tag([L + ox + 4, W / 2, -3], lift > 20 ? 'the tub: electronics screwed to its floor' : '', 'start')];
+  const lab = labels.map(([[x, y], t]) => `<g><line x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${x.toFixed(1)}" y2="${(y - 9).toFixed(1)}" class="stroke-ink" stroke-width=".35"/><text x="${(x + 1.5).toFixed(1)}" y="${(y - 10.5).toFixed(1)}" class="t" font-size="5.4">${esc(t)}</text></g>`);
+  const pad = 14; miny -= 16; maxx += 70;
+  const svg = $('svg-iso');
+  svg.setAttribute('viewBox', `${(minx - pad).toFixed(0)} ${(miny - pad).toFixed(0)} ${(maxx - minx + 2 * pad).toFixed(0)} ${(maxy - miny + 2 * pad).toFixed(0)}`);
+  svg.innerHTML = polys.join('') + holeMarks.join('') + lab.join('') + tags.join('');
+}
+
+/* ---------- plan ---------- */
+function renderPlan(parts, r){
+  const {L, W} = S, [ox, oy] = offs(), m = 16;
+  const Y = y => W - y;
+  const out = [];
+  out.push(`<rect x="${-ox}" y="${-oy}" width="${L + 2 * ox}" height="${W + 2 * oy}" rx="4" class="g-alu" fill-opacity=".35" stroke-width=".5"/>`);
+  out.push(`<rect x="0" y="0" width="${L}" height="${W}" fill="var(--paper)" stroke="var(--alu)" stroke-width=".4"/>`);
+  for (const b of Object.values(parts).filter(p => p.group === 'boss')) out.push(`<circle cx="${b.cx}" cy="${Y(b.cy)}" r="${b.dia / 2}" class="g-boss" stroke-width=".4"/>`);
+  const draw = grp => Object.values(parts).filter(p => p.group === grp && S.layers[grp] !== false).forEach(p => {
+    const cls = r.bad.has(p.id) ? 'g-bad' : 'g-' + grp, dash = grp === 'ceiling' ? ' stroke-dasharray="2 1.2"' : '', op = grp === 'ceiling' ? .55 : .9;
+    if (p.shape === 'cyl') out.push(`<circle cx="${p.cx}" cy="${Y(p.cy)}" r="${p.dia / 2}" class="${cls}" fill-opacity="${op}" stroke-width=".5"${dash}/>`);
+    else out.push(`<rect x="${p.x0}" y="${Y(p.y1)}" width="${p.x1 - p.x0}" height="${p.y1 - p.y0}" class="${cls}" fill-opacity="${p.ghost ? .25 : op}" stroke-width=".5"${dash}/>`);
+  });
+  draw('floor'); draw('wall'); draw('ceiling');
+  if (S.layers.wires) for (const w of DATA.wires){
+    const a = parts[w.from], b = parts[w.to]; if (!a || !b) continue;
+    const mx = (a.cx + b.cx) / 2, my = (a.cy + b.cy) / 2 + 8;
+    out.push(`<path class="wire" stroke-width=".5" d="M${a.cx} ${Y(a.cy)} Q${mx} ${Y(my)} ${b.cx} ${Y(b.cy)}"/>`);
+  }
+  if (S.layers.ceiling) for (const p of Object.values(parts)){
+    const h = p.hole; if (!h || h.face !== 'top') continue;
+    const pts = h.kind === 'grille' ? grille(p.cx, p.cy, h) : [[p.cx, p.cy]];
+    pts.forEach(([x, y]) => out.push(`<circle cx="${x}" cy="${Y(y)}" r="${Math.max(h.dia / 2, .8)}" class="hole" stroke-width=".35"/>`));
+    const tx = p.cx + (h.kind === 'grille' ? 20 : p.dia / 2 + 1.5), ty = Y(p.cy) + (h.kind === 'grille' ? -12 : 0);
+    out.push(`<text x="${tx}" y="${ty + 1.2}" class="tm" font-size="3.4">${f1(p.cx + ox)} / ${f1(p.cy + oy)}</text>`);
+  }
+  for (const p of Object.values(parts)){
+    if (p.group === 'boss' || p.part_of || !S.layers[p.group]) continue;
+    if (['leads', 'foam'].includes(p.id)) continue;
+    let x = p.cx, y = Y(p.cy), anchor = 'middle';
+    if (p.id === 'pi') y -= 0; if (p.id === 'hat') y = Y(p.y0) - 3;
+    if (p.group === 'wall'){ y = Y(p.y1) - 2.5; }
+    if (['rec', 'play', 'mic'].includes(p.id)) y = Y(p.cy) + p.dia / 2 + 4.2;
+    out.push(`<text x="${x}" y="${y}" class="t" font-size="${p.group === 'wall' ? 3 : 4}" text-anchor="${anchor}">${esc(nameOf(p.id))}</text>`);
+  }
+  out.push(`<text x="${L / 2}" y="${W + oy + 9}" class="tm" font-size="4" text-anchor="middle">FRONT · child side</text>`);
+  out.push(`<text x="${L / 2}" y="${-oy - 4}" class="tm" font-size="4" text-anchor="middle">back wall · 5 V in · antenna</text>`);
+  const svg = $('svg-plan');
+  svg.setAttribute('viewBox', `${-ox - m} ${-oy - m} ${L + 2 * ox + 2 * m} ${W + 2 * oy + 2 * m}`);
+  svg.innerHTML = out.join('');
+}
+
+/* ---------- section ---------- */
+function renderSection(parts, r){
+  const {L, W, H} = S, [ox, oy] = offs(), bt = DATA.box.base_t, tt = DATA.box.top_t;
+  const along = S.cutAxis === 'y' ? L : W, wo = S.cutAxis === 'y' ? ox : oy;
+  const cut = Math.min(S.cut, S.cutAxis === 'y' ? W : L);
+  const Z = z => H + tt - z, m = 12, out = [];
+  out.push(`<rect x="${-wo}" y="${Z(0)}" width="${along + 2 * wo}" height="${bt}" class="g-alu" stroke-width=".4"/>`);
+  out.push(`<rect x="${-wo}" y="${Z(H + tt)}" width="${along + 2 * wo}" height="${tt}" class="g-alu" stroke-width=".4"/>`);
+  out.push(`<rect x="${-wo}" y="${Z(H)}" width="${wo}" height="${H}" class="g-alu" stroke-width=".4"/><rect x="${along}" y="${Z(H)}" width="${wo}" height="${H}" class="g-alu" stroke-width=".4"/>`);
+  const segs = [];
+  for (const p of Object.values(parts)){
+    let a0, a1;
+    if (S.cutAxis === 'y'){
+      if (p.shape === 'cyl'){ const d = Math.abs(cut - p.cy), r0 = p.dia / 2; if (d > r0) continue; const hw = Math.sqrt(r0 * r0 - d * d); a0 = p.cx - hw; a1 = p.cx + hw; }
+      else { if (cut < p.y0 || cut > p.y1) continue; a0 = p.x0; a1 = p.x1; }
+    } else {
+      if (p.shape === 'cyl'){ const d = Math.abs(cut - p.cx), r0 = p.dia / 2; if (d > r0) continue; const hw = Math.sqrt(r0 * r0 - d * d); a0 = p.cy - hw; a1 = p.cy + hw; }
+      else { if (cut < p.x0 || cut > p.x1) continue; a0 = p.y0; a1 = p.y1; }
+    }
+    const cls = r.bad.has(p.id) ? 'g-bad' : 'g-' + p.group;
+    segs.push(p);
+    out.push(`<rect x="${a0.toFixed(2)}" y="${Z(p.z1).toFixed(2)}" width="${(a1 - a0).toFixed(2)}" height="${(p.z1 - p.z0).toFixed(2)}" class="${cls}" fill-opacity="${p.ghost ? .35 : .9}" stroke-width=".45"${p.group === 'ceiling' ? ' stroke-dasharray="1.6 1"' : ''}/>`);
+    if (!p.part_of && p.group !== 'boss' && a1 - a0 > 12){
+      out.push(`<text x="${((a0 + a1) / 2).toFixed(1)}" y="${(Z((p.z0 + p.z1) / 2) + 1.3).toFixed(1)}" class="t" font-size="3.6" text-anchor="middle">${esc(nameOf(p.id))}</text>`);
+    }
+  }
+  out.push(`<line x1="${along + wo + 5}" y1="${Z(0)}" x2="${along + wo + 5}" y2="${Z(H)}" class="stroke-ink" stroke-width=".35"/><text x="${along + wo + 7}" y="${Z(H / 2) + 1.3}" class="tm" font-size="3.6">${f1(H)}</text>`);
+  out.push(`<text x="0" y="${Z(-bt) + 6}" class="tm" font-size="3.4">${S.cutAxis === 'y' ? 'left ← seen from the front → right' : 'front ← seen from the right → back'}</text>`);
+  const svg = $('svg-sec');
+  svg.setAttribute('viewBox', `${-wo - m} ${-m} ${along + 2 * wo + 2 * m + 8} ${H + tt + bt + 2 * m + 6}`);
+  svg.innerHTML = out.join('');
+  $('cut-label').textContent = S.cutAxis === 'y' ? 'Cut at y =' : 'Cut at x =';
+  $('cut').max = S.cutAxis === 'y' ? W : L; $('cut').value = cut; $('cut-v').textContent = f1(cut) + ' mm';
+  document.querySelectorAll('[data-cut]').forEach(b => { const [ax, v] = b.dataset.cut.split(':'); b.setAttribute('aria-pressed', String(ax === S.cutAxis && Math.abs(+v - cut) < .6)); });
+}
+
+/* ---------- tables ---------- */
+function renderTables(parts){
+  const [ox, oy] = offs(), rows = [];
+  for (const p of Object.values(parts)){
+    const h = p.hole; if (!h) continue;
+    if (h.face === 'top'){
+      const n = h.kind === 'grille' ? grille(p.cx, p.cy, h).length : 1;
+      rows.push(['top face', h.kind === 'grille' ? `Speaker grille, ${n} holes at ${h.pitch} mm pitch` : nameOf(p.id), `${f1(p.cx + ox)} from left · ${f1(p.cy + oy)} from front`, h.dia + (n > 1 ? ' × ' + n : ''), h.drill]);
+    } else {
+      const u = OUT[0] - (p.cx + ox), v = S.H - (p.z0 + p.z1) / 2;
+      rows.push(['back wall', nameOf(p.id), `${f1(u)} from left end (seen from behind) · ${f1(v)} down from rim`, h.dia || 'per socket', h.drill]);
+    }
+  }
+  rows.push(['tub floor', 'HAT standoffs × 4', 'mark through the board where the plan shows it', '2.7', 'twist drill; pan-head M2.5 screws from below, rubber feet keep them off the table']);
+  $('tbl-holes').tBodies[0].innerHTML = rows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td class="num">${esc(r[2])}</td><td class="num">${esc(r[3])}</td><td>${esc(r[4])}</td></tr>`).join('');
+  const where = {floor:'tub floor', ceiling:'lid', wall:'back wall'};
+  $('tbl-fix').tBodies[0].innerHTML = DATA.parts.filter(p => p.fix).map(p => `<tr><td><b>${esc(nameOf(p.id))}</b><br><span class="tm" style="font-size:13px">${esc(p.sub || '')}</span></td><td><span class="tag ${p.group}">${where[p.group]}</span></td><td>${esc(p.fix)}</td></tr>`).join('');
+  $('tbl-harness').tBodies[0].innerHTML = DATA.harness.map(h => `<tr><td>${esc(h[0])}</td><td class="num">${esc(h[1])}</td><td class="num">${esc(h[2])}</td><td>${esc(h[3])}</td></tr>`).join('');
+  $('tbl-wires').tBodies[0].innerHTML = DATA.wires.map(w => { const a = parts[w.from], b = parts[w.to]; const d = a && b ? Math.abs(a.cx - b.cx) + Math.abs(a.cy - b.cy) + Math.abs(((a.z0 + a.z1) - (b.z0 + b.z1)) / 2) : 0; const len = Math.ceil((d + 80) / 10) * 10;
+    return `<tr><td>${esc(nameOf(w.from))} → ${esc(nameOf(w.to))}<br><span class="tm" style="font-size:13px">${esc(w.what)}</span></td><td class="num">${w.n}</td><td class="num">${w.from === 'sma' ? 'pigtail' : w.from === 'usbc' ? '~20 cm lead' : '~' + len / 10 + ' cm'}</td></tr>`; }).join('');
+  $('tbl-kit').tBodies[0].innerHTML = DATA.kit.map(k => `<tr><td>${esc(k[0])}</td><td class="num">${esc(k[1])}</td><td>${esc(k[2])}</td></tr>`).join('');
+}
+
+/* ---------- battery ---------- */
+function batteryNote(){
+  const note = $('battery-note');
+  if (!S.battery){ note.hidden = true; return; }
+  const r = check(resolve(true)), hits = r.issues.filter(i => i.includes('ups')).map(i => nameOf(i[0] === 'ups' ? i[1] : i[0]));
+  note.hidden = false;
+  note.innerHTML = `<b>It doesn't fit.</b> The UPS Module 3S (93 × 86 mm, about 28 mm tall with cells) collides with ${esc([...new Set(hits)].join(', '))}. With the speaker and buttons under the lid and the stack on the tub floor, there is no 93 × 86 patch left that is clear from floor to top. A battery later means a slimmer one (a flat 1S pack under 10 mm), or a taller box.`;
+}
+
+/* ---------- wiring up ---------- */
+function render(){
+  S.L = Math.max(150, Math.min(190, +S.L || PLAN[0])); S.W = Math.max(90, Math.min(120, +S.W || PLAN[1])); S.H = Math.max(20, Math.min(37, +S.H || PLAN[2]));
+  $('in-L').value = S.L; $('in-W').value = S.W; $('in-H').value = S.H; $('ex').value = S.ex;
+  $('tb-inner').textContent = `${f1(S.L)} × ${f1(S.W)} × ${f1(S.H)}`;
+  $('tg-battery').checked = S.battery;
+  ['floor', 'ceiling', 'wall', 'wires'].forEach(k => $('ly-' + k).checked = S.layers[k]);
+  $('view-l').setAttribute('aria-pressed', String(S.az < 0)); $('view-r').setAttribute('aria-pressed', String(S.az > 0));
+  const parts = resolve(S.battery), r = check(parts);
+  renderChips(check(resolve(false)));
+  renderIso(parts, r); renderPlan(parts, r); renderSection(parts, r); renderTables(resolve(false)); batteryNote();
+  save();
+}
+['L', 'W', 'H'].forEach(k => $('in-' + k).addEventListener('change', e => { S[k] = parseFloat(e.target.value); render(); }));
+$('reset').addEventListener('click', () => { [S.L, S.W, S.H] = PLAN; render(); });
+$('ex').addEventListener('input', e => { S.ex = +e.target.value; render(); });
+$('view-l').addEventListener('click', () => { S.az = -35; render(); });
+$('view-r').addEventListener('click', () => { S.az = 35; render(); });
+$('tg-battery').addEventListener('change', e => { S.battery = e.target.checked; render(); });
+['floor', 'ceiling', 'wall', 'wires'].forEach(k => $('ly-' + k).addEventListener('change', e => { S.layers[k] = e.target.checked; render(); }));
+$('cut').addEventListener('input', e => { S.cut = +e.target.value; render(); });
+document.querySelectorAll('[data-cut]').forEach(b => b.addEventListener('click', () => { const [ax, v] = b.dataset.cut.split(':'); S.cutAxis = ax; S.cut = +v; render(); }));
+render();
+})();
+</script>

@@ -83,7 +83,8 @@ History: the lid, reed contact and NeoPixel ring are in
 
 ## Questions
 
-1. **Wall or top plate?** At ~20 mm behind the panel the buttons fit either.
+1. **Wall or top plate?** Proposed: the lid (the top face), near the front edge
+   ([ADR 0023](../decisions/0023-enclosure-layout.md)). At ~20 mm behind the panel the buttons fit either.
    The plate is nicer for a child at a bedside and more exposed in a bag; a
    wall is safer in the bag and wants rubber feet so the box doesn't slide.
    Decide with the box in hand ([enclosure.md](enclosure.md)).

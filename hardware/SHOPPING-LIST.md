@@ -55,6 +55,24 @@ first.**
 | 1 | Second 12.6 V 2 A (3S Li-ion) charger for house B | ~12 | any — match the plug with the first one in hand |
 | 1 | Panel-mount DC barrel jack, round hole — the charge port through the wall | ~4 | any — buy with the UPS module in hand |
 
+### Before drilling — the fixing kit ([ADR 0023](../docs/decisions/0023-enclosure-layout.md), [LAYOUT.md](LAYOUT.md))
+
+All off the shelf; rows FX1–FX7, T3, P2, C1–2 in the BOM.
+
+| Item | CHF | Where |
+| --- | --- | --- |
+| M2.5 nylon standoff, screw and nut assortment | ~12 | Bastelgarage / Galaxus |
+| 3M VHB or 2 mm double-sided foam tape | ~10 | Hornbach / Galaxus |
+| Closed-cell EVA foam, 10 mm | ~6 | craft shop / Hornbach |
+| Adhesive cable-tie mounts + small ties | ~6 | Hornbach |
+| Silicone wire 26 AWG + heat-shrink | ~18 | Bastelgarage |
+| Medium threadlocker | ~9 | Hornbach |
+| Kapton tape or a plastic sheet | ~6 | Bastelgarage / stationery |
+| Twist drills 2 / 2.7 / 3 mm, centre punch, deburring tool, half-round file | ~23 | Hornbach |
+| USB-C panel socket with a 30 cm tail to a USB-C plug — [Exsys EX-49222](https://www.exsys.ch/einbau-adapter-usb-c-buchse-zu-stecker-usb-3.2-gen-2-30-cm-EX-49222), 22.3–24 mm hole. **Not** the socket-to-socket EX-49195 in hand: it powers the box one way up only | 16.90 | exsys.ch |
+| USB-C socket → micro-USB plug adapter (the tail to the Pi's PWR IN) — Delock 65927. Test it straight on the USB-C supply first: Pi boots = it has the CC resistors | ~8 | [Brack](https://www.brack.ch/delock-usb-2-0-adapter-usb-c-buchse--microb-usb-stecker-819951) |
+| Short micro-USB → USB-C lead, Pi→HAT, [ordered 2026-09-25](https://www.galaxus.ch/en/s1/product/delock-usb-c-micro-usb-b-014-m-usb-20-usb-cables-17956770) (Delock, 0.14 m) | ~12 | any |
+
 ### Before the box leaves home
 
 | Qty | Part | CHF | Source |
@@ -62,11 +80,8 @@ first.**
 | 1 | SanDisk High Endurance 32 GB microSD — the deployed card; the bench card becomes the spare image | 22.95 | [Brack](https://www.brack.ch/sandisk-microsdhc-karte-high-endurance-uhs-i-32-gb-935760) |
 | — | Rubber feet, self-adhesive | ~5 | [Hornbach](https://www.hornbach.ch/de/p/tarrox-rutsch-laermschutzpuffer-selbstklebend-transparent-o-10-x-3-mm-32-stueck/10565335/) |
 | 2 | 3 mm LEDs + 220 Ω for LINK and POWER | ~2 | any / drawer |
-| — | Sturdier internal wiring than jumpers | — | open |
 
-Round holes only, all within the step drill: 2 × 16 mm buttons, charge port,
-6.5 mm SMA, 2 × 3 mm status LEDs, and a drilled pattern over the speaker. No
-hole saw.
+Round holes only — positions and sizes in [LAYOUT.md](LAYOUT.md), 1:1 templates in `cad/`. No hole saw.
 
 Parts considered and dropped are in [EVALUATION.md](EVALUATION.md) and ADRs
 [0014](../docs/decisions/0014-raspberry-pi-zero-2w.md) and
