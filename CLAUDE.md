@@ -21,7 +21,8 @@ before making assumptions about the design.
   UART on GPIO 14/15 via `tools/serial_capture.py`, or `ssh dadbox-lan` on home
   Wi-Fi). Deploy is `box/deploy.sh`; logs are `journalctl -u dadbox` (in RAM,
   lost at power-off). Root is a read-only overlay, so only `/data` is ever
-  written; the power-cut test that proves a pulled plug is safe is still to do.
+  written; a pulled plug is safe (tested idle and mid-boot; mid-recording
+  waits for the mic).
 - Drive it with `dadboxctl` (`state`, `record start`, `play`, `checkin`, `led
   test`, `sim link down`) before asking the user to touch anything.
 - The root filesystem is a read-only overlay. Only `/data` is writable. Every

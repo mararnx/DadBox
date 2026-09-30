@@ -40,6 +40,23 @@ Delock 65927 adapter; the socket moves to the back-left corner and the
 antenna to its right (`hardware/LAYOUT.md`), because the new flange is
 ~30 mm, not 16.
 
+## 2026-09-30 (evening) — Power-cut test on the read-only root
+
+**Did:** Four pulls of the plug: one while idle, three more at different
+times after power-on, the early ones before `/data` was even mounted. After
+each: Wi-Fi back at once, LTE and Tailscale up, the service running, `/data`
+mounted `ext4 rw` and marked clean, a check-in ok, and all ten files on
+`/data` (config, key, `seq`, the two inbox messages) checksum-identical to a
+fingerprint taken on the Mac beforehand. Also a clean image of the card after
+`zerofree`: 1.45 GB, in `~/DadBox-backups/2026-09-30-clean/` with restore notes.
+**Learned:** A pull during a recording cannot be tested without a mic: the
+firmware stops a recording after 20 s of silence and drops one with under
+1 s of speech — the rescued capture after a pull included — so a silent test
+recording is gone before the plug is. `/data/tmp` is emptied at boot; keep
+test fingerprints off the box. Every boot starts with the clock where the
+root image last left it (17:23 today) until NTP — seconds on Wi-Fi.
+**Next:** the pull mid-recording, speaking into the mic, once it is soldered.
+
 ## 2026-09-30 (afternoon) — Re-flashed: read-only root, /data partition, Tailscale, signal in the app
 
 **Did:** Re-flashed the card so root could go read-only (the old root filled
