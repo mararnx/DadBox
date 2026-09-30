@@ -2,6 +2,22 @@
 
 Newest entry at the top. One entry per session at the bench.
 
+## 2026-09-30 (evening) — A 3-minute note over LTE: refused, and the box went offline
+
+**Did:** Queued 3 min of synthetic voice through the box's own pipeline
+(trim, ffmpeg Opus 16 kbps, seal, fsync to the outbox). There's no mic yet.
+Container 339,493 bytes (0.34 MB) for 180,000 ms; the nominal size at
+16 kbps is 0.36 MB. LTE itself was fine: `usb0` default route, ping 49–71 ms.
+**Learned:** The re-flash left no `/data/seq`, so the note got seq 1, which
+the server already had: `409 seq already used by another message`. The link
+round stopped at that upload and never checked in, so from 18:00 to 18:10 the
+box was `link=DOWN`. Moving the (synthetic) note out of the outbox brought it
+straight back. Fixed in ADR 0025: `max_seq` on check-in and on the 409, the
+box renumbers and retries, and a 4xx on one message no longer stops the
+check-in. The upload time over LTE is still unmeasured.
+**Next:** deploy the server function and `box/deploy.sh`, then re-run the
+3-minute upload and time it. Add `/data/seq` to the `/data` backup.
+
 ## 2026-09-30 — USB-C panel coupler: powers the box one way up only
 
 **Did:** Tried the Exsys EX-49195 (USB-C socket to socket, panel mount) as the
