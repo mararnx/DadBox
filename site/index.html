@@ -21,20 +21,7 @@
   /* used by the drawings */
   --card:var(--surface); --paper:#f0ede6; --paper-2:#e3dfd6; --rust:#b4553f; --orange:#f0a36b; --mustard:#f2cf6b;
   --led-red:#e0442c; --led-green:#22a95a; --led-blue:#3a6fc4;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#131312; --surface:#1c1b19; --ink:#ece9e2; --ink-soft:#c3beb4; --muted:#9e998f;
-    --hair:rgba(255,255,255,.1); --hair-2:rgba(255,255,255,.18);
-    --rec:#ff8170; --play:#5fd38c; --code-bg:#0c0c0b;
-    --paper:#181816; --paper-2:#2a2926; --rust:#e3917a;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#131312; --surface:#1c1b19; --ink:#ece9e2; --ink-soft:#c3beb4; --muted:#9e998f;
-  --hair:rgba(255,255,255,.1); --hair-2:rgba(255,255,255,.18);
-  --rec:#ff8170; --play:#5fd38c; --code-bg:#0c0c0b;
-  --paper:#181816; --paper-2:#2a2926; --rust:#e3917a;
+  color-scheme:light;
 }
 *{box-sizing:border-box}
 html{scroll-padding-top:80px}
@@ -282,7 +269,6 @@ footer p{margin:0;max-width:44em}
     <nav aria-label="Sections">
       <a href="#what">What</a><a href="#photos">Photos</a><a href="#drawings">Drawings</a><a href="#how">How</a><a href="#status">Status</a><a href="#parts">Parts</a><a href="#build">Build</a><a href="#repo">Code</a>
     </nav>
-    <button class="iconbtn" id="theme" type="button" aria-label="Toggle light or dark theme">◐</button>
   </div>
 </div>
 
@@ -737,14 +723,8 @@ open ios/DadBox.xcodeproj</code></pre></label></div>
 
 <script>
 (function(){
-  var root=document.documentElement;
   function get(k){try{return localStorage.getItem(k)}catch(e){return null}}
   function set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-  var t=get('dadbox-theme'); if(t) root.setAttribute('data-theme',t);
-  document.getElementById('theme').addEventListener('click',function(){
-    var cur=root.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
-    var n=cur==='dark'?'light':'dark'; root.setAttribute('data-theme',n); set('dadbox-theme',n);
-  });
 
   // the phone sketch's waveforms: fixed shapes, no randomness between loads
   document.querySelectorAll('.wave').forEach(function(w){ var s=+w.dataset.wave, h='';
