@@ -31,8 +31,9 @@ parts; they are **chained at the parts**, never doubled at the header:
 Grounds were already one per pin, with the joins at the part (a button's
 C− and a gold switch tab, the mic's L/R to its GND).
 
-The leads go onto the Zero's top face: with the stacked header in the holes,
-each lead is soldered to the top of its header pin, one lead per pin.
+The leads go onto the Zero's top face, each soldered into its hole from above,
+one lead per hole. Only pins 4, 6 and 7 hold a header pin, soldered in from
+below to reach the HAT; the inlet's two leads solder to the tops of 4 and 6.
 
 A chain is soldered at the part: both wires into the same tab or pad (or the
 second wire soldered to the pin on top of the header), heat-shrink over it.
@@ -43,9 +44,9 @@ No two Dupont housings on one pin, anywhere.
 | Pin | Function | Goes to | | Pin | Function | Goes to |
 | --: | --- | --- | --- | --: | --- | --- |
 | 1 | 3.3 V | — spare | | 2 | 5 V | Amp VIN |
-| 3 | GPIO 2 · SDA | — later: INA219 (battery gauge) | | 4 | 5 V | Modem HAT 5 V — stacked header |
-| 5 | GPIO 3 · SCL | — later: INA219 | | 6 | GND | Modem HAT GND — stacked header |
-| 7 | **GPIO 4** | **Modem PWRKEY (HAT P4) — stacked header** | | 8 | GPIO 14 · TXD | Debug probe RX (yellow) |
+| 3 | GPIO 2 · SDA | — later: INA219 (battery gauge) | | 4 | 5 V | **5 V in** (inlet, red) · HAT 5 V by pin from below |
+| 5 | GPIO 3 · SCL | — later: INA219 | | 6 | GND | **GND in** (inlet, black) · HAT GND by pin from below |
+| 7 | **GPIO 4** | **Modem PWRKEY (HAT P4) — pin from below** | | 8 | GPIO 14 · TXD | Debug probe RX (yellow) |
 | 9 | GND | Mic GND and mic L/R | | 10 | GPIO 15 · RXD | Debug probe TX (orange) |
 | 11 | **GPIO 17** | **Record LED red** (mic VDD chained from its tab) | | 12 | GPIO 18 · I2S BCLK | Amp BCLK (mic SCK chained from the amp) |
 | 13 | GPIO 27 | Record LED green | | 14 | GND | Debug probe GND (black) |
@@ -64,9 +65,9 @@ No two Dupont housings on one pin, anywhere.
 | 39 | GND | Amp GND | | 40 | GPIO 21 · I2S DOUT | Amp DIN (data into the amp) |
 
 Used: 16 signal pins, both 5 V pins, 6 of 8 grounds. Spare: GPIO 7, 8, 9,
-10, 11, 12, 13, 26, both 3.3 V pins, two grounds (25, 34). The stacked modem
-HAT joins every pin; it uses only 5 V, ground, pin 7 and (switched off) pins
-8 and 10.
+10, 11, 12, 13, 26, both 3.3 V pins, two grounds (25, 34). The modem HAT is
+joined by three pins only — 4, 6 and 7 — and 5 V comes in on pins 4 and 6
+([ADR 0026](../../docs/decisions/0026-power-and-modem-on-three-pins.md)).
 
 ## Wire colours
 
@@ -78,7 +79,7 @@ its colour from the header through the amp to the mic. The wiring map
 | Colour | Cut | Pins → part |
 | --- | --: | --- |
 | black | 4 + jumpers | 9 mic GND · 30 record gold/C− · 20 play gold/C− · 39 amp GND; short offcuts for C− ↔ gold and mic L/R ↔ GND |
-| red | 1 | 2 amp Vin (the modem gets 5 V through the stacked header) |
+| red | 1 | 2 amp Vin |
 | orange | 3 | 11 record R · 16 play R · record R tab → mic VDD |
 | green | 3 | 13 record G · 18 play G · 40 amp DIN |
 | blue | 2 | 15 record B · 22 play B |
@@ -88,7 +89,8 @@ its colour from the header through the amp to the mic. The wiring map
 | brown | 1 | 38 mic SD |
 | grey | 1 | 36 amp SD |
 
-The debug probe (pins 8, 10, 14) uses its own orange / yellow / black cable.
+The debug probe (pins 8, 10, 14) uses its own orange / yellow / black cable;
+the 5 V inlet (pins 4, 6) its own red / black leads, 0.5 mm² or thicker.
 
 ## Per part
 
@@ -161,26 +163,29 @@ L/R/SEL.
 | GAIN | — | unconnected: 9 dB |
 | Speaker + / − | — | the Seeed 4 Ω speaker on the screw terminal |
 
-### Modem — Waveshare SIM7670G HAT, under the Zero, pin for pin
+### Modem — Waveshare SIM7670G HAT, under the Zero, three pins
 
 The HAT sits under the Zero ([ADR 0023](../../docs/decisions/0023-enclosure-layout.md)),
-its 40-pin header exactly under the Zero's: a straight 2×20 header soldered in
-from below joins **pin N of the Zero to pin N of the HAT**, all 40. No modem
-wires.
+its 40-pin header exactly under the Zero's. **Only three pins join them**,
+soldered in from below ([ADR 0026](../../docs/decisions/0026-power-and-modem-on-three-pins.md)):
+
+| Pin | Signal | Row |
+| --: | --- | --- |
+| 4 | 5 V | even — the board's edge |
+| 6 | GND | even — the board's edge |
+| 7 | GPIO 4 → P4, the power key | odd — fixed by the HAT: DIP 3 routes PWR only to P4 |
 
 From the [HAT schematic](https://files.waveshare.com/wiki/SIM7670G-LTE-Cat-1-GNSS-HAT/SIM7670G_LTE_Cat-1-GNSS_HAT.pdf)
-the HAT uses only: **5 V** (pins 2, 4), **GND** (every ground pin), **P4**
-(pin 7 → DIP 3 → power key) and **TXD / RXD** (pins 8, 10 → DIP 1 / 2, kept
-off). Every other pin, 3.3 V and I²C included, ends at the header on the HAT,
-so the buttons, I²S and the debug probe are unaffected by the join.
+the HAT uses nothing else from the header but TXD / RXD on pins 8 / 10, behind
+DIP 1 / 2 and not joined. Every other HAT pin stays unconnected.
 
 | Connection | Zero | HAT | Note |
 | --- | --- | --- | --- |
-| 5 V | pins 2, 4 | pins 2, 4 | through the header; the amp's red lead goes on pin 2's top |
-| GND | all ground pins | same | through the header |
+| 5 V | pin 4 | pin 4 | the inlet's red lead on pin 4's top; the modem draws straight from the joined pin |
+| GND | pin 6 | pin 6 | the inlet's black lead on pin 6's top |
 | PWRKEY | pin 7 · **GPIO 4** | pin 7 (P4), DIP switch 3 (PWR) **on** | high on P4 turns a transistor on that pulls PWRKEY low. GPIO 4 has a pull-up at boot: `gpio=4=op,dl` in `config.txt` holds it low from the first second, since a key held ≥ 2.5 s turns the modem off. The HAT pulses PWRKEY itself at power-up, so the modem starts without it |
 | Data | Zero's inner micro-USB, "USB" | HAT Type-C | the short micro-USB → USB-C lead (BOM C2); appears as a network interface |
-| DIP switches | — | 1 TXD, 2 RXD **off**; 3 PWR **on**; 4 BOOT **off** | TXD/RXD would put the modem's UART on GPIO 14/15, the console; BOOT is for firmware flashing |
+| DIP switches | — | 1 TXD, 2 RXD **off**; 3 PWR **on**; 4 BOOT **off** | pins 8/10 are not joined anyway; BOOT is for firmware flashing |
 | Antenna | HAT "LTE" IPEX1 | pigtail → SMA through the wall → stub | never transmit without it |
 | SIM | HAT slot | — | insert before power; no hot-swap |
 
@@ -200,10 +205,16 @@ is the full UART and the kernel console.
 
 ### Power
 
-5 V 2.5 A supply → the Zero's **outer** micro-USB, "PWR IN". The 5 V rail
-then feeds the amp (pin 2) and the modem HAT (pin 4). Later, the UPS module
-replaces the supply, and its INA219 goes on pins 3 and 5 (I²C), with its
-own ground ([ADR 0019](../../docs/decisions/0019-mains-first-battery-deferred.md)).
+5 V 2.5 A USB-C supply → the USB-C socket in the back wall → its tail → **two
+leads onto the header: red on pin 4, black on pin 6**
+([ADR 0026](../../docs/decisions/0026-power-and-modem-on-three-pins.md)).
+The micro-USB "PWR IN" stays empty — never two supplies at once. Pins 4 and 6
+also join the HAT, so the modem takes its current there; the Zero's 5 V rail
+carries it on to the amp (pin 2). The tail needs the USB-C CC resistors
+(5.1 kΩ) somewhere on it, or the supply never switches 5 V on: check with a
+meter on the two leads, both ways up, before they touch the Zero. Later, the
+UPS module replaces the supply, and its INA219 goes on pins 3 and 5 (I²C)
+([ADR 0019](../../docs/decisions/0019-mains-first-battery-deferred.md)).
 
 ## Limits to respect
 
@@ -212,6 +223,8 @@ own ground ([ADR 0019](../../docs/decisions/0019-mains-first-battery-deferred.md
   LEDs have their resistors built in for 5 V, so at 3.3 V they draw less —
   measure one channel before trusting the total; buffers (74AHCT125) only if
   they are too dim (ADR 0016).
+- **5 V in on pins 4/6 is unprotected:** reversed leads or more than
+  ~5.25 V destroy the Zero and the HAT at once. Meter before the first plug-in.
 - **3.3 V logic only** on every GPIO. The modem HAT's logic is 3.3 V.
 - **GPIO 16 belongs to the sound driver.** Do not reuse it.
 - **GPIO 0/1 (pins 27, 28)** are for HAT EEPROMs; leave them free.

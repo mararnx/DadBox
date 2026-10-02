@@ -34,10 +34,10 @@ The parts are in hand. Facts from the bench:
 - **Buttons in the lid at the left end, near the front edge**, 30 mm apart —
   the one patch with 26 mm clear below. Mic beside the speaker, at the front.
 - **Antenna through the back wall**, back-left; the hinged stub folds upright.
-- **The HAT and the Pi are joined pin for pin** (revised 2026-10-02): a
-  straight 2×20 header, soldered in from below, puts Pi pin N exactly on HAT
-  pin N. The HAT uses only 5 V, ground and pin 7 (its power key, now GPIO 4),
-  so the modem needs no wires of its own.
+- **The HAT and the Pi are joined by three pins** (revised 2026-10-02,
+  [ADR 0026](0026-power-and-modem-on-three-pins.md)): 4 (5 V), 6 (GND) and 7
+  (its power key, GPIO 4), soldered in from below. 5 V comes in on pins 4
+  and 6 as well, so the modem needs no wires of its own.
 - **Leads are soldered onto the Pi's pins from above** — no dupont. It is the
   only way to fit under the lid, and it is the sturdier wiring the bag needed
   anyway. What each pin carries is
@@ -66,8 +66,8 @@ The parts are in hand. Facts from the bench:
   back on ~10–15 cm of button and mic leads. Nothing needs unplugging.
 - Screw heads on the top face: use matching stainless button-head screws.
   Rubber feet go on the tub's underside, clear of the standoff screw heads.
-- The Pi's micro-USB ports face the speaker: the power lead may need an
-  angled plug.
+- The Pi's micro-USB ports face the speaker; power no longer uses them
+  (ADR 0026), only the short OTG lead to the HAT does.
 - No 93 × 86 mm patch is left for the deferred UPS Module 3S
   ([ADR 0019](0019-mains-first-battery-deferred.md)). A battery later means a
   slim flat pack or a taller box.

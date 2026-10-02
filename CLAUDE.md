@@ -44,7 +44,7 @@ before making assumptions about the design.
 - The hardware in one breath (ADR 0014 as revised, ADR 0016): a 1590DD-size
   die-cast aluminium box (antenna outside, ~33 mm inside — measure the clone,
   round holes only); Pi Zero 2 W; Waveshare SIM7670G LTE Cat-1 HAT on USB;
-  I2S mic + MAX98357A amp; two 16 mm RGB-lit buttons; 5 V micro-USB power. The
+  I2S mic + MAX98357A amp; two 16 mm RGB-lit buttons; 5 V USB-C in, onto header pins 4/6 (ADR 0026). The
   first box is **mains only** — the battery (Waveshare UPS Module 3S) is
   deferred (ADR 0019), so pulling the plug is how it turns off. **Off-the-shelf parts only** — no 3D
   printing, no custom PCB.

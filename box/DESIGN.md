@@ -276,7 +276,7 @@ Every wire — per header pin and per part, grounds and 5 V included — is in
 | 23, 24, 25 | Play button red, green, blue (software PWM) |
 | 5, 6 | Record, Play switches to GND; internal pull-ups; 20 ms debounce in gpiozero |
 | 16 | MAX98357A SD_MODE (the overlay's `sdmode` pin) |
-| 4 | Modem PWRKEY: pin 7, joined pin-for-pin to the HAT's pin 7 (P4) by the stacked header, DIP 3 on; high presses the key (schematic). Held low from boot by `gpio=4=op,dl` |
+| 4 | Modem PWRKEY: pin 7, joined to the HAT's pin 7 (P4) by one pin from below (ADR 0026), DIP 3 on; high presses the key (schematic). Held low from boot by `gpio=4=op,dl` |
 | 18, 19, 20, 21 | I2S (`googlevoicehat-soundcard`) |
 | 2, 3 | I²C — INA219 on the UPS module, later |
 | 14, 15 | UART console |
