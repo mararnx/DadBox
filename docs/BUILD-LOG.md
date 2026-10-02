@@ -2,6 +2,35 @@
 
 Newest entry at the top. One entry per session at the bench.
 
+## 2026-10-02 — All wires on: buttons pass, the amp scratches even on silence
+
+**Did:** First boot on header power (5 V on pins 4/6, ADR 0026): no
+undervoltage (`throttled=0x0`). With the service stopped, each button-light
+channel lit on its own via `pinctrl`, and both switches read clean presses
+and releases. The box still ran the old pin map (power key on GPIO 26), so
+GPIO 4 floated high with the HAT's P4 on it; deployed the current code, which
+holds it low. Then the speaker: a tone, a voice message, and pure digital
+silence all came out as loud scratch. Remote checks from the Pi found no
+bridge between BCLK, LRC and DIN and none to ground; the mic's clock wires
+were unsoldered, and the modem's radio was switched off (`AT+CFUN=0`), with no
+change. The photo showed the amp's ground wire on **GAIN**; moved to GND, the
+tone's pitch came right, but it still scratched.
+**Learned:** The amp is the generic MAX98357 module (U5, the spare; the shop
+calls it MAX98367), not the Adafruit board: two rows, VCC/GND on both, a JST
+speaker plug. It played clearly on 2026-09-25. A loud scratch on **digital
+silence** means the noise starts in the amp, not in the signal: most likely
+damaged while it ran without ground. White on Record is never needed
+(only Play's lock blink is white); red swamps green and blue at 3.3 V. The
+modem's USB hub dropped twice ("disabled by hub (EMI?)", self-recovered in
+about 1 s), both near a button press, cause open. `dadboxctl modem off`
+did not switch the modem off: the power key on GPIO 4 is still unproven
+(DIP 3, the pin 7 joint). The mic was never tested: its clocks are
+disconnected.
+**Next:** test the speaker alone (3–4 Ω on a meter; a clean click from an
+AA cell), then a new amp; reconnect the mic's clocks and test it; DIP 3 and
+the power key; `gpio=4=op,dl` in `config.txt`; correct the amp in the BOM and
+`WIRING.md`.
+
 ## 2026-09-30 (evening) — A 3-minute note over LTE: refused, and the box went offline
 
 **Did:** Queued 3 min of synthetic voice through the box's own pipeline
