@@ -83,7 +83,7 @@ def hero():
          'a mic pinhole below it, six screws, and on the top edge a round USB-C socket and a black swivel LTE antenna">']
     s.append('<defs>'
              '<radialGradient id="hgG"><stop offset="0" stop-color="#8dffb0" stop-opacity="1"/><stop offset=".5" stop-color="#2fd16b" stop-opacity=".45"/><stop offset="1" stop-color="#2fd16b" stop-opacity="0"/></radialGradient>'
-             '<radialGradient id="hgR"><stop offset="0" stop-color="#ffa08a" stop-opacity=".9"/><stop offset=".5" stop-color="#ff4a3d" stop-opacity=".35"/><stop offset="1" stop-color="#ff4a3d" stop-opacity="0"/></radialGradient>'
+             '<radialGradient id="hgB"><stop offset="0" stop-color="#8fb0ff" stop-opacity=".45"/><stop offset=".5" stop-color="#3a6fc4" stop-opacity=".18"/><stop offset="1" stop-color="#3a6fc4" stop-opacity="0"/></radialGradient>'
              '<radialGradient id="steel" cx=".35" cy=".35"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#d2d0ca"/><stop offset="1" stop-color="#8e8a82"/></radialGradient>'
              '<linearGradient id="faceG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1f0ec"/><stop offset=".45" stop-color="#d9d7d1"/><stop offset="1" stop-color="#bcb9b1"/></linearGradient>'
              '<linearGradient id="topG" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#e9e7e2"/><stop offset="1" stop-color="#c9c6be"/></linearGradient>'
@@ -107,7 +107,7 @@ def hero():
         s.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="1.7" fill="#24222c"/>')
     s.append(f'<circle cx="{MIC[0]}" cy="{MIC[1]}" r="1.1" fill="#15141c"/></g>')
     s.append(button(PLAY, "#3cf07a", "hgG", "breathe"))
-    s.append(button(REC, "#ff4a3d", "hgR", ""))
+    s.append(button(REC, "#6f93d8", "hgB", ""))   # ready: steady dim blue
     # USB-C socket on the top edge
     s.append(cylinder(USB_U, H / 2, 12, 9, "#a6a39b", "#e2e0da"))
     s.append(f'<g transform="{topplane(9)}"><circle cx="{USB_U}" cy="{H / 2}" r="8" fill="#cfccc5" stroke="{INK}" stroke-width="1" {NS}/>'
@@ -185,7 +185,7 @@ def top_edge():
 # ---------------------------------------------------------------- technical drawings (theme-aware)
 DIM = 'stroke="var(--rust)" stroke-width="1.2"'
 LINE = 'stroke="var(--ink)" fill="none"'
-T = 'font-family="IBM Plex Mono, monospace" fill="var(--ink)"'
+T = 'font-family="JetBrains Mono, monospace" fill="var(--ink)"'
 
 
 def dim_h(x1, x2, y, label, k):
@@ -236,7 +236,7 @@ def inside():
         s.append(f'<rect x="{X(134 + 30 - 3.5):.1f}" y="{yy - 2:.1f}" width="4" height="4" fill="#d8b04a"/>')
     # the speaker sits under the grille, the buttons and mic hang from the lid (dashed); positions as built
     s.append(box(64.5 + 5, 28 + 5, 35, 40, "var(--paper-2)", "", "", dash=True))
-    s.append(box(64.5, 28, 45, 50, "var(--mustard)", "SPEAKER", "on foam, cone to the grille", tc="#1d1b3a"))
+    s.append(box(64.5, 28, 45, 50, "var(--mustard)", "SPEAKER", "on foam", tc="#1d1b3a"))
     s.append(f'<circle cx="{X(87)}" cy="{Y(53)}" r="{17 * k}" stroke="#1d1b3a" stroke-width="1.5" fill="none" opacity=".5"/>')
     s.append(box(8, 4, 18, 19, "var(--orange)", "AMP", "", tc="#1d1b3a"))
     for (x, y), name, col in (((32, 72), "PLAY", "var(--led-green)"), ((32, 32), "REC", "var(--led-red)")):
@@ -260,32 +260,80 @@ def inside():
 
 
 # ---------------------------------------------------------------- the button's light states
-STATES = [
-    ("Ready", "Record: steady dim blue", "rec", "#3a6fc4", "dim"),
-    ("Not ready", "Record: slow blue blink", "rec", "#3a6fc4", "blink"),
-    ("Recording", "Record: steady red, mic on", "rec", "#e0442c", "on"),
-    ("Got it", "one green pulse after fsync", "rec", "#58d47c", "pulse"),
-    ("Message waits", "Play: breathing green", "play", "#58d47c", "breathe"),
-    ("Playing", "Play: steady green", "play", "#58d47c", "on"),
-    ("Travel lock", "Play: white blink", "play", "#f4f1ea", "blink"),
+STATES = [   # in the order a child meets them, then the two that say "not now"
+    ("Ready", "steady dim blue", "Record", "#3a6fc4", "dim"),
+    ("Recording", "red · mic on", "Record", "#e0442c", "on"),
+    ("Got it", "one green pulse", "Record", "#58d47c", "pulse"),
+    ("Message waits", "breathing green", "Play", "#58d47c", "breathe"),
+    ("Playing", "steady green", "Play", "#58d47c", "on"),
+    ("Not ready", "slow blue blink", "Record", "#3a6fc4", "blink"),
+    ("Travel lock", "white blink", "Play", "#f4f1ea", "blink"),
 ]
 
 
 def light_states():
     out = []
-    for i, (name, sub, _, col, mode) in enumerate(STATES):
+    for i, (name, sub, which, col, mode) in enumerate(STATES):
         out.append(
-            f'<figure class="lstate"><svg viewBox="0 0 120 120" aria-hidden="true">'
+            f'<figure class="lstate{" aside" if i == 5 else ""}"><svg viewBox="0 0 120 120" aria-hidden="true">'
             f'<defs><radialGradient id="ls{i}"><stop offset="0" stop-color="{col}" stop-opacity=".9"/><stop offset="1" stop-color="{col}" stop-opacity="0"/></radialGradient></defs>'
             f'<circle cx="60" cy="60" r="56" fill="#cfcbc2" stroke="{INK}" stroke-width="2.5"/>'
             f'<g class="l-{mode}"><circle cx="60" cy="60" r="54" fill="url(#ls{i})"/>'
             f'<circle cx="60" cy="60" r="36" fill="none" stroke="{col}" stroke-width="9"/></g>'
             f'<circle cx="60" cy="60" r="30" fill="url(#steel2)" stroke="{INK}" stroke-width="2"/>'
             f'<ellipse cx="52" cy="50" rx="11" ry="6" fill="#fff" opacity=".7"/>'
-            f'</svg><figcaption><b>{name}</b><span>{sub}</span></figcaption></figure>')
+            f'</svg><figcaption><b>{name}</b><span>{which} · {sub}</span></figcaption></figure>')
     return ('<svg width="0" height="0" style="position:absolute"><defs><radialGradient id="steel2" cx=".35" cy=".35">'
             '<stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#cfccc5"/><stop offset="1" stop-color="#8e8a82"/></radialGradient></defs></svg>'
             + "".join(out))
+
+
+# ---------------------------------------------------------------- the 40-pin header, as wired (must match box/dadbox/hw/pi.py)
+# pin: (label, wire colour); a None colour means a bench-only probe lead
+PINS = {
+    2: ("Amp 5 V", "#d9412f"), 4: ("5 V in", "#d9412f"), 6: ("GND in", "#1b1a17"), 7: ("Modem key", "#9a958b"),
+    8: ("UART TX", None), 10: ("UART RX", None), 14: ("UART GND", None),
+    9: ("Mic GND", "#1b1a17"), 11: ("Rec red + mic", "#e8862a"), 12: ("BCLK", "#e9c03a"),
+    13: ("Rec green", "#2f9e5b"), 15: ("Rec blue", "#3a6fc4"), 16: ("Play red", "#e8862a"),
+    18: ("Play green", "#2f9e5b"), 20: ("Play GND", "#1b1a17"), 22: ("Play blue", "#3a6fc4"),
+    29: ("Rec switch", "#ffffff"), 30: ("Rec GND", "#1b1a17"), 31: ("Play switch", "#ffffff"),
+    35: ("LRCLK", "#8a5cf6"), 36: ("Amp SD", "#9a958b"), 38: ("Mic data", "#8b5a3c"),
+    39: ("Amp GND", "#1b1a17"), 40: ("Amp DIN", "#2f9e5b"),
+}
+
+
+KEYSTYLE = ' style="fill:var(--rec)"'
+
+
+def pin_header():
+    pitch, x0, ye, yo = 40, 92, 112, 152          # even pins on the board's edge (top row), odd below
+    s = ['<svg viewBox="0 0 900 300" role="img" aria-label="The Pi\'s 40-pin header as wired: 24 of 40 pins used. '
+         + "; ".join(f"pin {n}: {l}" for n, (l, _) in sorted(PINS.items())) + '">']
+    s.append(f'<rect x="{x0 - 26}" y="{ye - 22}" width="{19 * pitch + 52}" height="{yo - ye + 44}" rx="8" stroke="var(--ink)" stroke-width="2" style="fill:var(--card)"/>')
+    s.append(f'<text x="{x0 - 34}" y="{(ye + yo) / 2 + 4}" text-anchor="end" font-size="12" {T} opacity=".7">SD end</text>')
+    for col in range(20):
+        for row, y in ((0, ye), (1, yo)):
+            n = col * 2 + (2 if row == 0 else 1)
+            x = x0 + col * pitch
+            if n not in PINS:
+                s.append(f'<rect x="{x - 4}" y="{y - 4}" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/>')
+                continue
+            label, c = PINS[n]
+            key = n == 11
+            if c is None:
+                s.append(f'<circle cx="{x}" cy="{y}" r="8" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 2" fill="none"/>')
+            else:
+                s.append(f'<circle cx="{x}" cy="{y}" r="9" stroke="var(--ink)" stroke-width="{3 if key else 1.5}" fill="{c}"/>')
+            if key:
+                s.append(f'<circle cx="{x}" cy="{y}" r="15" stroke="var(--rec)" stroke-width="1.5" fill="none"/>')
+            ly, anchor, rot = (y - 20, "start", -55) if row == 0 else (y + 26, "end", -55)
+            s.append(f'<text transform="translate({x + 3} {ly}) rotate({rot})" text-anchor="{anchor}" font-size="13" '
+                     f'font-weight="{700 if key else 500}" {T}{KEYSTYLE if key else ""}>{label}</text>')
+    for n, x, y in ((1, x0, yo), (2, x0, ye), (39, x0 + 19 * pitch, yo), (40, x0 + 19 * pitch, ye)):
+        s.append(f'<text x="{x + (-16 if n in (1, 2) else 16)}" y="{y + 4}" text-anchor="middle" font-size="10" {T} opacity=".6">{n}</text>')
+    s.append(f'<text x="{x0 - 26}" y="292" font-size="12" {T} opacity=".75">Dashed: bench-only debug probe · hollow squares: unused · ring: the privacy wire</text>')
+    s.append('</svg>')
+    return "".join(s)
 
 
 # ---------------------------------------------------------------- the privacy wire
@@ -321,20 +369,20 @@ def privacy_wire():
     mx, my = 640, 80
     s.append(f'<rect x="{mx - 50}" y="{my - 34}" width="100" height="68" rx="6" fill="#2a4f9a" stroke="{INK}" stroke-width="2.5"/>'
              f'<circle cx="{mx}" cy="{my - 4}" r="9" fill="#c9c6bf" stroke="{INK}" stroke-width="1.5"/><circle cx="{mx}" cy="{my - 4}" r="2" fill="{INK}"/>'
-             f'<text x="{mx}" y="{my + 24}" text-anchor="middle" font-size="11" font-weight="600" fill="#fff" font-family="IBM Plex Mono, monospace">MIC · VDD</text>')
+             f'<text x="{mx}" y="{my + 24}" text-anchor="middle" font-size="11" font-weight="600" fill="#fff" font-family="JetBrains Mono, monospace">MIC · VDD</text>')
     s.append(f'<path d="M{rx} {ry - 4} C {rx + 80} {ry - 40}, {mx - 120} {my + 10}, {mx - 50} {my}" stroke="{INK}" stroke-width="8" fill="none" stroke-linecap="round"/>'
              f'<path d="M{rx} {ry - 4} C {rx + 80} {ry - 40}, {mx - 120} {my + 10}, {mx - 50} {my}" stroke="#e8862a" stroke-width="5" fill="none" stroke-linecap="round"/>'
              f'<text x="{rx + 60}" y="{ry - 40}" font-size="11" {T}>② same tab → mic power</text>')
     s.append(f'<rect x="530" y="170" width="215" height="92" fill="var(--mustard)" stroke="{INK}" stroke-width="2"/>'
-             f'<text x="542" y="194" font-size="12" font-weight="600" fill="{INK}" font-family="IBM Plex Mono, monospace">NO RED LIGHT, NO MIC.</text>'
-             f'<text x="542" y="214" font-size="11" fill="{INK}" font-family="IBM Plex Mono, monospace">Break ① → both dark.</text>'
-             f'<text x="542" y="232" font-size="11" fill="{INK}" font-family="IBM Plex Mono, monospace">Break ② → light on, mic off.</text>'
-             f'<text x="542" y="250" font-size="11" fill="{INK}" font-family="IBM Plex Mono, monospace">Never: mic on, light off.</text>')
+             f'<text x="542" y="194" font-size="12" font-weight="600" fill="{INK}" font-family="JetBrains Mono, monospace">NO RED LIGHT, NO MIC.</text>'
+             f'<text x="542" y="214" font-size="11" fill="{INK}" font-family="JetBrains Mono, monospace">Break ① → both dark.</text>'
+             f'<text x="542" y="232" font-size="11" fill="{INK}" font-family="JetBrains Mono, monospace">Break ② → light on, mic off.</text>'
+             f'<text x="542" y="250" font-size="11" fill="{INK}" font-family="JetBrains Mono, monospace">Never: mic on, light off.</text>')
     s.append('</svg>')
     return "".join(s)
 
 
-PICTURES = {"hero": hero, "face": face_plan, "top": top_edge, "inside": inside, "lights": light_states, "privacy": privacy_wire}
+PICTURES = {"hero": hero, "face": face_plan, "top": top_edge, "inside": inside, "lights": light_states, "privacy": privacy_wire, "pins": pin_header}
 
 if __name__ == "__main__":
     page = pathlib.Path(__file__).with_name("index.html")

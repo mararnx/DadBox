@@ -4,302 +4,283 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DadBox — Build Your Own</title>
-<meta name="description" content="A two-button voice box for a child and a parent who live apart. Photos, drawings, parts, wiring, software and lessons — everything to build your own.">
+<meta name="description" content="A two-button voice box for a child and a parent who live apart. Photos, drawings, parts, wiring and build steps for making your own.">
 <meta property="og:title" content="DadBox — a two-button voice box you build yourself">
-<meta property="og:description" content="Press Record, talk, press again. The parent hears it. Everything you need to build one with your kid.">
+<meta property="og:description" content="Press Record, talk, press again. The parent hears it. Notes for building one with your kid.">
 <meta property="og:image" content="https://dadbox-kit.vercel.app/img/finished-front.jpg">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c5cff'/%3E%3Cstop offset='1' stop-color='%2322c3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='6' y='10' width='52' height='44' rx='12' fill='url(%23g)'/%3E%3Ccircle cx='22' cy='25' r='6' fill='%2334d399'/%3E%3Ccircle cx='22' cy='41' r='6' fill='%23ff4a3d'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='6' y='10' width='52' height='44' rx='9' fill='%23d6d3cc' stroke='%231b1a17' stroke-width='4'/%3E%3Ccircle cx='22' cy='25' r='6' fill='%2322c55e'/%3E%3Ccircle cx='22' cy='41' r='6' fill='%23e0442c'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#eef0fb; --ink:#1d1b3a; --ink-soft:#5b5980; --muted:#8a88a8;
-  --glass:rgba(255,255,255,.48); --glass-strong:rgba(255,255,255,.72); --glass-border:rgba(255,255,255,.8);
-  --hair:rgba(29,27,58,.1); --shadow:0 24px 60px -24px rgba(64,48,160,.35), 0 2px 6px rgba(64,48,160,.06);
-  --a1:#7c5cff; --a2:#22c3ee; --a3:#34d399; --a4:#ff6fae; --a5:#ffb86b;
-  --grad:linear-gradient(110deg,#7c5cff 0%,#22c3ee 45%,#34d399 75%,#ff6fae 100%);
+  --bg:#f5f3ee; --surface:#fffdf9; --ink:#1b1a17; --ink-soft:#47443e; --muted:#67635b;
+  --hair:rgba(27,26,23,.12); --hair-2:rgba(27,26,23,.2);
+  --rec:#b8382a; --play:#1d7a43;
+  --code-bg:#1f1e1b; --code-ink:#ece8df;
   /* used by the drawings */
-  --card:rgba(255,255,255,.7); --paper:#f7f7fd; --paper-2:#e8e7f8; --rust:#7c5cff; --orange:#ffb27a; --mustard:#ffd66e;
-  --led-red:#ff4a3d; --led-green:#22c55e; --led-blue:#4f7dff;
-  --code-bg:rgba(23,21,52,.92); --code-ink:#e9e6ff;
-  --blob-op:.75;
+  --card:var(--surface); --paper:#f0ede6; --paper-2:#e3dfd6; --rust:#b4553f; --orange:#f0a36b; --mustard:#f2cf6b;
+  --led-red:#e0442c; --led-green:#22a95a; --led-blue:#3a6fc4;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#08091a; --ink:#eeecff; --ink-soft:#b0aed6; --muted:#7d7ba3;
-    --glass:rgba(255,255,255,.06); --glass-strong:rgba(22,22,48,.72); --glass-border:rgba(255,255,255,.14);
-    --hair:rgba(255,255,255,.1); --shadow:0 30px 70px -30px rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.04) inset;
-    --card:rgba(255,255,255,.06); --paper:#11122a; --paper-2:#1d1e3d; --code-bg:rgba(5,5,18,.85); --blob-op:.42;
+    --bg:#131312; --surface:#1c1b19; --ink:#ece9e2; --ink-soft:#c3beb4; --muted:#9e998f;
+    --hair:rgba(255,255,255,.1); --hair-2:rgba(255,255,255,.18);
+    --rec:#ff8170; --play:#5fd38c; --code-bg:#0c0c0b;
+    --paper:#181816; --paper-2:#2a2926; --rust:#e3917a;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#08091a; --ink:#eeecff; --ink-soft:#b0aed6; --muted:#7d7ba3;
-  --glass:rgba(255,255,255,.06); --glass-strong:rgba(22,22,48,.72); --glass-border:rgba(255,255,255,.14);
-  --hair:rgba(255,255,255,.1); --shadow:0 30px 70px -30px rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.04) inset;
-  --card:rgba(255,255,255,.06); --paper:#11122a; --paper-2:#1d1e3d; --code-bg:rgba(5,5,18,.85); --blob-op:.42;
+  --bg:#131312; --surface:#1c1b19; --ink:#ece9e2; --ink-soft:#c3beb4; --muted:#9e998f;
+  --hair:rgba(255,255,255,.1); --hair-2:rgba(255,255,255,.18);
+  --rec:#ff8170; --play:#5fd38c; --code-bg:#0c0c0b;
+  --paper:#181816; --paper-2:#2a2926; --rust:#e3917a;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:90px}
-body{margin:0;background:var(--bg);color:var(--ink);font:16.5px/1.65 "Plus Jakarta Sans",system-ui,sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
-a{color:var(--a1)}
+html{scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Plus Jakarta Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:underline;text-decoration-color:var(--hair-2);text-underline-offset:3px;transition:text-decoration-color .2s}
+a:hover{text-decoration-color:currentColor}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:4px}
 code,pre,.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
-code{font-size:.86em;background:var(--hair);padding:.1em .4em;border-radius:6px}
-pre{background:var(--code-bg);color:var(--code-ink);padding:16px 18px;border-radius:16px;overflow-x:auto;font-size:13.5px;line-height:1.6;border:1px solid rgba(255,255,255,.08);margin:12px 0 4px}
+code{font-size:.85em;background:var(--hair);padding:.1em .35em;border-radius:4px}
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:13px;line-height:1.6;margin:10px 0 4px}
 pre code{background:none;padding:0;color:inherit}
 img{max-width:100%;display:block}
-.wrap{max-width:1160px;margin:0 auto;padding:0 20px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+@media (max-width:600px){.wrap{padding:0 16px}}
+.rec{color:var(--rec)}.play{color:var(--play)}
 
-/* ---------- aurora background ---------- */
-.aurora{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
-.aurora i{position:absolute;width:62vmax;height:62vmax;border-radius:50%;filter:blur(90px);opacity:var(--blob-op);will-change:transform}
-.aurora i:nth-child(1){background:#b9a4ff;left:-18vmax;top:-20vmax;animation:drift1 26s ease-in-out infinite alternate}
-.aurora i:nth-child(2){background:#86e3ff;right:-22vmax;top:-8vmax;animation:drift2 30s ease-in-out infinite alternate}
-.aurora i:nth-child(3){background:#9ff2c9;left:10vmax;bottom:-30vmax;animation:drift3 34s ease-in-out infinite alternate}
-.aurora i:nth-child(4){background:#ffb3d6;right:-10vmax;bottom:-26vmax;animation:drift1 38s ease-in-out infinite alternate-reverse}
-@keyframes drift1{to{transform:translate(18vmax,14vmax) scale(1.15)}}
-@keyframes drift2{to{transform:translate(-16vmax,20vmax) scale(.9)}}
-@keyframes drift3{to{transform:translate(14vmax,-18vmax) scale(1.1)}}
-.grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.06;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+/* nav */
+.nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--hair)}
+.nav .wrap{display:flex;align-items:center;gap:20px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;color:var(--ink);text-decoration:none;flex:none}
+.mark{width:24px;height:20px;border:1.5px solid var(--ink);border-radius:5px;position:relative;background:var(--paper-2)}
+.mark::before,.mark::after{content:"";position:absolute;left:5px;width:5px;height:5px;border-radius:50%}
+.mark::before{top:3px;background:var(--led-green)}.mark::after{bottom:3px;background:var(--led-red)}
+.nav nav{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+.nav nav::-webkit-scrollbar{display:none}
+.nav nav a{color:var(--ink-soft);text-decoration:none;font-weight:500;font-size:14px;padding:6px 10px;border-radius:6px;white-space:nowrap}
+.nav nav a:hover{color:var(--ink);background:var(--hair)}
+.iconbtn{border:1px solid var(--hair-2);background:transparent;color:var(--ink);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:15px;display:grid;place-items:center;flex:none}
+@media (max-width:700px){.nav .wrap{gap:10px}.brand span:last-child{display:none}}
 
-/* ---------- glass ---------- */
-.glass{background:var(--glass);border:1px solid var(--glass-border);border-radius:28px;box-shadow:var(--shadow);
-  -webkit-backdrop-filter:blur(22px) saturate(170%);backdrop-filter:blur(22px) saturate(170%);position:relative}
-.glass.spot::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
-  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.35),transparent 45%)}
-.glass.spot:hover::after{opacity:1}
-:root[data-theme="dark"] .glass.spot::after{background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(140,120,255,.18),transparent 45%)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .glass.spot::after{background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(140,120,255,.18),transparent 45%)}}
-.pad{padding:26px}
+/* type */
+h1,h2{font-family:"Instrument Serif",Georgia,serif;font-weight:400;letter-spacing:-.015em;margin:0}
+h1{font-size:clamp(46px,7vw,84px);line-height:1}
+h2{font-size:clamp(34px,4.4vw,50px);line-height:1.05;margin:10px 0 14px}
+h1 em,h2 em{color:var(--muted)}
+h3{font-size:17px;font-weight:700;letter-spacing:-.01em;margin:0 0 6px}
+.eyebrow{font:500 12px/1 "JetBrains Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.intro{font-size:17.5px;color:var(--ink-soft);max-width:40em;margin:0 0 32px}
+.small{font-size:14px;color:var(--muted)}
 
-/* ---------- nav ---------- */
-.nav{position:sticky;top:14px;z-index:50;margin:14px auto 0;max-width:1160px;padding:0 20px}
-.nav .glass{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 12px 10px 18px;border-radius:999px}
-.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
-.brand .logo{width:28px;height:28px;border-radius:9px;background:var(--grad);display:grid;place-items:center;box-shadow:0 6px 18px -6px #7c5cff}
-.brand .logo i{width:7px;height:7px;border-radius:50%;background:#fff;box-shadow:0 9px 0 #fff;transform:translateY(-4px)}
-.nav nav{display:flex;gap:4px;flex-wrap:wrap}
-.nav nav a{color:var(--ink-soft);text-decoration:none;font-weight:600;font-size:14px;padding:8px 12px;border-radius:999px;transition:background .2s,color .2s}
-.nav nav a:hover{background:var(--glass-strong);color:var(--ink)}
-.iconbtn{border:1px solid var(--glass-border);background:var(--glass-strong);color:var(--ink);width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:16px;display:grid;place-items:center}
-@media (max-width:900px){.nav nav{display:none}}
-
-/* ---------- hero ---------- */
-.hero{padding:64px 0 30px}
-.hero .grid{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center}
-@media (max-width:920px){.hero .grid{grid-template-columns:1fr}}
-.chip{display:inline-flex;align-items:center;gap:8px;padding:7px 14px 7px 10px;border-radius:999px;font-weight:600;font-size:13px;color:var(--ink);background:var(--glass-strong);border:1px solid var(--glass-border);box-shadow:0 8px 24px -12px rgba(64,48,160,.35);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);white-space:nowrap}
-.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
-.dot.g{background:#22c55e;box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:ping 2s infinite}
-.dot.r{background:#ff4a3d;box-shadow:0 0 0 0 rgba(255,74,61,.6);animation:ping 1.6s infinite}
-.dot.b{background:#4f7dff}
-@keyframes ping{70%{box-shadow:0 0 0 9px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
-h1{font-size:clamp(46px,7.4vw,92px);line-height:.98;letter-spacing:-.045em;font-weight:800;margin:22px 0 22px}
-h1 em,h2 em{font-family:"Instrument Serif",serif;font-style:italic;font-weight:400;letter-spacing:-.01em}
-.grad{background:var(--grad);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
-@keyframes shine{to{background-position:200% center}}
-.lede{font-size:19px;color:var(--ink-soft);max-width:33em;margin:0}
-.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
-.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 22px;border-radius:999px;font-weight:700;font-size:15px;text-decoration:none;transition:transform .2s,box-shadow .2s;border:1px solid var(--glass-border)}
-.btn.primary{background:var(--grad);background-size:160% auto;color:#fff;border-color:transparent;box-shadow:0 14px 34px -12px #7c5cff;animation:shine 8s linear infinite}
-.btn.ghost{background:var(--glass-strong);color:var(--ink);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
-.btn:hover{transform:translateY(-2px)}
-.btn .arr{transition:transform .2s}.btn:hover .arr{transform:translateX(4px)}
-.mini{display:flex;gap:26px;margin-top:34px;flex-wrap:wrap}
-.mini div b{display:block;font-size:26px;font-weight:800;letter-spacing:-.03em}
-.mini div span{font-size:13px;color:var(--muted);font-weight:600}
-
-.stage{position:relative;perspective:1200px}
-.stage .card3d{padding:20px 20px 10px;border-radius:36px;transform-style:preserve-3d;transition:transform .25s ease-out}
-.stage svg.boxart{width:100%;height:auto;display:block;filter:drop-shadow(0 30px 30px rgba(40,30,110,.18))}
-.float{position:absolute;animation:bob 6s ease-in-out infinite;z-index:3}
-.f2{animation-delay:-1.5s}.f3{animation-delay:-3s}.f4{animation-delay:-4.5s}
-@keyframes bob{50%{transform:translateY(-12px)}}
-.f1{top:8%;left:-5%}.f2{top:34%;right:-4%}.f3{bottom:22%;left:-7%}.f4{bottom:3%;right:3%}
-@media (max-width:560px){.f1{left:2px;top:2%}.f2{right:2px;top:22%}.f3,.f4{display:none}.chip.float{font-size:11.5px}}
-
+/* hero */
+.hero{padding:72px 0 40px}
+.hero .wrap{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+@media (max-width:880px){.hero .wrap{grid-template-columns:1fr;gap:24px}.hero{padding-top:44px}}
+.lede{font-size:19px;color:var(--ink-soft);max-width:30em;margin:22px 0 0}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:30px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:999px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid var(--ink);transition:background .2s,color .2s}
+.btn.primary{background:var(--ink);color:var(--bg)}
+.btn.primary:hover{background:transparent;color:var(--ink)}
+.btn.ghost{color:var(--ink)}
+.btn.ghost:hover{background:var(--hair)}
+.hero figure{margin:0}
+.hero svg.boxart{width:100%;max-width:500px;height:auto;display:block;margin:0 auto}
+.hero figcaption{text-align:center;font-size:13px;color:var(--muted);margin-top:6px}
 .breathe{animation:breathe 3.2s ease-in-out infinite}
 @keyframes breathe{0%,100%{opacity:.3}50%{opacity:1}}
 
-/* ---------- marquee ---------- */
-.marquee{margin:34px 0 10px;overflow:hidden;border-radius:999px;padding:14px 0}
-.marquee .track{display:flex;gap:40px;width:max-content;animation:scroll 40s linear infinite;font-weight:700;color:var(--ink-soft);font-size:15px}
-.marquee .track span{display:inline-flex;align-items:center;gap:40px;white-space:nowrap}
-.marquee .track span::after{content:"✦";color:var(--a1)}
-@keyframes scroll{to{transform:translateX(-50%)}}
-
-/* ---------- sections ---------- */
-section{padding:84px 0 20px}
-.eyebrow{display:inline-flex;align-items:center;gap:10px;font:600 12.5px/1 "JetBrains Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--a1)}
-.eyebrow::before{content:"";width:26px;height:2px;background:var(--grad);border-radius:2px}
-h2{font-size:clamp(34px,5vw,58px);line-height:1.02;letter-spacing:-.04em;font-weight:800;margin:14px 0 16px}
-h3{font-size:20px;letter-spacing:-.02em;font-weight:800;margin:0 0 8px}
-.intro{font-size:18.5px;color:var(--ink-soft);max-width:44em;margin:0 0 34px}
-.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
-.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-@media (max-width:900px){.g2,.g3{grid-template-columns:1fr}}
-.card p{margin:.45em 0;color:var(--ink-soft)}
-.card p b,.card li b{color:var(--ink)}
-.icon{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;font-weight:800;margin-bottom:14px;font-size:18px;box-shadow:0 10px 24px -10px currentColor}
-.i1{background:linear-gradient(135deg,#7c5cff,#a78bfa);color:#7c5cff}.i2{background:linear-gradient(135deg,#22c3ee,#60a5fa);color:#22c3ee}
-.i3{background:linear-gradient(135deg,#34d399,#22c3ee);color:#34d399}.i4{background:linear-gradient(135deg,#ff6fae,#ff9f6b);color:#ff6fae}
-.i5{background:linear-gradient(135deg,#ffb86b,#ff6fae);color:#ffb86b}.i6{background:linear-gradient(135deg,#4f7dff,#7c5cff);color:#4f7dff}
-.icon span{color:#fff}
-
-.steps4{list-style:none;padding:0;margin:14px 0 0;counter-reset:s}
-.steps4 li{counter-increment:s;display:grid;grid-template-columns:36px 1fr;gap:12px;margin:0 0 14px;color:var(--ink-soft)}
-.steps4 li::before{content:counter(s);width:32px;height:32px;border-radius:11px;display:grid;place-items:center;font-weight:800;font-size:14px;color:#fff;background:var(--grad)}
+/* sections */
+section{padding:88px 0 0;border-top:1px solid var(--hair);margin-top:88px}
+section:first-of-type{margin-top:40px}
+.surface{background:var(--surface);border:1px solid var(--hair);border-radius:14px}
+.pad{padding:24px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media (max-width:860px){.g2,.g3{grid-template-columns:1fr}}
 
 /* light states */
-.lights{display:grid;grid-template-columns:repeat(7,1fr);gap:14px;margin-top:22px}
-@media (max-width:980px){.lights{grid-template-columns:repeat(4,1fr)}}
-@media (max-width:560px){.lights{grid-template-columns:repeat(2,1fr)}}
-.lstate{margin:0;text-align:center;padding:16px 10px;border-radius:22px;background:var(--glass-strong);border:1px solid var(--glass-border)}
-.lstate svg{width:84px;height:84px;margin:0 auto 8px;display:block}
-.lstate b{display:block;font-size:14px}
-.lstate span{display:block;font-size:12px;color:var(--muted);line-height:1.35;margin-top:2px}
-.l-dim{opacity:.45}.l-on{opacity:1}
+.lights{display:grid;grid-template-columns:repeat(5,1fr) 1px repeat(2,1fr);gap:10px;align-items:start}
+.lights::before{content:"";grid-column:6;grid-row:1;align-self:stretch;background:var(--hair)}
+.lstate{margin:0;text-align:center;padding:4px 2px}
+.lstate.aside{grid-column:7}
+.lstate svg{width:72px;height:72px;margin:0 auto 10px;display:block}
+.lstate b{display:block;font-size:14px;font-weight:600}
+.lstate span{display:block;font-size:12.5px;color:var(--muted);line-height:1.35;margin-top:2px}
+@media (max-width:860px){.lights{grid-template-columns:repeat(4,1fr)}.lights::before{display:none}.lstate.aside{grid-column:auto}}
+@media (max-width:480px){.lights{grid-template-columns:repeat(4,1fr);gap:8px 4px}.lstate svg{width:54px;height:54px}.lstate b{font-size:12.5px}.lstate span{font-size:11px}}
+.l-dim{opacity:.45}
 .l-blink{animation:blink 2s steps(1) infinite}
 @keyframes blink{50%{opacity:.05}}
 .l-pulse{animation:pulse 2.6s ease-out infinite}
 @keyframes pulse{0%{opacity:0}8%{opacity:1}30%,100%{opacity:0}}
 .l-breathe{animation:breathe 3.2s ease-in-out infinite}
+.lights-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+
+/* phone sketch */
+.app{display:grid;grid-template-columns:240px 1fr;gap:32px;align-items:center}
+@media (max-width:560px){.app{grid-template-columns:1fr}.phone{margin:0 auto}}
+.phone{width:240px;border:1.5px solid var(--ink);border-radius:34px;padding:14px 12px 18px;background:var(--bg)}
+.phone .notch{width:70px;height:6px;border-radius:6px;background:var(--hair-2);margin:0 auto 14px}
+.phone .bar{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);padding:0 4px 10px;border-bottom:1px solid var(--hair);margin-bottom:12px}
+.phone .bar i{width:7px;height:7px;border-radius:50%;background:var(--led-green)}
+.msg{max-width:84%;padding:9px 11px;border-radius:14px;margin-bottom:8px;background:var(--surface);border:1px solid var(--hair)}
+.msg.me{margin-left:auto;background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.wave{display:flex;align-items:center;gap:2px;height:18px}
+.wave i{width:2.5px;border-radius:2px;background:currentColor;opacity:.75}
+.msg small{display:block;font-size:10.5px;opacity:.7;margin-top:4px}
+.app ul{list-style:none;padding:0;margin:0}
+.app li{padding:12px 0;border-top:1px solid var(--hair);color:var(--ink-soft)}
+.app li:first-child{border-top:0}
+.app li b{color:var(--ink)}
 
 /* rules */
-.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-@media (max-width:900px){.rules{grid-template-columns:1fr}}
-.rule{padding:24px}
-.rule b{display:block;font-size:17px;letter-spacing:-.01em;margin-bottom:6px}
-.rule span{color:var(--ink-soft);font-size:15px}
+.rules{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border-top:1px solid var(--ink)}
+.rules div{padding:16px 18px 0 0}
+.rules b{display:block;font-size:15px;margin-bottom:4px}
+.rules span{font-size:14px;color:var(--ink-soft)}
+@media (max-width:860px){.rules{grid-template-columns:1fr 1fr;row-gap:16px}}
+@media (max-width:480px){.rules{grid-template-columns:1fr}}
 
 /* gallery */
-.gallery{columns:3 280px;column-gap:18px}
-.gallery figure{break-inside:avoid;margin:0 0 18px;border-radius:24px;overflow:hidden;position:relative;cursor:zoom-in;border:1px solid var(--glass-border);box-shadow:var(--shadow);background:var(--glass)}
-.gallery img{width:100%;height:auto;transition:transform .7s cubic-bezier(.2,.7,.2,1)}
-.gallery figure:hover img{transform:scale(1.05)}
-.gallery figcaption{position:absolute;left:12px;right:12px;bottom:12px;padding:10px 14px;border-radius:16px;font-size:13.5px;font-weight:600;color:var(--ink);
-  background:var(--glass-strong);border:1px solid var(--glass-border);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);transform:translateY(6px);opacity:.92;transition:transform .3s,opacity .3s}
-.gallery figure:hover figcaption{transform:none;opacity:1}
+.gallery{columns:3 260px;column-gap:16px}
+.gallery figure{break-inside:avoid;margin:0 0 20px;cursor:zoom-in}
+.gallery img{width:100%;height:auto;border-radius:10px;transition:opacity .2s}
+.gallery figure:hover img{opacity:.9}
+.gallery figcaption{font-size:13.5px;color:var(--muted);margin-top:8px}
 dialog.lb{border:0;padding:0;background:transparent;max-width:min(92vw,1200px);max-height:92vh;overflow:visible}
-dialog.lb::backdrop{background:rgba(10,8,30,.6);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
-dialog.lb img{max-height:84vh;width:auto;border-radius:22px;margin:0 auto}
-dialog.lb p{color:#fff;text-align:center;font-weight:600;margin:12px 0 0}
-dialog.lb button{position:fixed;top:18px;right:18px}
+dialog.lb::backdrop{background:rgba(12,12,11,.82)}
+dialog.lb img{max-height:84vh;width:auto;border-radius:10px;margin:0 auto}
+dialog.lb p{color:#eee;text-align:center;margin:12px 0 0;font-size:14px}
+dialog.lb button{position:fixed;top:18px;right:18px;color:#fff;border-color:rgba(255,255,255,.4)}
 
 /* drawings */
-.tabs{display:inline-flex;gap:4px;padding:5px;border-radius:999px;margin-bottom:18px;flex-wrap:wrap}
-.tabs button{border:0;background:transparent;color:var(--ink-soft);font:700 14px "Plus Jakarta Sans",sans-serif;padding:10px 18px;border-radius:999px;cursor:pointer;transition:background .25s,color .25s}
-.tabs button[aria-selected="true"]{background:var(--grad);color:#fff;box-shadow:0 8px 20px -10px #7c5cff}
-.panel{padding:22px;overflow-x:auto}
+.tabs{display:flex;gap:22px;border-bottom:1px solid var(--hair);margin-bottom:22px;overflow-x:auto;scrollbar-width:none}
+.tabs button{border:0;background:none;color:var(--muted);font:600 14.5px "Plus Jakarta Sans",sans-serif;padding:10px 0;margin-bottom:-1px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.panel{padding:28px;overflow-x:auto}
 .panel svg{display:block;width:100%;max-width:880px;margin:0 auto;min-width:560px;height:auto}
-.panel [role=tabpanel]{animation:fadein .5s ease}
 .panel [hidden]{display:none}
-.panel .cap{color:var(--ink-soft);font-size:15px;margin:12px 4px 0;max-width:60em}
-@media (max-width:600px){.panel svg{min-width:0}.panel{padding:14px}details.stg summary .cnt{display:none}details.stg summary{padding:16px}}
-@keyframes fadein{from{opacity:0;transform:translateY(8px)}}
-.wire{stroke-dasharray:6 6;animation:flow 1.2s linear infinite}
-@keyframes flow{to{stroke-dashoffset:-24}}
+.panel .cap{color:var(--ink-soft);font-size:15px;margin:18px auto 0;max-width:46em;text-align:center}
+@media (max-width:600px){.panel{padding:14px}.panel svg{min-width:0}.panel .pinsvg{min-width:640px}}
+details.more{margin-top:18px}
+details.more summary{cursor:pointer;font-weight:600;font-size:14.5px;color:var(--ink-soft);list-style:none;display:inline-flex;gap:8px;align-items:center}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::before{content:"+";font:500 16px "JetBrains Mono",monospace;width:16px}
+details.more[open] summary::before{content:"−"}
+details.more > div{margin-top:14px}
 
-/* flow diagram */
-.flow svg{width:100%;height:auto;display:block;min-width:640px}
-.flow{overflow-x:auto;padding:22px}
+/* flow */
+.flow{padding:28px;overflow-x:auto}
+.flow svg{width:100%;height:auto;display:block;min-width:680px}
 .flow text{font-family:"Plus Jakarta Sans",sans-serif;fill:var(--ink)}
-.flow .node{fill:var(--glass-strong);stroke:var(--glass-border);stroke-width:1.5}
-.flow .lane{stroke:var(--hair);stroke-width:2;fill:none;stroke-dasharray:4 6}
+.flow .soft{fill:var(--muted)}
+.flow .stroke{stroke:var(--ink);fill:none}
+.flow .fillsurf{fill:var(--bg);stroke:var(--ink)}
+.steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:28px}
+.steps3 div{border-top:1px solid var(--ink);padding-top:12px;color:var(--ink-soft);font-size:15px}
+.steps3 b{color:var(--ink);display:block;margin-bottom:2px}
+@media (max-width:860px){.steps3{grid-template-columns:1fr;gap:18px}}
 
-/* stats */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:22px}
-@media (max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}
-.stat{padding:24px}
-.stat b{display:block;font-size:clamp(34px,4.4vw,50px);font-weight:800;letter-spacing:-.04em;line-height:1.05}
-.stat span{display:block;color:var(--ink-soft);font-size:14px;margin-top:8px;font-weight:600}
-.ok{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 26px}
-@media (max-width:760px){.ok{grid-template-columns:1fr}}
-.ok li{position:relative;padding:10px 0 10px 34px;border-bottom:1px solid var(--hair);color:var(--ink-soft);font-size:15px}
-.ok li::before{content:"✓";position:absolute;left:0;top:10px;width:22px;height:22px;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;background:linear-gradient(135deg,#34d399,#22c3ee)}
+/* status */
+.status{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:14px;overflow:hidden}
+.status div{background:var(--surface);padding:18px 18px 20px;min-height:118px}
+.status b{display:flex;align-items:center;gap:8px;font-size:15px;margin-bottom:4px}
+.status span{font-size:13.5px;color:var(--muted);display:block}
+.st{width:12px;height:12px;border-radius:50%;flex:none;border:1.5px solid var(--ink)}
+.st.done{background:var(--ink)}
+.st.now{background:linear-gradient(90deg,var(--ink) 50%,transparent 50%)}
+.st.later{border-style:dashed;border-color:var(--muted)}
+.legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:14px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+@media (max-width:860px){.status{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.status{grid-template-columns:1fr}.status div{min-height:0}}
 
-/* tables */
-.tbl{overflow-x:auto;padding:8px}
-table{border-collapse:collapse;width:100%;font-size:14.5px}
-th,td{text-align:left;padding:11px 14px;vertical-align:top;border-bottom:1px solid var(--hair)}
-th{font:600 11.5px/1.2 "JetBrains Mono",monospace;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+/* parts */
+.phases{display:grid;grid-template-columns:repeat(3,1fr) .8fr;gap:20px}
+@media (max-width:860px){.phases{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.phases{grid-template-columns:1fr}}
+.phase{padding:20px 22px}
+.phase .eyebrow{display:block;margin-bottom:10px}
+.phase ul{list-style:none;margin:10px 0 0;padding:0;font-size:14px;color:var(--ink-soft)}
+.phase li{padding:4px 0;border-top:1px solid var(--hair)}
+.phase.opt{background:transparent;border-style:dashed}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--hair)}
+th{font:500 11px/1.2 "JetBrains Mono",monospace;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
 td.num{text-align:right;font-family:"JetBrains Mono",monospace;white-space:nowrap}
-td .note{display:block;color:var(--muted);font-size:13px}
+td .note{display:block;color:var(--muted);font-size:12.5px}
 tr.phase td{padding-top:22px;border-bottom:0}
-tr.phase td span{display:inline-block;padding:6px 12px;border-radius:999px;color:#fff;font:700 12px "Plus Jakarta Sans",sans-serif;background:var(--grad)}
-tr.total td{font-weight:800;font-size:16px;border-bottom:0}
-tbody tr:not(.phase):not(.total):hover td{background:var(--glass-strong)}
+tr.phase td span{font:500 11px "JetBrains Mono",monospace;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+tr.total td{font-weight:700;border-bottom:0}
 
 /* build */
-.progress{display:flex;align-items:center;gap:18px;padding:16px 22px;border-radius:24px;margin-bottom:22px;position:sticky;top:84px;z-index:20}
-.ring{--p:0;width:58px;height:58px;border-radius:50%;flex:none;background:conic-gradient(#7c5cff 0%,#22c3ee calc(var(--p)*1%),var(--hair) calc(var(--p)*1%));display:grid;place-items:center}
-.ring::before{content:attr(data-v);width:44px;height:44px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-weight:800;font-size:13px}
-.progress b{font-size:16px}.progress span{display:block;color:var(--muted);font-size:13.5px}
-details.stg{margin:0 0 16px;border-radius:26px;overflow:hidden}
-details.stg summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:16px;padding:18px 22px}
+.progress{display:flex;align-items:center;gap:16px;margin:0 0 18px}
+.progress .track{flex:1;height:4px;border-radius:4px;background:var(--hair);overflow:hidden;max-width:360px}
+.progress .track i{display:block;height:100%;width:0;background:var(--ink);transition:width .3s}
+.progress b{font-size:14px;font-weight:600}
+details.stg{border-top:1px solid var(--hair)}
+details.stg:last-of-type{border-bottom:1px solid var(--hair)}
+details.stg summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:18px;padding:18px 4px}
 details.stg summary::-webkit-details-marker{display:none}
-details.stg summary .n{width:46px;height:46px;border-radius:15px;flex:none;display:grid;place-items:center;font-weight:800;font-size:19px;color:#fff;background:var(--grad)}
+details.stg summary .n{font:500 15px/1 "JetBrains Mono",monospace;width:28px;flex:none;color:var(--muted)}
 details.stg summary h3{margin:0}
-details.stg summary p{margin:2px 0 0;color:var(--muted);font-size:14px}
-details.stg summary .chev{transition:transform .3s;color:var(--muted);font-size:20px}
+details.stg summary p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
+details.stg summary .cnt{margin-left:auto;font:500 12px "JetBrains Mono",monospace;color:var(--muted);white-space:nowrap}
+details.stg summary .chev{color:var(--muted);transition:transform .2s;font-size:18px}
 details.stg[open] summary .chev{transform:rotate(180deg)}
-details.stg summary .cnt{margin-left:auto;font:600 12px "JetBrains Mono",monospace;color:var(--muted);white-space:nowrap}
-.stg .body{padding:0 22px 14px}
-.step{display:grid;grid-template-columns:34px 1fr;gap:12px;padding:14px 0;border-top:1px solid var(--hair)}
-.step input{appearance:none;-webkit-appearance:none;width:24px;height:24px;margin:2px 0 0;border-radius:8px;border:2px solid var(--muted);cursor:pointer;display:grid;place-items:center;transition:all .2s}
-.step input::after{content:"✓";color:#fff;font-weight:800;font-size:13px;transform:scale(0);transition:transform .2s}
-.step input:checked{background:linear-gradient(135deg,#34d399,#22c3ee);border-color:transparent}
-.step input:checked::after{transform:scale(1)}
-.step input:focus-visible{outline:3px solid var(--a1);outline-offset:2px}
+.stg .body{padding:0 4px 18px 50px}
+@media (max-width:600px){.stg .body{padding-left:4px}details.stg summary .cnt{display:none}}
+.step{display:grid;grid-template-columns:30px 1fr;gap:10px;padding:12px 0;border-top:1px solid var(--hair)}
+.step input{appearance:none;-webkit-appearance:none;width:20px;height:20px;margin:3px 0 0;border-radius:5px;border:1.5px solid var(--muted);cursor:pointer;display:grid;place-items:center}
+.step input::after{content:"";width:9px;height:5px;border:2px solid var(--bg);border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px);opacity:0}
+.step input:checked{background:var(--ink);border-color:var(--ink)}
+.step input:checked::after{opacity:1}
 .step label{cursor:pointer;color:var(--ink-soft);min-width:0}
 .step label b{color:var(--ink)}
-.step.done label{opacity:.55}
-.step p{margin:.25em 0}
-.tip,.warn{display:block;margin-top:10px;padding:10px 14px;border-radius:14px;font-size:14px}
-.tip{background:rgba(52,211,153,.14);border:1px solid rgba(52,211,153,.35)}
-.tip::before{content:"★ Kid job · ";font-weight:800;color:#0f9f6e}
-.warn{background:rgba(255,74,61,.1);border:1px solid rgba(255,74,61,.32)}
-.warn::before{content:"⚠ Careful · ";font-weight:800;color:#e0362a}
+.step.done label{opacity:.5}
+.step p{margin:.2em 0}
+.tip,.warn{display:block;margin-top:10px;padding:2px 0 2px 14px;font-size:14px;border-left:2px solid}
+.tip{border-color:var(--play)}
+.tip::before{content:"With your kid — ";font-weight:700;color:var(--play)}
+.warn{border-color:var(--rec)}
+.warn::before{content:"Careful — ";font-weight:700;color:var(--rec)}
 
 /* lessons */
-.lessons{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-@media (max-width:900px){.lessons{grid-template-columns:1fr}}
-.lesson{padding:24px}
-.lesson .tag{font:600 11.5px "JetBrains Mono",monospace;letter-spacing:.1em;color:var(--a1);text-transform:uppercase}
-.lesson h4{margin:8px 0 8px;font-size:17px;letter-spacing:-.01em}
+.lessons{display:grid;grid-template-columns:repeat(3,1fr);gap:0 32px}
+@media (max-width:860px){.lessons{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.lessons{grid-template-columns:1fr}}
+.lesson{padding:18px 0 22px;border-top:1px solid var(--hair)}
+.lesson .eyebrow{font-size:11px}
+.lesson h3{margin:8px 0 6px;font-size:16px}
 .lesson p{margin:0;color:var(--ink-soft);font-size:14.5px}
 
 /* repo */
-.repo{display:grid;grid-template-columns:1.1fr 1fr;gap:22px;align-items:stretch}
-@media (max-width:900px){.repo{grid-template-columns:1fr}}
-.tree{font:13.5px/1.85 "JetBrains Mono",monospace;background:var(--code-bg);color:var(--code-ink);padding:24px;border-radius:28px;white-space:pre;overflow-x:auto;box-shadow:var(--shadow);margin:0}
-.tree b{color:#fff}.tree em{color:#9d98d8;font-style:normal}
-.cta-panel{padding:34px;overflow:hidden}
-.cta-panel::before{content:"";position:absolute;width:320px;height:320px;right:-120px;top:-120px;border-radius:50%;background:var(--grad);filter:blur(60px);opacity:.35;pointer-events:none}
+.repo{display:grid;grid-template-columns:1.1fr 1fr;gap:32px;align-items:start}
+@media (max-width:860px){.repo{grid-template-columns:1fr}}
+.tree{font:13px/1.85 "JetBrains Mono",monospace;background:var(--code-bg);color:var(--code-ink);padding:22px 24px;border-radius:14px;white-space:pre;overflow-x:auto;margin:0}
+.tree b{color:#fff;font-weight:500}.tree em{color:#a6a093;font-style:normal}
+.order{counter-reset:o;list-style:none;padding:0;margin:0 0 24px}
+.order li{counter-increment:o;display:flex;gap:14px;padding:9px 0;border-top:1px solid var(--hair);font-size:15px;color:var(--ink-soft)}
+.order li::before{content:counter(o);font:500 12px/1.9 "JetBrains Mono",monospace;color:var(--muted);width:12px}
 
-footer{padding:70px 0 60px;color:var(--muted);font-size:14px}
-footer .glass{padding:28px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
-footer .glass > span{max-width:60em}
+footer{margin-top:96px;padding:28px 0 48px;border-top:1px solid var(--hair);color:var(--muted);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:flex-start}
+footer p{margin:0;max-width:44em}
 
-/* reveal */
-.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s)}
-.reveal.in{opacity:1;transform:none}
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation:none!important;transition:none!important}
-  .reveal{opacity:1;transform:none}
-}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div class="aurora" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-<div class="grain" aria-hidden="true"></div>
-
 <div class="nav">
-  <div class="glass">
-    <a class="brand" href="#top"><span class="logo"><i></i></span>DadBox</a>
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="mark" aria-hidden="true"></span><span>DadBox</span></a>
     <nav aria-label="Sections">
-      <a href="#what">What</a><a href="#photos">Photos</a><a href="#drawings">Drawings</a><a href="#how">How</a><a href="#parts">Parts</a><a href="#build">Build</a><a href="#wiring">Wiring</a><a href="#repo">Code</a>
+      <a href="#what">What</a><a href="#photos">Photos</a><a href="#drawings">Drawings</a><a href="#how">How</a><a href="#status">Status</a><a href="#parts">Parts</a><a href="#build">Build</a><a href="#repo">Code</a>
     </nav>
     <button class="iconbtn" id="theme" type="button" aria-label="Toggle light or dark theme">◐</button>
   </div>
@@ -307,79 +288,58 @@ footer .glass > span{max-width:60em}
 
 <main id="top">
 <header class="hero">
-  <div class="wrap grid">
-    <div>
-      <span class="chip reveal"><span class="dot g"></span>Open build · made with a kid, for a kid</span>
-      <h1 class="reveal" style="--d:.08s">Two buttons.<br><span class="grad">One voice.</span><br><em>No screen.</em></h1>
-      <p class="lede reveal" style="--d:.16s">A little aluminium box for a child, an iPhone app for the parent who lives somewhere else. Press <b style="color:var(--led-red)">Record</b>, talk, press again, and the parent hears it. When an answer arrives, <b style="color:var(--led-green)">Play</b> glows.</p>
-      <div class="cta reveal" style="--d:.24s">
-        <a class="btn primary" href="#build">Start building <span class="arr">→</span></a>
-        <a class="btn ghost" href="https://github.com/mararnx/DadBox">View the code on GitHub</a>
-      </div>
-      <div class="mini reveal" style="--d:.32s">
-        <div><b>2</b><span>buttons</span></div>
-        <div><b>0</b><span>screens</span></div>
-        <div><b>8.5 s</b><span>3 min note over LTE</span></div>
-        <div><b>~395</b><span>CHF in parts</span></div>
-      </div>
-    </div>
-    <div class="stage reveal" style="--d:.2s">
-      <div class="glass card3d" id="tilt"><!--pic:hero--><svg class="boxart" viewBox="0 0 500 540" role="img" aria-label="The DadBox as built: a die-cast aluminium box standing on its long edge, two stainless buttons with lit rings stacked on the left of the face (Play glowing green above, Record red below), a round speaker grille in the middle, a mic pinhole below it, six screws, and on the top edge a round USB-C socket and a black swivel LTE antenna"><defs><radialGradient id="hgG"><stop offset="0" stop-color="#8dffb0" stop-opacity="1"/><stop offset=".5" stop-color="#2fd16b" stop-opacity=".45"/><stop offset="1" stop-color="#2fd16b" stop-opacity="0"/></radialGradient><radialGradient id="hgR"><stop offset="0" stop-color="#ffa08a" stop-opacity=".9"/><stop offset=".5" stop-color="#ff4a3d" stop-opacity=".35"/><stop offset="1" stop-color="#ff4a3d" stop-opacity="0"/></radialGradient><radialGradient id="steel" cx=".35" cy=".35"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#d2d0ca"/><stop offset="1" stop-color="#8e8a82"/></radialGradient><linearGradient id="faceG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1f0ec"/><stop offset=".45" stop-color="#d9d7d1"/><stop offset="1" stop-color="#bcb9b1"/></linearGradient><linearGradient id="topG" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#e9e7e2"/><stop offset="1" stop-color="#c9c6be"/></linearGradient><linearGradient id="sideG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#a9a59c"/><stop offset="1" stop-color="#85817a"/></linearGradient><linearGradient id="antG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3b3a48"/><stop offset=".5" stop-color="#15141c"/><stop offset="1" stop-color="#2a2935"/></linearGradient><filter id="soft" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="9"/></filter></defs><ellipse cx="247.4" cy="522.0" rx="223.4" ry="16" fill="#1d1b3a" opacity=".22" filter="url(#soft)"/><path d="M34.0 268.0 L410.0 286.8 L440.8 265.8 L64.8 247.0 Z" fill="url(#topG)" stroke="#1d1b3a" stroke-width="2.5" stroke-linejoin="round"/><path d="M410.0 286.8 L410.0 524.8 L440.8 503.8 L440.8 265.8 Z" fill="url(#sideG)" stroke="#1d1b3a" stroke-width="2.5" stroke-linejoin="round"/><path d="M36.5 266.3 L412.5 285.1" stroke="#1d1b3a" stroke-width="1" opacity=".45"/><path d="M412.5 285.1 L412.5 523.1" stroke="#1d1b3a" stroke-width="1" opacity=".45"/><g transform="matrix(2.0 0.1 0.0 2.0 34.00 268.00)"><rect x="0" y="0" width="188" height="119" rx="4" fill="url(#faceG)" stroke="#1d1b3a" stroke-width="2.5" vector-effect="non-scaling-stroke"/><circle cx="7" cy="7" r="2.5" fill="#f4f3ef" stroke="#1d1b3a" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M5.7 7 L8.3 7 M7 5.7 L7 8.3" stroke="#1d1b3a" stroke-width=".8" vector-effect="non-scaling-stroke"/><circle cx="181" cy="7" r="2.5" fill="#f4f3ef" stroke="#1d1b3a" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M179.7 7 L182.3 7 M181 5.7 L181 8.3" stroke="#1d1b3a" stroke-width=".8" vector-effect="non-scaling-stroke"/><circle cx="7" cy="112" r="2.5" fill="#f4f3ef" stroke="#1d1b3a" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M5.7 112 L8.3 112 M7 110.7 L7 113.3" stroke="#1d1b3a" stroke-width=".8" vector-effect="non-scaling-stroke"/><circle cx="181" cy="112" r="2.5" fill="#f4f3ef" stroke="#1d1b3a" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M179.7 112 L182.3 112 M181 110.7 L181 113.3" stroke="#1d1b3a" stroke-width=".8" vector-effect="non-scaling-stroke"/><circle cx="94.0" cy="6" r="2.5" fill="#f4f3ef" stroke="#1d1b3a" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M92.7 6 L95.3 6 M94.0 4.7 L94.0 7.3" stroke="#1d1b3a" stroke-width=".8" vector-effect="non-scaling-stroke"/><circle cx="94.0" cy="113" r="2.5" fill="#f4f3ef" stroke="#1d1b3a" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M92.7 113 L95.3 113 M94.0 111.7 L94.0 114.3" stroke="#1d1b3a" stroke-width=".8" vector-effect="non-scaling-stroke"/><circle cx="91.00" cy="62.00" r="1.7" fill="#24222c"/><circle cx="95.68" cy="64.70" r="1.7" fill="#24222c"/><circle cx="91.00" cy="67.40" r="1.7" fill="#24222c"/><circle cx="86.32" cy="64.70" r="1.7" fill="#24222c"/><circle cx="86.32" cy="59.30" r="1.7" fill="#24222c"/><circle cx="91.00" cy="56.60" r="1.7" fill="#24222c"/><circle cx="95.68" cy="59.30" r="1.7" fill="#24222c"/><circle cx="100.35" cy="67.40" r="1.7" fill="#24222c"/><circle cx="95.68" cy="70.10" r="1.7" fill="#24222c"/><circle cx="91.00" cy="72.80" r="1.7" fill="#24222c"/><circle cx="86.32" cy="70.10" r="1.7" fill="#24222c"/><circle cx="81.65" cy="67.40" r="1.7" fill="#24222c"/><circle cx="81.65" cy="62.00" r="1.7" fill="#24222c"/><circle cx="81.65" cy="56.60" r="1.7" fill="#24222c"/><circle cx="86.32" cy="53.90" r="1.7" fill="#24222c"/><circle cx="91.00" cy="51.20" r="1.7" fill="#24222c"/><circle cx="95.68" cy="53.90" r="1.7" fill="#24222c"/><circle cx="100.35" cy="56.60" r="1.7" fill="#24222c"/><circle cx="100.35" cy="62.00" r="1.7" fill="#24222c"/><circle cx="91" cy="101" r="1.1" fill="#15141c"/></g><g transform="matrix(2.0 0.1 0.0 2.0 34.00 268.00)"><circle class="breathe" cx="36" cy="43" r="19" fill="url(#hgG)"/><circle cx="36" cy="43" r="10.9" fill="#e7e5e0" stroke="#1d1b3a" stroke-width="1.4" vector-effect="non-scaling-stroke"/><circle cx="36" cy="43" r="9.4" fill="none" stroke="#a5a196" stroke-width="1" vector-effect="non-scaling-stroke"/></g><g transform="matrix(2.0 0.1 0.0 2.0 32.11 269.29)"><circle class="breathe" cx="36" cy="43" r="7.7" fill="none" stroke="#3cf07a" stroke-width="3.4" vector-effect="non-scaling-stroke"/><circle cx="36" cy="43" r="6" fill="url(#steel)" stroke="#1d1b3a" stroke-width="1.2" vector-effect="non-scaling-stroke"/><ellipse cx="34.4" cy="41.2" rx="2.8" ry="1.5" fill="#fff" opacity=".85"/></g><g transform="matrix(2.0 0.1 0.0 2.0 34.00 268.00)"><circle class="" cx="36" cy="83" r="19" fill="url(#hgR)"/><circle cx="36" cy="83" r="10.9" fill="#e7e5e0" stroke="#1d1b3a" stroke-width="1.4" vector-effect="non-scaling-stroke"/><circle cx="36" cy="83" r="9.4" fill="none" stroke="#a5a196" stroke-width="1" vector-effect="non-scaling-stroke"/></g><g transform="matrix(2.0 0.1 0.0 2.0 32.11 269.29)"><circle class="" cx="36" cy="83" r="7.7" fill="none" stroke="#ff4a3d" stroke-width="3.4" vector-effect="non-scaling-stroke"/><circle cx="36" cy="83" r="6" fill="url(#steel)" stroke="#1d1b3a" stroke-width="1.2" vector-effect="non-scaling-stroke"/><ellipse cx="34.4" cy="81.2" rx="2.8" ry="1.5" fill="#fff" opacity=".85"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 268.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 267.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 266.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 265.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 264.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 263.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 262.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 261.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 260.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 259.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 258.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 257.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 256.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 255.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 254.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 253.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 252.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 251.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 250.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 250.00)"><circle cx="25" cy="18.75" r="12" fill="#e2e0da" stroke="#1d1b3a" stroke-width="1.4" vector-effect="non-scaling-stroke"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 250.00)"><circle cx="25" cy="18.75" r="8" fill="#cfccc5" stroke="#1d1b3a" stroke-width="1" vector-effect="non-scaling-stroke"/><rect x="20.7" y="17.15" width="8.6" height="3.2" rx="1.6" fill="#15141c"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 268.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 267.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 266.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 265.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 264.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 263.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 262.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 261.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 260.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 260.00)"><circle cx="48" cy="18.75" r="5.5" fill="#d9b04a" stroke="#1d1b3a" stroke-width="1.4" vector-effect="non-scaling-stroke"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 268.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 267.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 266.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 265.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 264.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 263.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 262.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 261.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 260.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 259.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 258.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 257.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 256.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 255.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 254.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 253.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 252.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 251.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 250.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 249.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 248.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 247.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 246.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 245.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 244.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 243.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 242.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 241.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 240.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 240.00)"><circle cx="48" cy="18.76" r="4.6" fill="#3a3946" stroke="#1d1b3a" stroke-width="1.4" vector-effect="non-scaling-stroke"/></g><path class="whip" d="M140.3 230.3 L280.5 55.6 A3.5 3.5 0 0 1 286.0 59.9 L150.5 238.3 Z" fill="url(#antG)" stroke="#1d1b3a" stroke-width="1.5"/><circle cx="145.4" cy="234.3" r="7" fill="#2b2a35" stroke="#1d1b3a" stroke-width="1.5"/></svg><!--/pic:hero--></div>
-      <span class="chip float f1"><span class="dot r"></span>Record · mic on only while red</span>
-      <span class="chip float f2"><span class="dot g"></span>New message waiting</span>
-      <span class="chip float f3">🔒 End-to-end encrypted</span>
-      <span class="chip float f4"><span class="dot b"></span>Own LTE, no Wi-Fi needed</span>
-    </div>
-  </div>
   <div class="wrap">
-    <div class="glass marquee reveal" aria-hidden="true">
-      <div class="track">
-        <span>Raspberry Pi Zero 2 W</span><span>LTE Cat-1 modem</span><span>I2S microphone</span><span>Opus 16 kbps</span><span>AES-256-GCM</span><span>read-only root</span><span>Supabase</span><span>SwiftUI</span><span>die-cast aluminium</span><span>no account</span><span>no screen</span><span>quiet hours</span>
-        <span>Raspberry Pi Zero 2 W</span><span>LTE Cat-1 modem</span><span>I2S microphone</span><span>Opus 16 kbps</span><span>AES-256-GCM</span><span>read-only root</span><span>Supabase</span><span>SwiftUI</span><span>die-cast aluminium</span><span>no account</span><span>no screen</span><span>quiet hours</span>
+    <div>
+      <span class="eyebrow">An open build, made with a kid</span>
+      <h1 style="margin-top:18px">Two buttons.<br><em>No screen.</em></h1>
+      <p class="lede">A small aluminium box for a child, and an iPhone app for the parent who lives somewhere else. Press <b class="rec">Record</b>, talk, press again, and the parent hears it. When an answer arrives, <b class="play">Play</b> glows.</p>
+      <div class="cta">
+        <a class="btn primary" href="#build">Build one</a>
+        <a class="btn ghost" href="https://github.com/mararnx/DadBox">Source on GitHub</a>
       </div>
     </div>
+    <figure>
+      <!--pic:hero--><svg class="boxart" viewBox="0 0 500 540" role="img" aria-label="The DadBox as built: a die-cast aluminium box standing on its long edge, two stainless buttons with lit rings stacked on the left of the face (Play glowing green above, Record red below), a round speaker grille in the middle, a mic pinhole below it, six screws, and on the top edge a round USB-C socket and a black swivel LTE antenna"><defs><radialGradient id="hgG"><stop offset="0" stop-color="#8dffb0" stop-opacity="1"/><stop offset=".5" stop-color="#2fd16b" stop-opacity=".45"/><stop offset="1" stop-color="#2fd16b" stop-opacity="0"/></radialGradient><radialGradient id="hgB"><stop offset="0" stop-color="#8fb0ff" stop-opacity=".45"/><stop offset=".5" stop-color="#3a6fc4" stop-opacity=".18"/><stop offset="1" stop-color="#3a6fc4" stop-opacity="0"/></radialGradient><radialGradient id="steel" cx=".35" cy=".35"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#d2d0ca"/><stop offset="1" stop-color="#8e8a82"/></radialGradient><linearGradient id="faceG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1f0ec"/><stop offset=".45" stop-color="#d9d7d1"/><stop offset="1" stop-color="#bcb9b1"/></linearGradient><linearGradient id="topG" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#e9e7e2"/><stop offset="1" stop-color="#c9c6be"/></linearGradient><linearGradient id="sideG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#a9a59c"/><stop offset="1" stop-color="#85817a"/></linearGradient><linearGradient id="antG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3b3a48"/><stop offset=".5" stop-color="#15141c"/><stop offset="1" stop-color="#2a2935"/></linearGradient><filter id="soft" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="9"/></filter></defs><ellipse cx="247.4" cy="522.0" rx="223.4" ry="16" fill="#1d1b3a" opacity=".22" filter="url(#soft)"/><path d="M34.0 268.0 L410.0 286.8 L440.8 265.8 L64.8 247.0 Z" fill="url(#topG)" stroke="#1d1b3a" stroke-width="2.5" stroke-linejoin="round"/><path d="M410.0 286.8 L410.0 524.8 L440.8 503.8 L440.8 265.8 Z" fill="url(#sideG)" stroke="#1d1b3a" stroke-width="2.5" stroke-linejoin="round"/><path d="M36.5 266.3 L412.5 285.1" stroke="#1d1b3a" stroke-width="1" opacity=".45"/><path d="M412.5 285.1 L412.5 523.1" stroke="#1d1b3a" stroke-width="1" opacity=".45"/><g transform="matrix(2.0 0.1 0.0 2.0 34.00 268.00)"><rect x="0" y="0" width="188" height="119" rx="4" fill="url(#faceG)" stroke="#1d1b3a" stroke-width="2.5" vector-effect="non-scaling-stroke"/><circle cx="7" cy="7" r="2.5" fill="#f4f3ef" stroke="#1d1b3a" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M5.7 7 L8.3 7 M7 5.7 L7 8.3" stroke="#1d1b3a" stroke-width=".8" vector-effect="non-scaling-stroke"/><circle cx="181" cy="7" r="2.5" fill="#f4f3ef" stroke="#1d1b3a" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M179.7 7 L182.3 7 M181 5.7 L181 8.3" stroke="#1d1b3a" stroke-width=".8" vector-effect="non-scaling-stroke"/><circle cx="7" cy="112" r="2.5" fill="#f4f3ef" stroke="#1d1b3a" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M5.7 112 L8.3 112 M7 110.7 L7 113.3" stroke="#1d1b3a" stroke-width=".8" vector-effect="non-scaling-stroke"/><circle cx="181" cy="112" r="2.5" fill="#f4f3ef" stroke="#1d1b3a" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M179.7 112 L182.3 112 M181 110.7 L181 113.3" stroke="#1d1b3a" stroke-width=".8" vector-effect="non-scaling-stroke"/><circle cx="94.0" cy="6" r="2.5" fill="#f4f3ef" stroke="#1d1b3a" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M92.7 6 L95.3 6 M94.0 4.7 L94.0 7.3" stroke="#1d1b3a" stroke-width=".8" vector-effect="non-scaling-stroke"/><circle cx="94.0" cy="113" r="2.5" fill="#f4f3ef" stroke="#1d1b3a" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M92.7 113 L95.3 113 M94.0 111.7 L94.0 114.3" stroke="#1d1b3a" stroke-width=".8" vector-effect="non-scaling-stroke"/><circle cx="91.00" cy="62.00" r="1.7" fill="#24222c"/><circle cx="95.68" cy="64.70" r="1.7" fill="#24222c"/><circle cx="91.00" cy="67.40" r="1.7" fill="#24222c"/><circle cx="86.32" cy="64.70" r="1.7" fill="#24222c"/><circle cx="86.32" cy="59.30" r="1.7" fill="#24222c"/><circle cx="91.00" cy="56.60" r="1.7" fill="#24222c"/><circle cx="95.68" cy="59.30" r="1.7" fill="#24222c"/><circle cx="100.35" cy="67.40" r="1.7" fill="#24222c"/><circle cx="95.68" cy="70.10" r="1.7" fill="#24222c"/><circle cx="91.00" cy="72.80" r="1.7" fill="#24222c"/><circle cx="86.32" cy="70.10" r="1.7" fill="#24222c"/><circle cx="81.65" cy="67.40" r="1.7" fill="#24222c"/><circle cx="81.65" cy="62.00" r="1.7" fill="#24222c"/><circle cx="81.65" cy="56.60" r="1.7" fill="#24222c"/><circle cx="86.32" cy="53.90" r="1.7" fill="#24222c"/><circle cx="91.00" cy="51.20" r="1.7" fill="#24222c"/><circle cx="95.68" cy="53.90" r="1.7" fill="#24222c"/><circle cx="100.35" cy="56.60" r="1.7" fill="#24222c"/><circle cx="100.35" cy="62.00" r="1.7" fill="#24222c"/><circle cx="91" cy="101" r="1.1" fill="#15141c"/></g><g transform="matrix(2.0 0.1 0.0 2.0 34.00 268.00)"><circle class="breathe" cx="36" cy="43" r="19" fill="url(#hgG)"/><circle cx="36" cy="43" r="10.9" fill="#e7e5e0" stroke="#1d1b3a" stroke-width="1.4" vector-effect="non-scaling-stroke"/><circle cx="36" cy="43" r="9.4" fill="none" stroke="#a5a196" stroke-width="1" vector-effect="non-scaling-stroke"/></g><g transform="matrix(2.0 0.1 0.0 2.0 32.11 269.29)"><circle class="breathe" cx="36" cy="43" r="7.7" fill="none" stroke="#3cf07a" stroke-width="3.4" vector-effect="non-scaling-stroke"/><circle cx="36" cy="43" r="6" fill="url(#steel)" stroke="#1d1b3a" stroke-width="1.2" vector-effect="non-scaling-stroke"/><ellipse cx="34.4" cy="41.2" rx="2.8" ry="1.5" fill="#fff" opacity=".85"/></g><g transform="matrix(2.0 0.1 0.0 2.0 34.00 268.00)"><circle class="" cx="36" cy="83" r="19" fill="url(#hgB)"/><circle cx="36" cy="83" r="10.9" fill="#e7e5e0" stroke="#1d1b3a" stroke-width="1.4" vector-effect="non-scaling-stroke"/><circle cx="36" cy="83" r="9.4" fill="none" stroke="#a5a196" stroke-width="1" vector-effect="non-scaling-stroke"/></g><g transform="matrix(2.0 0.1 0.0 2.0 32.11 269.29)"><circle class="" cx="36" cy="83" r="7.7" fill="none" stroke="#6f93d8" stroke-width="3.4" vector-effect="non-scaling-stroke"/><circle cx="36" cy="83" r="6" fill="url(#steel)" stroke="#1d1b3a" stroke-width="1.2" vector-effect="non-scaling-stroke"/><ellipse cx="34.4" cy="81.2" rx="2.8" ry="1.5" fill="#fff" opacity=".85"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 268.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 267.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 266.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 265.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 264.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 263.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 262.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 261.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 260.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 259.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 258.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 257.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 256.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 255.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 254.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 253.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 252.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 251.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 250.00)"><circle cx="25" cy="18.75" r="12" fill="#a6a39b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 250.00)"><circle cx="25" cy="18.75" r="12" fill="#e2e0da" stroke="#1d1b3a" stroke-width="1.4" vector-effect="non-scaling-stroke"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 250.00)"><circle cx="25" cy="18.75" r="8" fill="#cfccc5" stroke="#1d1b3a" stroke-width="1" vector-effect="non-scaling-stroke"/><rect x="20.7" y="17.15" width="8.6" height="3.2" rx="1.6" fill="#15141c"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 268.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 267.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 266.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 265.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 264.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 263.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 262.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 261.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 260.00)"><circle cx="48" cy="18.75" r="5.5" fill="#b8902f"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 260.00)"><circle cx="48" cy="18.75" r="5.5" fill="#d9b04a" stroke="#1d1b3a" stroke-width="1.4" vector-effect="non-scaling-stroke"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 268.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 267.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 266.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 265.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 264.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 263.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 262.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 261.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 260.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 259.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 258.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 257.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 256.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 255.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 254.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 253.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 252.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 251.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 250.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 249.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 248.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 247.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 246.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 245.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 244.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 243.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 242.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 241.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 240.00)"><circle cx="48" cy="18.76" r="4.6" fill="#22212b"/></g><g transform="matrix(2.0 0.1 0.82 -0.56 34.00 240.00)"><circle cx="48" cy="18.76" r="4.6" fill="#3a3946" stroke="#1d1b3a" stroke-width="1.4" vector-effect="non-scaling-stroke"/></g><path class="whip" d="M140.3 230.3 L280.5 55.6 A3.5 3.5 0 0 1 286.0 59.9 L150.5 238.3 Z" fill="url(#antG)" stroke="#1d1b3a" stroke-width="1.5"/><circle cx="145.4" cy="234.3" r="7" fill="#2b2a35" stroke="#1d1b3a" stroke-width="1.5"/></svg><!--/pic:hero-->
+      <figcaption>Drawn to scale from the box as built. Record is dim blue: ready. Play breathes green: a message is waiting.</figcaption>
+    </figure>
   </div>
 </header>
 
 <!-- WHAT -->
 <section id="what">
   <div class="wrap">
-    <span class="eyebrow reveal">01 · What it is</span>
-    <h2 class="reveal">Presence, <em>not</em> a phone call.</h2>
-    <p class="intro reveal">A call needs both people free at the same moment, and a kid on a video call with a parent they miss often just goes quiet. A box that <i>holds</i> a voice until someone is ready to hear it fits how a child actually stays close to someone who isn't there.</p>
-    <div class="g2">
-      <div class="glass spot card pad reveal">
-        <div class="icon i4"><span>◉</span></div>
-        <h3>The box · for the child, age 6–9</h3>
-        <ol class="steps4">
-          <li><div>Press <b>Record</b>. It turns red, and only now does the microphone get power.</div></li>
-          <li><div>Talk, for up to five minutes. No timer, nothing to read.</div></li>
-          <li><div>Press again. One green pulse means <b>got it</b>: it's safely on disk.</div></li>
-          <li><div>When an answer arrives, <b>Play</b> breathes green and chimes once (never during quiet hours).</div></li>
-        </ol>
-      </div>
-      <div class="glass spot card pad reveal" style="--d:.1s">
-        <div class="icon i2"><span>▶</span></div>
-        <h3>The app · for the parent</h3>
-        <p><b>Conversation</b>: one timeline, both directions, the whole archive. Tap to record, review, send. Every message you send shows <i>sent → on the box → played 19:12</i>.</p>
-        <p><b>Box</b>: signal, last check-in, queue, quiet hours, volume, and any fault <i>in words</i>. The child never has to interpret an error; the adult reads it here.</p>
-        <p>A push arrives when the child sends something, and also when the box <b>hasn't checked in</b> for hours.</p>
-      </div>
-    </div>
-    <div class="glass pad reveal" style="margin-top:22px">
-      <h3>The lights are the whole display</h3>
-      <p style="color:var(--ink-soft);margin:0">Two RGB rings, seven states. No status LEDs; why the box isn't ready is the app's job to explain.</p>
-      <div class="lights"><!--pic:lights--><svg width="0" height="0" style="position:absolute"><defs><radialGradient id="steel2" cx=".35" cy=".35"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#cfccc5"/><stop offset="1" stop-color="#8e8a82"/></radialGradient></defs></svg><figure class="lstate"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="ls0"><stop offset="0" stop-color="#3a6fc4" stop-opacity=".9"/><stop offset="1" stop-color="#3a6fc4" stop-opacity="0"/></radialGradient></defs><circle cx="60" cy="60" r="56" fill="#cfcbc2" stroke="#1d1b3a" stroke-width="2.5"/><g class="l-dim"><circle cx="60" cy="60" r="54" fill="url(#ls0)"/><circle cx="60" cy="60" r="36" fill="none" stroke="#3a6fc4" stroke-width="9"/></g><circle cx="60" cy="60" r="30" fill="url(#steel2)" stroke="#1d1b3a" stroke-width="2"/><ellipse cx="52" cy="50" rx="11" ry="6" fill="#fff" opacity=".7"/></svg><figcaption><b>Ready</b><span>Record: steady dim blue</span></figcaption></figure><figure class="lstate"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="ls1"><stop offset="0" stop-color="#3a6fc4" stop-opacity=".9"/><stop offset="1" stop-color="#3a6fc4" stop-opacity="0"/></radialGradient></defs><circle cx="60" cy="60" r="56" fill="#cfcbc2" stroke="#1d1b3a" stroke-width="2.5"/><g class="l-blink"><circle cx="60" cy="60" r="54" fill="url(#ls1)"/><circle cx="60" cy="60" r="36" fill="none" stroke="#3a6fc4" stroke-width="9"/></g><circle cx="60" cy="60" r="30" fill="url(#steel2)" stroke="#1d1b3a" stroke-width="2"/><ellipse cx="52" cy="50" rx="11" ry="6" fill="#fff" opacity=".7"/></svg><figcaption><b>Not ready</b><span>Record: slow blue blink</span></figcaption></figure><figure class="lstate"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="ls2"><stop offset="0" stop-color="#e0442c" stop-opacity=".9"/><stop offset="1" stop-color="#e0442c" stop-opacity="0"/></radialGradient></defs><circle cx="60" cy="60" r="56" fill="#cfcbc2" stroke="#1d1b3a" stroke-width="2.5"/><g class="l-on"><circle cx="60" cy="60" r="54" fill="url(#ls2)"/><circle cx="60" cy="60" r="36" fill="none" stroke="#e0442c" stroke-width="9"/></g><circle cx="60" cy="60" r="30" fill="url(#steel2)" stroke="#1d1b3a" stroke-width="2"/><ellipse cx="52" cy="50" rx="11" ry="6" fill="#fff" opacity=".7"/></svg><figcaption><b>Recording</b><span>Record: steady red, mic on</span></figcaption></figure><figure class="lstate"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="ls3"><stop offset="0" stop-color="#58d47c" stop-opacity=".9"/><stop offset="1" stop-color="#58d47c" stop-opacity="0"/></radialGradient></defs><circle cx="60" cy="60" r="56" fill="#cfcbc2" stroke="#1d1b3a" stroke-width="2.5"/><g class="l-pulse"><circle cx="60" cy="60" r="54" fill="url(#ls3)"/><circle cx="60" cy="60" r="36" fill="none" stroke="#58d47c" stroke-width="9"/></g><circle cx="60" cy="60" r="30" fill="url(#steel2)" stroke="#1d1b3a" stroke-width="2"/><ellipse cx="52" cy="50" rx="11" ry="6" fill="#fff" opacity=".7"/></svg><figcaption><b>Got it</b><span>one green pulse after fsync</span></figcaption></figure><figure class="lstate"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="ls4"><stop offset="0" stop-color="#58d47c" stop-opacity=".9"/><stop offset="1" stop-color="#58d47c" stop-opacity="0"/></radialGradient></defs><circle cx="60" cy="60" r="56" fill="#cfcbc2" stroke="#1d1b3a" stroke-width="2.5"/><g class="l-breathe"><circle cx="60" cy="60" r="54" fill="url(#ls4)"/><circle cx="60" cy="60" r="36" fill="none" stroke="#58d47c" stroke-width="9"/></g><circle cx="60" cy="60" r="30" fill="url(#steel2)" stroke="#1d1b3a" stroke-width="2"/><ellipse cx="52" cy="50" rx="11" ry="6" fill="#fff" opacity=".7"/></svg><figcaption><b>Message waits</b><span>Play: breathing green</span></figcaption></figure><figure class="lstate"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="ls5"><stop offset="0" stop-color="#58d47c" stop-opacity=".9"/><stop offset="1" stop-color="#58d47c" stop-opacity="0"/></radialGradient></defs><circle cx="60" cy="60" r="56" fill="#cfcbc2" stroke="#1d1b3a" stroke-width="2.5"/><g class="l-on"><circle cx="60" cy="60" r="54" fill="url(#ls5)"/><circle cx="60" cy="60" r="36" fill="none" stroke="#58d47c" stroke-width="9"/></g><circle cx="60" cy="60" r="30" fill="url(#steel2)" stroke="#1d1b3a" stroke-width="2"/><ellipse cx="52" cy="50" rx="11" ry="6" fill="#fff" opacity=".7"/></svg><figcaption><b>Playing</b><span>Play: steady green</span></figcaption></figure><figure class="lstate"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="ls6"><stop offset="0" stop-color="#f4f1ea" stop-opacity=".9"/><stop offset="1" stop-color="#f4f1ea" stop-opacity="0"/></radialGradient></defs><circle cx="60" cy="60" r="56" fill="#cfcbc2" stroke="#1d1b3a" stroke-width="2.5"/><g class="l-blink"><circle cx="60" cy="60" r="54" fill="url(#ls6)"/><circle cx="60" cy="60" r="36" fill="none" stroke="#f4f1ea" stroke-width="9"/></g><circle cx="60" cy="60" r="30" fill="url(#steel2)" stroke="#1d1b3a" stroke-width="2"/><ellipse cx="52" cy="50" rx="11" ry="6" fill="#fff" opacity=".7"/></svg><figcaption><b>Travel lock</b><span>Play: white blink</span></figcaption></figure><!--/pic:lights--></div>
+    <span class="eyebrow">01 · What it is</span>
+    <h2>Presence, <em>not a phone call.</em></h2>
+    <p class="intro">A call needs both people free at once, and a child on a video call often just goes quiet. A box that holds a voice until someone is ready to hear it fits how a child stays close to someone who isn't there.</p>
+
+    <div class="surface pad">
+      <div class="lights-head"><h3>For the child: the lights are the whole display</h3><span class="small">In the order a child meets them · then two that say “not now”</span></div>
+      <div class="lights"><!--pic:lights--><svg width="0" height="0" style="position:absolute"><defs><radialGradient id="steel2" cx=".35" cy=".35"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#cfccc5"/><stop offset="1" stop-color="#8e8a82"/></radialGradient></defs></svg><figure class="lstate"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="ls0"><stop offset="0" stop-color="#3a6fc4" stop-opacity=".9"/><stop offset="1" stop-color="#3a6fc4" stop-opacity="0"/></radialGradient></defs><circle cx="60" cy="60" r="56" fill="#cfcbc2" stroke="#1d1b3a" stroke-width="2.5"/><g class="l-dim"><circle cx="60" cy="60" r="54" fill="url(#ls0)"/><circle cx="60" cy="60" r="36" fill="none" stroke="#3a6fc4" stroke-width="9"/></g><circle cx="60" cy="60" r="30" fill="url(#steel2)" stroke="#1d1b3a" stroke-width="2"/><ellipse cx="52" cy="50" rx="11" ry="6" fill="#fff" opacity=".7"/></svg><figcaption><b>Ready</b><span>Record · steady dim blue</span></figcaption></figure><figure class="lstate"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="ls1"><stop offset="0" stop-color="#e0442c" stop-opacity=".9"/><stop offset="1" stop-color="#e0442c" stop-opacity="0"/></radialGradient></defs><circle cx="60" cy="60" r="56" fill="#cfcbc2" stroke="#1d1b3a" stroke-width="2.5"/><g class="l-on"><circle cx="60" cy="60" r="54" fill="url(#ls1)"/><circle cx="60" cy="60" r="36" fill="none" stroke="#e0442c" stroke-width="9"/></g><circle cx="60" cy="60" r="30" fill="url(#steel2)" stroke="#1d1b3a" stroke-width="2"/><ellipse cx="52" cy="50" rx="11" ry="6" fill="#fff" opacity=".7"/></svg><figcaption><b>Recording</b><span>Record · red · mic on</span></figcaption></figure><figure class="lstate"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="ls2"><stop offset="0" stop-color="#58d47c" stop-opacity=".9"/><stop offset="1" stop-color="#58d47c" stop-opacity="0"/></radialGradient></defs><circle cx="60" cy="60" r="56" fill="#cfcbc2" stroke="#1d1b3a" stroke-width="2.5"/><g class="l-pulse"><circle cx="60" cy="60" r="54" fill="url(#ls2)"/><circle cx="60" cy="60" r="36" fill="none" stroke="#58d47c" stroke-width="9"/></g><circle cx="60" cy="60" r="30" fill="url(#steel2)" stroke="#1d1b3a" stroke-width="2"/><ellipse cx="52" cy="50" rx="11" ry="6" fill="#fff" opacity=".7"/></svg><figcaption><b>Got it</b><span>Record · one green pulse</span></figcaption></figure><figure class="lstate"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="ls3"><stop offset="0" stop-color="#58d47c" stop-opacity=".9"/><stop offset="1" stop-color="#58d47c" stop-opacity="0"/></radialGradient></defs><circle cx="60" cy="60" r="56" fill="#cfcbc2" stroke="#1d1b3a" stroke-width="2.5"/><g class="l-breathe"><circle cx="60" cy="60" r="54" fill="url(#ls3)"/><circle cx="60" cy="60" r="36" fill="none" stroke="#58d47c" stroke-width="9"/></g><circle cx="60" cy="60" r="30" fill="url(#steel2)" stroke="#1d1b3a" stroke-width="2"/><ellipse cx="52" cy="50" rx="11" ry="6" fill="#fff" opacity=".7"/></svg><figcaption><b>Message waits</b><span>Play · breathing green</span></figcaption></figure><figure class="lstate"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="ls4"><stop offset="0" stop-color="#58d47c" stop-opacity=".9"/><stop offset="1" stop-color="#58d47c" stop-opacity="0"/></radialGradient></defs><circle cx="60" cy="60" r="56" fill="#cfcbc2" stroke="#1d1b3a" stroke-width="2.5"/><g class="l-on"><circle cx="60" cy="60" r="54" fill="url(#ls4)"/><circle cx="60" cy="60" r="36" fill="none" stroke="#58d47c" stroke-width="9"/></g><circle cx="60" cy="60" r="30" fill="url(#steel2)" stroke="#1d1b3a" stroke-width="2"/><ellipse cx="52" cy="50" rx="11" ry="6" fill="#fff" opacity=".7"/></svg><figcaption><b>Playing</b><span>Play · steady green</span></figcaption></figure><figure class="lstate aside"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="ls5"><stop offset="0" stop-color="#3a6fc4" stop-opacity=".9"/><stop offset="1" stop-color="#3a6fc4" stop-opacity="0"/></radialGradient></defs><circle cx="60" cy="60" r="56" fill="#cfcbc2" stroke="#1d1b3a" stroke-width="2.5"/><g class="l-blink"><circle cx="60" cy="60" r="54" fill="url(#ls5)"/><circle cx="60" cy="60" r="36" fill="none" stroke="#3a6fc4" stroke-width="9"/></g><circle cx="60" cy="60" r="30" fill="url(#steel2)" stroke="#1d1b3a" stroke-width="2"/><ellipse cx="52" cy="50" rx="11" ry="6" fill="#fff" opacity=".7"/></svg><figcaption><b>Not ready</b><span>Record · slow blue blink</span></figcaption></figure><figure class="lstate"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="ls6"><stop offset="0" stop-color="#f4f1ea" stop-opacity=".9"/><stop offset="1" stop-color="#f4f1ea" stop-opacity="0"/></radialGradient></defs><circle cx="60" cy="60" r="56" fill="#cfcbc2" stroke="#1d1b3a" stroke-width="2.5"/><g class="l-blink"><circle cx="60" cy="60" r="54" fill="url(#ls6)"/><circle cx="60" cy="60" r="36" fill="none" stroke="#f4f1ea" stroke-width="9"/></g><circle cx="60" cy="60" r="30" fill="url(#steel2)" stroke="#1d1b3a" stroke-width="2"/><ellipse cx="52" cy="50" rx="11" ry="6" fill="#fff" opacity=".7"/></svg><figcaption><b>Travel lock</b><span>Play · white blink</span></figcaption></figure><!--/pic:lights--></div>
     </div>
 
-    <h3 class="reveal" style="margin:56px 0 18px;font-size:24px">Rules that shaped every decision</h3>
+    <div class="app" style="margin-top:48px">
+      <div class="phone" aria-label="Sketch of the parent's app: a conversation with two voice messages" role="img">
+        <div class="notch"></div>
+        <div class="bar"><i></i>Box online · checked in 1 min ago</div>
+        <div class="msg"><div class="wave" data-wave="7"></div><small>1:12 · from the box · 18:40</small></div>
+        <div class="msg me"><div class="wave" data-wave="3"></div><small>0:48 · sent → on the box → played 19:12</small></div>
+        <div class="msg"><div class="wave" data-wave="11"></div><small>0:21 · from the box · 19:15</small></div>
+      </div>
+      <div>
+        <h3>For the parent: an iPhone app</h3>
+        <ul>
+          <li><b>One conversation,</b> both directions, the whole archive. Each message you send shows when it reached the box and when it was played.</li>
+          <li><b>The box screen</b> shows signal, last check-in, quiet hours and volume, and explains any fault in words. The child never has to.</li>
+          <li><b>A push</b> when the child sends something, and when the box hasn't checked in for hours.</li>
+        </ul>
+      </div>
+    </div>
+
     <div class="rules">
-      <div class="glass spot rule reveal"><div class="icon i1"><span>6</span></div><b>A six-year-old can use it alone</b><span>Two buttons, both obvious. No menus, no pairing, no "are you sure?"</span></div>
-      <div class="glass spot rule reveal" style="--d:.06s"><div class="icon i4"><span>●</span></div><b>No red light, no microphone</b><span>The mic's power comes from the pin that lights Record red. That's wiring, not a software promise.</span></div>
-      <div class="glass spot rule reveal" style="--d:.12s"><div class="icon i3"><span>✓</span></div><b>Nothing recorded is ever lost</b><span>Audio is written to disk while the child talks. The outbox only clears when the server confirms a checksummed copy.</span></div>
-      <div class="glass spot rule reveal"><div class="icon i2"><span>↗</span></div><b>No one else's Wi-Fi</b><span>The box travels between two homes, so it brings its own LTE connection. No passwords, no router to depend on.</span></div>
-      <div class="glass spot rule reveal" style="--d:.06s"><div class="icon i6"><span>🔒</span></div><b>A child's voice stays private</b><span>Encrypted end to end. The server stores ciphertext it can't play. No transcription, no analytics, ever.</span></div>
-      <div class="glass spot rule reveal" style="--d:.12s"><div class="icon i5"><span>⇣</span></div><b>It lives in a school bag</b><span>Presses under 0.5 s don't count. Holding both buttons for 3 s sets a travel lock that survives a reboot.</span></div>
+      <div><b>No red light, no mic</b><span>The mic is powered from the pin that lights Record. That's wiring, not software.</span></div>
+      <div><b>Nothing is ever lost</b><span>Audio is on disk while the child talks, and is only deleted after the server confirms a checked copy.</span></div>
+      <div><b>Private by design</b><span>End-to-end encrypted. No transcription, no analytics.</span></div>
+      <div><b>Built for a school bag</b><span>Its own LTE, so no Wi-Fi to set up. Short bumps are ignored; a travel lock stops the rest.</span></div>
     </div>
   </div>
 </section>
@@ -387,22 +347,20 @@ footer .glass > span{max-width:60em}
 <!-- PHOTOS -->
 <section id="photos">
   <div class="wrap">
-    <span class="eyebrow reveal">02 · From the bench</span>
-    <h2 class="reveal">The real thing, <em>so far.</em></h2>
-    <p class="intro reveal">Built at a kitchen table over a few evenings in autumn 2026. It stands on its long edge like a small radio: buttons on the left, speaker in the middle, power and antenna on top. Tap a photo to enlarge it.</p>
+    <span class="eyebrow">02 · From the bench</span>
+    <h2>The real thing, <em>so far.</em></h2>
+    <p class="intro">Built at a kitchen table over a few evenings in autumn 2026. Tap a photo to enlarge it.</p>
     <div class="gallery">
-      <figure class="reveal" data-full="img/finished-front.jpg"><img src="img/finished-front-sm.jpg" alt="The finished box standing on its edge on a table: two stainless buttons on the left, a speaker grille in the middle, a USB-C socket and a black antenna on top" loading="lazy"><figcaption>Closed up: it stands like a little radio</figcaption></figure>
-      <figure class="reveal" data-full="img/parts-on-table.jpg"><img src="img/parts-on-table-sm.jpg" alt="Parts spread on a wooden table: the LTE modem board, a step drill, a header strip, a soldering iron, and the open aluminium box with the speaker inside" loading="lazy"><figcaption>Day one: everything on the table</figcaption></figure>
-      <figure class="reveal" data-full="img/lid-buttons.jpg"><img src="img/lid-buttons-sm.jpg" alt="The aluminium lid with two stainless push buttons fitted and a drilled hexagonal speaker grille" loading="lazy"><figcaption>Buttons fitted, grille drilled</figcaption></figure>
-      <figure class="reveal" data-full="img/first-fit.jpg"><img src="img/first-fit-sm.jpg" alt="The Pi Zero on the modem board with ribbon USB cables, beside the open box with the speaker on a foam block and the antenna pigtail" loading="lazy"><figcaption>First fit: Pi on the modem HAT, speaker on foam</figcaption></figure>
-      <figure class="reveal" data-full="img/grille-drilled.jpg"><img src="img/grille-drilled-sm.jpg" alt="Close-up of the lid with 19 small holes drilled in a hexagon, with scribed centre lines" loading="lazy"><figcaption>The speaker grille: 19 holes, scribed and drilled</figcaption></figure>
-      <figure class="reveal" data-full="img/bench-session.jpg"><img src="img/bench-session-sm.jpg" alt="A busy workbench: the lid with buttons and loose wires, red pliers, and the open box with the speaker and Pi inside" loading="lazy"><figcaption>Wiring evening: lid on the left, box on the right</figcaption></figure>
-      <figure class="reveal" data-full="img/button-tabs.jpg"><img src="img/button-tabs-sm.jpg" alt="The back of a 16 mm button showing six tabs labelled C minus, R, G and B plus two gold switch tabs" loading="lazy"><figcaption>Button from behind: C−, R, G, B and two gold switch tabs</figcaption></figure>
-      <figure class="reveal" data-full="img/wired-inside.jpg"><img src="img/wired-inside-sm.jpg" alt="Inside the box fully wired: coloured wires from the Pi to the amplifier and buttons, the speaker on the left" loading="lazy"><figcaption>All wires on: one wire per header pin</figcaption></figure>
-      <figure class="reveal" data-full="img/amp-wired.jpg"><img src="img/amp-wired-sm.jpg" alt="Close-up of the small black amplifier board with purple, yellow and green signal wires and red and black power wires soldered on" loading="lazy"><figcaption>The amp, soldered: check GND isn't on GAIN!</figcaption></figure>
-      <figure class="reveal" data-full="img/finished-top.jpg"><img src="img/finished-top-sm.jpg" alt="The closed box seen from above with an R scratched next to the Record button" loading="lazy"><figcaption>From above. The "R" scratched in marks Record</figcaption></figure>
-      <figure class="reveal" data-full="img/amp-module.jpg"><img src="img/amp-module-sm.jpg" alt="The MAX98357 amplifier module before wiring, with its speaker plug" loading="lazy"><figcaption>MAX98357 I2S amp, before soldering</figcaption></figure>
-      <figure class="reveal" data-full="img/pi-underside.jpg"><img src="img/pi-underside-sm.jpg" alt="The underside of the Raspberry Pi Zero 2 W with its 40 header holes" loading="lazy"><figcaption>The Pi Zero 2 W, from below</figcaption></figure>
+      <figure data-full="img/finished-front.jpg"><img src="img/finished-front-sm.jpg" alt="The finished box standing on its edge on a table: two stainless buttons on the left, a speaker grille in the middle, a USB-C socket and a black antenna on top" loading="lazy"><figcaption>Closed up, it stands like a little radio</figcaption></figure>
+      <figure data-full="img/parts-on-table.jpg"><img src="img/parts-on-table-sm.jpg" alt="Parts spread on a wooden table: the LTE modem board, a step drill, a header strip, a soldering iron, and the open aluminium box with the speaker inside" loading="lazy"><figcaption>Day one: everything on the table</figcaption></figure>
+      <figure data-full="img/lid-buttons.jpg"><img src="img/lid-buttons-sm.jpg" alt="The aluminium lid with two stainless push buttons fitted and a drilled hexagonal speaker grille" loading="lazy"><figcaption>Buttons fitted, grille drilled</figcaption></figure>
+      <figure data-full="img/first-fit.jpg"><img src="img/first-fit-sm.jpg" alt="The Pi Zero on the modem board with ribbon USB cables, beside the open box with the speaker on a foam block and the antenna pigtail" loading="lazy"><figcaption>First fit: the Pi on the modem HAT</figcaption></figure>
+      <figure data-full="img/grille-drilled.jpg"><img src="img/grille-drilled-sm.jpg" alt="Close-up of the lid with 19 small holes drilled in a hexagon, with scribed centre lines" loading="lazy"><figcaption>19 holes, scribed and drilled</figcaption></figure>
+      <figure data-full="img/bench-session.jpg"><img src="img/bench-session-sm.jpg" alt="A busy workbench: the lid with buttons and loose wires, red pliers, and the open box with the speaker and Pi inside" loading="lazy"><figcaption>A wiring evening</figcaption></figure>
+      <figure data-full="img/button-tabs.jpg"><img src="img/button-tabs-sm.jpg" alt="The back of a 16 mm button showing six tabs labelled C minus, R, G and B plus two gold switch tabs" loading="lazy"><figcaption>A button from behind: four LED tabs, two switch tabs</figcaption></figure>
+      <figure data-full="img/wired-inside.jpg"><img src="img/wired-inside-sm.jpg" alt="Inside the box fully wired: coloured wires from the Pi to the amplifier and buttons, the speaker on the left" loading="lazy"><figcaption>All wires on</figcaption></figure>
+      <figure data-full="img/amp-wired.jpg"><img src="img/amp-wired-sm.jpg" alt="Close-up of the small black amplifier board with purple, yellow and green signal wires and red and black power wires soldered on" loading="lazy"><figcaption>The amp, soldered</figcaption></figure>
+      <figure data-full="img/finished-top.jpg"><img src="img/finished-top-sm.jpg" alt="The closed box seen from above with an R scratched next to the Record button" loading="lazy"><figcaption>The scratched “R” marks Record</figcaption></figure>
     </div>
   </div>
 </section>
@@ -410,118 +368,152 @@ footer .glass > span{max-width:60em}
 <!-- DRAWINGS -->
 <section id="drawings">
   <div class="wrap">
-    <span class="eyebrow reveal">03 · Drawn to scale</span>
-    <h2 class="reveal">Every hole, <em>every wire.</em></h2>
-    <p class="intro reveal">Drawn from the build photos and <code>hardware/cad/layout.json</code>. Box: 188 × 119 × 37.5 mm, a 1590DD-size die-cast clone. <b>Measure your own box before drilling</b>, because clones differ by a millimetre or two.</p>
-    <div class="glass tabs reveal" role="tablist" aria-label="Drawings">
+    <span class="eyebrow">03 · Drawn to scale</span>
+    <h2>Every hole, <em>every wire.</em></h2>
+    <p class="intro">Drawn from the build photos and <code>hardware/cad/layout.json</code>. The box is a 1590DD-size die-cast clone, 188 × 119 × 37.5 mm. Clones differ by a millimetre or two, so measure yours before drilling.</p>
+    <div class="tabs" role="tablist" aria-label="Drawings">
       <button role="tab" aria-selected="true" aria-controls="tp-face" id="t-face">Front face</button>
-      <button role="tab" aria-selected="false" aria-controls="tp-top" id="t-top">Top edge</button>
-      <button role="tab" aria-selected="false" aria-controls="tp-inside" id="t-inside">Inside</button>
-      <button role="tab" aria-selected="false" aria-controls="tp-privacy" id="t-privacy">Privacy wire</button>
+      <button role="tab" aria-selected="false" aria-controls="tp-top" id="t-top" tabindex="-1">Top edge</button>
+      <button role="tab" aria-selected="false" aria-controls="tp-inside" id="t-inside" tabindex="-1">Inside</button>
+      <button role="tab" aria-selected="false" aria-controls="tp-privacy" id="t-privacy" tabindex="-1">Privacy wire</button>
+      <button role="tab" aria-selected="false" aria-controls="tp-pins" id="t-pins" tabindex="-1">Pin map</button>
     </div>
-    <div class="glass panel reveal">
-      <div role="tabpanel" id="tp-face" aria-labelledby="t-face"><!--pic:face--><svg viewBox="-60 -40 639 409" role="img" aria-label="Front face, 188 by 119 mm, as built (measured from photos, about plus or minus 3 mm): Play button 36 mm from the left and 43 mm down, Record 36 mm from the left and 83 mm down, both 16 mm holes; speaker grille of 19 holes centred at 91, 62; mic pinhole at 91, 101; six screws"><defs><marker id="da" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1 L9 5 L0 9" fill="none" stroke="var(--rust)" stroke-width="1.5"/></marker><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0 L0 6" stroke="var(--ink-soft)" stroke-width="1" opacity=".5"/></pattern></defs><rect x="0" y="0" width="488.8" height="309.40000000000003" rx="10" stroke="var(--ink)" fill="none" stroke-width="2.5" style="fill:var(--card)"/><circle cx="18.2" cy="18.2" r="6.5" stroke="var(--ink)" fill="none" stroke-width="1.5"/><path d="M14.2 18.2 L22.2 18.2 M18.2 14.2 L18.2 22.2" stroke="var(--ink)" fill="none"/><circle cx="470.6" cy="18.2" r="6.5" stroke="var(--ink)" fill="none" stroke-width="1.5"/><path d="M466.6 18.2 L474.6 18.2 M470.6 14.2 L470.6 22.2" stroke="var(--ink)" fill="none"/><circle cx="18.2" cy="291.2" r="6.5" stroke="var(--ink)" fill="none" stroke-width="1.5"/><path d="M14.2 291.2 L22.2 291.2 M18.2 287.2 L18.2 295.2" stroke="var(--ink)" fill="none"/><circle cx="470.6" cy="291.2" r="6.5" stroke="var(--ink)" fill="none" stroke-width="1.5"/><path d="M466.6 291.2 L474.6 291.2 M470.6 287.2 L470.6 295.2" stroke="var(--ink)" fill="none"/><circle cx="244.4" cy="15.600000000000001" r="6.5" stroke="var(--ink)" fill="none" stroke-width="1.5"/><path d="M240.4 15.600000000000001 L248.4 15.600000000000001 M244.4 11.600000000000001 L244.4 19.6" stroke="var(--ink)" fill="none"/><circle cx="244.4" cy="293.8" r="6.5" stroke="var(--ink)" fill="none" stroke-width="1.5"/><path d="M240.4 293.8 L248.4 293.8 M244.4 289.8 L244.4 297.8" stroke="var(--ink)" fill="none"/><circle cx="93.60000000000001" cy="111.8" r="28.3" stroke="var(--ink)" fill="none" stroke-dasharray="4 3" stroke-width="1"/><circle cx="93.60000000000001" cy="111.8" r="20.8" stroke="var(--led-green)" stroke-width="3.5" fill="none"/><path d="M59.60000000000001 111.8 L127.60000000000001 111.8 M93.60000000000001 77.8 L93.60000000000001 145.8" stroke="var(--ink)" fill="none" stroke-width=".8" stroke-dasharray="6 2 1 2"/><text x="129.60000000000002" y="115.8" font-size="12" font-weight="700" font-family="IBM Plex Mono, monospace" fill="var(--ink)">PLAY Ø16</text><circle cx="93.60000000000001" cy="215.8" r="28.3" stroke="var(--ink)" fill="none" stroke-dasharray="4 3" stroke-width="1"/><circle cx="93.60000000000001" cy="215.8" r="20.8" stroke="var(--led-red)" stroke-width="3.5" fill="none"/><path d="M59.60000000000001 215.8 L127.60000000000001 215.8 M93.60000000000001 181.8 L93.60000000000001 249.8" stroke="var(--ink)" fill="none" stroke-width=".8" stroke-dasharray="6 2 1 2"/><text x="129.60000000000002" y="219.8" font-size="12" font-weight="700" font-family="IBM Plex Mono, monospace" fill="var(--ink)">RECORD Ø16</text><circle cx="236.6" cy="161.2" r="4.4" style="fill:var(--ink)"/><circle cx="248.8" cy="168.2" r="4.4" style="fill:var(--ink)"/><circle cx="236.6" cy="175.2" r="4.4" style="fill:var(--ink)"/><circle cx="224.4" cy="168.2" r="4.4" style="fill:var(--ink)"/><circle cx="224.4" cy="154.2" r="4.4" style="fill:var(--ink)"/><circle cx="236.6" cy="147.2" r="4.4" style="fill:var(--ink)"/><circle cx="248.8" cy="154.2" r="4.4" style="fill:var(--ink)"/><circle cx="260.9" cy="175.2" r="4.4" style="fill:var(--ink)"/><circle cx="248.8" cy="182.3" r="4.4" style="fill:var(--ink)"/><circle cx="236.6" cy="189.3" r="4.4" style="fill:var(--ink)"/><circle cx="224.4" cy="182.3" r="4.4" style="fill:var(--ink)"/><circle cx="212.3" cy="175.2" r="4.4" style="fill:var(--ink)"/><circle cx="212.3" cy="161.2" r="4.4" style="fill:var(--ink)"/><circle cx="212.3" cy="147.2" r="4.4" style="fill:var(--ink)"/><circle cx="224.4" cy="140.1" r="4.4" style="fill:var(--ink)"/><circle cx="236.6" cy="133.1" r="4.4" style="fill:var(--ink)"/><circle cx="248.8" cy="140.1" r="4.4" style="fill:var(--ink)"/><circle cx="260.9" cy="147.2" r="4.4" style="fill:var(--ink)"/><circle cx="260.9" cy="161.2" r="4.4" style="fill:var(--ink)"/><text x="236.6" y="205.20000000000002" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--ink)">SPEAKER · 19 holes</text><circle cx="236.6" cy="262.6" r="3.2" style="fill:var(--ink)"/><text x="246.6" y="266.6" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--ink)">MIC Ø2</text><path d="M0.0 -18 L488.8 -18" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="244.4" y="-23" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--ink)">188</text><path d="M-34 0.0 L-34 309.4" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="-40" y="158.7" text-anchor="end" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--ink)">119</text><path d="M0.0 333.40000000000003 L93.6 333.40000000000003" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="46.8" y="328.40000000000003" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--ink)">≈36</text><path d="M93.6 333.40000000000003 L236.6 333.40000000000003" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="165.1" y="328.40000000000003" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--ink)">≈55</text><path d="M510.8 0.0 L510.8 111.8" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="515.8" y="59.9" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--ink)">≈43</text><path d="M510.8 111.8 L510.8 215.8" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="515.8" y="167.8" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--ink)">≈40</text><text x="244.4" y="363.40000000000003" text-anchor="middle" font-size="12" font-weight="700" font-family="IBM Plex Mono, monospace" fill="var(--ink)">FRONT FACE (the lid) · as built, ±3 mm from photos</text></svg><!--/pic:face--><p class="cap">The lid is the face. Two 16 mm holes (step drill to 15, file to 16), a 2 mm mic hole, and a 19-hole grille over the speaker. Play on top, Record below.</p></div>
-      <div role="tabpanel" id="tp-top" aria-labelledby="t-top" hidden><!--pic:top--><svg viewBox="-60 -50 609 218" role="img" aria-label="Top edge seen from above, 188 by 37.5 mm: the USB-C power socket about 25 mm from the left and the LTE antenna about 48 mm from the left, both centred in the depth"><defs><marker id="da" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1 L9 5 L0 9" fill="none" stroke="var(--rust)" stroke-width="1.5"/></marker><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0 L0 6" stroke="var(--ink-soft)" stroke-width="1" opacity=".5"/></pattern></defs><rect x="0" y="0" width="488.8" height="97.5" rx="6" stroke="var(--ink)" fill="none" stroke-width="2.5" style="fill:var(--card)"/><path d="M0 89.7 L488.8 89.7" stroke="var(--ink)" fill="none" stroke-width="1" stroke-dasharray="5 3"/><text x="482.8" y="84.7" text-anchor="end" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--ink)" opacity=".7">lid (front)</text><circle cx="65.0" cy="48.75" r="31.200000000000003" stroke="var(--ink)" stroke-width="2" style="fill:var(--paper-2)"/><rect x="53.8" y="44.6" width="22.4" height="8.3" rx="4.2" style="fill:var(--ink)"/><polygon points="139.1,48.8 132.0,61.1 117.7,61.1 110.5,48.8 117.7,36.4 132.0,36.4" stroke="var(--ink)" stroke-width="1.5" style="fill:var(--mustard)"/><circle cx="124.80000000000001" cy="48.75" r="11.4" stroke="var(--ink)" stroke-width="1.5" style="fill:#2b2a35"/><text x="65.0" y="121.5" text-anchor="middle" font-size="11" font-weight="700" font-family="IBM Plex Mono, monospace" fill="var(--ink)">5 V USB-C</text><text x="170.8" y="121.5" text-anchor="middle" font-size="11" font-weight="700" font-family="IBM Plex Mono, monospace" fill="var(--ink)">LTE ANTENNA (SMA)</text><path d="M0.0 -14 L65.0 -14" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="32.5" y="-19" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--ink)">≈25</text><path d="M0.0 -32 L124.8 -32" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="62.4" y="-37" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--ink)">≈48</text><path d="M-22 0.0 L-22 97.5" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="-28" y="52.8" text-anchor="end" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--ink)">37.5</text><text x="324.4" y="151.5" text-anchor="middle" font-size="12" font-weight="700" font-family="IBM Plex Mono, monospace" fill="var(--ink)">TOP EDGE · seen from above</text></svg><!--/pic:top--><p class="cap">Power and radio come in through the top edge: a USB-C panel socket (22.3 mm hole) and the antenna's SMA bulkhead (6.5 mm). The antenna swivels upright.</p></div>
-      <div role="tabpanel" id="tp-inside" aria-labelledby="t-inside" hidden><!--pic:inside--><svg viewBox="-20 -60 529 419" role="img" aria-label="Inside the box, lid off, seen from the front, bottom edge at the bottom: the Pi Zero 2 W stacked on the LTE modem HAT at the right, the speaker in the middle on a foam block, the amplifier in the lower left corner, the two buttons and the mic hanging from the lid, the USB-C socket and antenna on the top edge"><defs><marker id="da" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1 L9 5 L0 9" fill="none" stroke="var(--rust)" stroke-width="1.5"/></marker><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0 L0 6" stroke="var(--ink-soft)" stroke-width="1" opacity=".5"/></pattern></defs><rect x="0" y="0" width="488.8" height="309.40000000000003" rx="12" stroke="var(--ink)" stroke-width="2.5" style="fill:url(#hatch)"/><rect x="10.4" y="10.4" width="468.0" height="291.2" rx="6" stroke="var(--ink)" stroke-width="1.5" style="fill:var(--paper)"/><circle cx="23.400000000000002" cy="286.0" r="13.0" stroke="var(--ink)" stroke-width="1.2" style="fill:var(--paper-2)"/><circle cx="465.40000000000003" cy="286.0" r="13.0" stroke="var(--ink)" stroke-width="1.2" style="fill:var(--paper-2)"/><circle cx="23.400000000000002" cy="20.8" r="13.0" stroke="var(--ink)" stroke-width="1.2" style="fill:var(--paper-2)"/><circle cx="465.40000000000003" cy="20.8" r="13.0" stroke="var(--ink)" stroke-width="1.2" style="fill:var(--paper-2)"/><circle cx="244.4" cy="288.6" r="13.0" stroke="var(--ink)" stroke-width="1.2" style="fill:var(--paper-2)"/><circle cx="244.4" cy="18.2" r="13.0" stroke="var(--ink)" stroke-width="1.2" style="fill:var(--paper-2)"/><rect x="296.4" y="20.8" width="147.4" height="221.0" rx="3" stroke="var(--ink)" stroke-width="2" style="fill:#2b6cb0"/><text x="370.1" y="131.3" text-anchor="middle" font-size="12" font-weight="600" font-family="IBM Plex Mono, monospace" fill="var(--ink)" style="fill:var(--ink)"></text><text x="304.4" y="233.8" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--ink)" style="fill:#f3e8cf">LTE HAT 85 × 57</text><rect x="358.8" y="46.8" width="78.0" height="169.0" rx="3" stroke="var(--ink)" stroke-width="2" style="fill:#2f9e5b"/><text x="397.8" y="131.3" text-anchor="middle" font-size="12" font-weight="600" font-family="IBM Plex Mono, monospace" fill="var(--ink)" style="fill:#fff">Pi</text><text x="397.8" y="146.3" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--ink)" style="fill:#fff" opacity=".8">Zero 2 W</text><rect x="427.7" y="195.6" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="189.0" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="182.4" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="175.8" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="169.2" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="162.6" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="156.0" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="149.4" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="142.8" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="136.2" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="129.6" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="123.0" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="116.4" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="109.7" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="103.1" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="96.5" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="89.9" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="83.3" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="76.7" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="70.1" width="4" height="4" fill="#d8b04a"/><rect x="191.1" y="109.2" width="91.0" height="104.0" rx="3" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4" style="fill:var(--paper-2)"/><text x="236.6" y="161.2" text-anchor="middle" font-size="12" font-weight="600" font-family="IBM Plex Mono, monospace" fill="var(--ink)" style="fill:var(--ink)"></text><rect x="178.1" y="96.2" width="117.0" height="130.0" rx="3" stroke="var(--ink)" stroke-width="2" style="fill:var(--mustard)"/><text x="236.6" y="161.2" text-anchor="middle" font-size="12" font-weight="600" font-family="IBM Plex Mono, monospace" fill="var(--ink)" style="fill:#1d1b3a">SPEAKER</text><text x="236.6" y="176.2" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--ink)" style="fill:#1d1b3a" opacity=".8">on foam, cone to the grille</text><circle cx="236.6" cy="161.20000000000002" r="44.2" stroke="#1d1b3a" stroke-width="1.5" fill="none" opacity=".5"/><rect x="31.2" y="239.2" width="46.8" height="49.4" rx="3" stroke="var(--ink)" stroke-width="2" style="fill:var(--orange)"/><text x="54.6" y="263.9" text-anchor="middle" font-size="12" font-weight="600" font-family="IBM Plex Mono, monospace" fill="var(--ink)" style="fill:#1d1b3a">AMP</text><circle cx="93.60000000000001" cy="111.8" r="28.6" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4" style="fill:var(--card)"/><circle cx="93.60000000000001" cy="111.8" r="20.8" stroke="var(--led-green)" stroke-width="3" fill="none"/><text x="93.60000000000001" y="115.8" text-anchor="middle" font-size="11" font-weight="700" font-family="IBM Plex Mono, monospace" fill="var(--ink)">PLAY</text><circle cx="93.60000000000001" cy="215.8" r="28.6" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4" style="fill:var(--card)"/><circle cx="93.60000000000001" cy="215.8" r="20.8" stroke="var(--led-red)" stroke-width="3" fill="none"/><text x="93.60000000000001" y="219.8" text-anchor="middle" font-size="11" font-weight="700" font-family="IBM Plex Mono, monospace" fill="var(--ink)">REC</text><circle cx="236.6" cy="262.6" r="18.2" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4" style="fill:var(--card)"/><text x="236.6" y="266.6" text-anchor="middle" font-size="10" font-weight="700" font-family="IBM Plex Mono, monospace" fill="var(--ink)">MIC</text><rect x="33.8" y="7.8" width="62.4" height="36.4" rx="3" stroke="var(--ink)" stroke-width="2" style="fill:var(--card)"/><text x="65.0" y="26.0" text-anchor="middle" font-size="12" font-weight="600" font-family="IBM Plex Mono, monospace" fill="var(--ink)" style="fill:var(--ink)">5 V</text><rect x="111.8" y="7.8" width="26.0" height="33.8" rx="3" stroke="var(--ink)" stroke-width="2" style="fill:var(--mustard)"/><text x="124.8" y="24.7" text-anchor="middle" font-size="12" font-weight="600" font-family="IBM Plex Mono, monospace" fill="var(--ink)" style="fill:var(--ink)"></text><text x="124.80000000000001" y="-2.1999999999999993" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--ink)">ANT</text><path class="wire" d="M119.6 111.8 C276.2 81.8 402.9 143.0 432.9 132.6" stroke="#ff8a3d" stroke-width="2.4" fill="none" opacity=".9"/><path class="wire" d="M119.6 215.8 C276.2 185.8 402.9 143.0 432.9 132.6" stroke="#ff8a3d" stroke-width="2.4" fill="none" opacity=".9"/><path class="wire" d="M252.6 262.6 C342.8 232.6 402.9 143.0 432.9 132.6" stroke="#8b5a3c" stroke-width="2.4" fill="none" opacity=".9"/><path class="wire" d="M78.0 262.6 C255.5 232.6 402.9 143.0 432.9 132.6" stroke="#8a5cf6" stroke-width="2.4" fill="none" opacity=".9"/><path class="wire" d="M91.0 44.2 C262.0 14.2 402.9 143.0 432.9 132.6" stroke="#ff4a3d" stroke-width="2.4" fill="none" opacity=".9"/><text x="244.4" y="339.40000000000003" text-anchor="middle" font-size="12" font-weight="700" font-family="IBM Plex Mono, monospace" fill="var(--ink)">▼ BOTTOM EDGE (it stands here) · dashed = hangs from the lid</text><text x="0" y="-36" font-size="12" font-weight="600" font-family="IBM Plex Mono, monospace" fill="var(--ink)">INSIDE · lid off, seen from the front · 180 × 112 × ~31 mm</text></svg><!--/pic:inside--><p class="cap">The Pi Zero sits on the LTE HAT on four nylon standoffs; the speaker is pressed against the grille by a foam block; the buttons and mic hang from the lid. Wires are soldered, not plugged, because plugs shake loose in a bag.</p></div>
-      <div role="tabpanel" id="tp-privacy" aria-labelledby="t-privacy" hidden><!--pic:privacy--><svg viewBox="0 0 760 300" role="img" aria-label="The privacy wire: header pin 11 (GPIO 17) goes first to the Record button's red LED tab; a short wire from that same tab powers the microphone. Any break leaves the mic unpowered, never powered with the light off."><rect x="20" y="60" width="90" height="180" rx="6" fill="#1f6f6b" stroke="#1d1b3a" stroke-width="2.5"/><text x="65" y="50" text-anchor="middle" font-size="12" font-weight="600" font-family="IBM Plex Mono, monospace" fill="var(--ink)">Pi header</text><rect x="46" y="80" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="72" y="80" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="46" y="100" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="72" y="100" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="46" y="120" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="72" y="120" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="46" y="140" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="72" y="140" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="46" y="160" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="72" y="160" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="46" y="180" width="12" height="12" fill="#f2b83b" stroke="#1d1b3a" stroke-width="2.5"/><rect x="72" y="180" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="46" y="200" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="72" y="200" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="46" y="220" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="72" y="220" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><text x="38" y="191" text-anchor="end" font-size="11" font-weight="600" font-family="IBM Plex Mono, monospace" fill="var(--ink)">11</text><circle cx="380" cy="150" r="78" stroke="var(--ink)" stroke-width="2.5" style="fill:var(--card)"/><circle cx="380" cy="150" r="60" stroke="var(--ink)" stroke-width="1" stroke-dasharray="4 3" fill="none"/><text x="380" y="258" text-anchor="middle" font-size="12" font-weight="600" font-family="IBM Plex Mono, monospace" fill="var(--ink)">Record button, from behind</text><rect x="343" y="100" width="18" height="28" rx="2" fill="#c8c5bd" stroke="#1d1b3a" stroke-width="1.5"/><text x="352" y="94" text-anchor="middle" font-size="12" font-weight="600" font-family="IBM Plex Mono, monospace" fill="var(--ink)">C−</text><rect x="399" y="100" width="18" height="28" rx="2" fill="#c8c5bd" stroke="#1d1b3a" stroke-width="1.5"/><text x="408" y="94" text-anchor="middle" font-size="12" font-weight="600" font-family="IBM Plex Mono, monospace" fill="var(--ink)">R</text><rect x="343" y="172" width="18" height="28" rx="2" fill="#c8c5bd" stroke="#1d1b3a" stroke-width="1.5"/><text x="352" y="216" text-anchor="middle" font-size="12" font-weight="600" font-family="IBM Plex Mono, monospace" fill="var(--ink)">B</text><rect x="399" y="172" width="18" height="28" rx="2" fill="#c8c5bd" stroke="#1d1b3a" stroke-width="1.5"/><text x="408" y="216" text-anchor="middle" font-size="12" font-weight="600" font-family="IBM Plex Mono, monospace" fill="var(--ink)">G</text><rect x="309" y="138" width="18" height="24" rx="2" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1.5"/><rect x="433" y="138" width="18" height="24" rx="2" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1.5"/><path d="M58 186 C 200 186, 250 54, 408 110" stroke="#1d1b3a" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M58 186 C 200 186, 250 54, 408 110" stroke="#e8862a" stroke-width="5" fill="none" stroke-linecap="round"/><text x="170" y="150" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--ink)">① GPIO 17 → red LED first</text><rect x="590" y="46" width="100" height="68" rx="6" fill="#2a4f9a" stroke="#1d1b3a" stroke-width="2.5"/><circle cx="640" cy="76" r="9" fill="#c9c6bf" stroke="#1d1b3a" stroke-width="1.5"/><circle cx="640" cy="76" r="2" fill="#1d1b3a"/><text x="640" y="104" text-anchor="middle" font-size="11" font-weight="600" fill="#fff" font-family="IBM Plex Mono, monospace">MIC · VDD</text><path d="M408 110 C 488 74, 520 90, 590 80" stroke="#1d1b3a" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M408 110 C 488 74, 520 90, 590 80" stroke="#e8862a" stroke-width="5" fill="none" stroke-linecap="round"/><text x="468" y="74" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--ink)">② same tab → mic power</text><rect x="530" y="170" width="215" height="92" fill="var(--mustard)" stroke="#1d1b3a" stroke-width="2"/><text x="542" y="194" font-size="12" font-weight="600" fill="#1d1b3a" font-family="IBM Plex Mono, monospace">NO RED LIGHT, NO MIC.</text><text x="542" y="214" font-size="11" fill="#1d1b3a" font-family="IBM Plex Mono, monospace">Break ① → both dark.</text><text x="542" y="232" font-size="11" fill="#1d1b3a" font-family="IBM Plex Mono, monospace">Break ② → light on, mic off.</text><text x="542" y="250" font-size="11" fill="#1d1b3a" font-family="IBM Plex Mono, monospace">Never: mic on, light off.</text></svg><!--/pic:privacy--><p class="cap">The one wire that matters most. The mic is powered from the Record button's red LED tab, so the red light comes first in the chain. No software can turn the mic on with the light off.</p></div>
+    <div class="surface panel">
+      <div role="tabpanel" id="tp-face" aria-labelledby="t-face"><!--pic:face--><svg viewBox="-60 -40 639 409" role="img" aria-label="Front face, 188 by 119 mm, as built (measured from photos, about plus or minus 3 mm): Play button 36 mm from the left and 43 mm down, Record 36 mm from the left and 83 mm down, both 16 mm holes; speaker grille of 19 holes centred at 91, 62; mic pinhole at 91, 101; six screws"><defs><marker id="da" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1 L9 5 L0 9" fill="none" stroke="var(--rust)" stroke-width="1.5"/></marker><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0 L0 6" stroke="var(--ink-soft)" stroke-width="1" opacity=".5"/></pattern></defs><rect x="0" y="0" width="488.8" height="309.40000000000003" rx="10" stroke="var(--ink)" fill="none" stroke-width="2.5" style="fill:var(--card)"/><circle cx="18.2" cy="18.2" r="6.5" stroke="var(--ink)" fill="none" stroke-width="1.5"/><path d="M14.2 18.2 L22.2 18.2 M18.2 14.2 L18.2 22.2" stroke="var(--ink)" fill="none"/><circle cx="470.6" cy="18.2" r="6.5" stroke="var(--ink)" fill="none" stroke-width="1.5"/><path d="M466.6 18.2 L474.6 18.2 M470.6 14.2 L470.6 22.2" stroke="var(--ink)" fill="none"/><circle cx="18.2" cy="291.2" r="6.5" stroke="var(--ink)" fill="none" stroke-width="1.5"/><path d="M14.2 291.2 L22.2 291.2 M18.2 287.2 L18.2 295.2" stroke="var(--ink)" fill="none"/><circle cx="470.6" cy="291.2" r="6.5" stroke="var(--ink)" fill="none" stroke-width="1.5"/><path d="M466.6 291.2 L474.6 291.2 M470.6 287.2 L470.6 295.2" stroke="var(--ink)" fill="none"/><circle cx="244.4" cy="15.600000000000001" r="6.5" stroke="var(--ink)" fill="none" stroke-width="1.5"/><path d="M240.4 15.600000000000001 L248.4 15.600000000000001 M244.4 11.600000000000001 L244.4 19.6" stroke="var(--ink)" fill="none"/><circle cx="244.4" cy="293.8" r="6.5" stroke="var(--ink)" fill="none" stroke-width="1.5"/><path d="M240.4 293.8 L248.4 293.8 M244.4 289.8 L244.4 297.8" stroke="var(--ink)" fill="none"/><circle cx="93.60000000000001" cy="111.8" r="28.3" stroke="var(--ink)" fill="none" stroke-dasharray="4 3" stroke-width="1"/><circle cx="93.60000000000001" cy="111.8" r="20.8" stroke="var(--led-green)" stroke-width="3.5" fill="none"/><path d="M59.60000000000001 111.8 L127.60000000000001 111.8 M93.60000000000001 77.8 L93.60000000000001 145.8" stroke="var(--ink)" fill="none" stroke-width=".8" stroke-dasharray="6 2 1 2"/><text x="129.60000000000002" y="115.8" font-size="12" font-weight="700" font-family="JetBrains Mono, monospace" fill="var(--ink)">PLAY Ø16</text><circle cx="93.60000000000001" cy="215.8" r="28.3" stroke="var(--ink)" fill="none" stroke-dasharray="4 3" stroke-width="1"/><circle cx="93.60000000000001" cy="215.8" r="20.8" stroke="var(--led-red)" stroke-width="3.5" fill="none"/><path d="M59.60000000000001 215.8 L127.60000000000001 215.8 M93.60000000000001 181.8 L93.60000000000001 249.8" stroke="var(--ink)" fill="none" stroke-width=".8" stroke-dasharray="6 2 1 2"/><text x="129.60000000000002" y="219.8" font-size="12" font-weight="700" font-family="JetBrains Mono, monospace" fill="var(--ink)">RECORD Ø16</text><circle cx="236.6" cy="161.2" r="4.4" style="fill:var(--ink)"/><circle cx="248.8" cy="168.2" r="4.4" style="fill:var(--ink)"/><circle cx="236.6" cy="175.2" r="4.4" style="fill:var(--ink)"/><circle cx="224.4" cy="168.2" r="4.4" style="fill:var(--ink)"/><circle cx="224.4" cy="154.2" r="4.4" style="fill:var(--ink)"/><circle cx="236.6" cy="147.2" r="4.4" style="fill:var(--ink)"/><circle cx="248.8" cy="154.2" r="4.4" style="fill:var(--ink)"/><circle cx="260.9" cy="175.2" r="4.4" style="fill:var(--ink)"/><circle cx="248.8" cy="182.3" r="4.4" style="fill:var(--ink)"/><circle cx="236.6" cy="189.3" r="4.4" style="fill:var(--ink)"/><circle cx="224.4" cy="182.3" r="4.4" style="fill:var(--ink)"/><circle cx="212.3" cy="175.2" r="4.4" style="fill:var(--ink)"/><circle cx="212.3" cy="161.2" r="4.4" style="fill:var(--ink)"/><circle cx="212.3" cy="147.2" r="4.4" style="fill:var(--ink)"/><circle cx="224.4" cy="140.1" r="4.4" style="fill:var(--ink)"/><circle cx="236.6" cy="133.1" r="4.4" style="fill:var(--ink)"/><circle cx="248.8" cy="140.1" r="4.4" style="fill:var(--ink)"/><circle cx="260.9" cy="147.2" r="4.4" style="fill:var(--ink)"/><circle cx="260.9" cy="161.2" r="4.4" style="fill:var(--ink)"/><text x="236.6" y="205.20000000000002" text-anchor="middle" font-size="11" font-family="JetBrains Mono, monospace" fill="var(--ink)">SPEAKER · 19 holes</text><circle cx="236.6" cy="262.6" r="3.2" style="fill:var(--ink)"/><text x="246.6" y="266.6" font-size="11" font-family="JetBrains Mono, monospace" fill="var(--ink)">MIC Ø2</text><path d="M0.0 -18 L488.8 -18" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="244.4" y="-23" text-anchor="middle" font-size="11" font-family="JetBrains Mono, monospace" fill="var(--ink)">188</text><path d="M-34 0.0 L-34 309.4" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="-40" y="158.7" text-anchor="end" font-size="11" font-family="JetBrains Mono, monospace" fill="var(--ink)">119</text><path d="M0.0 333.40000000000003 L93.6 333.40000000000003" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="46.8" y="328.40000000000003" text-anchor="middle" font-size="11" font-family="JetBrains Mono, monospace" fill="var(--ink)">≈36</text><path d="M93.6 333.40000000000003 L236.6 333.40000000000003" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="165.1" y="328.40000000000003" text-anchor="middle" font-size="11" font-family="JetBrains Mono, monospace" fill="var(--ink)">≈55</text><path d="M510.8 0.0 L510.8 111.8" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="515.8" y="59.9" font-size="11" font-family="JetBrains Mono, monospace" fill="var(--ink)">≈43</text><path d="M510.8 111.8 L510.8 215.8" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="515.8" y="167.8" font-size="11" font-family="JetBrains Mono, monospace" fill="var(--ink)">≈40</text><text x="244.4" y="363.40000000000003" text-anchor="middle" font-size="12" font-weight="700" font-family="JetBrains Mono, monospace" fill="var(--ink)">FRONT FACE (the lid) · as built, ±3 mm from photos</text></svg><!--/pic:face--><p class="cap">Two 16 mm button holes (step drill to 15, file to 16), a 2 mm mic hole and a 19-hole grille over the speaker.</p></div>
+      <div role="tabpanel" id="tp-top" aria-labelledby="t-top" hidden><!--pic:top--><svg viewBox="-60 -50 609 218" role="img" aria-label="Top edge seen from above, 188 by 37.5 mm: the USB-C power socket about 25 mm from the left and the LTE antenna about 48 mm from the left, both centred in the depth"><defs><marker id="da" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1 L9 5 L0 9" fill="none" stroke="var(--rust)" stroke-width="1.5"/></marker><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0 L0 6" stroke="var(--ink-soft)" stroke-width="1" opacity=".5"/></pattern></defs><rect x="0" y="0" width="488.8" height="97.5" rx="6" stroke="var(--ink)" fill="none" stroke-width="2.5" style="fill:var(--card)"/><path d="M0 89.7 L488.8 89.7" stroke="var(--ink)" fill="none" stroke-width="1" stroke-dasharray="5 3"/><text x="482.8" y="84.7" text-anchor="end" font-size="10" font-family="JetBrains Mono, monospace" fill="var(--ink)" opacity=".7">lid (front)</text><circle cx="65.0" cy="48.75" r="31.200000000000003" stroke="var(--ink)" stroke-width="2" style="fill:var(--paper-2)"/><rect x="53.8" y="44.6" width="22.4" height="8.3" rx="4.2" style="fill:var(--ink)"/><polygon points="139.1,48.8 132.0,61.1 117.7,61.1 110.5,48.8 117.7,36.4 132.0,36.4" stroke="var(--ink)" stroke-width="1.5" style="fill:var(--mustard)"/><circle cx="124.80000000000001" cy="48.75" r="11.4" stroke="var(--ink)" stroke-width="1.5" style="fill:#2b2a35"/><text x="65.0" y="121.5" text-anchor="middle" font-size="11" font-weight="700" font-family="JetBrains Mono, monospace" fill="var(--ink)">5 V USB-C</text><text x="170.8" y="121.5" text-anchor="middle" font-size="11" font-weight="700" font-family="JetBrains Mono, monospace" fill="var(--ink)">LTE ANTENNA (SMA)</text><path d="M0.0 -14 L65.0 -14" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="32.5" y="-19" text-anchor="middle" font-size="11" font-family="JetBrains Mono, monospace" fill="var(--ink)">≈25</text><path d="M0.0 -32 L124.8 -32" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="62.4" y="-37" text-anchor="middle" font-size="11" font-family="JetBrains Mono, monospace" fill="var(--ink)">≈48</text><path d="M-22 0.0 L-22 97.5" stroke="var(--rust)" stroke-width="1.2" marker-start="url(#da)" marker-end="url(#da)"/><text x="-28" y="52.8" text-anchor="end" font-size="11" font-family="JetBrains Mono, monospace" fill="var(--ink)">37.5</text><text x="324.4" y="151.5" text-anchor="middle" font-size="12" font-weight="700" font-family="JetBrains Mono, monospace" fill="var(--ink)">TOP EDGE · seen from above</text></svg><!--/pic:top--><p class="cap">Power and radio come in through the top edge: a USB-C panel socket (22.3 mm hole) and the antenna's SMA bulkhead (6.5 mm).</p></div>
+      <div role="tabpanel" id="tp-inside" aria-labelledby="t-inside" hidden><!--pic:inside--><svg viewBox="-20 -60 529 419" role="img" aria-label="Inside the box, lid off, seen from the front, bottom edge at the bottom: the Pi Zero 2 W stacked on the LTE modem HAT at the right, the speaker in the middle on a foam block, the amplifier in the lower left corner, the two buttons and the mic hanging from the lid, the USB-C socket and antenna on the top edge"><defs><marker id="da" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1 L9 5 L0 9" fill="none" stroke="var(--rust)" stroke-width="1.5"/></marker><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0 L0 6" stroke="var(--ink-soft)" stroke-width="1" opacity=".5"/></pattern></defs><rect x="0" y="0" width="488.8" height="309.40000000000003" rx="12" stroke="var(--ink)" stroke-width="2.5" style="fill:url(#hatch)"/><rect x="10.4" y="10.4" width="468.0" height="291.2" rx="6" stroke="var(--ink)" stroke-width="1.5" style="fill:var(--paper)"/><circle cx="23.400000000000002" cy="286.0" r="13.0" stroke="var(--ink)" stroke-width="1.2" style="fill:var(--paper-2)"/><circle cx="465.40000000000003" cy="286.0" r="13.0" stroke="var(--ink)" stroke-width="1.2" style="fill:var(--paper-2)"/><circle cx="23.400000000000002" cy="20.8" r="13.0" stroke="var(--ink)" stroke-width="1.2" style="fill:var(--paper-2)"/><circle cx="465.40000000000003" cy="20.8" r="13.0" stroke="var(--ink)" stroke-width="1.2" style="fill:var(--paper-2)"/><circle cx="244.4" cy="288.6" r="13.0" stroke="var(--ink)" stroke-width="1.2" style="fill:var(--paper-2)"/><circle cx="244.4" cy="18.2" r="13.0" stroke="var(--ink)" stroke-width="1.2" style="fill:var(--paper-2)"/><rect x="296.4" y="20.8" width="147.4" height="221.0" rx="3" stroke="var(--ink)" stroke-width="2" style="fill:#2b6cb0"/><text x="370.1" y="131.3" text-anchor="middle" font-size="12" font-weight="600" font-family="JetBrains Mono, monospace" fill="var(--ink)" style="fill:var(--ink)"></text><text x="304.4" y="233.8" font-size="10" font-family="JetBrains Mono, monospace" fill="var(--ink)" style="fill:#f3e8cf">LTE HAT 85 × 57</text><rect x="358.8" y="46.8" width="78.0" height="169.0" rx="3" stroke="var(--ink)" stroke-width="2" style="fill:#2f9e5b"/><text x="397.8" y="131.3" text-anchor="middle" font-size="12" font-weight="600" font-family="JetBrains Mono, monospace" fill="var(--ink)" style="fill:#fff">Pi</text><text x="397.8" y="146.3" text-anchor="middle" font-size="10" font-family="JetBrains Mono, monospace" fill="var(--ink)" style="fill:#fff" opacity=".8">Zero 2 W</text><rect x="427.7" y="195.6" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="189.0" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="182.4" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="175.8" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="169.2" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="162.6" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="156.0" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="149.4" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="142.8" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="136.2" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="129.6" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="123.0" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="116.4" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="109.7" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="103.1" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="96.5" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="89.9" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="83.3" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="76.7" width="4" height="4" fill="#d8b04a"/><rect x="427.7" y="70.1" width="4" height="4" fill="#d8b04a"/><rect x="191.1" y="109.2" width="91.0" height="104.0" rx="3" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4" style="fill:var(--paper-2)"/><text x="236.6" y="161.2" text-anchor="middle" font-size="12" font-weight="600" font-family="JetBrains Mono, monospace" fill="var(--ink)" style="fill:var(--ink)"></text><rect x="178.1" y="96.2" width="117.0" height="130.0" rx="3" stroke="var(--ink)" stroke-width="2" style="fill:var(--mustard)"/><text x="236.6" y="161.2" text-anchor="middle" font-size="12" font-weight="600" font-family="JetBrains Mono, monospace" fill="var(--ink)" style="fill:#1d1b3a">SPEAKER</text><text x="236.6" y="176.2" text-anchor="middle" font-size="10" font-family="JetBrains Mono, monospace" fill="var(--ink)" style="fill:#1d1b3a" opacity=".8">on foam</text><circle cx="236.6" cy="161.20000000000002" r="44.2" stroke="#1d1b3a" stroke-width="1.5" fill="none" opacity=".5"/><rect x="31.2" y="239.2" width="46.8" height="49.4" rx="3" stroke="var(--ink)" stroke-width="2" style="fill:var(--orange)"/><text x="54.6" y="263.9" text-anchor="middle" font-size="12" font-weight="600" font-family="JetBrains Mono, monospace" fill="var(--ink)" style="fill:#1d1b3a">AMP</text><circle cx="93.60000000000001" cy="111.8" r="28.6" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4" style="fill:var(--card)"/><circle cx="93.60000000000001" cy="111.8" r="20.8" stroke="var(--led-green)" stroke-width="3" fill="none"/><text x="93.60000000000001" y="115.8" text-anchor="middle" font-size="11" font-weight="700" font-family="JetBrains Mono, monospace" fill="var(--ink)">PLAY</text><circle cx="93.60000000000001" cy="215.8" r="28.6" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4" style="fill:var(--card)"/><circle cx="93.60000000000001" cy="215.8" r="20.8" stroke="var(--led-red)" stroke-width="3" fill="none"/><text x="93.60000000000001" y="219.8" text-anchor="middle" font-size="11" font-weight="700" font-family="JetBrains Mono, monospace" fill="var(--ink)">REC</text><circle cx="236.6" cy="262.6" r="18.2" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4" style="fill:var(--card)"/><text x="236.6" y="266.6" text-anchor="middle" font-size="10" font-weight="700" font-family="JetBrains Mono, monospace" fill="var(--ink)">MIC</text><rect x="33.8" y="7.8" width="62.4" height="36.4" rx="3" stroke="var(--ink)" stroke-width="2" style="fill:var(--card)"/><text x="65.0" y="26.0" text-anchor="middle" font-size="12" font-weight="600" font-family="JetBrains Mono, monospace" fill="var(--ink)" style="fill:var(--ink)">5 V</text><rect x="111.8" y="7.8" width="26.0" height="33.8" rx="3" stroke="var(--ink)" stroke-width="2" style="fill:var(--mustard)"/><text x="124.8" y="24.7" text-anchor="middle" font-size="12" font-weight="600" font-family="JetBrains Mono, monospace" fill="var(--ink)" style="fill:var(--ink)"></text><text x="124.80000000000001" y="-2.1999999999999993" text-anchor="middle" font-size="10" font-family="JetBrains Mono, monospace" fill="var(--ink)">ANT</text><path class="wire" d="M119.6 111.8 C276.2 81.8 402.9 143.0 432.9 132.6" stroke="#ff8a3d" stroke-width="2.4" fill="none" opacity=".9"/><path class="wire" d="M119.6 215.8 C276.2 185.8 402.9 143.0 432.9 132.6" stroke="#ff8a3d" stroke-width="2.4" fill="none" opacity=".9"/><path class="wire" d="M252.6 262.6 C342.8 232.6 402.9 143.0 432.9 132.6" stroke="#8b5a3c" stroke-width="2.4" fill="none" opacity=".9"/><path class="wire" d="M78.0 262.6 C255.5 232.6 402.9 143.0 432.9 132.6" stroke="#8a5cf6" stroke-width="2.4" fill="none" opacity=".9"/><path class="wire" d="M91.0 44.2 C262.0 14.2 402.9 143.0 432.9 132.6" stroke="#ff4a3d" stroke-width="2.4" fill="none" opacity=".9"/><text x="244.4" y="339.40000000000003" text-anchor="middle" font-size="12" font-weight="700" font-family="JetBrains Mono, monospace" fill="var(--ink)">▼ BOTTOM EDGE (it stands here) · dashed = hangs from the lid</text><text x="0" y="-36" font-size="12" font-weight="600" font-family="JetBrains Mono, monospace" fill="var(--ink)">INSIDE · lid off, seen from the front · 180 × 112 × ~31 mm</text></svg><!--/pic:inside--><p class="cap">The Pi sits on the LTE HAT on nylon standoffs; foam presses the speaker to the grille. Wires are soldered, because plugs shake loose in a bag.</p></div>
+      <div role="tabpanel" id="tp-privacy" aria-labelledby="t-privacy" hidden><!--pic:privacy--><svg viewBox="0 0 760 300" role="img" aria-label="The privacy wire: header pin 11 (GPIO 17) goes first to the Record button's red LED tab; a short wire from that same tab powers the microphone. Any break leaves the mic unpowered, never powered with the light off."><rect x="20" y="60" width="90" height="180" rx="6" fill="#1f6f6b" stroke="#1d1b3a" stroke-width="2.5"/><text x="65" y="50" text-anchor="middle" font-size="12" font-weight="600" font-family="JetBrains Mono, monospace" fill="var(--ink)">Pi header</text><rect x="46" y="80" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="72" y="80" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="46" y="100" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="72" y="100" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="46" y="120" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="72" y="120" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="46" y="140" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="72" y="140" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="46" y="160" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="72" y="160" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="46" y="180" width="12" height="12" fill="#f2b83b" stroke="#1d1b3a" stroke-width="2.5"/><rect x="72" y="180" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="46" y="200" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="72" y="200" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="46" y="220" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><rect x="72" y="220" width="12" height="12" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1"/><text x="38" y="191" text-anchor="end" font-size="11" font-weight="600" font-family="JetBrains Mono, monospace" fill="var(--ink)">11</text><circle cx="380" cy="150" r="78" stroke="var(--ink)" stroke-width="2.5" style="fill:var(--card)"/><circle cx="380" cy="150" r="60" stroke="var(--ink)" stroke-width="1" stroke-dasharray="4 3" fill="none"/><text x="380" y="258" text-anchor="middle" font-size="12" font-weight="600" font-family="JetBrains Mono, monospace" fill="var(--ink)">Record button, from behind</text><rect x="343" y="100" width="18" height="28" rx="2" fill="#c8c5bd" stroke="#1d1b3a" stroke-width="1.5"/><text x="352" y="94" text-anchor="middle" font-size="12" font-weight="600" font-family="JetBrains Mono, monospace" fill="var(--ink)">C−</text><rect x="399" y="100" width="18" height="28" rx="2" fill="#c8c5bd" stroke="#1d1b3a" stroke-width="1.5"/><text x="408" y="94" text-anchor="middle" font-size="12" font-weight="600" font-family="JetBrains Mono, monospace" fill="var(--ink)">R</text><rect x="343" y="172" width="18" height="28" rx="2" fill="#c8c5bd" stroke="#1d1b3a" stroke-width="1.5"/><text x="352" y="216" text-anchor="middle" font-size="12" font-weight="600" font-family="JetBrains Mono, monospace" fill="var(--ink)">B</text><rect x="399" y="172" width="18" height="28" rx="2" fill="#c8c5bd" stroke="#1d1b3a" stroke-width="1.5"/><text x="408" y="216" text-anchor="middle" font-size="12" font-weight="600" font-family="JetBrains Mono, monospace" fill="var(--ink)">G</text><rect x="309" y="138" width="18" height="24" rx="2" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1.5"/><rect x="433" y="138" width="18" height="24" rx="2" fill="#d8b04a" stroke="#1d1b3a" stroke-width="1.5"/><path d="M58 186 C 200 186, 250 54, 408 110" stroke="#1d1b3a" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M58 186 C 200 186, 250 54, 408 110" stroke="#e8862a" stroke-width="5" fill="none" stroke-linecap="round"/><text x="170" y="150" font-size="11" font-family="JetBrains Mono, monospace" fill="var(--ink)">① GPIO 17 → red LED first</text><rect x="590" y="46" width="100" height="68" rx="6" fill="#2a4f9a" stroke="#1d1b3a" stroke-width="2.5"/><circle cx="640" cy="76" r="9" fill="#c9c6bf" stroke="#1d1b3a" stroke-width="1.5"/><circle cx="640" cy="76" r="2" fill="#1d1b3a"/><text x="640" y="104" text-anchor="middle" font-size="11" font-weight="600" fill="#fff" font-family="JetBrains Mono, monospace">MIC · VDD</text><path d="M408 110 C 488 74, 520 90, 590 80" stroke="#1d1b3a" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M408 110 C 488 74, 520 90, 590 80" stroke="#e8862a" stroke-width="5" fill="none" stroke-linecap="round"/><text x="468" y="74" font-size="11" font-family="JetBrains Mono, monospace" fill="var(--ink)">② same tab → mic power</text><rect x="530" y="170" width="215" height="92" fill="var(--mustard)" stroke="#1d1b3a" stroke-width="2"/><text x="542" y="194" font-size="12" font-weight="600" fill="#1d1b3a" font-family="JetBrains Mono, monospace">NO RED LIGHT, NO MIC.</text><text x="542" y="214" font-size="11" fill="#1d1b3a" font-family="JetBrains Mono, monospace">Break ① → both dark.</text><text x="542" y="232" font-size="11" fill="#1d1b3a" font-family="JetBrains Mono, monospace">Break ② → light on, mic off.</text><text x="542" y="250" font-size="11" fill="#1d1b3a" font-family="JetBrains Mono, monospace">Never: mic on, light off.</text></svg><!--/pic:privacy--><p class="cap">The wire that matters most: the mic is powered from the Record button's red LED tab, so no software can turn the mic on with the light off.</p></div>
+      <div role="tabpanel" id="tp-pins" aria-labelledby="t-pins" hidden><div class="pinsvg"><!--pic:pins--><svg viewBox="0 0 900 300" role="img" aria-label="The Pi's 40-pin header as wired: 24 of 40 pins used. pin 2: Amp 5 V; pin 4: 5 V in; pin 6: GND in; pin 7: Modem key; pin 8: UART TX; pin 9: Mic GND; pin 10: UART RX; pin 11: Rec red + mic; pin 12: BCLK; pin 13: Rec green; pin 14: UART GND; pin 15: Rec blue; pin 16: Play red; pin 18: Play green; pin 20: Play GND; pin 22: Play blue; pin 29: Rec switch; pin 30: Rec GND; pin 31: Play switch; pin 35: LRCLK; pin 36: Amp SD; pin 38: Mic data; pin 39: Amp GND; pin 40: Amp DIN"><rect x="66" y="90" width="812" height="84" rx="8" stroke="var(--ink)" stroke-width="2" style="fill:var(--card)"/><text x="58" y="136.0" text-anchor="end" font-size="12" font-family="JetBrains Mono, monospace" fill="var(--ink)" opacity=".7">SD end</text><circle cx="92" cy="112" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#d9412f"/><text transform="translate(95 92) rotate(-55)" text-anchor="start" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">Amp 5 V</text><rect x="88" y="148" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/><circle cx="132" cy="112" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#d9412f"/><text transform="translate(135 92) rotate(-55)" text-anchor="start" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">5 V in</text><rect x="128" y="148" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/><circle cx="172" cy="112" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#1b1a17"/><text transform="translate(175 92) rotate(-55)" text-anchor="start" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">GND in</text><rect x="168" y="148" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/><circle cx="212" cy="112" r="8" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 2" fill="none"/><text transform="translate(215 92) rotate(-55)" text-anchor="start" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">UART TX</text><circle cx="212" cy="152" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#9a958b"/><text transform="translate(215 178) rotate(-55)" text-anchor="end" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">Modem key</text><circle cx="252" cy="112" r="8" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 2" fill="none"/><text transform="translate(255 92) rotate(-55)" text-anchor="start" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">UART RX</text><circle cx="252" cy="152" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#1b1a17"/><text transform="translate(255 178) rotate(-55)" text-anchor="end" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">Mic GND</text><circle cx="292" cy="112" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#e9c03a"/><text transform="translate(295 92) rotate(-55)" text-anchor="start" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">BCLK</text><circle cx="292" cy="152" r="9" stroke="var(--ink)" stroke-width="3" fill="#e8862a"/><circle cx="292" cy="152" r="15" stroke="var(--rec)" stroke-width="1.5" fill="none"/><text transform="translate(295 178) rotate(-55)" text-anchor="end" font-size="13" font-weight="700" font-family="JetBrains Mono, monospace" fill="var(--ink)" style="fill:var(--rec)">Rec red + mic</text><circle cx="332" cy="112" r="8" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 2" fill="none"/><text transform="translate(335 92) rotate(-55)" text-anchor="start" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">UART GND</text><circle cx="332" cy="152" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#2f9e5b"/><text transform="translate(335 178) rotate(-55)" text-anchor="end" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">Rec green</text><circle cx="372" cy="112" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#e8862a"/><text transform="translate(375 92) rotate(-55)" text-anchor="start" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">Play red</text><circle cx="372" cy="152" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#3a6fc4"/><text transform="translate(375 178) rotate(-55)" text-anchor="end" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">Rec blue</text><circle cx="412" cy="112" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#2f9e5b"/><text transform="translate(415 92) rotate(-55)" text-anchor="start" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">Play green</text><rect x="408" y="148" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/><circle cx="452" cy="112" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#1b1a17"/><text transform="translate(455 92) rotate(-55)" text-anchor="start" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">Play GND</text><rect x="448" y="148" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/><circle cx="492" cy="112" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#3a6fc4"/><text transform="translate(495 92) rotate(-55)" text-anchor="start" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">Play blue</text><rect x="488" y="148" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/><rect x="528" y="108" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/><rect x="528" y="148" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/><rect x="568" y="108" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/><rect x="568" y="148" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/><rect x="608" y="108" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/><rect x="608" y="148" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/><circle cx="652" cy="112" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#1b1a17"/><text transform="translate(655 92) rotate(-55)" text-anchor="start" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">Rec GND</text><circle cx="652" cy="152" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#ffffff"/><text transform="translate(655 178) rotate(-55)" text-anchor="end" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">Rec switch</text><rect x="688" y="108" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/><circle cx="692" cy="152" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#ffffff"/><text transform="translate(695 178) rotate(-55)" text-anchor="end" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">Play switch</text><rect x="728" y="108" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/><rect x="728" y="148" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/><circle cx="772" cy="112" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#9a958b"/><text transform="translate(775 92) rotate(-55)" text-anchor="start" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">Amp SD</text><circle cx="772" cy="152" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#8a5cf6"/><text transform="translate(775 178) rotate(-55)" text-anchor="end" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">LRCLK</text><circle cx="812" cy="112" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#8b5a3c"/><text transform="translate(815 92) rotate(-55)" text-anchor="start" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">Mic data</text><rect x="808" y="148" width="8" height="8" rx="1" stroke="var(--ink-soft)" stroke-width="1" fill="none" opacity=".55"/><circle cx="852" cy="112" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#2f9e5b"/><text transform="translate(855 92) rotate(-55)" text-anchor="start" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">Amp DIN</text><circle cx="852" cy="152" r="9" stroke="var(--ink)" stroke-width="1.5" fill="#1b1a17"/><text transform="translate(855 178) rotate(-55)" text-anchor="end" font-size="13" font-weight="500" font-family="JetBrains Mono, monospace" fill="var(--ink)">Amp GND</text><text x="76" y="156" text-anchor="middle" font-size="10" font-family="JetBrains Mono, monospace" fill="var(--ink)" opacity=".6">1</text><text x="76" y="116" text-anchor="middle" font-size="10" font-family="JetBrains Mono, monospace" fill="var(--ink)" opacity=".6">2</text><text x="868" y="156" text-anchor="middle" font-size="10" font-family="JetBrains Mono, monospace" fill="var(--ink)" opacity=".6">39</text><text x="868" y="116" text-anchor="middle" font-size="10" font-family="JetBrains Mono, monospace" fill="var(--ink)" opacity=".6">40</text><text x="66" y="292" font-size="12" font-family="JetBrains Mono, monospace" fill="var(--ink)" opacity=".75">Dashed: bench-only debug probe · hollow squares: unused · ring: the privacy wire</text></svg><!--/pic:pins--></div><p class="cap">Physical pin numbers, pin 1 at the SD-card end; dot colours are the wire colours used. Must match <code>box/dadbox/hw/pi.py</code>. 3.3 V logic, ≤16 mA per pin.</p></div>
     </div>
+    <details class="more">
+      <summary>Pin map as a table</summary>
+      <div class="surface tbl">
+<table>
+        <thead><tr><th>Pin</th><th>Signal</th><th>Goes to</th><th>Wire</th></tr></thead>
+        <tbody>
+          <tr><td class="num">2</td><td>5 V</td><td>Amp VIN</td><td>red</td></tr>
+          <tr><td class="num">4 / 6</td><td>5 V / GND</td><td><b>Power in</b> from the USB-C tail · HAT joined from below</td><td>red / black, 0.5 mm²</td></tr>
+          <tr><td class="num">7</td><td>GPIO 4</td><td>Modem power key (HAT P4), from below</td><td>pin</td></tr>
+          <tr><td class="num">8 / 10 / 14</td><td>UART</td><td>Debug probe (bench only)</td><td>probe cable</td></tr>
+          <tr><td class="num">9</td><td>GND</td><td>Mic GND and L/R</td><td>black</td></tr>
+          <tr><td class="num">11</td><td><b>GPIO 17</b></td><td><b>Record red LED → mic VDD from its tab</b></td><td>orange</td></tr>
+          <tr><td class="num">12</td><td>GPIO 18 · BCLK</td><td>Amp BCLK → mic SCK</td><td>yellow</td></tr>
+          <tr><td class="num">13 / 15</td><td>GPIO 27 / 22</td><td>Record green / blue</td><td>green / blue</td></tr>
+          <tr><td class="num">16 / 18 / 22</td><td>GPIO 23 / 24 / 25</td><td>Play red / green / blue</td><td>orange / green / blue</td></tr>
+          <tr><td class="num">20 / 30</td><td>GND</td><td>Play / Record: switch + C−</td><td>black</td></tr>
+          <tr><td class="num">29 / 31</td><td>GPIO 5 / 6</td><td>Record / Play switch (pull-up, pressed = low)</td><td>white</td></tr>
+          <tr><td class="num">35</td><td>GPIO 19 · LRCLK</td><td>Amp LRC → mic WS</td><td>purple</td></tr>
+          <tr><td class="num">36</td><td>GPIO 16</td><td>Amp SD (the sound driver owns it)</td><td>grey</td></tr>
+          <tr><td class="num">38</td><td>GPIO 20 · DIN</td><td>Mic data</td><td>brown</td></tr>
+          <tr><td class="num">39</td><td>GND</td><td>Amp GND</td><td>black</td></tr>
+          <tr><td class="num">40</td><td>GPIO 21 · DOUT</td><td>Amp DIN</td><td>green</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
   </div>
 </section>
 
 <!-- HOW -->
 <section id="how">
   <div class="wrap">
-    <span class="eyebrow reveal">04 · How it works</span>
-    <h2 class="reveal">Box, server, phone. <em>One protocol.</em></h2>
-    <p class="intro reveal">Three pieces that speak one written contract (<code>docs/PROTOCOL.md</code>). The protocol changes first, then the code. Only the box and the phone hold the key.</p>
-    <div class="glass flow reveal">
-      <svg viewBox="0 0 960 300" role="img" aria-label="Animated diagram: the box sends encrypted audio over LTE to the server, which sends a push to the iPhone; the iPhone sends replies to the server, which the box picks up at its next check-in">
-        <defs>
-          <linearGradient id="fg" x1="0" x2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22c3ee"/></linearGradient>
-          <linearGradient id="fg2" x1="1" x2="0"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#ff6fae"/></linearGradient>
-        </defs>
-        <path id="lane1" class="lane" d="M250 120 C 300 120, 340 120, 380 120"/>
-        <path id="lane2" class="lane" d="M580 120 C 620 120, 660 120, 710 120"/>
-        <path id="lane3" class="lane" d="M710 190 C 660 190, 620 190, 580 190"/>
-        <path id="lane4" class="lane" d="M380 190 C 340 190, 300 190, 250 190"/>
-        <circle r="7" fill="url(#fg)"><animateMotion dur="2.4s" repeatCount="indefinite"><mpath href="#lane1"/></animateMotion></circle>
-        <circle r="7" fill="url(#fg)"><animateMotion dur="2.4s" begin="1.2s" repeatCount="indefinite"><mpath href="#lane2"/></animateMotion></circle>
-        <circle r="7" fill="url(#fg2)"><animateMotion dur="2.4s" begin=".6s" repeatCount="indefinite"><mpath href="#lane3"/></animateMotion></circle>
-        <circle r="7" fill="url(#fg2)"><animateMotion dur="2.4s" begin="1.8s" repeatCount="indefinite"><mpath href="#lane4"/></animateMotion></circle>
-        <g><rect class="node" x="20" y="50" width="230" height="200" rx="26"/>
-          <text x="44" y="92" font-size="20" font-weight="800">The box</text>
-          <text x="44" y="124" font-size="14" opacity=".75">Pi Zero 2 W · Linux</text>
-          <text x="44" y="148" font-size="14" opacity=".75">Python service, systemd</text>
-          <text x="44" y="172" font-size="14" opacity=".75">mic · amp · 2 buttons</text>
-          <text x="44" y="196" font-size="14" opacity=".75">SIM7670G LTE Cat-1</text>
-          <text x="44" y="226" font-size="12" font-weight="700" fill="#7c5cff">read-only root · /data</text></g>
-        <g><rect class="node" x="380" y="50" width="200" height="200" rx="26"/>
-          <text x="404" y="92" font-size="20" font-weight="800">The server</text>
-          <text x="404" y="124" font-size="14" opacity=".75">Supabase, Zurich</text>
-          <text x="404" y="148" font-size="14" opacity=".75">one Edge Function</text>
-          <text x="404" y="172" font-size="14" opacity=".75">Postgres · pg_cron</text>
-          <text x="404" y="196" font-size="14" opacity=".75">ciphertext only</text>
-          <text x="404" y="226" font-size="12" font-weight="700" fill="#7c5cff">never holds a key</text></g>
-        <g><rect class="node" x="710" y="50" width="230" height="200" rx="26"/>
-          <text x="734" y="92" font-size="20" font-weight="800">Parent's iPhone</text>
-          <text x="734" y="124" font-size="14" opacity=".75">SwiftUI app</text>
-          <text x="734" y="148" font-size="14" opacity=".75">records + plays Opus</text>
-          <text x="734" y="172" font-size="14" opacity=".75">key in the Keychain</text>
-          <text x="734" y="196" font-size="14" opacity=".75">APNs push</text>
-          <text x="734" y="226" font-size="12" font-weight="700" fill="#7c5cff">"box is late" alert</text></g>
-        <text x="262" y="108" font-size="12" font-weight="700" opacity=".7">HTTPS · LTE</text>
-        <text x="604" y="108" font-size="12" font-weight="700" opacity=".7">push</text>
-        <text x="604" y="214" font-size="12" font-weight="700" opacity=".7">reply</text>
-        <text x="262" y="214" font-size="12" font-weight="700" opacity=".7">check-in</text>
-        <text x="480" y="284" text-anchor="middle" font-size="13" font-weight="700" fill="#7c5cff">🔒 end-to-end encrypted: only the box and the phone can hear it</text>
+    <span class="eyebrow">04 · How it works</span>
+    <h2>Box, server, phone.</h2>
+    <p class="intro">Three pieces that follow one written contract, <code>docs/PROTOCOL.md</code>. Only the box and the phone hold the key.</p>
+    <div class="surface flow">
+      <svg viewBox="0 0 960 330" role="img" aria-label="The box uploads encrypted audio over LTE to the server, which pushes a notification to the parent's iPhone. Replies go from the phone to the server, and the box fetches them when it checks in. The server only ever holds ciphertext.">
+        <defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 1 L9 5 L0 9" fill="none" stroke="var(--ink)" stroke-width="1.6"/></marker></defs>
+        <!-- box -->
+        <g transform="translate(40 70)">
+          <rect class="fillsurf" x="0" y="0" width="200" height="130" rx="10" stroke-width="2"/>
+          <circle cx="44" cy="44" r="15" fill="none" stroke="var(--led-green)" stroke-width="5"/><circle cx="44" cy="44" r="9" fill="#d2cfc8" stroke="var(--ink)" stroke-width="1.5"/>
+          <circle cx="44" cy="92" r="15" fill="none" stroke="var(--led-red)" stroke-width="5"/><circle cx="44" cy="92" r="9" fill="#d2cfc8" stroke="var(--ink)" stroke-width="1.5"/>
+          <g fill="var(--ink)"><circle cx="128" cy="56" r="3"/><circle cx="142" cy="56" r="3"/><circle cx="114" cy="56" r="3"/><circle cx="121" cy="68" r="3"/><circle cx="135" cy="68" r="3"/><circle cx="121" cy="44" r="3"/><circle cx="135" cy="44" r="3"/></g>
+          <path class="stroke" d="M168 0 L188 -46" stroke-width="5" stroke-linecap="round"/>
+        </g>
+        <text x="140" y="236" text-anchor="middle" font-size="17" font-weight="700">The box</text>
+        <text x="140" y="258" text-anchor="middle" font-size="13" class="soft">Pi Zero 2 W · own LTE</text>
+        <!-- server -->
+        <g transform="translate(410 80)">
+          <rect class="fillsurf" x="0" y="0" width="140" height="34" rx="6" stroke-width="2"/>
+          <rect class="fillsurf" x="0" y="44" width="140" height="34" rx="6" stroke-width="2"/>
+          <rect class="fillsurf" x="0" y="88" width="140" height="34" rx="6" stroke-width="2"/>
+          <g fill="var(--ink)"><circle cx="18" cy="17" r="3"/><circle cx="18" cy="61" r="3"/><circle cx="18" cy="105" r="3"/></g>
+          <g class="stroke" stroke-width="2"><path d="M36 17 H90"/><path d="M36 61 H70"/><path d="M36 105 H100"/></g>
+        </g>
+        <text x="480" y="236" text-anchor="middle" font-size="17" font-weight="700">The server</text>
+        <text x="480" y="258" text-anchor="middle" font-size="13" class="soft">Supabase, Zurich · stores only ciphertext</text>
+        <!-- phone -->
+        <g transform="translate(772 52)">
+          <rect class="fillsurf" x="0" y="0" width="92" height="164" rx="18" stroke-width="2"/>
+          <rect x="12" y="34" width="50" height="18" rx="9" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
+          <rect x="30" y="62" width="50" height="18" rx="9" fill="var(--ink)"/>
+          <rect x="12" y="90" width="44" height="18" rx="9" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
+          <rect x="32" y="10" width="28" height="5" rx="2.5" fill="var(--ink)" opacity=".3"/>
+        </g>
+        <text x="818" y="246" text-anchor="middle" font-size="17" font-weight="700">The parent's iPhone</text>
+        <text x="818" y="268" text-anchor="middle" font-size="13" class="soft">SwiftUI · key in the Keychain</text>
+        <!-- arrows -->
+        <path class="stroke" d="M262 112 H392" stroke-width="1.6" marker-end="url(#ar)"/>
+        <text x="327" y="100" text-anchor="middle" font-size="13" font-weight="600">upload</text>
+        <path class="stroke" d="M392 162 H262" stroke-width="1.6" stroke-dasharray="5 5" marker-end="url(#ar)"/>
+        <text x="327" y="184" text-anchor="middle" font-size="13" font-weight="600">check-in</text>
+        <path class="stroke" d="M568 112 H752" stroke-width="1.6" marker-end="url(#ar)"/>
+        <text x="660" y="100" text-anchor="middle" font-size="13" font-weight="600">push</text>
+        <path class="stroke" d="M752 162 H568" stroke-width="1.6" marker-end="url(#ar)"/>
+        <text x="660" y="184" text-anchor="middle" font-size="13" font-weight="600">reply</text>
+        <path d="M40 304 H920" stroke="var(--hair-2)" stroke-width="1"/>
+        <text x="480" y="324" text-anchor="middle" font-size="13" class="soft">Sealed with AES-256-GCM on the box or the phone. The server can store and forward a message, but never play it.</text>
       </svg>
     </div>
-    <div class="g3" style="margin-top:22px">
-      <div class="glass spot card pad reveal"><div class="icon i4"><span>●</span></div><h3>Recording</h3><p>16 kHz mono from the I2S mic, written to <code>/data</code> as it happens. On stop: trim, encode Opus 16 kbps (~120 KB a minute), encrypt, CRC, fsync, rename into the outbox. Only then the green pulse.</p></div>
-      <div class="glass spot card pad reveal" style="--d:.08s"><div class="icon i1"><span>↑</span></div><h3>Sending</h3><p>A resumable upload in 32 KB chunks. No link? It waits, forever, and the child never hears about a network. A 3-minute note went through in 8.5 s on a CHF 6/month SIM.</p></div>
-      <div class="glass spot card pad reveal" style="--d:.16s"><div class="icon i3"><span>↓</span></div><h3>Receiving</h3><p>Plugged in, the box checks in every minute, and a realtime "doorbell" brings messages instantly. Oldest first, one per press; with nothing new, Play repeats the last one.</p></div>
-    </div>
-    <div class="g2" style="margin-top:22px">
-      <div class="glass spot card pad reveal"><h3>A Linux box you can SSH into</h3><p>Raspberry Pi OS Lite with a <b>read-only root</b>: only <code>/data</code> is written, so pulling the plug is safe. A watchdog restarts a hung service. Tailscale reaches it from anywhere; <code>dadboxctl</code> drives it.</p></div>
-      <div class="glass spot card pad reveal" style="--d:.08s"><h3>Runs on your laptop too</h3><p>The state machine is pure Python. The same service runs on a Mac as a simulator with a web UI (virtual buttons, lights and speaker), so you can try everything <b>before buying a single part</b>.</p></div>
+    <div class="steps3">
+      <div><b>Recording</b>16 kHz audio goes to disk as the child talks. On stop: Opus at 16 kbps, encrypted, checked and saved. Only then the green pulse.</div>
+      <div><b>Sending</b>Resumable uploads in 32 KB pieces. Without a signal it waits, and the child never hears about a network.</div>
+      <div><b>Receiving</b>Plugged in, the box checks in every minute. Oldest message first, one per press of Play.</div>
     </div>
   </div>
 </section>
 
-<!-- PROVEN -->
-<section id="proven">
+<!-- STATUS -->
+<section id="status">
   <div class="wrap">
-    <span class="eyebrow reveal">05 · Proven on the bench</span>
-    <h2 class="reveal">What already <em>works.</em></h2>
-    <div class="stats">
-      <div class="glass stat reveal"><b class="grad" data-count="70">0</b><span>automated tests on the box software</span></div>
-      <div class="glass stat reveal" style="--d:.06s"><b class="grad" data-count="8.5" data-dec="1">0</b><span>seconds for a 3-minute note over LTE</span></div>
-      <div class="glass stat reveal" style="--d:.12s"><b class="grad" data-count="0">0</b><span>files lost in four pulled plugs</span></div>
-      <div class="glass stat reveal" style="--d:.18s"><b class="grad" data-count="26">0</b><span>decision records explaining why</span></div>
+    <span class="eyebrow">05 · Where it stands</span>
+    <h2>Mostly working, <em>not finished.</em></h2>
+    <p class="intro">As of the last bench session, 2 October 2026. The details are in <code>docs/BUILD-LOG.md</code>.</p>
+    <div class="status">
+      <div><b><i class="st done"></i>Simulator</b><span>The whole box service runs on a Mac, with virtual buttons and lights</span></div>
+      <div><b><i class="st done"></i>Server</b><span>Live on Supabase; every protocol endpoint tested end to end</span></div>
+      <div><b><i class="st done"></i>Power and Pi</b><span>5 V on the header pins, no undervoltage; pulled plugs lose nothing</span></div>
+      <div><b><i class="st done"></i>Buttons and lights</b><span>Both switches and all six light channels checked</span></div>
+      <div><b><i class="st done"></i>LTE</b><span>A 3-minute note uploaded in 8.5 s on a CHF 6/month SIM</span></div>
+      <div><b><i class="st done"></i>iPhone app</b><span>Conversation, recorder and Box screen</span></div>
+      <div><b><i class="st done"></i>Enclosure</b><span>Lid drilled; buttons, grille and mic hole done</span></div>
+      <div><b><i class="st done"></i>Tests</b><span>70 automated tests on the box software</span></div>
+      <div><b><i class="st now"></i>Speaker amp</b><span>The first one was damaged by a wiring slip; a new one is going in</span></div>
+      <div><b><i class="st now"></i>Microphone</b><span>Wired, not yet tested</span></div>
+      <div><b><i class="st later"></i>Push notifications</b><span>Waiting for an Apple push key</span></div>
+      <div><b><i class="st later"></i>Battery</b><span>Designed, deferred: the first box is mains only</span></div>
     </div>
-    <div class="glass pad reveal">
-      <ul class="ok">
-        <li>Server live on Supabase; every protocol endpoint exercised end to end (dropped-link resume, shuffled chunks, the "box is late" alert)</li>
-        <li>Box service deployed to the Pi, with a full simulator on the Mac</li>
-        <li>LTE modem working as a plain network interface</li>
-        <li>Read-only root: power cuts while idle and mid-boot, everything intact</li>
-        <li>Both buttons and all six light channels wired and verified</li>
-        <li>5 V in on the header pins, no undervoltage</li>
-        <li>iPhone app: conversation, recorder, Box screen</li>
-        <li>Lid drilled; buttons, grille and mic hole done</li>
-      </ul>
-    </div>
+    <div class="legend"><span><i class="st done"></i>Works</span><span><i class="st now"></i>In progress</span><span><i class="st later"></i>Not yet</span></div>
   </div>
 </section>
 
 <!-- PARTS -->
 <section id="parts">
   <div class="wrap">
-    <span class="eyebrow reveal">06 · Parts list</span>
-    <h2 class="reveal">Off the shelf. <em>No custom boards.</em></h2>
-    <p class="intro reveal">No 3D printing, no PCB. Prices in CHF from Swiss shops (Sept 2026); any electronics shop has equivalents. Buy phase 1, get it talking, then buy the rest. Full list: <code>hardware/bom/bom.csv</code>.</p>
-    <div class="glass tbl reveal">
-      <table>
+    <span class="eyebrow">06 · Parts</span>
+    <h2>Off the shelf, <em>in three rounds.</em></h2>
+    <p class="intro">No 3D printing, no custom board. Buy one round, get it working, then buy the next. About CHF 395 for all three, tools included, from Swiss shops; any electronics shop has equivalents.</p>
+    <div class="phases">
+      <div class="surface phase"><span class="eyebrow">Round 1 · Bench</span><h3>It talks on the table</h3><ul><li>Pi Zero 2 W kit</li><li>Two 16 mm RGB buttons</li><li>I2S mic, I2S amp, speaker</li><li>Debug probe, soldering iron</li></ul></div>
+      <div class="surface phase"><span class="eyebrow">Round 2 · Link</span><h3>It reaches the server alone</h3><ul><li>SIM7670G LTE HAT</li><li>SMA pigtail and antenna</li><li>Data SIM, ~CHF 6/month</li></ul></div>
+      <div class="surface phase"><span class="eyebrow">Round 3 · Box</span><h3>It survives a school bag</h3><ul><li>Die-cast aluminium box</li><li>Step drill and hand tools</li><li>USB-C panel socket</li><li>Endurance microSD, wire, foam</li></ul></div>
+      <div class="surface phase opt"><span class="eyebrow">Later · Battery</span><h3>About 2 days unplugged</h3><ul><li>UPS module, three 18650 cells</li><li>Designed, not built</li></ul></div>
+    </div>
+    <details class="more">
+      <summary>Every part, with shop and price</summary>
+      <div class="surface tbl">
+<table>
         <thead><tr><th>Qty</th><th>Part</th><th>Why</th><th>Shop</th><th style="text-align:right">CHF</th></tr></thead>
         <tbody>
           <tr class="phase"><td colspan="5"><span>Phase 1 · The bench</span></td></tr>
@@ -549,24 +541,21 @@ footer .glass > span{max-width:60em}
           <tr class="total"><td colspan="4">Phases 1–3, tools included</td><td class="num">~395</td></tr>
         </tbody>
       </table>
-    </div>
-    <div class="g3" style="margin-top:22px">
-      <div class="glass spot card pad reveal"><h3>Also needed</h3><p>A Mac (needed for the iPhone app anyway) with Xcode, a multimeter, and a free <a href="https://tailscale.com">Tailscale</a> account.</p></div>
-      <div class="glass spot card pad reveal" style="--d:.08s"><h3>Running costs</h3><p>SIM ~CHF 6/month. A <a href="https://supabase.com">Supabase</a> project (we run Pro, ~USD 25/month). Apple Developer, USD 99/year, for push and installing on your phone.</p></div>
-      <div class="glass spot card pad reveal" style="--d:.16s"><h3>Outside Switzerland?</h3><p>Only the SIM is local. Pick any data SIM on a network the SIM7670G supports (common European LTE bands including 20 and 28) and set its APN.</p></div>
-    </div>
+      </div>
+    </details>
+    <p class="small" style="margin-top:20px;max-width:52em">Also needed: a Mac with Xcode and a multimeter. Running costs: the SIM, a Supabase project (we run Pro, about USD 25/month) and an Apple Developer account (USD 99/year). Outside Switzerland, only the SIM changes: pick one on a network the SIM7670G supports.</p>
   </div>
 </section>
 
 <!-- BUILD -->
 <section id="build">
   <div class="wrap">
-    <span class="eyebrow reveal">07 · Build it</span>
-    <h2 class="reveal">Step by step, <em>with your kid.</em></h2>
-    <p class="intro reveal">Tick steps as you go; progress is saved in this browser. Each stage ends with something that works. Exact commands live in the repo files named in each stage.</p>
-    <div class="glass progress reveal"><div class="ring" id="ring" data-v="0%"></div><div><b id="count">0 of 0 steps</b><span>Kit No. 001 · your progress</span></div></div>
+    <span class="eyebrow">07 · Build it</span>
+    <h2>Step by step, <em>with your kid.</em></h2>
+    <p class="intro">Each stage ends with something that works. Tick steps as you go; the exact commands live in the repo files named in each stage.</p>
+    <div class="progress"><div class="track"><i id="bar"></i></div><b id="count">0 of 0 steps done</b><span class="small">saved in this browser</span></div>
 
-    <details class="glass stg reveal" open>
+    <details class="stg" open>
       <summary><span class="n">0</span><div><h3>Try it with no hardware</h3><p>An evening. Proves the idea and your setup.</p></div><span class="cnt"></span><span class="chev">⌄</span></summary>
       <div class="body">
         <div class="step"><input type="checkbox" id="s0a"><label for="s0a"><p>Clone the repo and set up Python (the venv lives outside the repo).</p>
@@ -581,7 +570,7 @@ python3 -m venv ~/.venvs/dadbox
       </div>
     </details>
 
-    <details class="glass stg reveal">
+    <details class="stg">
       <summary><span class="n">1</span><div><h3>The Pi on the bench</h3><p><code>docs/DEV-PROCESS.md</code> · <code>box/setup/README.md</code></p></div><span class="cnt"></span><span class="chev">⌄</span></summary>
       <div class="body">
         <div class="step"><input type="checkbox" id="s1a"><label for="s1a"><p>Flash <b>Raspberry Pi OS Lite 64-bit</b> with Raspberry Pi Imager: hostname <code>dadbox</code>, SSH key, home Wi-Fi. <b>Before the first boot</b>: remove <code>resize</code> from <code>cmdline.txt</code>; add <code>growpart: {mode: "off"}</code> and <code>resize_rootfs: false</code> to <code>user-data</code>. This keeps room for <code>/data</code>.</p></label></div>
@@ -599,7 +588,7 @@ gpio=4=op,dl</code></pre></label></div>
       </div>
     </details>
 
-    <details class="glass stg reveal">
+    <details class="stg">
       <summary><span class="n">2</span><div><h3>Buttons, mic and amp</h3><p>Pin map below · <code>hardware/schematics/WIRING.md</code></p></div><span class="cnt"></span><span class="chev">⌄</span></summary>
       <div class="body">
         <div class="step"><input type="checkbox" id="s2a"><label for="s2a"><p>Find the tabs: four silver for the LED (<b>C−</b>, R, G, B), two gold for the switch. Use the meter's beep: gold pair silent at rest, beeps when pressed.</p><span class="tip">"Find the two tabs that only beep when you press": a perfect detective job.</span></label></div>
@@ -610,7 +599,7 @@ gpio=4=op,dl</code></pre></label></div>
       </div>
     </details>
 
-    <details class="glass stg reveal">
+    <details class="stg">
       <summary><span class="n">3</span><div><h3>The box software</h3><p><code>box/README.md</code> · <code>box/DESIGN.md</code> · <code>box/deploy.sh</code></p></div><span class="cnt"></span><span class="chev">⌄</span></summary>
       <div class="body">
         <div class="step"><input type="checkbox" id="s3a"><label for="s3a"><p>Create the service user, deploy with <code>box/deploy.sh</code>, install into a venv that sees apt's <code>lgpio</code>:</p>
@@ -623,7 +612,7 @@ sudo systemctl enable --now dadbox</code></pre></label></div>
       </div>
     </details>
 
-    <details class="glass stg reveal">
+    <details class="stg">
       <summary><span class="n">4</span><div><h3>Your own server</h3><p><code>server/README.md</code> · <code>docs/SERVER-CONCEPT.md</code></p></div><span class="cnt"></span><span class="chev">⌄</span></summary>
       <div class="body">
         <div class="step"><input type="checkbox" id="s4a"><label for="s4a"><p>Create your own Supabase project, link <code>server/supabase</code>, push the schema, deploy the one function:</p>
@@ -644,7 +633,7 @@ python3 tools/mint_token.py parent-a</code></pre></label></div>
       </div>
     </details>
 
-    <details class="glass stg reveal">
+    <details class="stg">
       <summary><span class="n">5</span><div><h3>LTE: its own internet</h3><p><code>box/setup/README.md</code> §6 · ADR 0026</p></div><span class="cnt"></span><span class="chev">⌄</span></summary>
       <div class="body">
         <div class="step"><input type="checkbox" id="s5a"><label for="s5a"><p>HAT DIP switches: 1, 2 <b>off</b>; 3 (PWR) <b>on</b>; 4 off. SIM in <i>before</i> power. Antenna on: never transmit without one.</p></label></div>
@@ -655,7 +644,7 @@ python3 tools/mint_token.py parent-a</code></pre></label></div>
       </div>
     </details>
 
-    <details class="glass stg reveal">
+    <details class="stg">
       <summary><span class="n">6</span><div><h3>The parent's iPhone app</h3><p><code>ios/README.md</code> · <code>ios/DESIGN.md</code></p></div><span class="cnt"></span><span class="chev">⌄</span></summary>
       <div class="body">
         <div class="step"><input type="checkbox" id="s6a"><label for="s6a"><p>Test the protocol library, open the project, run <code>DadBox</code> in the simulator with <code>-demo</code>.</p>
@@ -666,7 +655,7 @@ open ios/DadBox.xcodeproj</code></pre></label></div>
       </div>
     </details>
 
-    <details class="glass stg reveal">
+    <details class="stg">
       <summary><span class="n">7</span><div><h3>Into the aluminium box</h3><p>See the drawings · <code>hardware/LAYOUT.md</code></p></div><span class="cnt"></span><span class="chev">⌄</span></summary>
       <div class="body">
         <div class="step"><input type="checkbox" id="s7a"><label for="s7a"><p><b>Measure first</b>: inside length, width, depth, the screw bosses, the stack height. Lay the parts in, close the lid, mark each hole over its part.</p></label></div>
@@ -676,7 +665,7 @@ open ios/DadBox.xcodeproj</code></pre></label></div>
       </div>
     </details>
 
-    <details class="glass stg reveal">
+    <details class="stg">
       <summary><span class="n">8</span><div><h3>Seal it for the field</h3><p>Working unattended, for a month</p></div><span class="cnt"></span><span class="chev">⌄</span></summary>
       <div class="body">
         <div class="step"><input type="checkbox" id="s8a"><label for="s8a"><p>Enable the read-only root (<code>raspi-config nonint enable_overlayfs</code>), then set <code>overlayroot=tmpfs:recurse=0</code> in <code>cmdline.txt</code>. <code>findmnt /data</code> must say <code>ext4 rw</code>.</p><span class="warn">Without <code>recurse=0</code>, /data lives in RAM too and recordings vanish at the next power cut.</span></label></div>
@@ -687,51 +676,18 @@ open ios/DadBox.xcodeproj</code></pre></label></div>
   </div>
 </section>
 
-<!-- WIRING -->
-<section id="wiring">
-  <div class="wrap">
-    <span class="eyebrow reveal">08 · Pin map</span>
-    <h2 class="reveal">Forty pins, <em>twenty used.</em></h2>
-    <p class="intro reveal">Physical header pins and BCM GPIO numbers. Pin 1 is at the SD-card end; even pins are on the board's edge. Must match <code>box/dadbox/hw/pi.py</code>.</p>
-    <div class="glass tbl reveal">
-      <table>
-        <thead><tr><th>Pin</th><th>Signal</th><th>Goes to</th><th>Wire</th></tr></thead>
-        <tbody>
-          <tr><td class="num">2</td><td>5 V</td><td>Amp VIN</td><td>red</td></tr>
-          <tr><td class="num">4 / 6</td><td>5 V / GND</td><td><b>Power in</b> from the USB-C tail · HAT joined from below</td><td>red / black, 0.5 mm²</td></tr>
-          <tr><td class="num">7</td><td>GPIO 4</td><td>Modem power key (HAT P4), from below</td><td>pin</td></tr>
-          <tr><td class="num">8 / 10 / 14</td><td>UART</td><td>Debug probe (bench only)</td><td>probe cable</td></tr>
-          <tr><td class="num">9</td><td>GND</td><td>Mic GND and L/R</td><td>black</td></tr>
-          <tr><td class="num">11</td><td><b>GPIO 17</b></td><td><b>Record red LED → mic VDD from its tab</b></td><td>orange</td></tr>
-          <tr><td class="num">12</td><td>GPIO 18 · BCLK</td><td>Amp BCLK → mic SCK</td><td>yellow</td></tr>
-          <tr><td class="num">13 / 15</td><td>GPIO 27 / 22</td><td>Record green / blue</td><td>green / blue</td></tr>
-          <tr><td class="num">16 / 18 / 22</td><td>GPIO 23 / 24 / 25</td><td>Play red / green / blue</td><td>orange / green / blue</td></tr>
-          <tr><td class="num">20 / 30</td><td>GND</td><td>Play / Record: switch + C−</td><td>black</td></tr>
-          <tr><td class="num">29 / 31</td><td>GPIO 5 / 6</td><td>Record / Play switch (pull-up, pressed = low)</td><td>white</td></tr>
-          <tr><td class="num">35</td><td>GPIO 19 · LRCLK</td><td>Amp LRC → mic WS</td><td>purple</td></tr>
-          <tr><td class="num">36</td><td>GPIO 16</td><td>Amp SD (the sound driver owns it)</td><td>grey</td></tr>
-          <tr><td class="num">38</td><td>GPIO 20 · DIN</td><td>Mic data</td><td>brown</td></tr>
-          <tr><td class="num">39</td><td>GND</td><td>Amp GND</td><td>black</td></tr>
-          <tr><td class="num">40</td><td>GPIO 21 · DOUT</td><td>Amp DIN</td><td>green</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="reveal" style="color:var(--muted);font-size:14px;margin-top:16px">≤16 mA per GPIO, ~50 mA total; 3.3 V logic only; leave pins 27/28 free. The repo also has an interactive wiring map (<code>hardware/schematics/wiring-diagram.html</code>) and an exploded view (<code>hardware/cad/enclosure-layout.html</code>).</p>
-  </div>
-</section>
-
 <!-- LESSONS -->
 <section id="lessons">
   <div class="wrap">
-    <span class="eyebrow reveal">09 · Lessons</span>
-    <h2 class="reveal">Each cost us an evening. <em>Not you.</em></h2>
+    <span class="eyebrow">08 · Lessons</span>
+    <h2>What went wrong, <em>so you can skip it.</em></h2>
     <div class="lessons">
-      <div class="glass spot lesson reveal"><span class="tag">Power</span><h4>USB-C couplers work one way up</h4><p>A socket-to-socket panel coupler powered the box with the plug one way and stayed dark the other: it passes the plug's single CC wire to only one of two pins. Use a socket with a cable tail.</p></div>
-      <div class="glass spot lesson reveal" style="--d:.06s"><span class="tag">Audio</span><h4>A wire on GAIN killed an amp</h4><p>The amp's ground landed on the neighbouring GAIN pin. Fixed, it still scratched on pure digital silence: damage, not signal. Check grounds before power; keep a spare.</p></div>
-      <div class="glass spot lesson reveal" style="--d:.12s"><span class="tag">Linux</span><h4>overlayroot puts /data in RAM</h4><p>The stock read-only overlay also overlays every mount under <code>/</code>. Without <code>recurse=0</code>, the "safe" partition silently lives in memory.</p></div>
-      <div class="glass spot lesson reveal"><span class="tag">Modem</span><h4>It isn't who it says it is</h4><p>The SIM7670G shows up as Qualcomm <code>05c6:9330</code>. At <code>DIALMODE=1</code> it registers but forwards nothing; <code>0</code> fixes it for good.</p></div>
-      <div class="glass spot lesson reveal" style="--d:.06s"><span class="tag">Protocol</span><h4>Re-flashing reused a number</h4><p>A fresh card restarted message numbering; the server refused the duplicate and the stuck upload blocked check-ins. Now the server tells the box its highest number.</p></div>
-      <div class="glass spot lesson reveal" style="--d:.12s"><span class="tag">Boot</span><h4>Hold the power key low</h4><p>GPIO 4 floats high at boot, and a key held 2.5 s turns the modem <i>off</i>. <code>gpio=4=op,dl</code> holds it low from the first second.</p></div>
+      <div class="lesson"><span class="eyebrow">Power</span><h3>USB-C couplers work one way up</h3><p>A socket-to-socket coupler passes only one CC wire, so the plug worked one way round. Use a socket with a cable tail.</p></div>
+      <div class="lesson"><span class="eyebrow">Audio</span><h3>A wire on GAIN killed an amp</h3><p>Its ground landed on the neighbouring pin; afterwards it scratched even on silence. Check grounds before power.</p></div>
+      <div class="lesson"><span class="eyebrow">Linux</span><h3>overlayroot puts /data in RAM</h3><p>The stock read-only overlay covers every mount. Without <code>recurse=0</code>, the “safe” partition lives in memory.</p></div>
+      <div class="lesson"><span class="eyebrow">Modem</span><h3>It isn't who it says it is</h3><p>The SIM7670G shows up as Qualcomm <code>05c6:9330</code>, and at <code>DIALMODE=1</code> forwards nothing. Use <code>0</code>.</p></div>
+      <div class="lesson"><span class="eyebrow">Protocol</span><h3>Re-flashing reused a number</h3><p>A fresh card restarted message numbering and the upload stuck. The server now tells the box where to continue.</p></div>
+      <div class="lesson"><span class="eyebrow">Boot</span><h3>Hold the power key low</h3><p>GPIO 4 floats high at boot, and a long press turns the modem off. <code>gpio=4=op,dl</code> holds it low.</p></div>
     </div>
   </div>
 </section>
@@ -739,32 +695,31 @@ open ios/DadBox.xcodeproj</code></pre></label></div>
 <!-- REPO -->
 <section id="repo">
   <div class="wrap">
-    <span class="eyebrow reveal">10 · The source</span>
-    <h2 class="reveal">All of it, <em>open.</em></h2>
+    <span class="eyebrow">09 · The source</span>
+    <h2>All of it, <em>open.</em></h2>
     <div class="repo">
-<pre class="tree reveal"><b>DadBox/</b>
-├── <b>docs/</b>          <em>brief · architecture · PROTOCOL · build log</em>
-│   └── <b>decisions/</b> <em>26 records: why each choice</em>
-├── <b>hardware/</b>      <em>BOM · sourcing · layout</em>
-│   ├── <b>schematics/</b> <em>WIRING.md + wiring map</em>
-│   └── <b>cad/</b>       <em>layout + 1:1 drill templates</em>
-├── <b>box/</b>           <em>Python service + simulator</em>
-├── <b>server/</b>        <em>Supabase: SQL + Edge Function</em>
-├── <b>ios/</b>           <em>SwiftUI app + DadBoxKit</em>
-├── <b>tools/</b>         <em>fakebox · mint_token · serial</em>
+<pre class="tree"><b>DadBox/</b>
+├── <b>docs/</b>          <em>brief · architecture · protocol · build log</em>
+│   └── <b>decisions/</b> <em>why each choice was made</em>
+├── <b>hardware/</b>      <em>parts · sourcing · layout</em>
+│   ├── <b>schematics/</b> <em>wiring</em>
+│   └── <b>cad/</b>       <em>layout and 1:1 drill templates</em>
+├── <b>box/</b>           <em>Python service and simulator</em>
+├── <b>server/</b>        <em>Supabase: SQL and one Edge Function</em>
+├── <b>ios/</b>           <em>SwiftUI app</em>
+├── <b>tools/</b>         <em>fake box, token minting, serial</em>
 └── <b>site/</b>          <em>this page</em></pre>
-      <div class="glass cta-panel reveal" style="--d:.1s">
-        <h3 style="font-size:24px">Read in this order</h3>
-        <ol style="color:var(--ink-soft);padding-left:20px;margin:10px 0 22px">
-          <li><code>docs/BRIEF.md</code>: what and why</li>
-          <li><code>docs/ARCHITECTURE.md</code>: audio path, state machine</li>
-          <li><code>docs/PROTOCOL.md</code>: the contract</li>
-          <li><code>hardware/schematics/WIRING.md</code></li>
-          <li><code>box/setup/README.md</code>: Pi setup, exactly</li>
-          <li><code>docs/BUILD-LOG.md</code>: what actually happened</li>
+      <div>
+        <h3>Read in this order</h3>
+        <ol class="order">
+          <li><span><code>docs/BRIEF.md</code> — what and why</span></li>
+          <li><span><code>docs/PROTOCOL.md</code> — the contract</span></li>
+          <li><span><code>hardware/schematics/WIRING.md</code></span></li>
+          <li><span><code>box/setup/README.md</code> — the Pi, exactly</span></li>
+          <li><span><code>docs/BUILD-LOG.md</code> — what actually happened</span></li>
         </ol>
-        <a class="btn primary" href="https://github.com/mararnx/DadBox">github.com/mararnx/DadBox <span class="arr">→</span></a>
-        <p style="color:var(--muted);font-size:14px;margin:18px 0 0">Built with Claude Code as a co-builder: it drives the box over SSH and asks a human only for what it can't do itself, like listening, looking at an LED or reading a meter.</p>
+        <a class="btn primary" href="https://github.com/mararnx/DadBox">github.com/mararnx/DadBox</a>
+        <p class="small" style="margin-top:20px">Built with Claude Code as a co-builder: it drives the box over SSH and asks a person only for what it can't do itself, like listening, looking at an LED or reading a meter.</p>
       </div>
     </div>
   </div>
@@ -773,10 +728,8 @@ open ios/DadBox.xcodeproj</code></pre></label></div>
 
 <footer>
   <div class="wrap">
-    <div class="glass">
-      <a class="brand" href="#top"><span class="logo"><i></i></span>DadBox</a>
-      <span>A one-off for one family, shared so others can build their own. No warranty, just the notes. Keep the promises: red means listening, and nothing a child records is ever lost.</span>
-    </div>
+    <a class="brand" href="#top"><span class="mark" aria-hidden="true"></span><span>DadBox</span></a>
+    <p>A one-off for one family, shared so others can build their own. No warranty, just the notes. Keep the two promises: red means listening, and nothing a child records is ever lost.</p>
   </div>
 </footer>
 
@@ -792,50 +745,29 @@ open ios/DadBox.xcodeproj</code></pre></label></div>
     var cur=root.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
     var n=cur==='dark'?'light':'dark'; root.setAttribute('data-theme',n); set('dadbox-theme',n);
   });
-  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function count(el){
-    var to=parseFloat(el.dataset.count), dec=+(el.dataset.dec||0), t0=null;
-    if(reduce){el.textContent=to.toFixed(dec);return}
-    function step(ts){ if(!t0)t0=ts; var p=Math.min(1,(ts-t0)/1400), e=1-Math.pow(1-p,3);
-      el.textContent=(to*e).toFixed(dec); if(p<1) requestAnimationFrame(step); }
-    requestAnimationFrame(step);
-  }
-  var io='IntersectionObserver' in window ? new IntersectionObserver(function(es){
-    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in');
-      e.target.querySelectorAll('[data-count]').forEach(count); io.unobserve(e.target);} });
-  },{threshold:.12,rootMargin:'0px 0px -40px 0px'}) : null;
-  document.querySelectorAll('.reveal').forEach(function(el){ io?io.observe(el):el.classList.add('in'); });
-  if(!io) document.querySelectorAll('[data-count]').forEach(count);
-
-  document.querySelectorAll('.glass.spot').forEach(function(el){
-    el.addEventListener('pointermove',function(e){ var r=el.getBoundingClientRect();
-      el.style.setProperty('--mx',(e.clientX-r.left)+'px'); el.style.setProperty('--my',(e.clientY-r.top)+'px'); });
-  });
-
-  var tilt=document.getElementById('tilt');
-  if(tilt && !reduce && matchMedia('(pointer:fine)').matches){
-    var stage=tilt.parentElement;
-    stage.addEventListener('pointermove',function(e){ var r=stage.getBoundingClientRect();
-      var x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5;
-      tilt.style.transform='rotateY('+(x*14)+'deg) rotateX('+(-y*10)+'deg)'; });
-    stage.addEventListener('pointerleave',function(){ tilt.style.transform=''; });
-  }
+  // the phone sketch's waveforms: fixed shapes, no randomness between loads
+  document.querySelectorAll('.wave').forEach(function(w){ var s=+w.dataset.wave, h='';
+    for(var i=0;i<26;i++){ s=(s*9301+49297)%233280; h+='<i style="height:'+(4+Math.round(14*s/233280))+'px"></i>'; } w.innerHTML=h; });
 
   var tabs=[].slice.call(document.querySelectorAll('[role=tab]'));
+  function pick(tb){ tabs.forEach(function(o){ var on=o===tb; o.setAttribute('aria-selected',on); o.tabIndex=on?0:-1;
+    document.getElementById(o.getAttribute('aria-controls')).hidden=!on; }); }
   tabs.forEach(function(tb,i){
-    tb.addEventListener('click',function(){ tabs.forEach(function(o){ var on=o===tb; o.setAttribute('aria-selected',on);
-      document.getElementById(o.getAttribute('aria-controls')).hidden=!on; }); });
+    tb.addEventListener('click',function(){ pick(tb); });
     tb.addEventListener('keydown',function(e){ var d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;
-      if(d){ var n=tabs[(i+d+tabs.length)%tabs.length]; n.focus(); n.click(); } });
+      if(d){ var n=tabs[(i+d+tabs.length)%tabs.length]; n.focus(); pick(n); } });
   });
 
   var lb=document.getElementById('lb');
   document.querySelectorAll('.gallery figure').forEach(function(f){
-    f.addEventListener('click',function(){ var img=f.querySelector('img');
+    f.tabIndex=0; f.setAttribute('role','button');
+    function open(){ var img=f.querySelector('img');
       lb.querySelector('img').src=f.dataset.full; lb.querySelector('img').alt=img.alt;
       lb.querySelector('p').textContent=f.querySelector('figcaption').textContent;
-      if(lb.showModal) lb.showModal(); });
+      if(lb.showModal) lb.showModal(); }
+    f.addEventListener('click',open);
+    f.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); open(); } });
   });
   lb.addEventListener('click',function(e){ if(e.target===lb||e.target.tagName==='BUTTON') lb.close(); });
 
@@ -844,9 +776,8 @@ open ios/DadBox.xcodeproj</code></pre></label></div>
   var boxes=[].slice.call(document.querySelectorAll('.step input'));
   function update(){
     var n=0; boxes.forEach(function(b){ if(b.checked)n++; b.closest('.step').classList.toggle('done',b.checked); });
-    var p=Math.round(100*n/boxes.length), ring=document.getElementById('ring');
-    ring.style.setProperty('--p',p); ring.dataset.v=p+'%';
-    document.getElementById('count').textContent=n+' of '+boxes.length+' steps';
+    document.getElementById('bar').style.width=(100*n/boxes.length)+'%';
+    document.getElementById('count').textContent=n+' of '+boxes.length+' steps done';
     document.querySelectorAll('details.stg').forEach(function(d){ var bs=d.querySelectorAll('.step input'), c=0;
       bs.forEach(function(b){ if(b.checked)c++; }); d.querySelector('.cnt').textContent=c+'/'+bs.length; });
   }
