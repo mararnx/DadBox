@@ -55,8 +55,7 @@ PARTS = {
                          ("B", "B", "pin 15 · GPIO 22"), ("NO", "gold", "pin 29 · GPIO 5"),
                          ("C", "gold", "pin 30 · GND"), ("K", "C−", "link to gold")]),
     "modem": dict(side="L", y0=674, h=236, title="Modem HAT", sub="Waveshare SIM7670G · under the Zero (ADR 0023)",
-                  pads=[("USB", "USB-C", "data → Zero USB"), ("V5", "pin 2", "5 V ← Zero pin 4"),
-                        ("GND", "pin 6", "GND ← Zero pin 6"), ("P4", "pin 7", "PWRKEY ← pin 37")]),
+                  pads=[("USB", "USB-C", "data → Zero USB"), ("HDR", "2×20", "pin for pin, under the Zero")]),
     "psu": dict(side="L", y0=950, h=96, title="5 V 2.5 A supply", sub="mains · the off switch is the plug",
                 pads=[("OUT", "plug", "micro-USB → PWR IN")]),
     "amp": dict(side="R", y0=130, w=300, title="Amplifier", sub="Adafruit MAX98357A · 5 V",
@@ -104,9 +103,6 @@ WIRES = [
     (15, "record", "B", "blue", "blue ring"),
     (29, "record", "NO", "white", "switch · pull-up, pressed = low"),
     (30, "record", "C", "black", "GND · switch C and LED −"),
-    (4, "modem", "V5", "red", "5 V"),
-    (6, "modem", "GND", "black", "GND"),
-    (37, "modem", "P4", "grey", "PWRKEY · high = key pressed"),
     (2, "amp", "VIN", "red", "5 V"),
     (12, "amp", "BCLK", "yellow", "I²S bit clock"),
     (35, "amp", "LRC", "purple", "I²S word clock"),
@@ -123,7 +119,12 @@ WIRES = [
     (20, "play", "C", "black", "GND · switch C and LED −"),
 ]
 # wires that must cross the header to reach their side, and the gap they use
-GAP = {4: -1, 6: -1, 30: +1, 38: +1, 31: +1, 33: +1, 35: +1, 39: +1}
+GAP = {30: +1, 38: +1, 31: +1, 33: +1, 35: +1, 39: +1}
+
+
+# The modem HAT sits under the Zero, joined pin for pin by a 2×20 header (ADR 0023).
+# From its schematic it uses only these; every other pin ends at the header on the HAT.
+HAT_PINS = {2: "5 V", 4: "5 V", 6: "GND", 7: "P4 · power key"}
 
 
 def start_of(pin):
@@ -246,10 +247,14 @@ def build_svg():
     pwr_y = usb_y + 40
     psu_y = pad_xy("psu", "OUT")[1]
     wires_svg.append(wire(rounded([(L_EDGE, usb_y), (bx0 - 12, usb_y)]), "cable", ["modem"],
-                          "USB data: Zero inner micro-USB (via OTG adapter) → HAT USB-C", "cable", 7))
+                          "USB data: Zero inner micro-USB → HAT USB-C, short lead", "cable", 7))
     wires_svg.append(wire(rounded([(L_EDGE, psu_y), (bx0 - 22, psu_y), (bx0 - 22, pwr_y), (bx0 - 12, pwr_y)]),
                           "cable", ["psu"], "5 V supply → Zero outer micro-USB, PWR IN", "cable", 7))
-    notes.append(text(L_EDGE + 70, usb_y - 9, "OTG adapter + USB-A→C cable", "cap"))
+    notes.append(text(L_EDGE + 70, usb_y - 9, "micro-USB → USB-C lead", "cap"))
+    hdr_y = pad_xy("modem", "HDR")[1]
+    wires_svg.append(f'<g class="w stack" data-p="modem"><title>Stacked 2×20 header: Zero pin N on HAT pin N, all 40</title>'
+                     f'<path class="stackline" d="M{L_EDGE},{hdr_y} H{bx0}"/></g>')
+    notes.append(text(L_EDGE + 70, hdr_y + 16, "stacked header: pin N ↔ HAT pin N", "cap"))
     notes.append(text(L_EDGE + 70, psu_y - 9, "micro-USB plug", "cap"))
 
     # -- the header wires --
@@ -301,14 +306,16 @@ def build_svg():
                       f'height="{19 * PITCH + 40}" rx="4"/>')
     for p in range(1, 41):
         x, y = pin_xy(p)
-        u = p in used
+        u = p in used or p in HAT_PINS
         cls = "pin used" if u else "pin"
-        if u:
-            cls += f" c-{used[p][3]}"
-        dp = f'data-p="{used[p][1]}"' if u else ""
+        if p in HAT_PINS:
+            cls += " hat"
+        owners = ([used[p][1]] if p in used else []) + (["modem"] if p in HAT_PINS else [])
+        dp = f'data-p="{" ".join(owners)}"' if u else ""
         shape = (f'<rect x="{x - 9}" y="{y - 9}" width="18" height="18" rx="2"/>' if p == 1
                  else f'<circle cx="{x}" cy="{y}" r="9.5"/>')
-        header_svg.append(f'<g class="{cls}" {dp}>{shape}{text(x, y + 3.5, p, "pnum", "middle")}</g>')
+        ring = f'<circle class="hatring" cx="{x}" cy="{y}" r="13.5"/>' if p in HAT_PINS else ""
+        header_svg.append(f'<g class="{cls}" {dp}>{ring}{shape}{text(x, y + 3.5, p, "pnum", "middle")}</g>')
         lx = X_ODD - 22 if p % 2 else X_EVEN + 22
         labels_svg.append(text(lx, y - 6, PIN_NAME[p], "plab" + (" on" if u else ""),
                                "end" if p % 2 else "start", dp))
@@ -410,15 +417,15 @@ def illustrations():
 
 COLOURS = ["black", "brown", "red", "orange", "yellow", "green", "blue", "purple", "grey", "white"]
 USES = {
-    "black": "ground, every part; also the short jumpers at the parts",
+    "black": "ground: mic, both buttons, amp; also the short jumpers at the parts",
     "brown": "mic data → pin 38",
-    "red": "5 V → amp and modem HAT",
+    "red": "5 V → amp (the modem gets it through the stacked header)",
     "orange": "button red rings; record R tab → mic VDD",
     "yellow": "I²S bit clock: pin 12 → amp BCLK → mic SCK",
     "green": "button green rings; amp DIN",
     "blue": "button blue rings",
     "purple": "I²S word clock: pin 35 → amp LRC → mic WS",
-    "grey": "amp SD; modem PWRKEY",
+    "grey": "amp SD",
     "white": "button switches",
 }
 
@@ -461,10 +468,11 @@ CARDS = [
       ("LRC", "35 · GPIO 19", "and on to the mic's WS"), ("DIN", "40 · GPIO 21", "data into the amp"),
       ("SD", "36 · GPIO 16", "the sound driver raises it while audio plays; firmware never touches it"),
       ("GAIN", "—", "unconnected: 9 dB"), ("+ / −", "speaker", "screw terminal")]),
-    ("modem", "Modem HAT", "Waveshare SIM7670G; the Zero sits on it on standoffs (ADR 0023).",
-     [("USB-C", "Zero inner micro-USB", "OTG adapter + USB-A→C cable; shows up as a network interface"),
-      ("pin 2 · 5 V", "Zero pin 4", "stiffer supply for transmit bursts"), ("pin 6 · GND", "Zero pin 6", ""),
-      ("pin 7 · P4", "Zero pin 37 · GPIO 26", "high turns on a transistor that pulls PWRKEY low"),
+    ("modem", "Modem HAT", "Waveshare SIM7670G, under the Zero (ADR 0023). A straight 2×20 header soldered in from below joins pin N to pin N, all 40; no modem wires.",
+     [("USB-C", "Zero inner micro-USB", "short micro-USB → USB-C lead; shows up as a network interface"),
+      ("pins 2, 4 · 5 V", "same pins", "through the header"), ("GND", "every ground pin", "through the header"),
+      ("pin 7 · P4", "pin 7 · GPIO 4", "power key: high turns on a transistor that pulls PWRKEY low. <code>gpio=4=op,dl</code> in config.txt holds it low through boot"),
+      ("pins 8, 10", "TXD, RXD", "reach the HAT only through DIP 1 and 2, which stay off"),
       ("DIP", "", "1 TXD off · 2 RXD off · 3 PWR on · 4 BOOT off"),
       ("LTE", "antenna", "IPEX1 pigtail → SMA through the wall. Never transmit without it"),
       ("SIM", "", "insert before power; no hot-swap")]),

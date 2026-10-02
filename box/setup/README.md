@@ -18,6 +18,8 @@
    # serial console on GPIO 14/15 for the debug probe; no Bluetooth, so the full UART goes there
    enable_uart=1
    dtoverlay=disable-bt
+   # modem power key (GPIO 4 = HAT P4): low from the first second, against its boot pull-up
+   gpio=4=op,dl
    # in the field only; the bench needs Wi-Fi
    #dtoverlay=disable-wifi
    ```

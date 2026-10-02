@@ -34,9 +34,13 @@ The parts are in hand. Facts from the bench:
 - **Buttons in the lid at the left end, near the front edge**, 30 mm apart —
   the one patch with 26 mm clear below. Mic beside the speaker, at the front.
 - **Antenna through the back wall**, back-left; the hinged stub folds upright.
-- **Leads are soldered straight into the Pi's GPIO holes** — no header, no
-  dupont. It is the only way to fit under the lid, and it is the sturdier
-  wiring the bag needed anyway. What each pin carries is
+- **The HAT and the Pi are joined pin for pin** (revised 2026-10-02): a
+  straight 2×20 header, soldered in from below, puts Pi pin N exactly on HAT
+  pin N. The HAT uses only 5 V, ground and pin 7 (its power key, now GPIO 4),
+  so the modem needs no wires of its own.
+- **Leads are soldered onto the Pi's pins from above** — no dupont. It is the
+  only way to fit under the lid, and it is the sturdier wiring the bag needed
+  anyway. What each pin carries is
   [hardware/schematics/WIRING.md](../../hardware/schematics/WIRING.md).
 - Positions, holes and clearances live in `hardware/cad/layout.json`;
   `hardware/cad/layout.py` checks them and writes 1:1 drill templates.

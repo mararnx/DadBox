@@ -11,7 +11,7 @@ header pin, is in hardware/schematics/WIRING.md — change it together with hw/p
     GPIO 5    Record switch (to GND, internal pull-up)
     GPIO 6    Play switch   (to GND, internal pull-up)
     GPIO 16   MAX98357A SD_MODE — driven by the kernel's voicehat driver, only while audio plays
-    GPIO 26   Modem power key → HAT header pin 7 (P4 = PWR, DIP switch 3 on; high = pressed)
+    GPIO 4    Modem power key: pin 7, joined to the HAT's pin 7 (P4 = PWR) by the stacked header; DIP 3 on; high = pressed
     GPIO 18/19/20/21  I2S (googlevoicehat-soundcard)   GPIO 2/3  I²C (INA219, later)   GPIO 14/15  UART console
 """
 from __future__ import annotations

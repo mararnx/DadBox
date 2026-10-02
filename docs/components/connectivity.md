@@ -60,7 +60,8 @@ houses every few days, without anyone in either house doing anything.
 
 ## Questions
 
-1. **How is the SIM7670G's power key wired?** Which header pin, does the
+1. **How is the SIM7670G's power key wired?** *Pin 7 (P4) via DIP 3, from the
+   HAT schematic; the stacked header joins it to GPIO 4 (WIRING.md).* Does the
    modem start by itself when 5 V appears, and what does it draw when off? A
    high-side switch on its 5 V feed if the standby is too high
    ([power.md](power.md)).

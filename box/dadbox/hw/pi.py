@@ -25,7 +25,7 @@ PIN_RECORD_GREEN, PIN_RECORD_BLUE = 27, 22
 PIN_PLAY_RED, PIN_PLAY_GREEN, PIN_PLAY_BLUE = 23, 24, 25
 PIN_RECORD_SWITCH, PIN_PLAY_SWITCH = 5, 6
 PIN_AMP_SD = 16                  # MAX98357A SD_MODE — owned by the kernel's voicehat driver, see PiAmpGate
-PIN_MODEM_PWRKEY = 26            # wire to the HAT's header pin 7 (P4 = PWR), DIP 3 on; high = key pressed
+PIN_MODEM_PWRKEY = 4             # pin 7, joined pin-for-pin to the HAT's pin 7 (P4 = PWR) by the stacked header; DIP 3 on; high = key pressed
 MODEM_AT_PORT = os.environ.get("DADBOX_MODEM_AT", "/dev/ttyACM0")   # the HAT enumerates as 05c6:9330, AT on ACM0
 ALSA_DEVICE = os.environ.get("DADBOX_ALSA", "default")
 DEBOUNCE_S = 0.02
@@ -85,7 +85,9 @@ class PiAmpGate:
 
 
 class PiModem:
-    """RNDIS `usb0` from the SIM7670G HAT, AT commands on `ttyACM0`, power key on GPIO 26.
+    """RNDIS `usb0` from the SIM7670G HAT, AT commands on `ttyACM0`, power key on GPIO 4.
+    GPIO 4 has a pull-up at boot; `gpio=4=op,dl` in config.txt holds it low until this claims it,
+    or the key would be held through boot (≥ 2.5 s turns the modem off).
     The power key is not yet proven on the bench: the first box is mains only and never
     switches the modem off (ADR 0019), so `power` only matters once the battery is fitted."""
 

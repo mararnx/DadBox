@@ -88,6 +88,8 @@ svg text{fill:var(--ink)}
 .pin .pnum{font:600 9px var(--mono);fill:var(--muted)}
 .pin.used circle,.pin.used rect{fill:#D4A937;stroke:#8C6A12;stroke-width:1.2}
 .pin.used .pnum{fill:#1B2226}
+.hatring{fill:none;stroke:var(--accent);stroke-width:2;stroke-dasharray:3 3}
+.stackline{fill:none;stroke:var(--accent);stroke-width:5;stroke-dasharray:10 6;stroke-linecap:round}
 .plab{font:500 10.5px var(--mono);fill:var(--muted);opacity:.55}
 .plab.on{fill:var(--ink);opacity:1}
 .plab,.silk.lab{paint-order:stroke;stroke:var(--pcb);stroke-width:4px;stroke-linejoin:round}
@@ -174,7 +176,7 @@ td.mono{white-space:nowrap}
       %%PARTS%%
       %%NOTES%%
     </svg>
-    <figcaption>Pin numbers are physical header pins. Pin 1 (square pad) is at the SD-card end; odd pins are the inner row. The header is drawn wider than it is so every wire can leave its own pin, and wires that belong to the other side cross between two rows of pins. Dashed wires are bench-only. The USB ports' positions are approximate.</figcaption>
+    <figcaption>Pin numbers are physical header pins. Pin 1 (square pad) is at the SD-card end; odd pins are the inner row. The header is drawn wider than it is so every wire can leave its own pin, and wires that belong to the other side cross between two rows of pins. Dashed wires are bench-only. The modem HAT sits under the Zero and a straight 2×20 header joins every pin to the HAT's pin of the same number; the pins ringed in blue are the ones the HAT uses (5 V on 2 and 4, ground on 6 and every other ground, its power key on 7). The USB ports' positions are approximate.</figcaption>
   </figure>
 
   <h2>Wire colours</h2>
