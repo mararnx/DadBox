@@ -93,14 +93,15 @@ LINK_OK_MIN_S = 120      # the link is up while the last good check-in is at lea
 RING_MIN_GAP_S = 5       # at most one ring-triggered round this often; later rings wait, never drop (ADR 0021)
 
 
-def doorbell_wanted(*, mains: bool) -> bool:
+def doorbell_wanted(*, mains: bool, locked: bool = False) -> bool:
     """The doorbell is open only on mains until the battery exists and its
-    heartbeat cost has been measured (ADR 0021)."""
-    return mains
+    heartbeat cost has been measured (ADR 0021), and never while the travel
+    lock is on: a locked box may be on a power bank in a bag (ADR 0015)."""
+    return mains and not locked
 
 
 def poll_plan(poll: Poll, *, mains: bool, since_activity_s: float | None,
-              doorbell: bool = False) -> tuple[int, bool]:
+              doorbell: bool = False, locked: bool = False) -> tuple[int, bool]:
     """(seconds to the next check-in, keep the modem on until then).
 
     `since_activity_s` is the time since the last completed upload or played
@@ -109,7 +110,11 @@ def poll_plan(poll: Poll, *, mains: bool, since_activity_s: float | None,
     The first JUST_USED_S of that are polled every JUST_USED_POLL_S.
     `doorbell` is true while the doorbell is joined: the timer then only backs
     it up. A doorbell that is not joined changes nothing (ADR 0021).
+    `locked` is the travel lock: the battery's idle cadence whatever the power,
+    because a power bank looks like mains and nobody can play a reply anyway.
     """
+    if locked:
+        return poll.idle_minutes * 60, False
     if since_activity_s is not None and since_activity_s < JUST_USED_S:
         return JUST_USED_POLL_S, True
     if mains and doorbell:

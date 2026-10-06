@@ -297,6 +297,7 @@ class BoxState:
     last_checkin_ok_at: Optional[float] = None
     last_checkin_wall: Optional[float] = None
     checkin_interval_s: int = 60
+    ok_interval_s: int = 0                                  # the interval promised at the last good check-in; 0 after a failed one
     modem_on: bool = True
     doorbell: Optional[Dict[str, str]] = None               # {url, topic} from the last check-in
     doorbell_joined: bool = False
@@ -361,7 +362,10 @@ class Core:
 
     def link(self, now: float) -> Link:
         ok_at = self.s.last_checkin_ok_at
-        if ok_at is not None and now - ok_at <= max(2 * self.s.checkin_interval_s, rules.LINK_OK_MIN_S):
+        # The promise made at the last good check-in holds until a round fails: unlocking
+        # after half an hour on the slow cadence is not "not ready" while the box checks in.
+        interval = max(self.s.checkin_interval_s, self.s.ok_interval_s)
+        if ok_at is not None and now - ok_at <= max(2 * interval, rules.LINK_OK_MIN_S):
             return Link.OK
         return Link.DOWN_QUEUED if self.s.outbox else Link.DOWN
 
@@ -425,11 +429,11 @@ class Core:
     def plan(self, now: float) -> Tuple[int, bool]:
         since = None if self.s.last_activity_at is None else now - self.s.last_activity_at
         return rules.poll_plan(self.s.settings.poll, mains=self.s.mains, since_activity_s=since,
-                               doorbell=self.doorbell_joined())
+                               doorbell=self.doorbell_joined(), locked=self.s.locked)
 
     def doorbell_plan(self) -> DoorbellPlan:
         d = self.s.doorbell
-        if d and rules.doorbell_wanted(mains=self.s.mains):
+        if d and rules.doorbell_wanted(mains=self.s.mains, locked=self.s.locked):
             return DoorbellPlan(d["url"], d["topic"])
         return DoorbellPlan()
 
@@ -516,7 +520,9 @@ class Core:
         self.s.cue, self.s.cue_at = (Cue.LOCK if locked else Cue.UNLOCK), now
         out.append(Chime(self._tone_volume(), "lock_on" if locked else "lock_off"))
         out.append(PersistLock(locked))
-        out.append(Log("travel lock " + ("on" if locked else "off")))
+        out.append(Log("travel lock " + ("on: modem off between check-ins" if locked else "off")))
+        if not locked:
+            out.append(LinkPlan(*self.plan(now), wake=True))   # whatever arrived in the bag, fetch it now
 
     def _record_press(self, now: float, out: List[Action]) -> None:
         s = self.s
@@ -614,8 +620,10 @@ class Core:
         s = self.s
         if not e.ok:
             out.append(Log(f"check-in failed: {e.error}", "warning"))
+            s.ok_interval_s = 0
             return
         s.last_checkin_ok_at = now
+        s.ok_interval_s = s.checkin_interval_s
         s.last_checkin_wall = self.clock.wall()
         s.time_ok = True
         s.rssi = e.rssi

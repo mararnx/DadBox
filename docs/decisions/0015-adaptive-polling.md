@@ -4,6 +4,7 @@
 **Status:** accepted — while the box has no battery ([ADR 0019](0019-mains-first-battery-deferred.md)) only the mains row applies
 — the mains row is revised by the doorbell, [ADR 0021](0021-doorbell.md)
 — revised 2026-10-06: the first 5 minutes after use poll every 15 s (see below)
+— revised 2026-10-06: the travel lock is the idle cadence, whatever the power (see below)
 
 ## Context
 
@@ -54,6 +55,27 @@ use, while the modem is on anyway. The numbers are constants on the box
 (`JUST_USED_S`, `JUST_USED_POLL_S`), not settings. The link counts as up
 while the last good check-in is within 2 × the interval but never less
 than 2 minutes, so the faster cadence does not make Record blink sooner.
+
+## Revision 2026-10-06: locked means idle
+
+The box sometimes runs from a power bank in a bag with the travel lock on.
+A power bank looks exactly like mains (no gauge, ADR 0019), so the box kept
+the modem registered, the doorbell open and checked in every minute.
+
+**While the travel lock is on, the box uses the battery's idle row on any
+power:** modem off between check-ins, a check-in every `idle_minutes`, the
+doorbell closed. It beats the just-used rule too: nobody can play a reply in
+a bag. Locking does not delay an upload already queued — that round runs
+first, failures back off as always. **Unlocking checks in at once** and
+reopens the doorbell, so what arrived meanwhile is there within seconds. The
+link counts as up for 2 × the interval promised at the last good check-in
+until a round fails, so Record does not blink "not ready" while that first
+check-in runs.
+
+The app already sees `locked` and `next_checkin_s` in telemetry; the server's
+*late* rule follows `next_checkin_s`, so a locked box is not late at 2 min.
+The saving is unmeasured: the Pi itself is most of the ~0.6 W. Not done: the
+button lights stay as they are (user decision), and the Pi keeps both cores.
 
 ## Alternatives considered
 

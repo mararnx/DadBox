@@ -135,6 +135,42 @@ def test_travel_lock_kills_the_buttons_and_persists():
     assert of(out, c.PersistLock)[0].locked is False
 
 
+def lock(clock, core):
+    out = core.handle(c.Contact(Button.RECORD, True)) + core.handle(c.Contact(Button.PLAY, True))
+    clock.skip(3.0)
+    out += core.handle(c.Tick())
+    core.handle(c.Contact(Button.RECORD, False)); core.handle(c.Contact(Button.PLAY, False))
+    return out
+
+
+def test_the_travel_lock_saves_power_and_unlocking_checks_in_at_once():
+    clock, core = make()                                          # on mains — or a power bank, which looks the same
+    core.handle(c.Checkin(True, Settings(), (), doorbell=BELL))
+    core.handle(c.DoorbellState(True))
+    out = lock(clock, core)
+    assert of(out, c.LinkPlan)[-1] == c.LinkPlan(1800, False)     # modem off between check-ins
+    assert of(out, c.DoorbellPlan) == [c.DoorbellPlan()]
+    core.handle(c.DoorbellState(False))                           # the worker reports it closed
+    out = core.handle(c.UploadDone(MID))                          # sent just before locking: no 15 s polling
+    assert not of(out, c.LinkPlan) and core.s.checkin_interval_s == 1800
+    t = core.telemetry(outbox_bytes=0, outbox_oldest_s=0, storage_pct=0, inbox_on_disk=0)
+    assert t["locked"] is True and t["next_checkin_s"] == 1800 and t["doorbell"] is False
+    clock.skip(1700)
+    core.handle(c.Checkin(True, Settings(), (), doorbell=BELL))
+    clock.skip(1500)
+    out = lock(clock, core)                                       # unlocked 25 min after the last check-in
+    assert any(p.wake for p in of(out, c.LinkPlan)) and core.s.checkin_interval_s == 60
+    assert of(out, c.DoorbellPlan) == [c.DoorbellPlan(BELL["url"], BELL["topic"])]
+    assert core.ready(clock.now())                                # not "not ready" while it checks in
+    core.handle(c.Checkin(False, error="no route"))
+    assert not core.ready(clock.now())                            # …but a failed round says so
+
+
+def test_a_box_that_boots_locked_starts_on_the_slow_cadence():
+    clock, core = make(locked=True)
+    assert core.s.checkin_interval_s == 1800 and core.s.modem_on is False
+
+
 def test_mic_and_amp_are_never_on_together():
     clock, core = make(inbox=[MID])
     press(clock, core, Button.PLAY)

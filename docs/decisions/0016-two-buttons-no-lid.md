@@ -73,7 +73,9 @@ What this gives up, stated plainly, because ADR 0007 existed for these:
   2. A press must last ≥ 0.5 s to count.
   3. A recording with under 1 s of speech is discarded (already the rule).
   4. **Travel lock:** hold both buttons for 3 s → both blink twice (Play blinks white twice since ADR 0024) and the
-     buttons are dead until the same gesture again. Survives reboot.
+     buttons are dead until the same gesture again. Survives reboot. While locked the
+     box checks in on the slow cadence with the modem off between check-ins
+     ([ADR 0015](0015-adaptive-polling.md), revised 2026-10-06).
   5. Mute and quiet hours from the app still apply to playback.
 - **"Obvious to the room" is weaker.** An open lid is unmistakable; a red ring
   on a button is a small light. The hardware tie between the light and the

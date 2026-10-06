@@ -40,3 +40,10 @@ def test_just_used_polls_every_15_s_whatever_the_power_or_doorbell():
         assert poll_plan(POLL, mains=mains, since_activity_s=JUST_USED_S - 1, doorbell=doorbell) == (15, True)
     assert poll_plan(POLL, mains=True, since_activity_s=JUST_USED_S) == (60, True)
     assert poll_plan(POLL, mains=True, since_activity_s=JUST_USED_S, doorbell=True) == (600, True)
+
+
+def test_the_travel_lock_is_the_idle_cadence_whatever_the_power_or_use():
+    for mains, doorbell in ((True, True), (True, False), (False, False)):
+        for since in (None, 0, JUST_USED_S, 10 * 3600):
+            assert poll_plan(POLL, mains=mains, since_activity_s=since, doorbell=doorbell, locked=True) == (1800, False)
+    assert poll_plan(Poll(idle_minutes=60), mains=True, since_activity_s=None, locked=True) == (3600, False)

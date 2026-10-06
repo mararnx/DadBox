@@ -325,7 +325,7 @@ Pushes are hints. The truth is whatever `GET /messages` and
   each check-in; `null` when the modem does not answer. Over Wi-Fi on the bench
   it is still the modem's signal, not the Wi-Fi's.
 - `mains` — external power present. Not the same as `charging`: a full pack
-  on mains is not charging. Selects the poll cadence.
+  on mains is not charging. Selects the poll cadence, unless `locked`.
 - `next_checkin_s` — when the box intends to check in next. The server and
   the app call the box *late* after 2 × this, not after a fixed interval.
 - `doorbell` — the doorbell is joined as this check-in is sent. The app says
@@ -341,6 +341,9 @@ Pushes are hints. The truth is whatever `GET /messages` and
   ([ADR 0024](decisions/0024-no-status-leds-record-says-ready.md)).
 - `locked` — the travel lock is engaged ([ADR 0016](decisions/0016-two-buttons-no-lid.md)).
   Without it, a locked box in a bag looks like a child who stopped talking.
+  A locked box checks in every `idle_minutes` with the doorbell closed, on any
+  power ([ADR 0015](decisions/0015-adaptive-polling.md)); the app should say
+  "locked — next check-in in 28 min", not "offline".
 - `house` is `unknown | a | b`, reserved for a dock ID resistor.
 
 The app surfaces all of it; this is how a box dead in a bag gets noticed by an
