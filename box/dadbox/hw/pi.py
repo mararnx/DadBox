@@ -13,7 +13,7 @@ import threading
 import time
 from typing import Callable, Optional, Tuple
 
-from ..dsp import BLOCK_BYTES, BLOCK_MS, RATE, SPEECH_RMS, chime_pcm, rms
+from ..dsp import BLOCK_BYTES, BLOCK_MS, RATE, SPEECH_LEVEL, chime_pcm, level
 from ..gestures import Button
 from ..hal import Hardware
 from ..lights import Frame
@@ -185,8 +185,9 @@ class _Capture:
                 settled = False
                 while not self._stop.is_set():
                     block = self.proc.stdout.read(BLOCK_BYTES)
-                    if not block:
-                        ok, reason = False, "arecord ended"
+                    if not block:                         # stop() terminated arecord mid-read: a normal end
+                        if not self._stop.is_set():
+                            ok, reason = False, "arecord ended"
                         break
                     if not settled:                       # drop the mic's power-up click
                         settled = True
@@ -195,7 +196,7 @@ class _Capture:
                     now = time.monotonic()
                     if now - last_sync >= 1.0:
                         f.flush(); os.fsync(f.fileno()); last_sync = now
-                    silence_s = silence_s + BLOCK_MS / 1000 if rms(block) < SPEECH_RMS else 0.0
+                    silence_s = silence_s + BLOCK_MS / 1000 if level(block) < SPEECH_LEVEL else 0.0
                     on_level(now - start, silence_s)
                 f.flush(); os.fsync(f.fileno())
         except Exception as e:                             # noqa: BLE001

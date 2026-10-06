@@ -45,3 +45,55 @@ def test_csq_reply_to_dbm():
     assert csq_to_dbm("+CSQ: 99,99\r\nOK") is None       # not known or not detectable
     assert csq_to_dbm("ERROR") is None
     assert csq_to_dbm("") is None
+
+
+class _BlockingArecord:
+    """arecord's stand-in: a few blocks, then blocked in read until terminated, then EOF."""
+
+    def __init__(self, blocks):
+        import threading
+        self._blocks, self._killed, self.returncode = list(blocks), threading.Event(), None
+        self.stdout = self
+
+    def read(self, n):
+        if self._blocks:
+            return self._blocks.pop(0)
+        self._killed.wait(5)
+        return b""
+
+    def poll(self):
+        return self.returncode
+
+    def terminate(self):
+        self.returncode = -15
+        self._killed.set()
+
+
+def _capture_with(monkeypatch, fake):
+    from dadbox.dsp import BLOCK_BYTES
+    from dadbox.hw import pi
+    monkeypatch.setattr(pi.subprocess, "Popen", lambda *a, **k: fake)
+    ended = []
+    path = os.path.join(tempfile.mkdtemp(), "c.pcm")
+    return pi._Capture(path, lambda *a: None, lambda ok, r: ended.append((ok, r))), ended, path, BLOCK_BYTES
+
+
+def test_stopping_a_capture_blocked_in_read_is_a_normal_end(monkeypatch):
+    # Found on the bench, 2026-10-06: stop() lands while the pump waits for a fresh block,
+    # read() returns b"", and a normal release was reported as "arecord ended".
+    fake = _BlockingArecord([b"\0\1" * 2000] * 4)
+    cap, ended, path, block = _capture_with(monkeypatch, fake)
+    import time
+    time.sleep(0.2)
+    cap.stop()
+    cap.thread.join(2)
+    assert ended == [(True, "")]
+    assert os.path.getsize(path) == 3 * len(b"\0\1" * 2000)     # the first block is the mic's click
+
+
+def test_arecord_dying_on_its_own_is_still_a_failure(monkeypatch):
+    fake = _BlockingArecord([b"\0\1" * 2000] * 2)
+    fake._killed.set()                                          # EOF without anyone calling stop()
+    cap, ended, _, _ = _capture_with(monkeypatch, fake)
+    cap.thread.join(2)
+    assert ended == [(False, "arecord ended")]
