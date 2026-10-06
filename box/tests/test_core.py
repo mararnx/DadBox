@@ -447,3 +447,21 @@ def test_locking_mid_recording_gives_the_lock_tone_not_the_done_tone():
     out += core.handle(c.Tick())
     assert [a.kind for a in of(out, c.Chime)] == ["lock_on"]
     assert of(out, c.MicPower) and not of(out, c.MicPower)[0].on
+
+
+def test_the_ready_voice_speaks_once_when_power_on_ends_in_ready():
+    clock, core = make()
+    out = core.handle(c.Checkin(True, Settings(), ()))
+    assert [a.kind for a in of(out, c.Chime)] == ["voice_ready"]
+    out = core.handle(c.Checkin(True, Settings(), ()))
+    assert not of(out, c.Chime)                                   # once per power-on
+
+
+def test_no_ready_voice_when_a_press_or_a_message_came_first():
+    clock, core = make()
+    press(clock, core, Button.RECORD)
+    out = core.handle(c.Checkin(True, Settings(), ()))
+    assert "voice_ready" not in [a.kind for a in of(out, c.Chime)]
+    clock, core = make(inbox=(MID,))
+    out = core.handle(c.Checkin(True, Settings(), ()))
+    assert "voice_ready" not in [a.kind for a in of(out, c.Chime)]

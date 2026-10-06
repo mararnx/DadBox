@@ -1,0 +1,15 @@
+[Unit]
+Description=DadBox power-on voice: "L X M A module is starting"
+# ADR 0024 §10. As early as the sound card exists; the files come from
+# setup/make_voice.sh. A missing file just means no voice.
+DefaultDependencies=no
+After=sound.target
+Wants=sound.target
+ConditionPathExists=/usr/local/lib/dadbox/voice/starting.pcm
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/aplay -q -f S16_LE -r 16000 -c 1 -t raw /usr/local/lib/dadbox/voice/starting.pcm
+
+[Install]
+WantedBy=sysinit.target

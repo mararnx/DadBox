@@ -76,6 +76,7 @@ def _end_bootlight() -> None:
 
 
 LED_PWM_HZ = 200
+VOICE_DIR = "/usr/local/lib/dadbox/voice"   # on the read-only root: setup/make_voice.sh (ADR 0024 §10)
 
 
 class PiButtonLights:
@@ -289,7 +290,14 @@ class PiAudio:
 
     def chime(self, volume: int, kind: str = "message") -> None:
         gain = max(0, min(100, volume)) / 100.0
-        pcm = chime_pcm(kind)
+        if kind.startswith("voice_"):                # a spoken line, rendered by setup/make_voice.sh
+            try:
+                with open(os.path.join(VOICE_DIR, kind[len("voice_"):] + ".pcm"), "rb") as f:
+                    pcm = f.read()
+            except OSError:
+                return                               # no file, no voice
+        else:
+            pcm = chime_pcm(kind)
         if gain < 1.0:
             import array
             a = array.array("h"); a.frombytes(pcm)

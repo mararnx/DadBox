@@ -218,7 +218,8 @@ class StopPlay(Action):
 @dataclass(frozen=True)
 class Chime(Action):
     volume: int
-    kind: str = "message"         # dsp.chime_pcm: message, record_start, record_end, lock_on, lock_off
+    kind: str = "message"         # dsp.chime_pcm: message, record_start, record_end, lock_on, lock_off;
+                                  # voice_ready: a spoken file, played at `volume` % of its 48 % level
     wait: bool = False            # sound it to the end before the next action (record start)
 
 
@@ -405,6 +406,11 @@ class Core:
 
     def _derive(self, now: float) -> List[Action]:
         out: List[Action] = []
+        s = self.s
+        if (not s.booted and self.ready(now) and s.mode is Mode.IDLE and not s.locked and not s.inbox
+                and now - s.boot_at < rules.BOOT_LIGHT_MAX_S):
+            # first ready since power-on, and that is what ends the rainbow: say so, once
+            out.append(Chime(50 if self.quiet() else 100, "voice_ready"))
         cue = self.s.cue if self.s.cue is not None and cue_active(self._plan_probe(), now) else None
         if cue is None:
             self.s.cue = None

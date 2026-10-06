@@ -70,7 +70,8 @@
    `python3 -m venv --system-site-packages /opt/dadbox/.venv` (so gpiozero
    finds apt's `lgpio`, which pip would have to compile), `pip install -e .[pi]`, the unit from
    `systemd/`, `systemctl enable --now dadbox`; also `systemctl enable
-   dadbox-bootlight` (the power-on colours, ADR 0024 §7). `dadboxctl` on `$PATH`.
+   dadbox-bootlight` (the power-on colours, ADR 0024 §7) and `dadbox-bootvoice`
+   (the spoken "starting"; run `setup/make_voice.sh` from the Mac first, ADR 0024 §10). `dadboxctl` on `$PATH`.
    Before the first start: `/data/config.env` with `DADBOX_URL` and
    `DADBOX_TOKEN`, and the family key in `/data/keys/1.key` (64 hex
    characters) — both **owned by `dadbox`, mode 0600**, or the service cannot

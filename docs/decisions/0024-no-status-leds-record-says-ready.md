@@ -5,7 +5,7 @@
 (two vocabularies become one), [ADR 0016](0016-two-buttons-no-lid.md) §4
 (the lock blink) and [ADR 0020](0020-no-mute-replay-green-link.md) §3–5
 and §7
-— revised 2026-10-06 (user decision): powering on is shown on Play, see §7; ready drifts blue–green, see §8; the lock flashes both buttons with a tone, see §9
+— revised 2026-10-06 (user decision): powering on is shown on Play, see §7; ready drifts blue–green, see §8; the lock flashes both buttons with a tone, see §9; spoken start and ready, see §10
 
 ## Context
 
@@ -116,6 +116,19 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
    than Play white and Record cyan side by side (user decision). The lock tones answer a
    press, so they sound in quiet hours at half volume, like the record tones;
    locking mid-recording stops the recording and sounds only the lock tone.
+
+10. **The box says it is starting and ready (2026-10-06).** Two fixed lines in
+    a calm male voice (macOS "Reed", US), at 48 % of full scale: "L X M A
+    module is starting" as soon as the sound card exists (~15 s after power,
+    `dadbox-bootvoice.service`, before the service runs), and "L X M A module
+    is ready to record" once, when the box first becomes ready — not if a
+    press, the lock or a waiting message ended the power-on rainbow first;
+    half volume in quiet hours. They are pre-rendered sound files, not speech
+    synthesis on the box: no speech engine, no service, nothing leaves it —
+    the "no speech services" rule stands. Rendered on a Mac by
+    `setup/make_voice.sh` into `/usr/local/lib/dadbox/voice/`; the audio is
+    not committed (a macOS system voice, licensed for personal use, and this
+    repo is public).
 
 ## Alternatives considered
 
