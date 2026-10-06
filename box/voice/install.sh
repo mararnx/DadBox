@@ -2,7 +2,7 @@
 # Install the box's two spoken lines on the Pi (ADR 0024 §10):
 #   box/voice/install.sh [host]        (default: dadbox)
 # starting.pcm / ready.pcm here are 16 kHz s16le mono, levelled with
-#   ffmpeg -af "loudnorm=I=-16:TP=-1.5,volume=0.48,aresample=16000"
+#   ffmpeg -af "loudnorm=I=-16:TP=-1.5,volume=0.24,aresample=16000"
 # from the WAVs that render.py makes. They go to /usr/local/lib/dadbox/voice
 # on the read-only root (through overlayroot-chroot): dadbox-bootvoice plays
 # "starting" before /data is even mounted.

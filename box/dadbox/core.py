@@ -220,7 +220,7 @@ class StopPlay(Action):
 class Chime(Action):
     volume: int
     kind: str = "message"         # dsp.chime_pcm: message, record_start, record_end, lock_on, lock_off;
-                                  # voice_ready: a spoken file, played at `volume` % of its 48 % level
+                                  # voice_ready: a spoken file, played at `volume` % of its 24 % level
     wait: bool = False            # sound it to the end before the next action (record start)
 
 
