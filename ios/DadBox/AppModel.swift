@@ -91,7 +91,7 @@ final class AppModel {
             ticker = Task { [weak self] in
                 // Pushes are hints; the truth is what the server says when asked (PROTOCOL.md § Push).
                 while !Task.isCancelled {
-                    try? await Task.sleep(for: .seconds(self?.isDemo == true ? 3 : 20))
+                    try? await Task.sleep(for: .seconds(self?.refreshInterval ?? 20))
                     await self?.refresh()
                 }
             }
@@ -108,6 +108,13 @@ final class AppModel {
     }
 
     // MARK: Sync
+
+    /// While one of my messages is on its way and not yet played, ask every 5 s, so
+    /// "On the box" and "Played" show up while the parent is watching. Foreground only.
+    var refreshInterval: Int {
+        if isDemo { return 3 }
+        return thread.contains { $0.from == me && $0.state != .played } ? 5 : 20
+    }
 
     func refresh() async {
         now = Date()
