@@ -124,13 +124,22 @@ def test_a_press_while_locked_flashes_three_times():
 
 
 def test_powering_on_runs_play_through_the_colours_and_record_is_dark():
+    from dadbox.lights import RAINBOW_EQUAL, RAINBOW_PERIOD_S, rainbow
     plan = LightsPlan(booting=True, brightness=100)
-    frames = [render(plan, i * 0.1) for i in range(30)]
+    frames = [render(plan, i * RAINBOW_PERIOD_S / 30) for i in range(30)]
     assert all(f.record == (0.0, 0.0, 0.0) for f in frames)
-    for f in frames:
-        assert max(f.play) == 1.0                                # every hue at full strength
-    hues = {tuple(round(x) for x in f.play) for f in frames}
-    assert {(1, 0, 0), (0, 1, 0), (0, 0, 1)} <= hues
+    for t in [i * RAINBOW_PERIOD_S / 300 for i in range(300)]:
+        c = rainbow(t)
+        assert abs(sum(c[j] / RAINBOW_EQUAL[j] for j in range(3)) - 1.0) < 1e-9   # brightness holds
+    assert rainbow(0.0) == (RAINBOW_EQUAL[0], 0.0, 0.0)                            # red, then green, then blue
+    assert rainbow(RAINBOW_PERIOD_S / 3) == (0.0, RAINBOW_EQUAL[1], 0.0)
+    r, g, b = rainbow(RAINBOW_PERIOD_S / 6)
+    assert r > 0 and g > 0 and b == 0                                              # yellow on the way
+    prev = rainbow(0.0)
+    for i in range(1, 91):                                                         # 30 Hz: no big steps
+        c = rainbow(i * RAINBOW_PERIOD_S / 90)
+        assert max(abs(a - b) for a, b in zip(c, prev)) < 0.05
+        prev = c
 
 
 def test_mixes_are_balanced_for_the_buttons_pure_colours_are_not():

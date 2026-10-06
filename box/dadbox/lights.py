@@ -12,7 +12,6 @@ got it — is blue or green (ADR 0024).
 """
 from __future__ import annotations
 
-import colorsys
 import math
 from dataclasses import dataclass
 from enum import Enum
@@ -47,7 +46,10 @@ READY_CYAN_DWELL = 2.0            # 1 = even pace; higher = more time at cyan
 READY_GREEN = 0.25                # the green as bright to the eye as full blue (judge on the bench)
 NOT_READY_PERIOD_S = 3.0          # not ready: 1 s on, 2 s off
 NOT_READY_ON_S = 1.0
-RAINBOW_PERIOD_S = 3.0           # powering on: Play runs through every colour, Record dark (ADR 0024 revised)
+RAINBOW_PERIOD_S = 4.5           # powering on: Play runs through every colour, Record dark (ADR 0024 §7)
+RAINBOW_EQUAL: RGB = (0.3, 0.25, 1.0)   # red, green, blue duties that look equally bright (green as
+                                        # READY_GREEN; red judged on the bench). Keep in step with
+                                        # systemd/bootlight.py
 
 
 class Cue(Enum):
@@ -91,8 +93,17 @@ def balanced(c: RGB) -> RGB:
     return DARK if top == 0 else (m[0] / top, m[1] / top, m[2] / top)
 
 
-def _rainbow(t: float) -> RGB:
-    return balanced(colorsys.hsv_to_rgb((t / RAINBOW_PERIOD_S) % 1.0, 1.0, 1.0))
+def rainbow(t: float) -> RGB:
+    """Red → green → blue → red at an even pace, each step a straight crossfade in
+    duty between two primaries that look equally bright — the ready glow's lesson:
+    the brightness holds and only the colour moves, through yellow, cyan, magenta."""
+    p = (t / RAINBOW_PERIOD_S) % 1.0 * 3
+    i = int(p) % 3
+    f = p - int(p)
+    c = [0.0, 0.0, 0.0]
+    c[i] = (1 - f) * RAINBOW_EQUAL[i]
+    c[(i + 1) % 3] = f * RAINBOW_EQUAL[(i + 1) % 3]
+    return (c[0], c[1], c[2])
 
 
 def _ready_cyan() -> RGB:
@@ -144,7 +155,7 @@ def render(plan: LightsPlan, t: float) -> Frame:
     # Powering on: until the box is first ready, Play runs through the colours and
     # Record stays dark. Anything the child does ends it (the core clears `booting`).
     if plan.booting and plan.lights is Lights.IDLE:
-        return Frame(record=DARK, play=_scale(_rainbow(t), k))
+        return Frame(record=DARK, play=_scale(rainbow(t), k))
 
     record: RGB = DARK
     play: RGB = DARK

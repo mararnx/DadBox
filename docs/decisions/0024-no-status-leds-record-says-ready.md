@@ -70,6 +70,12 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
      tuned by eye on the bench (red 25 %, green 63 %, blue 100 %, `BALANCE` in
      `lights.py`); pure colours stay full. The lock's white uses it too. The
      shell stage cannot dim, so it shows the three pure colours only.
+   - **The rainbow is an even crossfade between equally bright primaries**
+     (red 30 %, green 25 %, blue 100 %: `RAINBOW_EQUAL`), red → green → blue,
+     4.5 s a round — the ready glow's lesson: hold the brightness, move only
+     the colour. The early stage is now `systemd/bootlight.py` on the system
+     Python with lgpio PWM (1000 Hz, 60 updates/s), so the full rainbow runs
+     from ~10.6 s, not on/off steps.
    - The service stops that unit as it starts and carries a smooth rainbow
      (`booting` in the lights plan) until it is first ready. It ends for good
      at the first ready, at any press or lock, if a message is waiting (its
