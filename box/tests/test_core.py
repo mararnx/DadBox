@@ -163,8 +163,11 @@ def test_battery_cadence_and_the_conversation_window():
     out = core.handle(c.PowerState(mains=False, battery_pct=60))
     assert of(out, c.LinkPlan)[-1] == c.LinkPlan(1800, False)
     out = core.handle(c.UploadDone(MID))
-    assert of(out, c.LinkPlan)[-1] == c.LinkPlan(60, True)
-    clock.skip(90 * 60)
+    assert of(out, c.LinkPlan)[-1] == c.LinkPlan(15, True)       # just used
+    clock.skip(5 * 60)
+    out = core.handle(c.Tick())
+    assert of(out, c.LinkPlan)[-1] == c.LinkPlan(60, True)       # the rest of the window
+    clock.skip(85 * 60)
     out = core.handle(c.Tick())
     assert of(out, c.LinkPlan)[-1] == c.LinkPlan(1800, False)
     out = core.handle(c.PowerState(mains=True, battery_pct=60, charging=True))

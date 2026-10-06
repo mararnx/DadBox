@@ -356,7 +356,7 @@ class Core:
 
     def link(self, now: float) -> Link:
         ok_at = self.s.last_checkin_ok_at
-        if ok_at is not None and now - ok_at <= 2 * self.s.checkin_interval_s:
+        if ok_at is not None and now - ok_at <= max(2 * self.s.checkin_interval_s, rules.LINK_OK_MIN_S):
             return Link.OK
         return Link.DOWN_QUEUED if self.s.outbox else Link.DOWN
 

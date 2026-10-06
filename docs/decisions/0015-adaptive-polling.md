@@ -3,6 +3,7 @@
 **Date:** 2026-09-21
 **Status:** accepted — while the box has no battery ([ADR 0019](0019-mains-first-battery-deferred.md)) only the mains row applies
 — the mains row is revised by the doorbell, [ADR 0021](0021-doorbell.md)
+— revised 2026-10-06: the first 5 minutes after use poll every 15 s (see below)
 
 ## Context
 
@@ -42,6 +43,17 @@ Three cadences, chosen by the box, parameters from the server:
 
 Settings change from `poll_minutes` to a `poll` object
 ([PROTOCOL.md](../PROTOCOL.md)). The app exposes `idle_minutes` only.
+
+## Revision 2026-10-06: just used
+
+On the bench the doorbell was off and an answer took up to a minute to
+reach a child waiting at the box. For **5 minutes after an upload completes
+or a message plays**, the box checks in every **15 s**, on mains or battery,
+doorbell joined or not: about 20 extra check-ins of a few hundred bytes per
+use, while the modem is on anyway. The numbers are constants on the box
+(`JUST_USED_S`, `JUST_USED_POLL_S`), not settings. The link counts as up
+while the last good check-in is within 2 × the interval but never less
+than 2 minutes, so the faster cadence does not make Record blink sooner.
 
 ## Alternatives considered
 

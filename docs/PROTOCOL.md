@@ -12,6 +12,11 @@
 > check-in response gains `max_seq`; the `409` for a `seq` already used gains
 > `max_seq`; the box renumbers a message the server has never seen and goes
 > on. A server's 4xx on one message no longer stops the box checking in.
+>
+> **2026-10-06, ADR 0015 revised:** for 5 minutes after the child used the
+> box (an upload completed or a message played) it checks in every 15 s,
+> whatever the power or the doorbell. Fixed on the box, not a setting; the
+> server and app change nothing.
 
 The contract between the three code streams. Firmware, server and iOS app all
 depend on this document; change it here first, then in the code.
@@ -242,6 +247,7 @@ chosen by the box from `settings.poll`:
 
 | Box state | Modem | Doorbell | Interval |
 | --- | --- | --- | --- |
+| Just used (5 min after an upload or a played message) | stays on | either | 15 s |
 | On mains, doorbell joined | stays on | open | `backstop_minutes` (default 10, app-set 5-30) |
 | On mains, doorbell not joined | stays on | reconnecting | `active_minutes` (default 1) |
 | On battery, conversation window open | stays on | closed | `active_minutes` |
@@ -249,7 +255,9 @@ chosen by the box from `settings.poll`:
 
 A conversation window opens when an upload completes or the child plays a
 message, lasts `active_window_minutes` (default 90), and restarts on each such
-event. A message arriving does not open one. Inbound latency is therefore
+event. A message arriving does not open one. The first 5 minutes after such
+an event are *just used*: the parent's answer to what the child just sent
+arrives within 15 s even without the doorbell. Inbound latency is therefore
 ≤ 1 minute whenever the box is plugged in or the child has just used it, and
 `idle_minutes` otherwise. Every check-in reuses one TLS session and stays a
 few hundred bytes.

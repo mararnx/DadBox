@@ -152,7 +152,7 @@ def t_battery():
     until(lambda s: not s["world"]["modem_powered"], "modem actually powered off", 20)
     post("/api/parent/send", {"seconds": 3}); world(skip_s=1800)
     until(lambda s: s["box"]["lights"] == "WAITING", "arrived at the 30-min check-in", 20)
-    hold("play"); until(lambda s: s["box"]["window_open"] and s["box"]["checkin_interval_s"] == 60, "window → 1 min")
+    hold("play"); until(lambda s: s["box"]["window_open"] and s["box"]["checkin_interval_s"] == 15, "just used → 15 s")
     until(lambda s: s["box"]["lights"] == "IDLE", "done", 30)
     world(skip_s=91 * 60); until(lambda s: s["box"]["checkin_interval_s"] == 1800, "window closed")
 check("battery, unplugged: 30-min cadence, modem off; play opens a 90-min 1-min window", t_battery)

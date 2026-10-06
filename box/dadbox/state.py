@@ -84,6 +84,10 @@ class Poll:
     backstop_minutes: int = 10
 
 
+JUST_USED_S = 5 * 60     # after an upload or a played message the parent often answers at once…
+JUST_USED_POLL_S = 15    # …so check in this often meanwhile, whatever the power (ADR 0015, revised)
+LINK_OK_MIN_S = 120      # the link is up while the last good check-in is at least this recent
+
 RING_MIN_GAP_S = 5       # at most one ring-triggered round this often; later rings wait, never drop (ADR 0021)
 
 
@@ -100,9 +104,12 @@ def poll_plan(poll: Poll, *, mains: bool, since_activity_s: float | None,
     `since_activity_s` is the time since the last completed upload or played
     message — the things that open a conversation window — or None if there
     has been none since boot. A message arriving is not activity.
+    The first JUST_USED_S of that are polled every JUST_USED_POLL_S.
     `doorbell` is true while the doorbell is joined: the timer then only backs
     it up. A doorbell that is not joined changes nothing (ADR 0021).
     """
+    if since_activity_s is not None and since_activity_s < JUST_USED_S:
+        return JUST_USED_POLL_S, True
     if mains and doorbell:
         return poll.backstop_minutes * 60, True
     in_window = since_activity_s is not None and since_activity_s < poll.active_window_minutes * 60
