@@ -24,7 +24,7 @@ from kokoro_onnx import EspeakConfig, Kokoro
 VOICE, LANG = "bm_george", "en-gb"          # chosen by ear on the bench, 2026-10-06
 LINES = {
     "starting": "LXMA module is starting up.",   # one word, so the A is the letter, not "uh"
-    "ready": "LXMA module is ready to record.",
+    "ready": "LXMA module is connected to the server and ready to record.",
     "nolink": "LXMA module cannot connect to the server.",
 }
 

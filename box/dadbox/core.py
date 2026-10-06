@@ -412,13 +412,13 @@ class Core:
         if (not s.booted and self.ready(now) and s.mode is Mode.IDLE and not s.locked and not s.inbox
                 and now - s.boot_at < rules.BOOT_LIGHT_MAX_S):
             # first ready since power-on, and that is what ends the rainbow: say so, once
-            out.append(Chime(50 if self.quiet() else 100, "voice_ready"))
+            out.append(Chime(100, "voice_ready"))   # the same level as "starting", always
         if (not s.no_link_said and s.last_checkin_ok_at is None and s.mode is Mode.IDLE
                 and now - s.boot_at >= NO_LINK_VOICE_S):
             # power-on only: the adult who plugged it in hears why it isn't ready; never
             # during the day, where a child would be left with a fault (ADR 0024 §10)
             s.no_link_said = True
-            out.append(Chime(50 if self.quiet() else 100, "voice_nolink"))
+            out.append(Chime(100, "voice_nolink"))
         cue = self.s.cue if self.s.cue is not None and cue_active(self._plan_probe(), now) else None
         if cue is None:
             self.s.cue = None

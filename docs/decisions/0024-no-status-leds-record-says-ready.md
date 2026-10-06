@@ -121,9 +121,10 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
     a calm, mature British male voice — Kokoro's "George", an open neural TTS
     model (Apache 2.0) run offline on a Mac: "LXMA module is starting up" as
     soon as the sound card exists (~15 s after power, `dadbox-bootvoice.service`,
-    before the service runs), and "LXMA module is ready to record" once, when
+    before the service runs), and "LXMA module is connected to the server and ready to record" once, when
     the box first becomes ready — not if a press, the lock or a waiting
-    message ended the power-on rainbow first; half volume in quiet hours.
+    message ended the power-on rainbow first. All three lines at one level
+    (−22.5 LUFS measured, "ready" the reference), quiet hours or not.
     And once, if the server has not answered 60 s after power-on and the box
     is idle: "LXMA module cannot connect to the server" — **the one place the
     box explains a fault**, a user decision: at power-on an adult has usually
