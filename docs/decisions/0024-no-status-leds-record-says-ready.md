@@ -118,17 +118,18 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
    locking mid-recording stops the recording and sounds only the lock tone.
 
 10. **The box says it is starting and ready (2026-10-06).** Two fixed lines in
-    a calm male voice (macOS "Reed", US), at 48 % of full scale: "L X M A
-    module is starting" as soon as the sound card exists (~15 s after power,
-    `dadbox-bootvoice.service`, before the service runs), and "L X M A module
-    is ready to record" once, when the box first becomes ready — not if a
-    press, the lock or a waiting message ended the power-on rainbow first;
-    half volume in quiet hours. They are pre-rendered sound files, not speech
-    synthesis on the box: no speech engine, no service, nothing leaves it —
-    the "no speech services" rule stands. Rendered on a Mac by
-    `setup/make_voice.sh` into `/usr/local/lib/dadbox/voice/`; the audio is
-    not committed (a macOS system voice, licensed for personal use, and this
-    repo is public).
+    a calm, mature British male voice — Kokoro's "George", an open neural TTS
+    model (Apache 2.0) run offline on a Mac: "LXMA module is starting up" as
+    soon as the sound card exists (~15 s after power, `dadbox-bootvoice.service`,
+    before the service runs), and "LXMA module is ready to record" once, when
+    the box first becomes ready — not if a press, the lock or a waiting
+    message ended the power-on rainbow first; half volume in quiet hours.
+    Levelled to −16 LUFS then 48 %. They are pre-rendered files, not speech
+    synthesis on the box: no speech engine, no service, nothing leaves it — the
+    "no speech services" rule stands. `box/voice/render.py` makes them, the
+    PCM is committed (Apache 2.0 permits it), `box/voice/install.sh` puts it in
+    `/usr/local/lib/dadbox/voice/`. Chosen by ear over macOS system voices
+    (less natural, and licensed for personal use only).
 
 ## Alternatives considered
 

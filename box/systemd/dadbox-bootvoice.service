@@ -1,7 +1,7 @@
 [Unit]
-Description=DadBox power-on voice: "L X M A module is starting"
+Description=DadBox power-on voice: "LXMA module is starting up"
 # ADR 0024 §10. As early as the sound card exists; the files come from
-# setup/make_voice.sh. A missing file just means no voice.
+# box/voice/install.sh. A missing file just means no voice.
 DefaultDependencies=no
 After=sound.target
 Wants=sound.target
