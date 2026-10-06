@@ -102,17 +102,17 @@ def _mix(parts: List[Tuple[float, array.array]], rate: int = RATE) -> bytes:
 
 def chime_pcm(kind: str = "message") -> bytes:
     """The box's few sounds. "message": a marimba pair, G5 then C6, the only
-    sound it makes unbidden. "record_start": the locking marimba pair, before the mic comes on.
-    "record_end": the unlocking pair, after the mic is off (user's choice).
+    sound it makes unbidden. "record_start": the unlocking marimba pair (rising), before the mic comes on.
+    "record_end": the locking pair (falling), after the mic is off (user's choice).
     "lock_on" / "lock_off": two low marimba notes, falling / rising."""
     if kind == "lock_on":                            # two low marimba notes, falling: "closed"
         return _mix([(0.0, marimba(392, 0.25)), (0.13, marimba(262, 0.4))])
     if kind == "lock_off":                           # the same, rising: "open"
         return _mix([(0.0, marimba(262, 0.25)), (0.13, marimba(392, 0.4))])
-    if kind == "record_start":                       # the locking pair (user's choice, 2026-10-06)
-        return chime_pcm("lock_on")
-    if kind == "record_end":                         # and its unlocking pair
+    if kind == "record_start":                       # the unlocking pair, rising (user's choice, 2026-10-06)
         return chime_pcm("lock_off")
+    if kind == "record_end":                         # the locking pair, falling
+        return chime_pcm("lock_on")
     return _mix([(0.0, marimba(784, 0.35)), (0.16, marimba(1047, 0.5))])
 
 
