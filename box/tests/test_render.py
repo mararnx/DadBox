@@ -96,19 +96,19 @@ def test_got_it_is_one_green_pulse_on_record():
     assert render(plan, 10.7).record == render(LightsPlan(brightness=100, ready=True), 10.7).record   # back to ready
 
 
-def test_lock_flashes_both_buttons_white_twice_record_without_red():
+def test_lock_flashes_both_buttons_the_same_cyan_white_twice():
     from dadbox.lights import BALANCE
     plan = LightsPlan(cue=Cue.LOCK, cue_at=0.0, brightness=100, locked=True)
-    assert render(plan, 0.1).play == BALANCE                                  # white, balanced
-    assert render(plan, 0.1).record == (0.0, BALANCE[1], BALANCE[2])          # Record: no red, ever
+    cw = (0.0, BALANCE[1], BALANCE[2])                                        # cyan-white: no red, ever
+    assert render(plan, 0.1).play == render(plan, 0.1).record == cw          # the same on both
     assert render(plan, 0.3).play == render(plan, 0.3).record == (0.0, 0.0, 0.0)
-    assert render(plan, 0.6).play == BALANCE                                  # the second flash
+    assert render(plan, 0.6).play == cw                                       # the second flash
 
 
 def test_unlock_flashes_once_then_normal():
     from dadbox.lights import BALANCE, UNLOCK_FLASH_S
     plan = LightsPlan(cue=Cue.UNLOCK, cue_at=0.0, brightness=100, ready=True)
-    assert render(plan, 0.1).play == BALANCE
+    assert render(plan, 0.1).play == render(plan, 0.1).record == (0.0, BALANCE[1], BALANCE[2])
     after = render(plan, UNLOCK_FLASH_S + 0.1)
     assert after.play == (0.0, 0.0, 0.0) and max(after.record) > 0           # back to the ready glow
 
@@ -118,7 +118,7 @@ def test_a_press_while_locked_flashes_three_times():
     plan = LightsPlan(cue=Cue.LOCKED_PRESS, cue_at=0.0, brightness=100, locked=True)
     step = LOCKED_PRESS_S / 3
     for n in range(3):                                                    # three flashes, dark between
-        assert render(plan, n * step + 0.05).play == BALANCE
+        assert render(plan, n * step + 0.05).play == (0.0, BALANCE[1], BALANCE[2])
         assert render(plan, n * step + step * 0.75).play == (0.0, 0.0, 0.0)
     assert render(plan, LOCKED_PRESS_S + 0.05).play == (0.0, 0.0, 0.0)
 

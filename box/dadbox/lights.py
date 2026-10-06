@@ -25,7 +25,7 @@ RGB = Tuple[float, float, float]
 DARK: RGB = (0.0, 0.0, 0.0)
 RED: RGB = (1.0, 0.0, 0.0)
 BLUE: RGB = (0.0, 0.0, 1.0)       # Record: steady dim = ready, slow blink = not ready (ADR 0024)
-WHITE: RGB = (1.0, 1.0, 1.0)      # the lock flashes, on both buttons (Record without its red)
+WHITE: RGB = (1.0, 1.0, 1.0)      # the lock flashes are this without its red: cyan-white, both buttons
 GREEN: RGB = (0.0, 1.0, 0.0)      # Play: pulsing = a new message, steady = playing (ADR 0020)
 
 # The buttons' resistors are sized for 5 V and we drive them at 3.3 V: red gets far
@@ -117,10 +117,12 @@ def ready_colour(t: float) -> RGB:
 
 
 def _lock_white() -> Tuple[RGB, RGB]:
-    """(Record, Play) white. Record's red is the mic's pin, so its "white" is the
-    balanced green and blue alone — a bright cyan-white."""
+    """(Record, Play) for the lock flashes: the same cyan-white on both. Record's
+    red is the mic's pin, so it cannot show white; Play matches it rather than
+    flashing a different colour (user decision, 2026-10-06)."""
     w = balanced(WHITE)
-    return (0.0, w[1], w[2]), w
+    c = (0.0, w[1], w[2])
+    return c, c
 
 
 def _lock_blink(x: float) -> bool:

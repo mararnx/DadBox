@@ -99,12 +99,13 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
    whole service runs at ~8 % of one core.
 
 9. **The lock, seen and heard (2026-10-06).** §4's two white blinks on Play
-   become, on both buttons: **lock on** — two white flashes and a falling
-   two-note marimba tone (G4 → C4); **lock off** — one white flash and the
+   become, on both buttons: **lock on** — two flashes and a falling
+   two-note marimba tone (G4 → C4); **lock off** — one flash and the
    same tone rising, then back to normal; **a press while locked** — three quick
-   white flashes, no sound, so a child learns the box is locked rather than
-   broken. Record has no white: its red is the mic's pin, so it flashes the
-   balanced green and blue alone, a bright cyan-white. The lock tones answer a
+   flashes, no sound, so a child learns the box is locked rather than
+   broken. Record has no white: its red is the mic's pin. So **both buttons
+   flash the same cyan-white** — the balanced white without its red — rather
+   than Play white and Record cyan side by side (user decision). The lock tones answer a
    press, so they sound in quiet hours at half volume, like the record tones;
    locking mid-recording stops the recording and sounds only the lock tone.
 

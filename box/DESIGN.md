@@ -342,7 +342,7 @@ HTTP API in about two minutes (a 20× clock, every step from a clean world).
 | Ready (blue–cyan flow on Record, 4 s, Play dark; Record dark while a message waits) | the server answered within 2 × the interval and no fault (ADR 0024) |
 | Silence threshold / auto-stop | RMS 400 per 100 ms block, 20 s — tune on real audio |
 | Raw capture lifetime | unlinked right after the sealed container is fsynced |
-| Lock | on: two white flashes on both buttons + falling marimba tone; off: one flash + rising tone; a press while locked: three quick flashes (ADR 0024 §9). Record's "white" is green + blue: its red is the mic |
+| Lock | on: two cyan-white flashes on both buttons + falling marimba tone; off: one flash + rising tone; a press while locked: three quick flashes (ADR 0024 §9). both buttons cyan-white: Record's red is the mic, so neither shows true white |
 | Record not ready | dim blue blink, 1 s on / 2 s off; dark while locked or playing (ADR 0024) |
 | Powering on | Play runs through the colours, Record dark, until first ready (or 3 min, a press, a waiting message); before the service: `config.txt` + `dadbox-bootlight.service` (ADR 0024 §7) |
 
