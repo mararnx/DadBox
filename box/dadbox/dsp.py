@@ -76,16 +76,40 @@ def tone(freq: float, seconds: float, amp: float = 0.3, rate: int = RATE) -> byt
     return a.tobytes()
 
 
+def marimba(freq: float, seconds: float, amp: float = 0.3, rate: int = RATE) -> array.array:
+    """A short wooden note: 2 ms attack, fast decay, with the bar's 4th partial
+    as a quick knock at the start."""
+    n = int(seconds * rate)
+    out = array.array("h", bytes(2 * n))
+    for i in range(n):
+        t = i / rate
+        env = min(1.0, i / (0.002 * rate)) * math.exp(-t / 0.09) * min(1.0, (n - i) / (0.01 * rate))
+        s = math.sin(2 * math.pi * freq * t) + 0.35 * math.sin(2 * math.pi * 4 * freq * t)
+        out[i] = int(32767 * amp * env * s / 1.35)
+    return out
+
+
+def _mix(parts: List[Tuple[float, array.array]], rate: int = RATE) -> bytes:
+    """Sounds laid at their start times (seconds) and added."""
+    n = max(int(at * rate) + len(a) for at, a in parts)
+    x = array.array("h", bytes(2 * n))
+    for at, a in parts:
+        off = int(at * rate)
+        for i, v in enumerate(a):
+            x[off + i] = max(-32768, min(32767, x[off + i] + v))
+    return x.tobytes()
+
+
 def chime_pcm(kind: str = "message") -> bytes:
-    """The box's few sounds. "message": two soft notes, the only sound it makes
-    unbidden. "record_start": a rising two-note "bee-boo" before the mic comes on.
+    """The box's few sounds. "message": a marimba pair, G5 then C6, the only
+    sound it makes unbidden. "record_start": a rising two-note "bee-boo" before the mic comes on.
     "record_end": the same falling, after the mic is off. Chosen by ear on the
     bench from five styles, 2026-10-06."""
     if kind == "record_start":                       # rising "bee-boo", 0.25 s: it delays the mic
         return tone(660, 0.11, 0.28) + tone(990, 0.14, 0.28)
     if kind == "record_end":                         # the same, falling
         return tone(990, 0.11, 0.28) + tone(660, 0.16, 0.28)
-    return tone(660, 0.18, 0.25) + tone(880, 0.28, 0.22)
+    return _mix([(0.0, marimba(784, 0.35)), (0.16, marimba(1047, 0.5))])
 
 
 def synthetic_voice(seconds: float, seed: int = 1, rate: int = RATE) -> bytes:

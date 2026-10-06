@@ -31,6 +31,7 @@ from .settings import Settings, in_quiet_hours
 from .state import Fault, Lights, Link, Power
 
 FW_VERSION = "0.3.0"
+CHIME_REPEAT_S = 10.0            # the message chime sounds once more after this, if still unplayed and idle
 CHIME_MIN_GAP_S = 30.0           # a burst of arrivals (a backlog after a reboot or an outage) chimes once
 
 
@@ -313,6 +314,7 @@ class BoxState:
     time_ok: bool = False                                   # clock trusted once a check-in has succeeded
     shutting_down: bool = False
     last_chime_at: Optional[float] = None
+    chime_repeat_at: Optional[float] = None                 # the one repeat of the message chime
 
 
 class Core:
@@ -471,6 +473,11 @@ class Core:
             self._answer_ring(now, out)
         for g in self.gestures.tick(now):
             self._gesture(g, now, out)
+        s = self.s
+        if s.chime_repeat_at is not None and now >= s.chime_repeat_at:
+            s.chime_repeat_at = None                   # once: a second reminder, never a nag
+            if s.inbox and s.mode is Mode.IDLE and not s.locked and not self.quiet():
+                out.append(Chime(s.settings.volume))
         if self.s.mode is Mode.RECORDING and self.s.recording_id:
             elapsed = now - self.s.recording_since
             if rules.should_stop_recording(elapsed_s=elapsed, silence_s=self.s.silence_s):
@@ -484,6 +491,7 @@ class Core:
 
     def _gesture(self, g: Any, now: float, out: List[Action]) -> None:
         self.s.last_interaction_at = now
+        self.s.chime_repeat_at = None                   # the child is here: no reminder needed
         if isinstance(g, LockGesture):
             self._set_lock(not self.s.locked, now, out)
             return
@@ -654,6 +662,7 @@ class Core:
         if (s.mode is Mode.IDLE and not self.quiet()
                 and (s.last_chime_at is None or now - s.last_chime_at >= CHIME_MIN_GAP_S)):
             s.last_chime_at = now
+            s.chime_repeat_at = now + CHIME_REPEAT_S
             out.append(Chime(s.settings.volume))
         out.append(Log(f"new message {e.message_id} waiting ({len(s.inbox)})"))
 

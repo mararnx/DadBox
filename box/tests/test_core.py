@@ -363,3 +363,23 @@ def test_record_tones_are_half_volume_in_quiet_hours():
     clock, core = make(settings=Settings(volume=80, quiet_hours=QuietHours("00:00", "23:59", "UTC")))
     out = press(clock, core, Button.RECORD)
     assert of(out, c.Chime)[0].volume == 40
+
+
+def test_the_message_chime_sounds_once_more_after_10_s():
+    clock, core = make()
+    out = core.handle(c.Downloaded(MID))
+    assert len(of(out, c.Chime)) == 1
+    clock.skip(9.9)
+    assert not of(core.handle(c.Tick()), c.Chime)
+    clock.skip(0.2)
+    assert len(of(core.handle(c.Tick()), c.Chime)) == 1
+    clock.skip(30)
+    assert not of(core.handle(c.Tick()), c.Chime)             # once, never a nag
+
+
+def test_no_repeat_once_the_child_pressed_or_the_message_was_heard():
+    clock, core = make()
+    core.handle(c.Downloaded(MID))
+    out = press(clock, core, Button.PLAY)
+    clock.skip(11)
+    assert not [a for a in core.handle(c.Tick()) if isinstance(a, c.Chime) and a.kind == "message"]
