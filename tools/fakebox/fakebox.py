@@ -10,7 +10,7 @@ a link that drops, idempotent retries, the check-in, Range downloads.
     fakebox.py resume                      finish every interrupted upload, as the box does on boot
     fakebox.py inbox [--play] [--halves]   check in, download what waits, decrypt, optionally mark played
     fakebox.py --as parent-a send          be the app: AAC (codec 3) to the box
-    fakebox.py --as parent-a list | status | mute on|off
+    fakebox.py --as parent-a list | status
     fakebox.py --as parent-a setup-code    what the iOS app's setup screen wants: the code, then the key
     fakebox.py run [--every 60]            check in forever; download and play what arrives
 
@@ -156,7 +156,7 @@ def telemetry(c: Client, a) -> dict:
 
 def cmd_checkin(c: Client, a) -> dict:
     r = c.call("POST", "/device/checkin", json=telemetry(c, a)).json()
-    print(f"checked in; inbox {r['inbox']}; poll {r['settings']['poll']}; mute {r['settings']['mute']}")
+    print(f"checked in; inbox {r['inbox']}; poll {r['settings']['poll']}")
     return r
 
 
@@ -200,12 +200,6 @@ def cmd_list(c: Client, a) -> None:
 
 def cmd_status(c: Client, a) -> None:
     print(json.dumps(c.call("GET", "/device/status").json(), indent=2))
-
-
-def cmd_mute(c: Client, a) -> None:
-    mine = "a" if c.who == "parent-a" else "b"
-    r = c.call("PATCH", "/settings", json={"mute": {mine: a.state == "on"}}).json()
-    print(r["settings"]["mute"], r["settings_meta"].get(f"mute.{mine}"))
 
 
 def cmd_setup_code(c: Client, a) -> None:
@@ -257,7 +251,6 @@ def main() -> None:
     s = sub.add_parser("run"); box_flags(s); s.set_defaults(fn=cmd_run)
     sub.add_parser("list").set_defaults(fn=cmd_list)
     sub.add_parser("status").set_defaults(fn=cmd_status)
-    s = sub.add_parser("mute"); s.add_argument("state", choices=["on", "off"]); s.set_defaults(fn=cmd_mute)
     s = sub.add_parser("setup-code"); s.add_argument("--qr", action="store_true", help="also as QR codes to scan"); s.set_defaults(fn=cmd_setup_code)
 
     a = p.parse_args()

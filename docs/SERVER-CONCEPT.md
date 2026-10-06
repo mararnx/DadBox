@@ -87,7 +87,7 @@ messages        id (ULID, client-minted) · seq · from · to · created_at · t
 message_chunks  message_id · seq · data (≤ 32 KB)                              primary key (message_id, seq)
 box_status      single row: last telemetry · last_checkin_at · next_due_at
 checkins        at · telemetry                                                 pruned at 30 days
-settings        single row · per-field updated_by / updated_at (who muted, when)
+settings        single row · per-field updated_by / updated_at (who set what, when)
 alerts          kind · raised_at · pushed_at · cleared_at                      so a late box pushes once
 audit_log       at · identity · action · message_id
 ```

@@ -148,7 +148,6 @@ export function parseRange(header: string | null, size: number): { start: number
 
 export type Settings = {
   poll: { active_minutes: number; active_window_minutes: number; idle_minutes: number; backstop_minutes: number }
-  mute: { a: boolean; b: boolean }
   quiet_hours: { start: string; end: string; tz: string }
   led_brightness: number
   volume: number
@@ -156,7 +155,6 @@ export type Settings = {
 
 export const DEFAULT_SETTINGS: Settings = {
   poll: { active_minutes: 1, active_window_minutes: 90, idle_minutes: 30, backstop_minutes: 10 },
-  mute: { a: false, b: false },
   quiet_hours: { start: '20:00', end: '07:00', tz: 'Europe/Zurich' },
   led_brightness: 40,
   volume: 70,
@@ -168,8 +166,6 @@ const LIMITS: Record<string, (v: unknown) => boolean> = {
   'poll.active_window_minutes': (v) => isInt(v, 10, 240),
   'poll.idle_minutes': (v) => isInt(v, 5, 60),
   'poll.backstop_minutes': (v) => isInt(v, 5, 30),
-  'mute.a': (v) => typeof v === 'boolean',
-  'mute.b': (v) => typeof v === 'boolean',
   'quiet_hours.start': (v) => typeof v === 'string' && HHMM.test(v),
   'quiet_hours.end': (v) => typeof v === 'string' && HHMM.test(v),
   'quiet_hours.tz': (v) => typeof v === 'string' && /^[A-Za-z_]+\/[A-Za-z_+\-/]+$/.test(v),
@@ -179,8 +175,10 @@ const LIMITS: Record<string, (v: unknown) => boolean> = {
 
 export type SettingsMeta = Record<string, { by: Identity; at: string }>
 
-// Apply a partial settings object. A parent may set only its own mute; every
-// changed field records who and when. Returns the HTTP status to answer with.
+// Apply a partial settings object. A parent may set poll, quiet_hours,
+// led_brightness and volume — anything else is 403, mute included: there is no
+// mute (ADR 0020). Every changed field records who and when. Returns the HTTP
+// status to answer with.
 export function patchSettings(
   who: Identity, current: Settings, meta: SettingsMeta, patch: unknown, now: string,
 ): { settings: Settings; meta: SettingsMeta; changed: string[] } | { status: 400 | 403; error: string } {
@@ -197,10 +195,8 @@ export function patchSettings(
   const changed: string[] = []
   for (const [path, value] of flat) {
     const ok = LIMITS[path]
-    if (!ok) return { status: 400, error: `unknown setting ${path}` }
+    if (!ok) return { status: 403, error: `${path} is not a setting a parent may change` }
     if (!ok(value)) return { status: 400, error: `invalid value for ${path}` }
-    const ownMute = who === 'parent-a' ? 'mute.a' : 'mute.b'
-    if (path.startsWith('mute.') && path !== ownMute) return { status: 403, error: `${path} is not yours to set` }
     const [a, b] = path.split('.')
     const before = b ? (next[a] as Record<string, unknown>)[b] : next[a]
     if (before === value) continue

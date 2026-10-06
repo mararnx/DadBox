@@ -91,23 +91,24 @@ test('range', () => {
   assert.equal(parseRange('bytes=100-', 100), 'unsatisfiable')
 })
 
-test('settings: own mute only, limits enforced, who-set-what recorded', () => {
+test('settings: no mute, limits enforced, who-set-what recorded', () => {
   const now = '2026-09-22T08:00:00Z'
-  const ok = patchSettings('parent-a', DEFAULT_SETTINGS, {}, { mute: { a: true }, volume: 50 }, now)
+  const ok = patchSettings('parent-a', DEFAULT_SETTINGS, {}, { poll: { backstop_minutes: 15 }, volume: 50 }, now)
   assert.ok('settings' in ok)
-  assert.equal(ok.settings.mute.a, true)
-  assert.deepEqual(ok.changed, ['mute.a', 'volume'])
-  assert.deepEqual(ok.meta['mute.a'], { by: 'parent-a', at: now })
-  assert.equal(DEFAULT_SETTINGS.mute.a, false)   // not mutated
+  assert.equal(ok.settings.poll.backstop_minutes, 15)
+  assert.deepEqual(ok.changed, ['poll.backstop_minutes', 'volume'])
+  assert.deepEqual(ok.meta['volume'], { by: 'parent-a', at: now })
+  assert.equal(DEFAULT_SETTINGS.volume, 70)   // not mutated
+  assert.ok(!('mute' in DEFAULT_SETTINGS))
 
-  const other = patchSettings('parent-a', DEFAULT_SETTINGS, {}, { mute: { b: true } }, now)
-  assert.ok('status' in other && other.status === 403)
+  const mute = patchSettings('parent-a', DEFAULT_SETTINGS, {}, { mute: { a: true } }, now)
+  assert.ok('status' in mute && mute.status === 403)   // there is no mute (ADR 0020)
   const box = patchSettings('box', DEFAULT_SETTINGS, {}, { volume: 1 }, now)
   assert.ok('status' in box && box.status === 403)
   const range = patchSettings('parent-a', DEFAULT_SETTINGS, {}, { poll: { idle_minutes: 120 } }, now)
   assert.ok('status' in range && range.status === 400)
   const unknown = patchSettings('parent-a', DEFAULT_SETTINGS, {}, { transcribe: true }, now)
-  assert.ok('status' in unknown && unknown.status === 400)
+  assert.ok('status' in unknown && unknown.status === 403)
   const same = patchSettings('parent-a', DEFAULT_SETTINGS, {}, { volume: 70 }, now)
   assert.ok('changed' in same && same.changed.length === 0)
 })
