@@ -20,8 +20,8 @@
    dtoverlay=disable-bt
    # modem power key (GPIO 4 = HAT P4): low from the first second, against its boot pull-up
    gpio=4=op,dl
-   # Play blue from power-on, until dadbox-bootlight takes over (ADR 0024 §7)
-   gpio=25=op,dh
+   # Play all colours on from power-on, until dadbox-bootlight takes over (ADR 0024 §7)
+   gpio=23,24,25=op,dh
    # in the field only; the bench needs Wi-Fi
    #dtoverlay=disable-wifi
    ```

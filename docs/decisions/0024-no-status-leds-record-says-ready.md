@@ -60,7 +60,9 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
    mixed ones included, from about a second after power-on until the box is
    first ready; then Play goes dark and Record shows its ready glow. In
    three layers, because nothing of ours runs at first:
-   - `gpio=25=op,dh` in `config.txt`: Play blue from the firmware on.
+   - `gpio=23,24,25=op,dh` in `config.txt`: Play's red, green and blue all on
+     from the firmware on — no dimming exists there, so not a balanced white
+     (user's choice over steady blue and pull-up mixes).
    - `dadbox-bootlight.service` (early boot, `pinctrl`): steps Play through
      red, green, blue, 0.5 s each, from when systemd starts (~10.6 s) until
      the light driver takes the pins (it creates `/run/dadbox/bootlight-stop`).

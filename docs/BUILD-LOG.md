@@ -7,7 +7,7 @@ Newest entry at the top. One entry per session at the bench.
 **Did:** With the box closed and on mains, tuned what a child sees and hears,
 each step deployed and judged live. Faster answers: 15 s check-ins for 5 min
 after use (ADR 0015 revised). Power-on: Play blue from the firmware
-(`config.txt gpio=25`), a rainbow from ~10.6 s (`dadbox-bootlight.service`,
+(`config.txt gpio=25`, later all three: `gpio=23,24,25`), a rainbow from ~10.6 s (`dadbox-bootlight.service`,
 system Python + lgpio, installed through `overlayroot-chroot`), handed to
 the service through `/run/dadbox/bootlight-stop`, until first ready (ADR
 0024 §7). A white point tuned live through a file-fed PWM holder: red 25 %,
