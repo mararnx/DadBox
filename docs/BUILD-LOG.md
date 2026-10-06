@@ -2,6 +2,70 @@
 
 Newest entry at the top. One entry per session at the bench.
 
+## 2026-10-06 — New amp: loud scratch at any level, until it was rewired to the scheme
+
+**Did:** Fitted a new amp, the same "MAX98367" clone module as U5 (silkscreen
+"I2S 3W Class D Amplifier Module V1.0"). Digital silence still scratched,
+lower than before and audible at 1 m. Ruled out one by one: Wi-Fi traffic,
+the modem (USB unplugged), the supply (power bank), the in-box wire length
+(short jumpers), the frame format (`hifiberry-dac` with 16-bit frames for
+one boot, then the voicehat overlay restored). The telling test: one note
+three times, each 10× (later 20 dB) quieter — heard **equally loud, or
+louder**, and a left-only and a right-only note both played. Powering the
+mic (GPIO 17 high) made it cleaner; taking the mic's clocks off, cleaner
+still, but no quieter. Then an I2S loopback, a jumper from header pin N to
+pin 38 (PCM_DIN) with the mic's data wire off: DIN on 40 came back
+bit-exact (9.2 M bits, 0 errors) with the amp as load; LRC on 35 gave
+`0x00000001 / 0xFFFFFFFE` in every frame; BCLK on 12 read constant with no
+glitch. With the Pi cleared, the amp was reconnected to `WIRING.md`: a
+falling test went very quiet and clean, and five notes at about −18 dBFS
+"sound great". GAIN left unconnected (9 dB). Then the mic, clocks back on,
+service stopped, powered by GPIO 17 (red light on) and recorded raw: left
+channel only (L/R to GND), speech at 30 cm −28 to −39 dBFS rms, peaks
+−8 dBFS, right channel digital zero. Played back through the amp: "clear
+and natural".
+**Learned:** Loudness that does not follow the level means the amp is
+reading the wrong bits — no gain or volume setting touches it, so stop
+turning things down and check the wiring. The loopback is a free, exact
+test of the Pi's audio pins: a jumper to pin 38, `arecord` while `aplay`
+sends a known pattern, then compare words; check with `pinctrl lev 20`
+that pin 38 actually toggles, or a loose jumper reads as a clean zero. Which
+wire was wrong before the rewire was not identified. GPIO 16 drives SD at
+3.3 V, yet the amp plays both channels: this clone does not select a channel
+the way a MAX98357A does (harmless, the stream is mono). The mic's output
+drifts after power-up: a silent take swings its DC by ±0.18 of full scale
+(−15 to −30 dBFS rms, louder than speech) and settles only after ~1.5 s,
+far past the 100 ms the capture drops. But it is subsonic: the box's own
+encode (Opus 16 kbit/s, `-application voip`, which high-passes) takes the
+same take to −71 to −77 dBFS throughout, leaving one 50 ms click at
+power-on at −51 dBFS. That was true of the encode, not of the box:
+the first real recordings through the service went wrong twice. (1) A
+normal release came out as `capture failed: arecord ended` (fault CAPTURE,
+nothing queued): `stop()` terminates arecord while the pump waits in
+`read()`, which returns `b""` before the loop re-checks the stop flag.
+Fixed in `hw/pi.py`, with a regression test. The capture stayed on `/data`
+as designed and was sent by the boot recovery. (2) Both recordings reached
+the server as exactly **2.0 s** (one was 5.4 s): `trim` counted the drift as
+speech (a silent take through the service's path: 1.9 s "speech") and real
+speech at 50 cm, −52 to −66 dBFS in that path, as silence against
+`SPEECH_RMS` −38 dBFS. The plaintext is deleted once queued, so both
+messages are cut for good — and a softly spoken message would have been
+discarded whole as under 1 s of speech. Fixed: `dsp.level` takes each 2 ms
+slice's mean and slope out before measuring (drift to the noise floor;
+−7 dB at 300 Hz, flat above 1 kHz; 1.1 s per minute of audio on the Zero),
+used for trim and the silence stop; `SPEECH_LEVEL` −70 dBFS from a bench
+take, set low on purpose. Deployed. GAIN on VIN made no
+audible difference while the bits were wrong. The box was rewired twice
+with power on today.
+**Next:** the modem is still missing from `lsusb` after being unplugged —
+reseat its USB lead; play a real message with `dadboxctl play` at 70 % and
+the chime; a real recording through the service (Record button →
+outbox → the phone) whose length matches what was said; re-measure
+`SPEECH_LEVEL` with the mic behind its hole, and with a child; the capture
+path may lose level (S32 → S16, stereo probably averaged to mono with an empty right
+channel, 48 → 16 kHz in the ALSA plug) — take the left channel and add gain;
+correct the amp in the BOM and `WIRING.md` (still open from 10-02).
+
 ## 2026-10-02 — All wires on: buttons pass, the amp scratches even on silence
 
 **Did:** First boot on header power (5 V on pins 4/6, ADR 0026): no
