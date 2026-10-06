@@ -101,7 +101,7 @@ def _ready_cyan() -> RGB:
 
 def ready_colour(t: float) -> RGB:
     """Record's ready glow: blue ↔ cyan, slowly, never red (the mic's pin) and never
-    pure green (green on Play means a message). Play runs it half a round behind."""
+    pure green (green means a message)."""
     # There and back, easing out so it lingers at cyan; a straight crossfade in duty
     # between two colours that look equally bright, so the brightness holds and only
     # the colour moves.
@@ -148,11 +148,7 @@ def render(plan: LightsPlan, t: float) -> Frame:
             record = _scale(BLUE, k * READY_LEVEL)
 
     # 2. Playing: play button steady green.
-    if plan.lights is Lights.IDLE and plan.ready and not plan.locked:
-        # Ready and nothing waiting: Play runs Record's drift half a round behind,
-        # so the colour flows from one button to the other (ADR 0024 §8).
-        play = _scale(ready_colour(t + READY_DRIFT_S / 2), k * READY_LEVEL)
-    elif plan.lights is Lights.PLAYING:
+    if plan.lights is Lights.PLAYING:
         play = _scale(GREEN, k)
     # 4. Waiting: play button pulses green; resting (dim) after 2 h. 5. Idle: both dark.
     elif plan.lights in (Lights.WAITING, Lights.GOT_IT):

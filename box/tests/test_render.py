@@ -66,18 +66,10 @@ def test_ready_drift_has_no_big_steps():
         assert render(LightsPlan(lights=Lights.IDLE, brightness=100), t).play == (0.0, 0.0, 0.0)   # not ready: Play dark
 
 
-def test_ready_play_flows_half_a_round_behind_record():
-    for i in range(20):
-        t = i * READY_DRIFT_S / 20
+def test_ready_lights_only_record_play_stays_dark():
+    for t in [0, 0.7, 1.9, 3.1]:
         f = render(LightsPlan(lights=Lights.IDLE, brightness=100, ready=True), t)
-        assert f.play == render(LightsPlan(lights=Lights.IDLE, brightness=100, ready=True), t + READY_DRIFT_S / 2).record
-    f = render(LightsPlan(lights=Lights.IDLE, brightness=100, ready=True), 0.0)
-    assert f.record[2] > 0 and f.record[1] == 0 and f.play[1] > 0 and f.play[2] > 0     # blue here, cyan there
-    for plan in (LightsPlan(lights=Lights.IDLE, ready=True, locked=True),
-                 LightsPlan(lights=Lights.IDLE, ready=False)):
-        assert render(plan, 1.0).play == (0.0, 0.0, 0.0)
-    waiting = render(LightsPlan(lights=Lights.WAITING, brightness=100, ready=True), 2.0).play
-    assert waiting[0] == 0 and waiting[2] == 0 and waiting[1] > 0.9                        # a message: green pulse
+        assert f.play == (0.0, 0.0, 0.0) and max(f.record) > 0
 
 
 def test_not_ready_blinks_blue_on_record():

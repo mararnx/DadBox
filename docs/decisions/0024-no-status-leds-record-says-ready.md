@@ -35,7 +35,7 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
    | --- | --- |
    | unplugged | dark |
    | powering on, not yet ready (§7) | dark; Play runs through the colours |
-   | ready: the server answered within 2 × the check-in interval, and no fault | **blue–cyan flow on both buttons**, Record dark while a message waits (§8) |
+   | ready: the server answered within 2 × the check-in interval, and no fault | **blue–cyan flow**, Play dark; Record dark while a message waits (§8) |
    | not ready: no network, no server, or a fault (storage, capture, modem) | **slow dim blue blink**, 1 s on, 2 s off |
    | playing a message (a Record press is ignored then) | dark |
    | travel lock on | dark |
@@ -83,10 +83,9 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
    lingers at cyan (`READY_CYAN_DWELL`), at 60 % of the brightness setting
    (`READY_LEVEL`). Cyan is the balanced cyan at the same brightness as full
    blue, counting 25 % green as worth all of blue (`READY_GREEN`, judged on the
-   bench), so the brightness holds and only the colour moves. **Play runs the
-   same glow half a round behind**, so the colour flows from one button to the
-   other — only while ready and nothing waits. Never red (Record's red is the
-   mic) and never pure green (green on Play means a message). **While a message
+   bench), so the brightness holds and only the colour moves. Play stays dark
+   (a mirrored flow on Play was tried the same day and taken back). Never red
+   (Record's red is the mic) and never pure green (green means a message). **While a message
    waits, Record is dark** — ready or not — so Play's breathing green has the
    child's eye. Not ready is otherwise unchanged: Record's slow blue blink,
    Play dark.

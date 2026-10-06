@@ -338,7 +338,7 @@ HTTP API in about two minutes (a 20× clock, every step from a clean world).
 | Inbox removal after play | on the server's `played` ack, except the newest played message |
 | Quiet-hours glow | capped at 30 % of `led_brightness` |
 | Record tones | rising two-note "bee-boo" (660 → 990 Hz) before the mic, the same falling after; `volume`, half in quiet hours (they answer a press; the message chime stays silent then) |
-| Ready (blue–cyan flow, 4 s, Play half a round behind; Record dark while a message waits) | the server answered within 2 × the interval and no fault (ADR 0024) |
+| Ready (blue–cyan flow on Record, 4 s, Play dark; Record dark while a message waits) | the server answered within 2 × the interval and no fault (ADR 0024) |
 | Silence threshold / auto-stop | RMS 400 per 100 ms block, 20 s — tune on real audio |
 | Raw capture lifetime | unlinked right after the sealed container is fsynced |
 | Lock blink | two white blinks on Play (ADR 0024); Record keeps its red for the mic |
