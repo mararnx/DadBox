@@ -29,7 +29,11 @@ PIN_MODEM_PWRKEY = 4             # pin 7, joined to the HAT's pin 7 (P4 = PWR) b
 MODEM_AT_PORT = os.environ.get("DADBOX_MODEM_AT", "/dev/ttyACM0")   # the HAT enumerates as 05c6:9330, AT on ACM0
 ALSA_DEVICE = os.environ.get("DADBOX_ALSA", "default")
 DEBOUNCE_S = 0.02
-CAPTURE_GAIN = 1.7                # recordings sounded quiet on the phone (judged by ear, 2026-10-06); the limiter keeps loud takes from clipping
+# Every message to one loudness (EBU R128, -16 LUFS, peaks under -1.5 dBTP): a fixed
+# gain could not cover the ~20 dB between a child close by and one across the room
+# with the lid shut. On the bench a quiet take went -39 -> -21 dB mean, a loud one
+# stayed. Costs ~16 s more encoding for a 3-minute message on the Zero 2 W.
+LOUDNESS = "loudnorm=I=-16:TP=-1.5:LRA=11,aresample=16000"
 
 
 class PiButtons:
@@ -254,7 +258,7 @@ class PiAudio:
         duration_ms = int(size / 2 / RATE * 1000)
         out = subprocess.run(
             ["ffmpeg", "-v", "error", "-f", "s16le", "-ar", str(RATE), "-ac", "1", "-i", pcm_path,
-             "-af", f"volume={CAPTURE_GAIN},alimiter=limit=0.95:level=0",
+             "-af", LOUDNESS,
              "-c:a", "libopus", "-b:a", "16k", "-application", "voip", "-f", "ogg", "-"],
             capture_output=True, check=True)
         return out.stdout, duration_ms
