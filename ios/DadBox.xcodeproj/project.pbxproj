@@ -188,6 +188,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Config/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DadBox;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Scans the setup code and the key's paper copy.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Shows the key that reads every message.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Records the messages you send to the box. Only while the red button shows.";
@@ -224,6 +225,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Config/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DadBox;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Scans the setup code and the key's paper copy.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Shows the key that reads every message.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Records the messages you send to the box. Only while the red button shows.";
