@@ -62,7 +62,9 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
    three layers, because nothing of ours runs at first:
    - `gpio=23,24,25=op,dh` in `config.txt`: Play's red, green and blue all on
      from the firmware on — no dimming exists there, so not a balanced white
-     (user's choice over steady blue and pull-up mixes).
+     (user's choice over steady blue and pull-up mixes). At 3.3 V red
+     dominates, so the first ~10 s look red; the user judged that fine
+     (2026-10-06).
    - `dadbox-bootlight.service` (early boot, `pinctrl`): steps Play through
      red, green, blue, 0.5 s each, from when systemd starts (~10.6 s) until
      the light driver takes the pins (it creates `/run/dadbox/bootlight-stop`).

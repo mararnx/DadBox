@@ -22,8 +22,9 @@ as PROTOCOL.md says. Checked live: settings hold no mute, a mute PATCH gets
 since ADR 0020 — a contract change needs a sweep of all three streams, not
 only the one that prompted it.
 **Next:** Look at the Box screen in build 12 on the phone. APNs key, the
-doorbell bench measurements (ADR 0021), and the open questions from the
-evening entry below.
+doorbell bench measurements (ADR 0021), and the new loudness on more takes.
+Answered from the evening entry: the firmware stage of power-on (all three
+of Play's colours on, which looks red at 3.3 V) is fine as it is.
 
 ## 2026-10-06 (evening) — Lights, sounds and loudness tuned by eye and ear
 
