@@ -39,8 +39,10 @@ LOCK_BLINK_S = 1.2                # Play blinks white twice on lock and unlock (
 BREATHE_PERIOD_S = 4.0
 RESTING_LEVEL = 0.15              # *resting*: dim, not off
 QUIET_CAP = 0.3                   # quiet hours: the glow is capped, so it doesn't light a bedroom
-READY_LEVEL = 0.3                 # Record's dim glow: ready drifts blue–green, not ready blinks blue (ADR 0024)
-READY_DRIFT_S = 20.0              # ready: blue → cyan → green → cyan → blue, once in this long
+READY_LEVEL = 0.6                 # Record's dim glow: ready drifts blue–green, not ready blinks blue (ADR 0024)
+READY_DRIFT_S = 5.0               # ready: blue → cyan → green → cyan → blue, once in this long
+READY_MIX_LINGER = 0.7            # 0 = even pace; higher = more time in the mixed colours
+READY_GREEN = 0.25                # the green as bright to the eye as full blue (judge on the bench)
 NOT_READY_PERIOD_S = 3.0          # not ready: 1 s on, 2 s off
 NOT_READY_ON_S = 1.0
 RAINBOW_PERIOD_S = 3.0           # powering on: Play runs through every colour, Record dark (ADR 0024 revised)
@@ -92,8 +94,15 @@ def _rainbow(t: float) -> RGB:
 def ready_colour(t: float) -> RGB:
     """Record's ready glow: a slow drift through the colours blue and green make,
     balanced for the buttons. Never red: that is the mic's pin."""
-    x = 0.5 - 0.5 * math.cos(2 * math.pi * t / READY_DRIFT_S)        # 0 = blue, 1 = green
-    return balanced((0.0, x, 1.0 - x))
+    # There and back, lingering in the blue–green mix and passing quickly through
+    # pure blue and pure green, as a straight crossfade in duty between a blue and a
+    # green that look equally bright: the light adds up, so the brightness holds and
+    # only the colour moves.
+    phase = (t / READY_DRIFT_S) % 1.0
+    u = 2 * phase if phase < 0.5 else 2 - 2 * phase                  # an even walk 0 → 1 → 0
+    s = 2 * u - 1
+    x = 0.5 + 0.5 * (READY_MIX_LINGER * s ** 3 + (1 - READY_MIX_LINGER) * s)   # 0 = blue, 1 = green
+    return (0.0, x * READY_GREEN, 1.0 - x)
 
 
 def _lock_blink(x: float) -> bool:

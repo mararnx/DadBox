@@ -70,19 +70,36 @@ def _end_bootlight() -> None:
     time.sleep(0.5)
 
 
+LED_PWM_HZ = 200
+
+
 class PiButtonLights:
-    """Software PWM on five pins. The sixth — record red — is the mic gate's and is ignored here."""
+    """Software PWM on five pins. The sixth — record red — is the mic gate's and is ignored here.
+
+    lgpio directly, not gpiozero's PWMLED: gpiozero rounds the duty down to a whole
+    percent, which left the dim ready glow (≤ ~16 %) with a dozen visible steps.
+    lgpio takes a fractional duty (bench, 2026-10-06)."""
+
+    PINS = (PIN_RECORD_GREEN, PIN_RECORD_BLUE, PIN_PLAY_RED, PIN_PLAY_GREEN, PIN_PLAY_BLUE)
 
     def __init__(self):
-        from gpiozero import PWMLED
+        import lgpio
         _end_bootlight()
-        self.rg, self.rb = PWMLED(PIN_RECORD_GREEN), PWMLED(PIN_RECORD_BLUE)
-        self.pr, self.pg, self.pb = PWMLED(PIN_PLAY_RED), PWMLED(PIN_PLAY_GREEN), PWMLED(PIN_PLAY_BLUE)
+        self._lg = lgpio
+        self._h = lgpio.gpiochip_open(0)
+        for p in self.PINS:
+            lgpio.gpio_claim_output(self._h, p, 0)
+        self._last = [-1.0] * len(self.PINS)
 
     def write(self, frame: Frame) -> None:
+        # Only the channels that changed: each write restarts that pin's PWM cycle,
+        # and rewriting all five at RENDER_HZ showed as jitter in slow fades.
         _, g, b = frame.record
-        self.rg.value, self.rb.value = g, b
-        self.pr.value, self.pg.value, self.pb.value = frame.play
+        for i, v in enumerate((g, b) + tuple(frame.play)):
+            v = max(0.0, min(1.0, v))
+            if v != self._last[i]:
+                self._lg.tx_pwm(self._h, self.PINS[i], LED_PWM_HZ, 100.0 * v)
+                self._last[i] = v
 
 
 class PiAmpGate:

@@ -29,7 +29,7 @@ from .store import Store
 log = logging.getLogger("dadbox")
 
 TICK_S = 0.05
-RENDER_HZ = 30
+RENDER_HZ = 30                  # with fractional PWM duty a 5 s fade is smooth at 30 Hz; the Pi writes only channels that change
 
 
 class LightsDriver:

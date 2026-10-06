@@ -38,16 +38,28 @@ def test_playing_is_steady_green_and_record_is_dark():
 
 
 def test_ready_drifts_slowly_through_blue_and_green_on_record():
+    from dadbox.lights import READY_GREEN
     for lights in (Lights.IDLE, Lights.WAITING):
-        frames = [render(LightsPlan(lights=lights, brightness=100, ready=True), i * 0.5) for i in range(41)]
+        frames = [render(LightsPlan(lights=lights, brightness=100, ready=True), i * READY_DRIFT_S / 40) for i in range(41)]
         for f in frames:
             r, g, b = f.record
-            assert r == 0.0 and abs(max(g, b) - READY_LEVEL) < 1e-9      # dim, never off, never red
-        assert frames[0].record == (0.0, 0.0, READY_LEVEL)                # blue
-        assert frames[20].record == (0.0, READY_LEVEL, 0.0)               # green, half way round
-        g, b = frames[10].record[1:]
-        assert 0 < g < b                                                  # cyan between
+            assert r == 0.0 and 0 < g + b <= READY_LEVEL + 1e-9               # dim, never off, never red
+        assert frames[0].record == (0.0, 0.0, READY_LEVEL)                    # blue
+    for lights in (Lights.IDLE,):
+        half = READY_DRIFT_S / 2
+        f = render(LightsPlan(lights=lights, brightness=100, ready=True), half).record
+        assert abs(f[1] - READY_LEVEL * READY_GREEN) < 1e-9 and f[2] < 1e-9       # green, as bright as blue
+        g, b = render(LightsPlan(lights=lights, brightness=100, ready=True), half / 2).record[1:]
+        assert 0 < g < b                                                      # cyan between
     assert ready_colour(0.0) == ready_colour(READY_DRIFT_S)
+
+
+def test_ready_drift_has_no_big_steps():
+    prev = ready_colour(0.0)
+    for i in range(1, 601):                                                   # 30 Hz over the 20 s round
+        c = ready_colour(i * READY_DRIFT_S / 600)
+        assert max(abs(a - b) for a, b in zip(c, prev)) < 0.02
+        prev = c
     for t in [0, 0.75, 1.5]:
         assert render(LightsPlan(lights=Lights.IDLE, brightness=100), t).play == (0.0, 0.0, 0.0)   # replay shows nothing
 

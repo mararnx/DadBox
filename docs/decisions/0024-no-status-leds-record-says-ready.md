@@ -78,12 +78,22 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
 
    Play's colours otherwise mean messages (green) and the lock (white); the
    rainbow is only ever seen right after plugging in.
-8. **Ready drifts (2026-10-06).** Steady dim blue becomes a dim glow that
-   drifts slowly through the colours blue and green make — blue, cyan,
-   green, cyan, blue, once every 20 s (`READY_DRIFT_S`), balanced like every
-   mix. Never red: Record's red is the mic. Not ready is unchanged: the slow
-   blue blink, on and off. Ready is never dark, so the two stay apart; the
-   got-it pulse is bright green and short, the drift is dim and slow.
+8. **Ready drifts (2026-10-06).** Steady dim blue becomes a glow that drifts
+   blue → cyan → green → cyan → blue once every 5 s (`READY_DRIFT_S`),
+   lingering in cyan (`READY_MIX_LINGER`), at 60 % of the brightness setting
+   (`READY_LEVEL`). It is a straight crossfade between full blue and a green
+   that looks as bright (`READY_GREEN` = 25 %, judged on the bench), so the
+   brightness holds and only the colour moves. Never red: Record's red is the
+   mic. Not ready is unchanged: the slow blue blink, on and off. Ready is never
+   dark, so the two stay apart.
+
+   Smoothness needed two driver changes, both measured on the bench: gpiozero
+   rounds PWM duty down to whole percent (a dozen visible steps at this
+   dimness), so the button LEDs are driven through lgpio directly with a
+   fractional duty; and only channels that change are written. Rendering stays
+   at 30 Hz — 90 Hz looked no different once the duty was fine-grained. Cost:
+   lgpio's software PWM is ~0.85 % of one core per 100 Hz for two pins; the
+   whole service runs at ~8 % of one core.
 
 ## Alternatives considered
 
