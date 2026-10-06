@@ -56,11 +56,26 @@ class PiMicGate:
         return bool(self.pin.value)
 
 
+BOOTLIGHT_STOP = "/run/dadbox/bootlight-stop"
+
+
+def _end_bootlight() -> None:
+    """dadbox-bootlight.service cycles Play's colours from early boot (ADR 0024 §7).
+    It stops itself when this file appears; wait out its last step (0.4 s) so it
+    lets go of the pins before the PWM takes them, and the rainbow carries on."""
+    try:
+        open(BOOTLIGHT_STOP, "w").close()
+    except OSError:
+        return                                   # not under systemd (the Mac, a test)
+    time.sleep(0.5)
+
+
 class PiButtonLights:
     """Software PWM on five pins. The sixth — record red — is the mic gate's and is ignored here."""
 
     def __init__(self):
         from gpiozero import PWMLED
+        _end_bootlight()
         self.rg, self.rb = PWMLED(PIN_RECORD_GREEN), PWMLED(PIN_RECORD_BLUE)
         self.pr, self.pg, self.pb = PWMLED(PIN_PLAY_RED), PWMLED(PIN_PLAY_GREEN), PWMLED(PIN_PLAY_BLUE)
 

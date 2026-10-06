@@ -2,16 +2,15 @@
 Description=DadBox power-on light: Play runs through the colours until the service takes over
 # ADR 0024 as revised 2026-10-06. config.txt lights Play blue from the firmware
 # on; this steps Play through red, yellow, green, cyan, blue, magenta, white from
-# early boot; dadbox.service stops it first thing (ExecStartPre) and carries the
-# rainbow on, smoothly, until the box is first ready.
+# early boot until the service's light driver creates /run/dadbox/bootlight-stop
+# (dadbox/hw/pi.py), which then carries the rainbow on until the box is first ready.
+# No ordering: pinctrl is on the root, so it needn't wait for /data's fsck.
 DefaultDependencies=no
-After=local-fs.target
 
 [Service]
 Type=simple
 # Play: red 23, green 24, blue 25. Each step lists the pins that are on.
-ExecStart=/bin/sh -c 'while :; do for on in 23 23,24 24 24,25 25 23,25 23,24,25; do /usr/bin/pinctrl set 23,24,25 op dl; /usr/bin/pinctrl set $$on op dh; sleep 0.4; done; done'
-ExecStopPost=/usr/bin/pinctrl set 23,24,25 op dl
+ExecStart=/bin/sh -c 'while :; do for on in 23 23,24 24 24,25 25 23,25 23,24,25; do [ -e /run/dadbox/bootlight-stop ] && break 2; /usr/bin/pinctrl set 23,24,25 op dl; /usr/bin/pinctrl set $$on op dh; sleep 0.4; done; done; /usr/bin/pinctrl set 23,24,25 op dl'
 
 [Install]
 WantedBy=sysinit.target

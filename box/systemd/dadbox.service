@@ -9,8 +9,6 @@ User=dadbox
 # gpio, audio, i2c, dialout (the modem's AT port): see box/setup/README.md step 5
 SupplementaryGroups=gpio audio i2c dialout
 WorkingDirectory=/opt/dadbox
-# The power-on blink ends as the service starts (dadbox-bootlight.service); `+` runs it as root.
-ExecStartPre=-+/bin/systemctl stop dadbox-bootlight.service
 ExecStart=/opt/dadbox/.venv/bin/python -m dadbox
 Restart=always
 RestartSec=3
