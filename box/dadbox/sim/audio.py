@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Callable, Optional, Tuple
 
 from ..clock import Clock
-from ..dsp import BLOCK_BYTES, BLOCK_MS, RATE, SPEECH_RMS, rms, synthetic_voice, wav
+from ..dsp import BLOCK_BYTES, BLOCK_MS, RATE, SPEECH_LEVEL, level, synthetic_voice, wav
 
 HAVE_FFMPEG = shutil.which("ffmpeg") is not None
 
@@ -50,7 +50,7 @@ class _FakeCapture:
                     now = clock.now()
                     if now - last_sync >= 1.0:
                         f.flush(); os.fsync(f.fileno()); last_sync = now
-                    silence_s = silence_s + BLOCK_MS / 1000 if rms(block) < SPEECH_RMS else 0.0
+                    silence_s = silence_s + BLOCK_MS / 1000 if level(block) < SPEECH_LEVEL else 0.0
                     on_level(now - start, silence_s)
                     clock.sleep(BLOCK_MS / 1000)
                 f.flush(); os.fsync(f.fileno())
@@ -78,8 +78,8 @@ class SimAudio:
         return data[44:] if data[:4] == b"RIFF" else data
 
     def next_block(self, pos: int) -> bytes:
-        if not self.speaking:                          # room tone: a faint hiss, well under SPEECH_RMS
-            return array.array("h", (random.randint(-25, 25) for _ in range(BLOCK_BYTES // 2))).tobytes()
+        if not self.speaking:                          # room tone: a faint hiss, ~ -77 dBFS like the bench room
+            return array.array("h", (random.randint(-8, 8) for _ in range(BLOCK_BYTES // 2))).tobytes()
         i = pos % len(self.voice)
         block = self.voice[i:i + BLOCK_BYTES]
         return block + self.voice[:BLOCK_BYTES - len(block)] if len(block) < BLOCK_BYTES else block
