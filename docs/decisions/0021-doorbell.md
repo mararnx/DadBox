@@ -4,7 +4,9 @@
 **Status:** accepted 2026-09-22 — revises the mains row of
 [ADR 0015](0015-adaptive-polling.md); the battery rows are unchanged.
 Implemented in the box, the simulator and the server; the server migration
-waits to be deployed, and the bench measurements below are still open.
+went live 2026-10-06 (a settings change rang a joined client in ~0.4 s, 5 of 6;
+the first broadcast on the new topic was missed). The bench measurements
+below are still open.
 
 ## Context
 
