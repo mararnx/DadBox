@@ -2,6 +2,40 @@
 
 Newest entry at the top. One entry per session at the bench.
 
+## 2026-10-06 (evening) — Lights, sounds and loudness tuned by eye and ear
+
+**Did:** With the box closed and on mains, tuned what a child sees and hears,
+each step deployed and judged live. Faster answers: 15 s check-ins for 5 min
+after use (ADR 0015 revised). Power-on: Play blue from the firmware
+(`config.txt gpio=25`), a rainbow from ~10.6 s (`dadbox-bootlight.service`,
+system Python + lgpio, installed through `overlayroot-chroot`), handed to
+the service through `/run/dadbox/bootlight-stop`, until first ready (ADR
+0024 §7). A white point tuned live through a file-fed PWM holder: red 25 %,
+green 63 %, blue 100 %. Ready became a blue–cyan flow on Record, 4 s,
+constant brightness; Play dark; Record dark while a message waits (§8).
+Sounds chosen from five synthesized styles each, numbered by green blinks on
+Record: a two-note "bee-boo" before and after recording (the start tone
+played to the end before the mic gets power), a marimba pair for a new
+message that repeats once after 10 s, a low marimba pair for lock on/off.
+Lock: two cyan-white flashes on both buttons, one on unlock, three on a
+press while locked (§9). Messages normalized with `loudnorm` (EBU R128,
+−16 LUFS). User walked through power-on, recording, receiving and lock:
+all as intended.
+**Learned:** gpiozero's `PWMLED` truncates duty to whole percent — at a dim
+16 % that is a dozen visible steps; lgpio's `tx_pwm` takes a fraction. A
+smooth fade needs constant brightness, not more frames: crossfade straight
+in duty between colours that look equally bright (green 25 % ≈ blue 100 %
+on these buttons). The built-in resistors are sized for 5 V, so at 3.3 V red
+outshines green outshines blue and on/off mixes look red. Record can never
+show white: its red is the mic. lgpio software PWM costs ~0.85 % of a core
+per 100 Hz per two pins. A fixed capture gain cannot cover the ~20 dB between
+takes; `loudnorm` took a quiet one from −39 to −21 dB mean at ~16 s extra
+encode for 3 minutes. A `dadboxctl record` test take is uploaded if it holds
+1.3 s of "speech" — one went to the parent's archive (cannot be deleted).
+**Next:** Is the first ~10 s (steady blue, the firmware stage) good enough,
+or try a pull-up on red for a rough white. Judge the new loudness on more
+takes from across the room.
+
 ## 2026-10-06 — New amp: loud scratch at any level, until it was rewired to the scheme
 
 **Did:** Fitted a new amp, the same "MAX98367" clone module as U5 (silkscreen
