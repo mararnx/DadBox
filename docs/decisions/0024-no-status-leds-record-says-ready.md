@@ -5,6 +5,7 @@
 (two vocabularies become one), [ADR 0016](0016-two-buttons-no-lid.md) §4
 (the lock blink) and [ADR 0020](0020-no-mute-replay-green-link.md) §3–5
 and §7
+— revised 2026-10-06 (user decision): powering on is shown on Play, see §7
 
 ## Context
 
@@ -33,6 +34,7 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
    | Box | Record |
    | --- | --- |
    | unplugged | dark |
+   | powering on, not yet ready (§7) | dark; Play runs through the colours |
    | ready: the server answered within 2 × the check-in interval, and no fault | **steady dim blue** (30 % of the brightness setting) |
    | not ready: no network, no server, or a fault (storage, capture, modem) | **slow dim blue blink**, 1 s on, 2 s off |
    | playing a message (a Record press is ignored then) | dark |
@@ -53,6 +55,22 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
 6. **The buttons now carry one "not ready" state.** CLAUDE.md's "the buttons'
    lights have no error state" is revised: Record's blink says only "not
    ready". The child is not asked to interpret it; the app says why.
+7. **Powering on (2026-10-06).** The box was dark for ~36 s after the plug
+   went in, which looked like a dead box. Now Play runs through the colours,
+   mixed ones included, from about a second after power-on until the box is
+   first ready; then Play goes dark and Record shows steady dim blue. In
+   three layers, because nothing of ours runs at first:
+   - `gpio=25=op,dh` in `config.txt`: Play blue from the firmware on.
+   - `dadbox-bootlight.service` (early boot, `pinctrl`): steps Play through
+     red, yellow, green, cyan, blue, magenta, white, 0.4 s each.
+   - The service stops that unit as it starts and carries a smooth rainbow
+     (`booting` in the lights plan) until it is first ready. It ends for good
+     at the first ready, at any press or lock, if a message is waiting (its
+     green pulse matters more), or after 3 minutes, when Record's not-ready
+     blink takes over. It is shown once per power-on, never again.
+
+   Play's colours otherwise mean messages (green) and the lock (white); the
+   rainbow is only ever seen right after plugging in.
 
 ## Alternatives considered
 

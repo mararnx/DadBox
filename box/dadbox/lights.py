@@ -12,6 +12,7 @@ got it — is blue or green (ADR 0024).
 """
 from __future__ import annotations
 
+import colorsys
 import math
 from dataclasses import dataclass
 from enum import Enum
@@ -35,6 +36,7 @@ QUIET_CAP = 0.3                   # quiet hours: the glow is capped, so it doesn
 READY_LEVEL = 0.3                 # Record's dim blue, steady or blinking (ADR 0024)
 NOT_READY_PERIOD_S = 3.0          # not ready: 1 s on, 2 s off
 NOT_READY_ON_S = 1.0
+RAINBOW_PERIOD_S = 3.0           # powering on: Play runs through every colour, Record dark (ADR 0024 revised)
 
 
 class Cue(Enum):
@@ -52,6 +54,7 @@ class LightsPlan:
     quiet: bool = False           # quiet hours
     locked: bool = False          # travel lock: Record shows neither ready nor not-ready
     ready: bool = False           # the server answered recently and nothing is faulty (ADR 0024)
+    booting: bool = False         # powered on, not yet ready: the rainbow on Play
 
 
 @dataclass(frozen=True)
@@ -66,6 +69,10 @@ def _scale(c: RGB, k: float) -> RGB:
 
 def _breathe(t: float, period: float = BREATHE_PERIOD_S) -> float:
     return 0.5 - 0.5 * math.cos(2 * math.pi * t / period)
+
+
+def _rainbow(t: float) -> RGB:
+    return colorsys.hsv_to_rgb((t / RAINBOW_PERIOD_S) % 1.0, 1.0, 1.0)
 
 
 def _lock_blink(x: float) -> bool:
@@ -83,6 +90,11 @@ def render(plan: LightsPlan, t: float) -> Frame:
     # 1. Recording: steady red, exactly full, whatever the brightness setting.
     if plan.lights is Lights.RECORDING:
         return Frame(record=RED, play=DARK)
+
+    # Powering on: until the box is first ready, Play runs through the colours and
+    # Record stays dark. Anything the child does ends it (the core clears `booting`).
+    if plan.booting and plan.lights is Lights.IDLE:
+        return Frame(record=DARK, play=_scale(_rainbow(t), k))
 
     record: RGB = DARK
     play: RGB = DARK

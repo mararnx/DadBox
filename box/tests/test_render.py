@@ -5,11 +5,11 @@ from dadbox.state import Lights
 
 
 def test_record_red_is_only_ever_on_or_off():
-    for lights, cue, bright, resting, quiet, locked, ready in itertools.product(
+    for lights, cue, bright, resting, quiet, locked, ready, booting in itertools.product(
             Lights, [None, Cue.GOT_IT, Cue.LOCK], [0, 37, 100], [False, True], [False, True], [False, True],
-            [False, True]):
+            [False, True], [False, True]):
         plan = LightsPlan(lights=lights, cue=cue, cue_at=0.0, brightness=bright, resting=resting, quiet=quiet,
-                          locked=locked, ready=ready)
+                          locked=locked, ready=ready, booting=booting)
         for t in [i * 0.037 for i in range(120)]:
             red = render(plan, t).record[0]
             assert red in (0.0, 1.0)
@@ -73,3 +73,16 @@ def test_lock_blinks_play_white_twice():
     plan = LightsPlan(cue=Cue.LOCK, cue_at=0.0, brightness=100, locked=True)
     assert render(plan, 0.1).play == (1.0, 1.0, 1.0) and render(plan, 0.3).play == (0.0, 0.0, 0.0)
     assert render(plan, 0.1).record == (0.0, 0.0, 0.0)
+
+
+def test_powering_on_runs_play_through_the_colours_and_record_is_dark():
+    plan = LightsPlan(booting=True, brightness=100)
+    frames = [render(plan, i * 0.1) for i in range(30)]
+    assert all(f.record == (0.0, 0.0, 0.0) for f in frames)
+    seen = {tuple(round(x) for x in f.play) for f in frames}
+    assert {(1, 0, 0), (1, 1, 0), (0, 1, 0), (0, 1, 1), (0, 0, 1), (1, 0, 1)} <= seen    # mixed ones too
+
+
+def test_powering_on_gives_way_to_what_the_child_does():
+    assert render(LightsPlan(lights=Lights.RECORDING, booting=True), 1.0).record[0] == 1.0
+    assert render(LightsPlan(lights=Lights.PLAYING, booting=True, brightness=100), 1.0).play == (0.0, 1.0, 0.0)

@@ -315,3 +315,31 @@ def test_a_burst_of_arrivals_chimes_once():
     assert len(chimes) == 1 and len(core.s.inbox) == 7
     clock.skip(31)
     assert of(core.handle(c.Downloaded("01JAYZ3K7QW9E8RVX2M4N6P8TH")), c.Chime)
+
+
+def test_power_on_rainbow_until_first_ready():
+    clock, core = make()
+    assert core.booting(clock.now())
+    out = core.handle(c.Checkin(True, Settings(), ()))
+    assert not core.booting(clock.now())
+    assert of(out, c.SetLights)[-1].plan.booting is False and of(out, c.SetLights)[-1].plan.ready
+    core.s.last_checkin_ok_at = None
+    assert not core.booting(clock.now())                         # once over, never back
+
+
+def test_power_on_rainbow_gives_way_to_not_ready_after_three_minutes():
+    clock, core = make()
+    clock.skip(179)
+    core.handle(c.Tick())
+    assert core.booting(clock.now())
+    clock.skip(2)
+    out = core.handle(c.Tick())
+    assert of(out, c.SetLights)[-1].plan.booting is False         # Record blinks blue: not ready
+
+
+def test_power_on_rainbow_ends_when_the_child_records_or_a_message_waits():
+    clock, core = make()
+    press(clock, core, Button.RECORD)
+    assert not core.booting(clock.now())
+    clock, core = make(inbox=(MID,))
+    assert not core.booting(clock.now())                         # the green pulse matters more

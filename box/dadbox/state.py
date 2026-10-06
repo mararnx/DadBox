@@ -84,6 +84,8 @@ class Poll:
     backstop_minutes: int = 10
 
 
+BOOT_LIGHT_MAX_S = 3 * 60   # the power-on rainbow gives way to "not ready" if the box isn't ready by then
+
 JUST_USED_S = 5 * 60     # after an upload or a played message the parent often answers at once…
 JUST_USED_POLL_S = 15    # …so check in this often meanwhile, whatever the power (ADR 0015, revised)
 LINK_OK_MIN_S = 120      # the link is up while the last good check-in is at least this recent

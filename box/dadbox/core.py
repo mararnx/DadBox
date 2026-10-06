@@ -290,6 +290,7 @@ class BoxState:
     cue: Optional[Cue] = None
     cue_at: float = 0.0
     boot_at: float = 0.0
+    booted: bool = False                                    # the power-on rainbow is over, for good
     last_checkin_ok_at: Optional[float] = None
     last_checkin_wall: Optional[float] = None
     checkin_interval_s: int = 60
@@ -365,6 +366,15 @@ class Core:
         is faulty. Otherwise Record blinks blue — the box's only fault light."""
         return self.link(now) is Link.OK and self.fault() is Fault.NONE
 
+    def booting(self, now: float) -> bool:
+        """Powered on and not yet ready: Play shows the rainbow. Over for good once the
+        box is first ready, the child does anything, or BOOT_LIGHT_MAX_S has passed."""
+        s = self.s
+        if not s.booted and (self.ready(now) or s.mode is not Mode.IDLE or s.locked or s.inbox
+                             or now - s.boot_at >= rules.BOOT_LIGHT_MAX_S):
+            s.booted = True
+        return not s.booted
+
     def power(self) -> Power:
         # Steady means "external power is present" — with or without a battery.
         if self.s.battery_pct is None:
@@ -393,7 +403,7 @@ class Core:
         plan = LightsPlan(lights=self.lights(now), cue=cue, cue_at=self.s.cue_at,
                           brightness=self.s.settings.led_brightness,
                           resting=self.resting(now), quiet=self.quiet(), locked=self.s.locked,
-                          ready=self.ready(now))
+                          ready=self.ready(now), booting=self.booting(now))
         if plan != self._lights:
             self._lights = plan
             out.append(SetLights(plan))

@@ -342,6 +342,7 @@ HTTP API in about two minutes (a 20× clock, every step from a clean world).
 | Raw capture lifetime | unlinked right after the sealed container is fsynced |
 | Lock blink | two white blinks on Play (ADR 0024); Record keeps its red for the mic |
 | Record not ready | dim blue blink, 1 s on / 2 s off; dark while locked or playing (ADR 0024) |
+| Powering on | Play runs through the colours, Record dark, until first ready (or 3 min, a press, a waiting message); before the service: `config.txt` + `dadbox-bootlight.service` (ADR 0024 §7) |
 
 ## Not built yet
 

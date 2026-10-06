@@ -20,6 +20,8 @@
    dtoverlay=disable-bt
    # modem power key (GPIO 4 = HAT P4): low from the first second, against its boot pull-up
    gpio=4=op,dl
+   # Play blue from power-on, until dadbox-bootlight takes over (ADR 0024 §7)
+   gpio=25=op,dh
    # in the field only; the bench needs Wi-Fi
    #dtoverlay=disable-wifi
    ```
@@ -67,7 +69,8 @@
    fixed on the Pi — macOS openrsync ignores `--chmod`).
    `python3 -m venv --system-site-packages /opt/dadbox/.venv` (so gpiozero
    finds apt's `lgpio`, which pip would have to compile), `pip install -e .[pi]`, the unit from
-   `systemd/`, `systemctl enable --now dadbox`. `dadboxctl` on `$PATH`.
+   `systemd/`, `systemctl enable --now dadbox`; also `systemctl enable
+   dadbox-bootlight` (the power-on colours, ADR 0024 §7). `dadboxctl` on `$PATH`.
    Before the first start: `/data/config.env` with `DADBOX_URL` and
    `DADBOX_TOKEN`, and the family key in `/data/keys/1.key` (64 hex
    characters) — both **owned by `dadbox`, mode 0600**, or the service cannot
