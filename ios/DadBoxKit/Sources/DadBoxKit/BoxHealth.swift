@@ -10,7 +10,7 @@ public struct BoxHealth: Equatable, Sendable {
 
     public var level: Level
     public var headline: String      // "Fine", "Late since 14:10", "Silent for 9 h"
-    public var notes: [String]       // amber reasons: battery, mute, quiet hours, travel lock
+    public var notes: [String]       // amber reasons: battery, quiet hours, travel lock
     public var nextCheckin: Date?
 
     public init(status: DeviceStatus?, now: Date = Date(), calendar: Calendar = .current) {
@@ -27,7 +27,7 @@ public struct BoxHealth: Equatable, Sendable {
         let lateAt = last.addingTimeInterval(2 * Double(t.nextCheckinS))
         let silent = now.timeIntervalSince(last)
 
-        if now > lateAt || status.late {
+        if now > lateAt || status.late == true {
             level = .trouble
             headline = silent > 3 * 3600
                 ? "Silent for \(Self.span(silent))"
@@ -41,8 +41,11 @@ public struct BoxHealth: Equatable, Sendable {
             notes.append("Fault: \(fault.rawValue)")
         }
         if let pct = t.batteryPct, !t.mains, pct < 20 { notes.append("Battery \(pct) %") }
-        if t.locked { notes.append("Locked for travel") }
-        if status.settings.mute.a || status.settings.mute.b { notes.append("Muted") }
+        if t.locked {
+            // A locked box checks in only every idle_minutes, on any power: say when, not "offline" (ADR 0015).
+            notes.append(nextCheckin.map { "Locked for travel · next check-in in \(Self.span($0.timeIntervalSince(now)))" }
+                         ?? "Locked for travel")
+        }
         if Self.inQuietHours(status.settings.quietHours, at: now) { notes.append("Quiet hours") }
         if !notes.isEmpty { level = max(level, .attention) }
 
@@ -67,6 +70,17 @@ public struct BoxHealth: Equatable, Sendable {
         return p[0] * 60 + p[1]
     }
 
+    /// How soon a message sent now reaches the box: the doorbell and the cadence in words
+    /// (PROTOCOL.md § Check-in; ADR 0015, 0021).
+    public static func delivery(_ t: Telemetry) -> String {
+        let every = span(Double(t.nextCheckinS))
+        if t.locked { return "At its next check-in — locked, every \(every)" }
+        if t.doorbell == true { return "At once — the doorbell is connected" }
+        if t.nextCheckinS <= 20 { return "Within 15 s — the child just used it" }
+        if t.doorbell == false, t.mains { return "Within \(every) — the doorbell is not connected" }
+        return "Within \(every)"
+    }
+
     public static func span(_ seconds: TimeInterval) -> String {
         let s = Int(seconds)
         if s < 90 { return "1 min" }
@@ -88,6 +102,7 @@ public enum SentStatus {
             return uploadProgress.map { "Sending… \(Int($0 * 100)) %" } ?? "Sending…"
         case .uploaded:
             if health.level == .trouble, health.headline != "Fine" { return "Sent · box is late" }
+            if let t = status?.telemetry, t.doorbell == true, !t.locked { return "Sent · ringing the box" }
             if let next = health.nextCheckin, next > now { return "Sent · box checks in ~\(time(next))" }
             return "Sent · box checks in soon"
         case .delivered:
@@ -95,7 +110,6 @@ public enum SentStatus {
                 return "On the box for \(BoxHealth.span(now.timeIntervalSince(at)))"
             }
             guard let s = status?.settings else { return "On the box" }
-            if s.mute.a || s.mute.b { return "On the box · muted, it glows" }
             if BoxHealth.inQuietHours(s.quietHours, at: now) { return "On the box · quiet hours, it glows" }
             return "On the box · glowing"
         case .played:

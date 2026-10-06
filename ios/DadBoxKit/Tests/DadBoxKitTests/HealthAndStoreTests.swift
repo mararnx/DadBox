@@ -5,14 +5,14 @@ import Testing
 let t0 = Date(timeIntervalSince1970: 1_789_988_000)   // 2026-09-21T10:53:20Z = 12:53 in Europe/Berlin (CEST)
 
 func status(nextCheckinS: Int = 1800, battery: Int? = 68, mains: Bool = false, fault: Fault? = nil,
-            locked: Bool = false, muteB: Bool = false, quiet: (String, String) = ("20:00", "07:00")) -> DeviceStatus {
+            locked: Bool = false, doorbell: Bool? = nil, quiet: (String, String) = ("20:00", "07:00")) -> DeviceStatus {
     DeviceStatus(
         telemetry: Telemetry(batteryPct: battery, charging: false, mains: mains, rssi: -91, fw: "0.1.0", outbox: 0,
                              outboxBytes: 0, outboxOldestS: 0, storagePct: 12, inbox: 0, uptimeS: 100, offlineS: 0,
-                             nextCheckinS: nextCheckinS, recording: false, locked: locked, house: "unknown", fault: fault),
+                             nextCheckinS: nextCheckinS, recording: false, locked: locked, house: "unknown", fault: fault,
+                             doorbell: doorbell),
         lastCheckinAt: t0, late: false,
-        settings: BoxSettings(poll: .init(activeMinutes: 1, activeWindowMinutes: 90, idleMinutes: 30),
-                              mute: .init(a: false, b: muteB),
+        settings: BoxSettings(poll: .init(activeMinutes: 1, activeWindowMinutes: 90, idleMinutes: 30, backstopMinutes: 10),
                               quietHours: .init(start: quiet.0, end: quiet.1, tz: "Europe/Berlin"),
                               ledBrightness: 40, volume: 70),
         settingsMeta: [:])
@@ -37,10 +37,25 @@ func status(nextCheckinS: Int = 1800, battery: Int? = 68, mains: Bool = false, f
         #expect(BoxHealth(status: status(battery: 18), now: t0).notes == ["Battery 18 %"])
         #expect(BoxHealth(status: status(battery: 18, mains: true), now: t0).level == .fine)   // low but charging from the wall
         #expect(BoxHealth(status: status(battery: nil, mains: true), now: t0).level == .fine)  // no battery fitted (ADR 0019)
-        #expect(BoxHealth(status: status(locked: true), now: t0).notes == ["Locked for travel"])
-        #expect(BoxHealth(status: status(muteB: true), now: t0).level == .attention)
+        #expect(BoxHealth(status: status(locked: true), now: t0 + 2 * 60).notes == ["Locked for travel · next check-in in 28 min"])
+        #expect(BoxHealth(status: status(locked: true), now: t0).level == .attention)
         #expect(BoxHealth(status: status(fault: .storage), now: t0).level == .trouble)
         #expect(BoxHealth(status: nil, now: t0).headline == "No news yet")
+    }
+
+    @Test func lateIsUnknownBeforeTheFirstCheckin() {
+        var s = status()
+        s.late = nil
+        #expect(BoxHealth(status: s, now: t0).level == .fine)
+    }
+
+    @Test func deliverySaysDoorbellJustUsedAndLock() {
+        func words(_ s: DeviceStatus) -> String { BoxHealth.delivery(s.telemetry!) }
+        #expect(words(status(nextCheckinS: 600, mains: true, doorbell: true)) == "At once — the doorbell is connected")
+        #expect(words(status(nextCheckinS: 15, mains: true, doorbell: false)) == "Within 15 s — the child just used it")
+        #expect(words(status(nextCheckinS: 60, mains: true, doorbell: false)) == "Within 1 min — the doorbell is not connected")
+        #expect(words(status(nextCheckinS: 1800, mains: true, locked: true, doorbell: false)) == "At its next check-in — locked, every 30 min")
+        #expect(words(status(nextCheckinS: 1800)) == "Within 30 min")      // an older box sends no doorbell
     }
 
     @Test func quietHoursWrapMidnightInTheBoxsTimezone() {
@@ -69,8 +84,8 @@ func status(nextCheckinS: Int = 1800, battery: Int? = 68, mains: Bool = false, f
         #expect(line(sent(.uploading, uploaded: nil), status(), now: t0, progress: 0.5) == "Sending… 50 %")
         #expect(line(sent(.uploaded), status(), now: t0 + 60).hasPrefix("Sent · box checks in ~"))
         #expect(line(sent(.uploaded), status(), now: t0 + 2 * 3600) == "Sent · box is late")
+        #expect(line(sent(.uploaded), status(nextCheckinS: 600, mains: true, doorbell: true), now: t0 + 60) == "Sent · ringing the box")
         #expect(line(sent(.delivered), status(), now: t0 + 60) == "On the box · glowing")
-        #expect(line(sent(.delivered), status(muteB: true), now: t0 + 60) == "On the box · muted, it glows")
         #expect(line(sent(.delivered), status(quiet: ("12:00", "14:00")), now: t0 + 60) == "On the box · quiet hours, it glows")
         #expect(line(sent(.delivered), status(), now: t0 + 50 * 3600) == "On the box for 2 days")
         #expect(line(sent(.played, played: t0 + 300), status(), now: t0 + 600).hasPrefix("Played "))
@@ -120,6 +135,24 @@ func status(nextCheckinS: Int = 1800, battery: Int? = 68, mains: Bool = false, f
         try await again.dequeue(testID.string, as: .uploaded, at: t0)
         #expect(await again.index.outbox.isEmpty)
         #expect(await again.awaitingPlayed(by: .parentA).map(\.id) == [testID.string])
+        try? FileManager.default.removeItem(at: root)
+    }
+
+    @Test func aTakenSeqIsRenumberedAboveTheServersMax() async throws {
+        let sealed = try Envelope.seal(audio: Data([1, 2, 3]), header: .init(codec: .aacM4A, durationMs: 1000),
+                                       id: testID, keyID: 1, key: testKey).encoded()
+        let store = try ArchiveStore(root: root)
+        try await store.merge(MessagesPage(messages: [], cursor: nil, maxSeq: 3))
+        _ = try await store.enqueue { seq in
+            (Message(id: testID.string, seq: seq, from: .parentA, to: .box, createdAt: t0, durationMs: 1000,
+                     codec: .aacM4A, keyID: 1, bytes: sealed.count, state: .queued), sealed)
+        }
+        let m = try await store.renumber(testID.string, above: 41)    // ADR 0025: the server holds up to 41
+        #expect(m.seq == 42)
+        #expect(try await ArchiveStore(root: root).index.messages[testID.string]?.seq == 42)   // durable before the retry
+        #expect(await store.index.nextSeq == 43)
+        try await store.dequeue(testID.string, as: .uploaded)
+        await #expect(throws: ArchiveStore.StoreError.notInOutbox) { try await store.renumber(testID.string, above: 50) }
         try? FileManager.default.removeItem(at: root)
     }
 

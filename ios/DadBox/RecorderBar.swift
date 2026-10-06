@@ -94,7 +94,6 @@ struct RecorderBar: View {
     private var deliveryHint: String? {
         guard let s = model.status else { return nil }
         if model.health.level == .trouble { return "The box is out of touch — this arrives when it's back." }
-        if s.settings.mute.a || s.settings.mute.b { return "The box is muted — it will glow, not chime." }
         if BoxHealth.inQuietHours(s.settings.quietHours, at: model.now) {
             return "Quiet hours until \(s.settings.quietHours.end) — it will glow, not chime."
         }

@@ -17,6 +17,8 @@ public actor ArchiveStore {
         /// A fresh install must hear the server's `max_seq` once before it may number a message,
         /// or a reinstalled app would reuse a `seq` (PROTOCOL.md § Archive and state).
         case notSyncedYet
+        /// Only a message the server has never accepted may be renumbered.
+        case notInOutbox
     }
 
     public private(set) var index: Index
@@ -86,6 +88,19 @@ public actor ArchiveStore {
         index.outbox.append(message.id)
         try save()
         return message
+    }
+
+    /// The server says this `seq` is taken (ADR 0025): raise the counter above `maxSeq` and give
+    /// the queued message the next number — persisted before the caller sends it again.
+    /// `seq` is not inside the sealed container, so the container stays as it is.
+    public func renumber(_ id: String, above maxSeq: Int) throws -> Message {
+        guard var m = index.messages[id], index.outbox.contains(id) else { throw StoreError.notInOutbox }
+        index.nextSeq = max(index.nextSeq, maxSeq + 1)
+        m.seq = index.nextSeq
+        index.nextSeq += 1
+        index.messages[id] = m
+        try save()
+        return m
     }
 
     public func dequeue(_ id: String, as state: MessageState, at: Date = Date()) throws {

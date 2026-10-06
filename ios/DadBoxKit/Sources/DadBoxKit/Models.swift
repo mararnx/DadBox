@@ -91,9 +91,10 @@ public struct Telemetry: Codable, Equatable, Sendable {
     public var locked: Bool
     public var house: String
     public var fault: Fault?
+    public var doorbell: Bool?       // joined as this check-in was sent (ADR 0021); absent from an older box
 
     enum CodingKeys: String, CodingKey {
-        case charging, mains, rssi, fw, outbox, inbox, recording, locked, house, fault
+        case charging, mains, rssi, fw, outbox, inbox, recording, locked, house, fault, doorbell
         case batteryPct = "battery_pct", outboxBytes = "outbox_bytes", outboxOldestS = "outbox_oldest_s"
         case storagePct = "storage_pct", uptimeS = "uptime_s", offlineS = "offline_s"
         case nextCheckinS = "next_checkin_s"
@@ -101,12 +102,12 @@ public struct Telemetry: Codable, Equatable, Sendable {
 
     public init(batteryPct: Int?, charging: Bool?, mains: Bool, rssi: Int?, fw: String, outbox: Int, outboxBytes: Int,
                 outboxOldestS: Int, storagePct: Int, inbox: Int, uptimeS: Int, offlineS: Int, nextCheckinS: Int,
-                recording: Bool, locked: Bool, house: String, fault: Fault?) {
+                recording: Bool, locked: Bool, house: String, fault: Fault?, doorbell: Bool? = nil) {
         self.batteryPct = batteryPct; self.charging = charging; self.mains = mains; self.rssi = rssi; self.fw = fw
         self.outbox = outbox; self.outboxBytes = outboxBytes; self.outboxOldestS = outboxOldestS
         self.storagePct = storagePct; self.inbox = inbox; self.uptimeS = uptimeS; self.offlineS = offlineS
         self.nextCheckinS = nextCheckinS; self.recording = recording; self.locked = locked
-        self.house = house; self.fault = fault
+        self.house = house; self.fault = fault; self.doorbell = doorbell
     }
 }
 
@@ -115,19 +116,15 @@ public struct BoxSettings: Codable, Equatable, Sendable {
         public var activeMinutes: Int
         public var activeWindowMinutes: Int
         public var idleMinutes: Int
+        public var backstopMinutes: Int?   // on mains with the doorbell joined (ADR 0021); absent from an older server
         enum CodingKeys: String, CodingKey {
             case activeMinutes = "active_minutes", activeWindowMinutes = "active_window_minutes"
-            case idleMinutes = "idle_minutes"
+            case idleMinutes = "idle_minutes", backstopMinutes = "backstop_minutes"
         }
-        public init(activeMinutes: Int, activeWindowMinutes: Int, idleMinutes: Int) {
+        public init(activeMinutes: Int, activeWindowMinutes: Int, idleMinutes: Int, backstopMinutes: Int? = nil) {
             self.activeMinutes = activeMinutes; self.activeWindowMinutes = activeWindowMinutes
-            self.idleMinutes = idleMinutes
+            self.idleMinutes = idleMinutes; self.backstopMinutes = backstopMinutes
         }
-    }
-    public struct Mute: Codable, Equatable, Sendable {
-        public var a: Bool
-        public var b: Bool
-        public init(a: Bool, b: Bool) { self.a = a; self.b = b }
     }
     public struct QuietHours: Codable, Equatable, Sendable {
         public var start: String   // "20:00", box-local
@@ -136,37 +133,39 @@ public struct BoxSettings: Codable, Equatable, Sendable {
         public init(start: String, end: String, tz: String) { self.start = start; self.end = end; self.tz = tz }
     }
 
+    // There is no mute (ADR 0020): a `mute` key from the server is ignored, as the box ignores it.
     public var poll: Poll
-    public var mute: Mute
     public var quietHours: QuietHours
     public var ledBrightness: Int
     public var volume: Int
 
     enum CodingKeys: String, CodingKey {
-        case poll, mute, volume, quietHours = "quiet_hours", ledBrightness = "led_brightness"
+        case poll, volume, quietHours = "quiet_hours", ledBrightness = "led_brightness"
     }
 
-    public init(poll: Poll, mute: Mute, quietHours: QuietHours, ledBrightness: Int, volume: Int) {
-        self.poll = poll; self.mute = mute; self.quietHours = quietHours
+    public init(poll: Poll, quietHours: QuietHours, ledBrightness: Int, volume: Int) {
+        self.poll = poll; self.quietHours = quietHours
         self.ledBrightness = ledBrightness; self.volume = volume
     }
 }
 
-/// `PATCH /settings` body: only what changed. A parent may set its own mute and nothing of the other's.
+/// `PATCH /settings` body: only what changed.
 public struct SettingsPatch: Codable, Equatable, Sendable {
     public struct Poll: Codable, Equatable, Sendable {
         public var idleMinutes: Int?
-        enum CodingKeys: String, CodingKey { case idleMinutes = "idle_minutes" }
-        public init(idleMinutes: Int?) { self.idleMinutes = idleMinutes }
+        public var backstopMinutes: Int?
+        enum CodingKeys: String, CodingKey { case idleMinutes = "idle_minutes", backstopMinutes = "backstop_minutes" }
+        public init(idleMinutes: Int? = nil, backstopMinutes: Int? = nil) {
+            self.idleMinutes = idleMinutes; self.backstopMinutes = backstopMinutes
+        }
     }
     public var poll: Poll?
-    public var mute: [String: Bool]?
     public var quietHours: BoxSettings.QuietHours?
     public var ledBrightness: Int?
     public var volume: Int?
 
     enum CodingKeys: String, CodingKey {
-        case poll, mute, volume, quietHours = "quiet_hours", ledBrightness = "led_brightness"
+        case poll, volume, quietHours = "quiet_hours", ledBrightness = "led_brightness"
     }
     public init() {}
 }
@@ -179,7 +178,7 @@ public struct DeviceStatus: Codable, Equatable, Sendable {
     }
     public var telemetry: Telemetry?        // nil until the box has checked in once
     public var lastCheckinAt: Date?
-    public var late: Bool
+    public var late: Bool?                  // nil until the box has checked in once
     public var settings: BoxSettings
     public var settingsMeta: [String: Meta]
 
@@ -187,7 +186,7 @@ public struct DeviceStatus: Codable, Equatable, Sendable {
         case telemetry, late, settings, lastCheckinAt = "last_checkin_at", settingsMeta = "settings_meta"
     }
 
-    public init(telemetry: Telemetry?, lastCheckinAt: Date?, late: Bool, settings: BoxSettings, settingsMeta: [String: Meta]) {
+    public init(telemetry: Telemetry?, lastCheckinAt: Date?, late: Bool?, settings: BoxSettings, settingsMeta: [String: Meta]) {
         self.telemetry = telemetry; self.lastCheckinAt = lastCheckinAt; self.late = late
         self.settings = settings; self.settingsMeta = settingsMeta
     }

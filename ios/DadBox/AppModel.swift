@@ -228,9 +228,16 @@ final class AppModel {
             m.state = .uploading
             try? await store.update(m)
             await reload()
+            let progress: @Sendable (Double) -> Void = { [weak self] p in
+                Task { @MainActor in self?.uploadProgress[id] = p }
+            }
             do {
-                try await backend.upload(m, container: container) { [weak self] p in
-                    Task { @MainActor in self?.uploadProgress[id] = p }
+                do {
+                    try await backend.upload(m, container: container, progress: progress)
+                } catch APIError.seqTaken(let maxSeq) {
+                    // A reinstall reused a seq the server holds (ADR 0025): renumber, durably, and send once more.
+                    m = try await store.renumber(id, above: maxSeq)
+                    try await backend.upload(m, container: container, progress: progress)
                 }
                 try await store.dequeue(id, as: .uploaded)
             } catch let e as APIError where e.isPermanent {

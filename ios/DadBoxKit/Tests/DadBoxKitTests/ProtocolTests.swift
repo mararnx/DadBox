@@ -24,9 +24,10 @@ import Testing
         { "telemetry": { "battery_pct": null, "charging": null, "mains": true, "rssi": -91, "fw": "0.1.0",
             "outbox": 0, "outbox_bytes": 0, "outbox_oldest_s": 0, "storage_pct": 12, "inbox": 2,
             "uptime_s": 41022, "offline_s": 0, "next_checkin_s": 60, "recording": false, "locked": false,
-            "house": "unknown", "fault": null },
+            "house": "unknown", "fault": null, "doorbell": true },
           "last_checkin_at": "2026-09-21T10:00:00Z", "late": false,
-          "settings": { "poll": { "active_minutes": 1, "active_window_minutes": 90, "idle_minutes": 30 },
+          "settings": { "poll": { "active_minutes": 1, "active_window_minutes": 90, "idle_minutes": 30,
+                                  "backstop_minutes": 10 },
             "mute": { "a": false, "b": true },
             "quiet_hours": { "start": "20:00", "end": "07:00", "tz": "Europe/Berlin" },
             "led_brightness": 40, "volume": 70 },
@@ -34,7 +35,20 @@ import Testing
         """
         let s = try WireJSON.decoder().decode(DeviceStatus.self, from: Data(json.utf8))
         #expect(s.telemetry?.batteryPct == nil && s.telemetry?.mains == true)
-        #expect(s.settings.mute.b && s.settingsMeta["mute.b"]?.by == .parentB)
+        #expect(s.telemetry?.doorbell == true && s.settings.poll.backstopMinutes == 10)
+        #expect(s.settingsMeta["mute.b"]?.by == .parentB)   // an old server's mute decodes and is ignored (ADR 0020)
+    }
+
+    @Test func decodesAStatusFromABoxThatNeverCheckedIn() throws {
+        let json = """
+        { "telemetry": null, "last_checkin_at": null, "late": null,
+          "settings": { "poll": { "active_minutes": 1, "active_window_minutes": 90, "idle_minutes": 30 },
+            "quiet_hours": { "start": "20:00", "end": "07:00", "tz": "Europe/Berlin" },
+            "led_brightness": 40, "volume": 70 },
+          "settings_meta": {} }
+        """
+        let s = try WireJSON.decoder().decode(DeviceStatus.self, from: Data(json.utf8))
+        #expect(s.late == nil && s.telemetry == nil && s.settings.poll.backstopMinutes == nil)
     }
 
     @Test func decodesTelemetryWithoutASignalReading() throws {
@@ -45,14 +59,14 @@ import Testing
           "house": "unknown", "fault": null }
         """
         let t = try WireJSON.decoder().decode(Telemetry.self, from: Data(json.utf8))
-        #expect(t.rssi == nil && t.mains)
+        #expect(t.rssi == nil && t.mains && t.doorbell == nil)   // an older box sends no doorbell
     }
 
     @Test func aPatchCarriesOnlyWhatChanged() throws {
         var p = SettingsPatch()
-        p.mute = ["a": true]
+        p.poll = .init(backstopMinutes: 15)
         p.volume = 55
-        #expect(String(decoding: try WireJSON.encoder().encode(p), as: UTF8.self) == #"{"mute":{"a":true},"volume":55}"#)
+        #expect(String(decoding: try WireJSON.encoder().encode(p), as: UTF8.self) == #"{"poll":{"backstop_minutes":15},"volume":55}"#)
     }
 
     @Test func setupCodeAcceptsOnlyAParentOverHTTPS() {
@@ -70,6 +84,7 @@ final class FakeServer: HTTPTransport, @unchecked Sendable {
     private(set) var completed: [String: Data] = [:]
     private(set) var log: [String] = []
     var failChunkOnce: Int?
+    var seqTakenOnce: Int?          // answer the next metadata PUT as ADR 0025's seq conflict
 
     func send(_ request: URLRequest, body: Data?) async throws -> (Data, HTTPURLResponse) {
         lock.withLock { handle(request, body: body) }
@@ -87,6 +102,10 @@ final class FakeServer: HTTPTransport, @unchecked Sendable {
         let id = parts[2]
         switch (method, parts.dropFirst(3).first, parts.count) {
         case ("PUT", nil, _):
+            if let max = seqTakenOnce {
+                seqTakenOnce = nil
+                return reply(409, #"{"error":"seq already used by another message","max_seq":\#(max)}"#)
+            }
             chunks[id, default: [:]] = chunks[id] ?? [:]
             return reply(200)
         case ("PUT", "chunks"?, 5):
@@ -147,6 +166,13 @@ final class FakeServer: HTTPTransport, @unchecked Sendable {
         #expect(server.completed[testID.string] == container)
         let second = server.log.dropFirst(before).filter { $0.contains("chunks/") }
         #expect(second == ["PUT messages/\(testID)/chunks/2", "PUT messages/\(testID)/chunks/3"])
+    }
+
+    @Test func aSeqConflictCarriesTheServersMaxAndOtherConflictsDoNot() async {
+        server.seqTakenOnce = 41
+        await #expect(throws: APIError.seqTaken(maxSeq: 41)) { try await api.putMessage(message) }
+        try? await api.putMessage(message)   // the conflict was once: now it is accepted
+        #expect(!APIError.seqTaken(maxSeq: 41).isPermanent)
     }
 
     @Test func aBadTokenIsPermanentAndAnOutageIsNot() async {

@@ -37,7 +37,7 @@ struct BoxView: View {
                 }
                 Section("Link") {
                     Row("Signal", t.rssi.map { "\(signalWord($0)) · \($0) dBm" } ?? "No reading from the modem")
-                    Row("Checks in", "every \(BoxHealth.span(Double(t.nextCheckinS)))")
+                    Row("A message reaches it", BoxHealth.delivery(t))
                     if t.offlineS > 0 { Row("Was offline for", BoxHealth.span(Double(t.offlineS))) }
                 }
                 Section("Queue") {
@@ -46,7 +46,7 @@ struct BoxView: View {
                         "\(t.outbox) · oldest \(BoxHealth.span(Double(t.outboxOldestS)))")
                     Row("Storage used", "\(t.storagePct) %")
                     if t.recording { Label("Recording right now", systemImage: "record.circle").foregroundStyle(.red) }
-                    if t.locked { Label("Locked for travel — hold both buttons 3 s to unlock", systemImage: "lock") }
+                    if t.locked { Label("Locked for travel — hold both buttons 3 s to unlock. It checks in only every \(BoxHealth.span(Double(t.nextCheckinS))) until then.", systemImage: "lock") }
                 }
             } else {
                 Section { Text("The box has not checked in yet.").foregroundStyle(.secondary) }
@@ -55,7 +55,7 @@ struct BoxView: View {
             if let s = model.status?.settings { SettingsSections(settings: s) }
 
             Section {
-                DisclosureGroup("What the Record light means") { LEDLegend() }
+                DisclosureGroup("What the lights mean") { LEDLegend() }
             }
 
             Section {
@@ -113,7 +113,7 @@ private struct FaultSection: View {
             VStack(alignment: .leading, spacing: 6) {
                 Label(title, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.red).font(.headline)
                 Text(advice).font(.subheadline)
-                Text("On the box, Record blinks blue instead of glowing steady dim blue. Recording still works — messages wait safely on the box.")
+                Text("On the box, Record blinks blue instead of its blue–cyan glow. Recording still works — messages wait safely on the box.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
         }
@@ -146,23 +146,6 @@ private struct SettingsSections: View {
 
     var body: some View {
         let s = Binding(get: { draft ?? settings }, set: { draft = $0 })
-        let mine = model.me.house ?? "a", other = mine == "a" ? "b" : "a"
-
-        Section {
-            Toggle("Mute the box", isOn: Binding(
-                get: { mine == "a" ? settings.mute.a : settings.mute.b },
-                set: { v in Task { await model.patch { $0.mute = [mine: v] } } }))
-            if let m = model.status?.settingsMeta["mute.\(mine)"], mine == "a" ? settings.mute.a : settings.mute.b {
-                Text("Muted \(m.at.formatted(.relative(presentation: .named)))").font(.footnote).foregroundStyle(.secondary)
-            }
-            if other == "a" ? settings.mute.a : settings.mute.b {
-                let m = model.status?.settingsMeta["mute.\(other)"]
-                Label("Muted by the other household" + (m.map { " · \($0.at.formatted(date: .abbreviated, time: .shortened))" } ?? ""),
-                      systemImage: "speaker.slash")
-            }
-        } header: { Text("Mute") } footer: {
-            Text("Muted: no sound at all, the play button still glows. Both households can mute; both can see it.")
-        }
 
         Section {
             DatePicker("From", selection: time(s.quietHours.start), displayedComponents: .hourAndMinute)
@@ -181,9 +164,14 @@ private struct SettingsSections: View {
         }
 
         Section {
-            Stepper("Every \(s.wrappedValue.poll.idleMinutes) min", value: s.poll.idleMinutes, in: 5...60, step: 5)
-        } header: { Text("Check-in on battery, when idle") } footer: {
-            Text("Plugged in, or for 90 minutes after the child used it, the box checks in every minute. Shorter here means faster delivery and a shorter battery.")
+            if s.wrappedValue.poll.backstopMinutes != nil {
+                Stepper("Plugged in: every \(s.wrappedValue.poll.backstopMinutes ?? 10) min",
+                        value: Binding(get: { s.wrappedValue.poll.backstopMinutes ?? 10 },
+                                       set: { s.wrappedValue.poll.backstopMinutes = $0 }), in: 5...30, step: 5)
+            }
+            Stepper("Locked or idle on battery: every \(s.wrappedValue.poll.idleMinutes) min", value: s.poll.idleMinutes, in: 5...60, step: 5)
+        } header: { Text("Check-in") } footer: {
+            Text("Plugged in, the doorbell brings a message at once; the check-in above only catches a missed ring. Without the doorbell it is every minute, and for 5 minutes after the child used the box every 15 s. Locked for travel, or idle on battery, it checks in at the second interval — shorter means faster delivery and, on battery, a shorter battery.")
         }
 
         if let d = draft, d != settings {
@@ -199,7 +187,10 @@ private struct SettingsSections: View {
             if d.quietHours != settings.quietHours { p.quietHours = d.quietHours }
             if d.volume != settings.volume { p.volume = d.volume }
             if d.ledBrightness != settings.ledBrightness { p.ledBrightness = d.ledBrightness }
-            if d.poll.idleMinutes != settings.poll.idleMinutes { p.poll = .init(idleMinutes: d.poll.idleMinutes) }
+            if d.poll != settings.poll {
+                p.poll = .init(idleMinutes: d.poll.idleMinutes != settings.poll.idleMinutes ? d.poll.idleMinutes : nil,
+                               backstopMinutes: d.poll.backstopMinutes != settings.poll.backstopMinutes ? d.poll.backstopMinutes : nil)
+            }
         }
         draft = nil
     }
@@ -225,23 +216,39 @@ private struct SettingsSections: View {
     }
 }
 
-/// ARCHITECTURE.md § Indication (ADR 0024) — so the adult in the other house can be told what the blue blinking means.
+/// ADR 0024 and box/DESIGN.md § Decisions — so the adult in the other house can be told what the lights mean.
 private struct LEDLegend: View {
-    private let rows: [(String, String)] = [
-        ("Steady dim blue", "Ready. The server heard from the box within the last two check-ins, and nothing is wrong."),
+    private let record: [(String, String)] = [
+        ("Blue–cyan glow, slowly flowing", "Ready. The server heard from the box within the last two check-ins, and nothing is wrong."),
         ("Slow blue blink, 1 s on / 2 s off", "Not ready: no network, no server, or a fault. Recording still works — messages wait on the box and go when it is back. This screen says why."),
-        ("Steady red", "Recording. The microphone is on only then."),
+        ("Steady red", "Recording, between a rising and a falling tone. The microphone is on only then."),
         ("One green pulse", "Got it: the recording is safe on the box. Not yet delivered — that is this screen's job."),
-        ("Dark", "Playing a message, locked for travel — or unplugged."),
+        ("Dark", "A message is waiting on Play, a message is playing, the box is locked for travel or still starting — or unplugged."),
+    ]
+    private let play: [(String, String)] = [
+        ("Pulsing green", "A message is waiting. It chimes once when it arrives and once more 10 s later — never in quiet hours."),
+        ("Steady green", "Playing."),
+        ("Running through the colours", "Starting up. Then the box says it is ready to record — or, once, that it cannot connect to the server."),
+    ]
+    private let both: [(String, String)] = [
+        ("Two cyan-white flashes and a falling tone", "Locked for travel (both buttons held 3 s). One flash and a rising tone: unlocked."),
+        ("Three quick cyan-white flashes", "A button pressed while locked."),
     ]
     var body: some View {
+        group("Record", record)
+        group("Play", play)
+        group("Both buttons", both)
+        Text("Why the box is not ready — no connection, or a fault — is only on this screen.")
+            .font(.footnote).foregroundStyle(.secondary)
+    }
+
+    @ViewBuilder private func group(_ title: String, _ rows: [(String, String)]) -> some View {
+        Text(title).font(.headline).padding(.top, 4)
         ForEach(rows, id: \.0) { pattern, meaning in
             VStack(alignment: .leading, spacing: 2) {
                 Text(pattern).font(.subheadline.weight(.medium))
                 Text(meaning).font(.footnote).foregroundStyle(.secondary)
             }
         }
-        Text("Play is about messages — green — and blinks white twice for the travel lock. Why the box is not ready — no connection, or a fault — is only on this screen.")
-            .font(.footnote).foregroundStyle(.secondary)
     }
 }

@@ -19,6 +19,8 @@ extension URLSession: HTTPTransport {
 public enum APIError: Error, Equatable {
     case notHTTP
     case status(Int, String)
+    /// `409` to `PUT /messages/{id}`: another message of ours already has this `seq` (ADR 0025).
+    case seqTaken(maxSeq: Int)
 
     /// 4xx other than 408/429 will not get better by trying again.
     public var isPermanent: Bool {
@@ -43,7 +45,16 @@ public struct APIClient: Sendable {
     // MARK: Upload
 
     public func putMessage(_ m: Message) async throws {
-        _ = try await call("PUT", "messages/\(m.id)", json: WireJSON.encoder().encode(m))
+        do {
+            _ = try await call("PUT", "messages/\(m.id)", json: WireJSON.encoder().encode(m))
+        } catch APIError.status(409, let body) {
+            // Only the seq conflict carries `max_seq`; the same id with other metadata does not.
+            struct Conflict: Decodable { var max_seq: Int? }
+            guard let max = (try? JSONDecoder().decode(Conflict.self, from: Data(body.utf8)))?.max_seq else {
+                throw APIError.status(409, body)
+            }
+            throw APIError.seqTaken(maxSeq: max)
+        }
     }
 
     public func putChunk(id: String, seq: Int, total: Int, bytes: Data) async throws {

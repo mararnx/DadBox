@@ -41,8 +41,7 @@ actor DemoBackend: Backend {
 
     private var messages: [Message] = []
     private var blobs: [String: Data] = [:]
-    private var settings = BoxSettings(poll: .init(activeMinutes: 1, activeWindowMinutes: 90, idleMinutes: 30),
-                                       mute: .init(a: false, b: false),
+    private var settings = BoxSettings(poll: .init(activeMinutes: 1, activeWindowMinutes: 90, idleMinutes: 30, backstopMinutes: 10),
                                        quietHours: .init(start: "20:00", end: "07:00", tz: TimeZone.current.identifier),
                                        ledBrightness: 40, volume: 70)
     private var meta: [String: DeviceStatus.Meta] = [:]
@@ -100,18 +99,17 @@ actor DemoBackend: Backend {
                                  outboxBytes: 0, outboxOldestS: 0, storagePct: 12,
                                  inbox: messages.filter { $0.to == .box && $0.state == .delivered }.count,
                                  uptimeS: 41_022 + up, offlineS: 0, nextCheckinS: 60, recording: false, locked: false,
-                                 house: "unknown", fault: nil),
+                                 house: "unknown", fault: nil, doorbell: true),
             lastCheckinAt: Date().addingTimeInterval(-Double(up % 60)), late: false, settings: settings, settingsMeta: meta)
     }
 
     func patchSettings(_ patch: SettingsPatch) async throws -> DeviceStatus {
         let stamp = DeviceStatus.Meta(by: .parentA, at: Date())
-        if let v = patch.mute?["a"] { settings.mute.a = v; meta["mute.a"] = stamp }
-        if patch.mute?["b"] != nil { throw APIError.status(403, "only your own mute") }
         if let v = patch.quietHours { settings.quietHours = v; meta["quiet_hours"] = stamp }
         if let v = patch.volume { settings.volume = v; meta["volume"] = stamp }
         if let v = patch.ledBrightness { settings.ledBrightness = v; meta["led_brightness"] = stamp }
         if let v = patch.poll?.idleMinutes { settings.poll.idleMinutes = v; meta["poll"] = stamp }
+        if let v = patch.poll?.backstopMinutes { settings.poll.backstopMinutes = v; meta["poll"] = stamp }
         return try await deviceStatus()
     }
 
