@@ -39,7 +39,9 @@ def test_playing_is_steady_green_and_record_is_dark():
 
 def test_ready_drifts_slowly_through_blue_and_green_on_record():
     from dadbox.lights import READY_GREEN
-    for lights in (Lights.IDLE, Lights.WAITING):
+    for ready in (True, False):
+        assert render(LightsPlan(lights=Lights.WAITING, brightness=100, ready=ready), 0.5).record == (0.0, 0.0, 0.0)  # a message waits: Record dark
+    for lights in (Lights.IDLE,):
         frames = [render(LightsPlan(lights=lights, brightness=100, ready=True), i * READY_DRIFT_S / 40) for i in range(41)]
         for f in frames:
             r, g, b = f.record
@@ -48,7 +50,7 @@ def test_ready_drifts_slowly_through_blue_and_green_on_record():
     for lights in (Lights.IDLE,):
         half = READY_DRIFT_S / 2
         f = render(LightsPlan(lights=lights, brightness=100, ready=True), half).record
-        assert abs(f[1] - READY_LEVEL * READY_GREEN) < 1e-9 and f[2] < 1e-9       # green, as bright as blue
+        assert abs(f[1] / f[2] - 0.63) < 1e-9                                      # balanced cyan, never pure green
         g, b = render(LightsPlan(lights=lights, brightness=100, ready=True), half / 2).record[1:]
         assert 0 < g < b                                                      # cyan between
     assert ready_colour(0.0) == ready_colour(READY_DRIFT_S)
@@ -61,7 +63,21 @@ def test_ready_drift_has_no_big_steps():
         assert max(abs(a - b) for a, b in zip(c, prev)) < 0.02
         prev = c
     for t in [0, 0.75, 1.5]:
-        assert render(LightsPlan(lights=Lights.IDLE, brightness=100), t).play == (0.0, 0.0, 0.0)   # replay shows nothing
+        assert render(LightsPlan(lights=Lights.IDLE, brightness=100), t).play == (0.0, 0.0, 0.0)   # not ready: Play dark
+
+
+def test_ready_play_flows_half_a_round_behind_record():
+    for i in range(20):
+        t = i * READY_DRIFT_S / 20
+        f = render(LightsPlan(lights=Lights.IDLE, brightness=100, ready=True), t)
+        assert f.play == render(LightsPlan(lights=Lights.IDLE, brightness=100, ready=True), t + READY_DRIFT_S / 2).record
+    f = render(LightsPlan(lights=Lights.IDLE, brightness=100, ready=True), 0.0)
+    assert f.record[2] > 0 and f.record[1] == 0 and f.play[1] > 0 and f.play[2] > 0     # blue here, cyan there
+    for plan in (LightsPlan(lights=Lights.IDLE, ready=True, locked=True),
+                 LightsPlan(lights=Lights.IDLE, ready=False)):
+        assert render(plan, 1.0).play == (0.0, 0.0, 0.0)
+    waiting = render(LightsPlan(lights=Lights.WAITING, brightness=100, ready=True), 2.0).play
+    assert waiting[0] == 0 and waiting[2] == 0 and waiting[1] > 0.9                        # a message: green pulse
 
 
 def test_not_ready_blinks_blue_on_record():

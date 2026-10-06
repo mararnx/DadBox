@@ -35,7 +35,7 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
    | --- | --- |
    | unplugged | dark |
    | powering on, not yet ready (§7) | dark; Play runs through the colours |
-   | ready: the server answered within 2 × the check-in interval, and no fault | **dim blue–green drift** (30 % of the brightness setting; §8) |
+   | ready: the server answered within 2 × the check-in interval, and no fault | **blue–cyan flow on both buttons**, Record dark while a message waits (§8) |
    | not ready: no network, no server, or a fault (storage, capture, modem) | **slow dim blue blink**, 1 s on, 2 s off |
    | playing a message (a Record press is ignored then) | dark |
    | travel lock on | dark |
@@ -78,14 +78,18 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
 
    Play's colours otherwise mean messages (green) and the lock (white); the
    rainbow is only ever seen right after plugging in.
-8. **Ready drifts (2026-10-06).** Steady dim blue becomes a glow that drifts
-   blue → cyan → green → cyan → blue once every 5 s (`READY_DRIFT_S`),
-   lingering in cyan (`READY_MIX_LINGER`), at 60 % of the brightness setting
-   (`READY_LEVEL`). It is a straight crossfade between full blue and a green
-   that looks as bright (`READY_GREEN` = 25 %, judged on the bench), so the
-   brightness holds and only the colour moves. Never red: Record's red is the
-   mic. Not ready is unchanged: the slow blue blink, on and off. Ready is never
-   dark, so the two stay apart.
+8. **Ready flows (2026-10-06).** Steady dim blue becomes a glow that flows
+   blue → cyan → blue once every 4 s (`READY_DRIFT_S`), easing out so it
+   lingers at cyan (`READY_CYAN_DWELL`), at 60 % of the brightness setting
+   (`READY_LEVEL`). Cyan is the balanced cyan at the same brightness as full
+   blue, counting 25 % green as worth all of blue (`READY_GREEN`, judged on the
+   bench), so the brightness holds and only the colour moves. **Play runs the
+   same glow half a round behind**, so the colour flows from one button to the
+   other — only while ready and nothing waits. Never red (Record's red is the
+   mic) and never pure green (green on Play means a message). **While a message
+   waits, Record is dark** — ready or not — so Play's breathing green has the
+   child's eye. Not ready is otherwise unchanged: Record's slow blue blink,
+   Play dark.
 
    Smoothness needed two driver changes, both measured on the bench: gpiozero
    rounds PWM duty down to whole percent (a dozen visible steps at this

@@ -40,8 +40,8 @@ BREATHE_PERIOD_S = 4.0
 RESTING_LEVEL = 0.15              # *resting*: dim, not off
 QUIET_CAP = 0.3                   # quiet hours: the glow is capped, so it doesn't light a bedroom
 READY_LEVEL = 0.6                 # Record's dim glow: ready drifts blue–green, not ready blinks blue (ADR 0024)
-READY_DRIFT_S = 5.0               # ready: blue → cyan → green → cyan → blue, once in this long
-READY_MIX_LINGER = 0.7            # 0 = even pace; higher = more time in the mixed colours
+READY_DRIFT_S = 4.0               # ready: blue → cyan → blue, once in this long
+READY_CYAN_DWELL = 2.0            # 1 = even pace; higher = more time at cyan
 READY_GREEN = 0.25                # the green as bright to the eye as full blue (judge on the bench)
 NOT_READY_PERIOD_S = 3.0          # not ready: 1 s on, 2 s off
 NOT_READY_ON_S = 1.0
@@ -91,18 +91,25 @@ def _rainbow(t: float) -> RGB:
     return balanced(colorsys.hsv_to_rgb((t / RAINBOW_PERIOD_S) % 1.0, 1.0, 1.0))
 
 
+def _ready_cyan() -> RGB:
+    """Balanced cyan (green : blue as in BALANCE) as bright to the eye as full blue,
+    counting READY_GREEN of green as worth all of blue."""
+    ratio = BALANCE[1] / BALANCE[2]
+    b = 1.0 / (1.0 + ratio / READY_GREEN)
+    return (0.0, ratio * b, b)
+
+
 def ready_colour(t: float) -> RGB:
-    """Record's ready glow: a slow drift through the colours blue and green make,
-    balanced for the buttons. Never red: that is the mic's pin."""
-    # There and back, lingering in the blue–green mix and passing quickly through
-    # pure blue and pure green, as a straight crossfade in duty between a blue and a
-    # green that look equally bright: the light adds up, so the brightness holds and
-    # only the colour moves.
+    """Record's ready glow: blue ↔ cyan, slowly, never red (the mic's pin) and never
+    pure green (green on Play means a message). Play runs it half a round behind."""
+    # There and back, easing out so it lingers at cyan; a straight crossfade in duty
+    # between two colours that look equally bright, so the brightness holds and only
+    # the colour moves.
     phase = (t / READY_DRIFT_S) % 1.0
     u = 2 * phase if phase < 0.5 else 2 - 2 * phase                  # an even walk 0 → 1 → 0
-    s = 2 * u - 1
-    x = 0.5 + 0.5 * (READY_MIX_LINGER * s ** 3 + (1 - READY_MIX_LINGER) * s)   # 0 = blue, 1 = green
-    return (0.0, x * READY_GREEN, 1.0 - x)
+    x = 1 - (1 - u) ** READY_CYAN_DWELL                               # 0 = blue, 1 = cyan
+    c = _ready_cyan()
+    return (0.0, x * c[1], (1 - x) + x * c[2])
 
 
 def _lock_blink(x: float) -> bool:
@@ -131,16 +138,21 @@ def render(plan: LightsPlan, t: float) -> Frame:
 
     # Record, when not recording: a dim glow drifting slowly through blue and green =
     # ready to record and the server is reachable; slow dim blue blink = not (no network,
-    # no server, or a fault). Dark when locked, and while playing — a Record press is
-    # ignored during playback.
-    if not plan.locked and plan.lights is not Lights.PLAYING:
+    # no server, or a fault). Dark when locked, while playing — a Record press is
+    # ignored during playback — and while a message waits, so Play's green has the
+    # child's eye (ADR 0024 §8).
+    if not plan.locked and plan.lights not in (Lights.PLAYING, Lights.WAITING):
         if plan.ready:
             record = _scale(ready_colour(t), k * READY_LEVEL)
         elif (t % NOT_READY_PERIOD_S) < NOT_READY_ON_S:
             record = _scale(BLUE, k * READY_LEVEL)
 
     # 2. Playing: play button steady green.
-    if plan.lights is Lights.PLAYING:
+    if plan.lights is Lights.IDLE and plan.ready and not plan.locked:
+        # Ready and nothing waiting: Play runs Record's drift half a round behind,
+        # so the colour flows from one button to the other (ADR 0024 §8).
+        play = _scale(ready_colour(t + READY_DRIFT_S / 2), k * READY_LEVEL)
+    elif plan.lights is Lights.PLAYING:
         play = _scale(GREEN, k)
     # 4. Waiting: play button pulses green; resting (dim) after 2 h. 5. Idle: both dark.
     elif plan.lights in (Lights.WAITING, Lights.GOT_IT):
