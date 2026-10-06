@@ -1,9 +1,11 @@
 import AVFoundation
+import DadBoxKit
 import Observation
 import UIKit
 
-/// Plays one message from memory. The box's Ogg Opus and the phone's own M4A
-/// both go straight into `AVAudioPlayer` — iOS 26 reads Ogg natively.
+/// Plays one message from memory. The phone's own M4A goes straight into
+/// `AVAudioPlayer`; the box's Ogg Opus is decoded to WAV first, in memory,
+/// because `AVAudioPlayer` won't play an Ogg shorter than ~15 s (see `WAVDecoder`).
 @Observable
 final class AudioPlayer: NSObject, AVAudioPlayerDelegate {
     private(set) var playingID: String?
@@ -20,7 +22,8 @@ final class AudioPlayer: NSObject, AVAudioPlayerDelegate {
         try session.setCategory(.playback, mode: .spokenAudio)
         try session.setActive(true)
 
-        let p = try AVAudioPlayer(data: audio)
+        let isOgg = audio.starts(with: Data("OggS".utf8))
+        let p = try AVAudioPlayer(data: isOgg ? try WAVDecoder.wav(from: audio, sampleRate: 16_000) : audio)
         p.delegate = self
         guard p.play() else { throw CocoaError(.fileReadCorruptFile) }
         player = p

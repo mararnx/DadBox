@@ -150,8 +150,13 @@ final class AppModel {
     func toggle(_ m: Message) async {
         if player.playingID == m.id { player.stop(); return }
         guard let backend, let store else { return }
+        if await !store.hasContainer(m.id) {
+            do { try await store.keep(try await backend.audio(id: m.id), id: m.id) } catch {
+                notice = "Can't fetch this message right now — it will be fetched when there's a connection."
+                return
+            }
+        }
         do {
-            if await !store.hasContainer(m.id) { try await store.keep(try await backend.audio(id: m.id), id: m.id) }
             guard let id = ULID(m.id) else { return }
             // Decrypted in memory, played from memory. Plaintext never touches the disk.
             let audio = try Envelope.open(try Container(decoding: try await store.container(m.id)), id: id, keys: keys)
@@ -163,7 +168,7 @@ final class AppModel {
         } catch EnvelopeError.authenticationFailed {
             notice = "This message failed its integrity check and was not played."
         } catch {
-            notice = "Can't play this yet — it will be fetched when there's a connection."
+            notice = "This message is on the phone but couldn't be played."
         }
     }
 
