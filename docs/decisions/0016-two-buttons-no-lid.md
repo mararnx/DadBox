@@ -76,7 +76,8 @@ What this gives up, stated plainly, because ADR 0007 existed for these:
      buttons are dead until the same gesture again. Survives reboot. While locked the
      box checks in on the slow cadence with the modem off between check-ins
      ([ADR 0015](0015-adaptive-polling.md), revised 2026-10-06).
-  5. Mute and quiet hours from the app still apply to playback.
+  5. Quiet hours from the app still apply to playback. (There is no mute —
+     [ADR 0020](0020-no-mute-replay-green-link.md).)
 - **"Obvious to the room" is weaker.** An open lid is unmistakable; a red ring
   on a button is a small light. The hardware tie between the light and the
   mic's power keeps the promise honest, but it is less visible than a lid.

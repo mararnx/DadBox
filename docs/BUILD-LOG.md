@@ -2,6 +2,29 @@
 
 Newest entry at the top. One entry per session at the bench.
 
+## 2026-10-06 (night) — App and server catch up with the box
+
+**Did:** No bench work; the iOS app and the server caught up with today's
+box changes. App (TestFlight build 12): reads the box's `doorbell` and says
+how soon a message reaches the box (at once with the doorbell, within 15 s
+just after use, at the next check-in when locked); a locked box shows "next
+check-in in 28 min"; a new setting for the plugged-in backstop interval
+(`backstop_minutes`, 5–30); the light guide rewritten for ADR 0024 as
+revised today (blue–cyan ready flow, Play's colours at power-on, cyan-white
+lock flashes); a `409` seq conflict renumbers above `max_seq` and retries
+(ADR 0025); `late: null` before a first check-in no longer breaks the status;
+the mute toggle removed. Server: mute dropped from the settings rules and,
+by migration `20261006200000_no_mute`, from the live settings row; `PATCH
+/settings` answers 403 to anything but poll, quiet hours, light and volume,
+as PROTOCOL.md says. Checked live: settings hold no mute, a mute PATCH gets
+403, the box reports its doorbell joined.
+**Learned:** The app had silently kept a mute toggle the box had ignored
+since ADR 0020 — a contract change needs a sweep of all three streams, not
+only the one that prompted it.
+**Next:** Look at the Box screen in build 12 on the phone. APNs key, the
+doorbell bench measurements (ADR 0021), and the open questions from the
+evening entry below.
+
 ## 2026-10-06 (evening) — Lights, sounds and loudness tuned by eye and ear
 
 **Did:** With the box closed and on mains, tuned what a child sees and hears,

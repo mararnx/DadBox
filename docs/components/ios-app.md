@@ -43,7 +43,6 @@ SwiftUI, APNs. Two screens — Conversation and Box — plus a one-time setup.
 5. **Live Activity** while a message is uploading / until it's played?
    Nice, not needed.
 6. **Which alerts, exactly?** New message (loud). Box offline > N hours
-   (loud). Battery < 20% (quiet). Muted by other household (quiet, once).
-   Message unplayed after 48 h (quiet). Anything else?
+   (loud). Battery < 20% (quiet). Message unplayed after 48 h (quiet). Anything else?
 7. **Free vs paid Apple account** — the 7-day re-sign is a real chore; will
    this actually get done weekly, or is the $99 cheaper than the nagging?
