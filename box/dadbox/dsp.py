@@ -78,12 +78,13 @@ def tone(freq: float, seconds: float, amp: float = 0.3, rate: int = RATE) -> byt
 
 def chime_pcm(kind: str = "message") -> bytes:
     """The box's few sounds. "message": two soft notes, the only sound it makes
-    unbidden. "record_start": a quick rising blip before the mic comes on.
-    "record_end": a falling "done" after the mic is off."""
-    if kind == "record_start":
-        return tone(523, 0.06, 0.22) + tone(659, 0.06, 0.22) + tone(784, 0.10, 0.22)
-    if kind == "record_end":
-        return tone(784, 0.09, 0.22) + tone(523, 0.16, 0.2)
+    unbidden. "record_start": a rising two-note "bee-boo" before the mic comes on.
+    "record_end": the same falling, after the mic is off. Chosen by ear on the
+    bench from five styles, 2026-10-06."""
+    if kind == "record_start":                       # rising "bee-boo", 0.25 s: it delays the mic
+        return tone(660, 0.11, 0.28) + tone(990, 0.14, 0.28)
+    if kind == "record_end":                         # the same, falling
+        return tone(990, 0.11, 0.28) + tone(660, 0.16, 0.28)
     return tone(660, 0.18, 0.25) + tone(880, 0.28, 0.22)
 
 
