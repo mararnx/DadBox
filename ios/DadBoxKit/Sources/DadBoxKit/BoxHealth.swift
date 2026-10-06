@@ -9,11 +9,17 @@ public struct BoxHealth: Equatable, Sendable {
     }
 
     public var level: Level
-    public var headline: String      // "Fine", "Late since 14:10", "Silent for 9 h"
+    public var headline: String      // "Fine", "Late since 14:10", "Silent for 9 h", "No news since 22:00"
     public var notes: [String]       // amber reasons: battery, quiet hours, travel lock
     public var nextCheckin: Date?
 
-    public init(status: DeviceStatus?, now: Date = Date(), calendar: Calendar = .current) {
+    /// How long a status read may be old before the phone stops judging the box by it.
+    /// The app reads every 5-20 s, so two missed reads plus slack.
+    public static let staleRead: TimeInterval = 90
+
+    /// `readAt` is when this phone last got a status from the server. When it is older than
+    /// `staleRead`, the phone, not the box, is out of touch: say so, and never call the box late.
+    public init(status: DeviceStatus?, now: Date = Date(), readAt: Date? = nil, calendar: Calendar = .current) {
         guard let status, let t = status.telemetry, let last = status.lastCheckinAt else {
             level = .attention
             headline = status == nil ? "No news yet" : "Never checked in"
@@ -27,7 +33,11 @@ public struct BoxHealth: Equatable, Sendable {
         let lateAt = last.addingTimeInterval(2 * Double(t.nextCheckinS))
         let silent = now.timeIntervalSince(last)
 
-        if now > lateAt || status.late == true {
+        if let readAt, now.timeIntervalSince(readAt) > Self.staleRead {
+            level = .attention
+            headline = "No news since \(readAt.formatted(date: .omitted, time: .shortened))"
+            notes.append("This phone can't read the box's status from the server")
+        } else if now > lateAt || status.late == true {
             level = .trouble
             headline = silent > 3 * 3600
                 ? "Silent for \(Self.span(silent))"

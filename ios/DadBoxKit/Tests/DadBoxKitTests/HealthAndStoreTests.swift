@@ -33,6 +33,20 @@ func status(nextCheckinS: Int = 1800, battery: Int? = 68, mains: Bool = false, f
         #expect(BoxHealth(status: status(), now: t0 + 3 * 86400).headline == "Silent for 3 days")
     }
 
+    @Test func aStatusThePhoneCantReadIsStaleNewsNotALateBox() {
+        // 2026-10-06: an old build couldn't decode the status after the server dropped mute,
+        // kept the 22:00 read (1-min cadence) and called a box that checked in every 10 min late.
+        let s = status(nextCheckinS: 60, mains: true)
+        let stale = BoxHealth(status: s, now: t0 + 3600, readAt: t0)
+        #expect(stale.level == .attention)
+        #expect(stale.headline.hasPrefix("No news since"))
+        #expect(stale.notes.contains("This phone can't read the box's status from the server"))
+        #expect(stale.nextCheckin == nil)
+        // A fresh read still judges the box by its own cadence.
+        #expect(BoxHealth(status: s, now: t0 + 180, readAt: t0 + 170).level == .trouble)
+        #expect(BoxHealth(status: s, now: t0 + 30, readAt: t0 + 20).level == .fine)
+    }
+
     @Test func amberReasons() {
         #expect(BoxHealth(status: status(battery: 18), now: t0).notes == ["Battery 18 %"])
         #expect(BoxHealth(status: status(battery: 18, mains: true), now: t0).level == .fine)   // low but charging from the wall

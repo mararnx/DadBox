@@ -11,6 +11,7 @@ final class AppModel {
     private(set) var thread: [Message] = []
     private(set) var heard: Set<String> = []
     private(set) var status: DeviceStatus?
+    private(set) var statusReadAt: Date?     // when the server last answered; older than a minute or so, the news is ours to doubt
     private(set) var uploadProgress: [String: Double] = [:]
     private(set) var isDemo = false
     private(set) var me = Identity.parentA
@@ -30,7 +31,7 @@ final class AppModel {
     private var pushToken: String?
     private var ticker: Task<Void, Never>?
 
-    var health: BoxHealth { BoxHealth(status: status, now: now) }
+    var health: BoxHealth { BoxHealth(status: status, now: now, readAt: statusReadAt) }
     var keyID: UInt8 { me == .parentB ? 2 : 1 }      // PROTOCOL.md § Encryption: the first key of each parent
     var hasKey: Bool { keys.key(id: keyID) != nil }
     var unheardCount: Int { thread.filter { $0.from == .box && $0.state != .played && !heard.contains($0.id) }.count }
@@ -70,7 +71,7 @@ final class AppModel {
         ticker?.cancel()
         player.stop()
         if !isDemo { keychain.forgetSetup() }
-        backend = nil; store = nil; thread = []; status = nil
+        backend = nil; store = nil; thread = []; status = nil; statusReadAt = nil
         phase = .setup
     }
 
@@ -117,10 +118,17 @@ final class AppModel {
     }
 
     func refresh() async {
+        guard let backend, let store else { now = Date(); return }
+        // Status on its own: a status the app can't read must not stop the messages, and must
+        // show as stale news rather than as a late box (BoxHealth.staleRead). The clock moves
+        // after the read, so a return to the foreground doesn't flash "No news" while it runs.
+        let fresh = try? await backend.deviceStatus()
         now = Date()
-        guard let backend, let store else { return }
+        if let fresh {
+            status = fresh
+            statusReadAt = now
+        }
         do {
-            status = try await backend.deviceStatus()
             var cursor = await store.index.cursor
             for _ in 0..<50 {
                 let page = try await backend.messages(cursor: cursor)
@@ -260,7 +268,7 @@ final class AppModel {
         guard let backend else { return }
         var p = SettingsPatch()
         build(&p)
-        do { status = try await backend.patchSettings(p) } catch {
+        do { status = try await backend.patchSettings(p); statusReadAt = Date() } catch {
             notice = "The setting wasn't saved — no connection to the server."
         }
     }
