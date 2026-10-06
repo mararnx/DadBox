@@ -25,6 +25,7 @@ VOICE, LANG = "bm_george", "en-gb"          # chosen by ear on the bench, 2026-1
 LINES = {
     "starting": "LXMA module is starting up.",   # one word, so the A is the letter, not "uh"
     "ready": "LXMA module is ready to record.",
+    "nolink": "LXMA module cannot connect to the server.",
 }
 
 model_dir, out_dir = sys.argv[1], sys.argv[2]

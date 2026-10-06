@@ -9,11 +9,11 @@
 set -e
 HOST=${1:-dadbox}
 cd "$(dirname "$0")"
-scp -q starting.pcm ready.pcm "$HOST:/tmp/"
+scp -q starting.pcm ready.pcm nolink.pcm "$HOST:/tmp/"
 ssh "$HOST" 'set -e; cd /tmp
   sudo overlayroot-chroot sh -c "mkdir -p /usr/local/lib/dadbox/voice" >/dev/null
-  for f in starting ready; do
+  for f in starting ready nolink; do
     sudo overlayroot-chroot sh -c "cat > /usr/local/lib/dadbox/voice/$f.pcm && chmod 644 /usr/local/lib/dadbox/voice/$f.pcm" < $f.pcm >/dev/null 2>&1
   done
-  rm -f starting.* ready.*
+  rm -f starting.* ready.* nolink.*
   ls -la /media/root-ro/usr/local/lib/dadbox/voice/'

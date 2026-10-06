@@ -465,3 +465,21 @@ def test_no_ready_voice_when_a_press_or_a_message_came_first():
     clock, core = make(inbox=(MID,))
     out = core.handle(c.Checkin(True, Settings(), ()))
     assert "voice_ready" not in [a.kind for a in of(out, c.Chime)]
+
+
+def test_cannot_connect_is_said_once_a_minute_after_power_on():
+    clock, core = make()
+    clock.skip(59)
+    assert not of(core.handle(c.Tick()), c.Chime)
+    clock.skip(2)
+    assert [a.kind for a in of(core.handle(c.Tick()), c.Chime)] == ["voice_nolink"]
+    clock.skip(600)
+    assert not of(core.handle(c.Tick()), c.Chime)                    # once per power-on
+
+
+def test_cannot_connect_is_not_said_once_the_server_answered():
+    clock, core = make()
+    core.handle(c.Checkin(True, Settings(), ()))
+    core.handle(c.Checkin(False, error="no route"))
+    clock.skip(120)
+    assert "voice_nolink" not in [a.kind for a in of(core.handle(c.Tick()), c.Chime)]

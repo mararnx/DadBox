@@ -31,6 +31,7 @@ from .settings import Settings, in_quiet_hours
 from .state import Fault, Lights, Link, Power
 
 FW_VERSION = "0.3.0"
+NO_LINK_VOICE_S = 60.0           # power-on: still no server after this, say so once (ADR 0024 §10)
 CHIME_REPEAT_S = 10.0            # the message chime sounds once more after this, if still unplayed and idle
 CHIME_MIN_GAP_S = 30.0           # a burst of arrivals (a backlog after a reboot or an outage) chimes once
 
@@ -295,6 +296,7 @@ class BoxState:
     cue_at: float = 0.0
     boot_at: float = 0.0
     booted: bool = False                                    # the power-on rainbow is over, for good
+    no_link_said: bool = False                              # "cannot connect" spoken this power-on
     last_checkin_ok_at: Optional[float] = None
     last_checkin_wall: Optional[float] = None
     checkin_interval_s: int = 60
@@ -411,6 +413,12 @@ class Core:
                 and now - s.boot_at < rules.BOOT_LIGHT_MAX_S):
             # first ready since power-on, and that is what ends the rainbow: say so, once
             out.append(Chime(50 if self.quiet() else 100, "voice_ready"))
+        if (not s.no_link_said and s.last_checkin_ok_at is None and s.mode is Mode.IDLE
+                and now - s.boot_at >= NO_LINK_VOICE_S):
+            # power-on only: the adult who plugged it in hears why it isn't ready; never
+            # during the day, where a child would be left with a fault (ADR 0024 §10)
+            s.no_link_said = True
+            out.append(Chime(50 if self.quiet() else 100, "voice_nolink"))
         cue = self.s.cue if self.s.cue is not None and cue_active(self._plan_probe(), now) else None
         if cue is None:
             self.s.cue = None

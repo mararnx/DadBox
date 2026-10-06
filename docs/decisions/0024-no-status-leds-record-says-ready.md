@@ -124,6 +124,10 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
     before the service runs), and "LXMA module is ready to record" once, when
     the box first becomes ready — not if a press, the lock or a waiting
     message ended the power-on rainbow first; half volume in quiet hours.
+    And once, if the server has not answered 60 s after power-on and the box
+    is idle: "LXMA module cannot connect to the server" — **the one place the
+    box explains a fault**, a user decision: at power-on an adult has usually
+    just plugged it in. Never during the day, where a child would hear it.
     Levelled to −16 LUFS then 48 %. They are pre-rendered files, not speech
     synthesis on the box: no speech engine, no service, nothing leaves it — the
     "no speech services" rule stands. `box/voice/render.py` makes them, the

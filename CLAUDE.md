@@ -60,7 +60,8 @@ before making assumptions about the design.
   They say waiting, recording, playing, got-it and ready (a dim blue–cyan
   flow on Record) or not ready (slow blue blink). There are no status LEDs. Why the box is not
   ready (link, server, fault) is the app's to explain. A child never
-  interprets a fault.
+  interprets a fault. One exception: at power-on, an adult hears "cannot
+  connect to the server" once (ADR 0024 §10).
 - **Nothing a child recorded is ever lost.** The got-it pulse comes only after
   fsync; the outbox is never evicted; deletion only on the server's 2xx to
   `complete`, which follows a durable write and CRC check.
