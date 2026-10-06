@@ -39,7 +39,8 @@ LOCK_BLINK_S = 1.2                # Play blinks white twice on lock and unlock (
 BREATHE_PERIOD_S = 4.0
 RESTING_LEVEL = 0.15              # *resting*: dim, not off
 QUIET_CAP = 0.3                   # quiet hours: the glow is capped, so it doesn't light a bedroom
-READY_LEVEL = 0.3                 # Record's dim blue, steady or blinking (ADR 0024)
+READY_LEVEL = 0.3                 # Record's dim glow: ready drifts blue–green, not ready blinks blue (ADR 0024)
+READY_DRIFT_S = 20.0              # ready: blue → cyan → green → cyan → blue, once in this long
 NOT_READY_PERIOD_S = 3.0          # not ready: 1 s on, 2 s off
 NOT_READY_ON_S = 1.0
 RAINBOW_PERIOD_S = 3.0           # powering on: Play runs through every colour, Record dark (ADR 0024 revised)
@@ -88,6 +89,13 @@ def _rainbow(t: float) -> RGB:
     return balanced(colorsys.hsv_to_rgb((t / RAINBOW_PERIOD_S) % 1.0, 1.0, 1.0))
 
 
+def ready_colour(t: float) -> RGB:
+    """Record's ready glow: a slow drift through the colours blue and green make,
+    balanced for the buttons. Never red: that is the mic's pin."""
+    x = 0.5 - 0.5 * math.cos(2 * math.pi * t / READY_DRIFT_S)        # 0 = blue, 1 = green
+    return balanced((0.0, x, 1.0 - x))
+
+
 def _lock_blink(x: float) -> bool:
     """Two blinks in LOCK_BLINK_S: on–off–on–off."""
     phase = x / LOCK_BLINK_S
@@ -112,11 +120,14 @@ def render(plan: LightsPlan, t: float) -> Frame:
     record: RGB = DARK
     play: RGB = DARK
 
-    # Record, when not recording: steady dim blue = ready to record and the server is
-    # reachable; slow dim blue blink = not (no network, no server, or a fault). Dark when
-    # locked, and while playing — a Record press is ignored during playback.
+    # Record, when not recording: a dim glow drifting slowly through blue and green =
+    # ready to record and the server is reachable; slow dim blue blink = not (no network,
+    # no server, or a fault). Dark when locked, and while playing — a Record press is
+    # ignored during playback.
     if not plan.locked and plan.lights is not Lights.PLAYING:
-        if plan.ready or (t % NOT_READY_PERIOD_S) < NOT_READY_ON_S:
+        if plan.ready:
+            record = _scale(ready_colour(t), k * READY_LEVEL)
+        elif (t % NOT_READY_PERIOD_S) < NOT_READY_ON_S:
             record = _scale(BLUE, k * READY_LEVEL)
 
     # 2. Playing: play button steady green.

@@ -1,6 +1,6 @@
 import itertools
 
-from dadbox.lights import (Cue, LightsPlan, render, QUIET_CAP, READY_LEVEL)
+from dadbox.lights import (Cue, LightsPlan, render, ready_colour, QUIET_CAP, READY_DRIFT_S, READY_LEVEL)
 from dadbox.state import Lights
 
 
@@ -37,10 +37,17 @@ def test_playing_is_steady_green_and_record_is_dark():
             assert f.play == (0.0, 1.0, 0.0) and f.record == (0.0, 0.0, 0.0)    # Record is ignored while playing
 
 
-def test_ready_is_steady_dim_blue_on_record():
+def test_ready_drifts_slowly_through_blue_and_green_on_record():
     for lights in (Lights.IDLE, Lights.WAITING):
-        for t in [0, 0.75, 1.5, 2.25]:
-            assert render(LightsPlan(lights=lights, brightness=100, ready=True), t).record == (0.0, 0.0, READY_LEVEL)
+        frames = [render(LightsPlan(lights=lights, brightness=100, ready=True), i * 0.5) for i in range(41)]
+        for f in frames:
+            r, g, b = f.record
+            assert r == 0.0 and abs(max(g, b) - READY_LEVEL) < 1e-9      # dim, never off, never red
+        assert frames[0].record == (0.0, 0.0, READY_LEVEL)                # blue
+        assert frames[20].record == (0.0, READY_LEVEL, 0.0)               # green, half way round
+        g, b = frames[10].record[1:]
+        assert 0 < g < b                                                  # cyan between
+    assert ready_colour(0.0) == ready_colour(READY_DRIFT_S)
     for t in [0, 0.75, 1.5]:
         assert render(LightsPlan(lights=Lights.IDLE, brightness=100), t).play == (0.0, 0.0, 0.0)   # replay shows nothing
 
@@ -66,7 +73,7 @@ def test_quiet_hours_cap_the_glow():
 def test_got_it_is_one_green_pulse_on_record():
     plan = LightsPlan(lights=Lights.IDLE, cue=Cue.GOT_IT, cue_at=10.0, brightness=100, ready=True)
     assert render(plan, 10.3).record == (0.0, render(plan, 10.3).record[1], 0.0) and render(plan, 10.3).record[1] > 0.9
-    assert render(plan, 10.7).record == (0.0, 0.0, READY_LEVEL)   # back to ready
+    assert render(plan, 10.7).record == render(LightsPlan(brightness=100, ready=True), 10.7).record   # back to ready
 
 
 def test_lock_blinks_play_white_twice():

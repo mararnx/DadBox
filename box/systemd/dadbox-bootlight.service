@@ -1,17 +1,16 @@
 [Unit]
-Description=DadBox power-on light: Play runs through the colours until the service takes over
-# ADR 0024 as revised 2026-10-06. config.txt lights Play blue from the firmware
-# on; this steps Play through red, green, blue (on/off only: mixes look red on these
-# buttons, the service balances them with PWM, ADR 0024 §7) from
-# early boot until the service's light driver creates /run/dadbox/bootlight-stop
-# (dadbox/hw/pi.py), which then carries the rainbow on until the box is first ready.
-# No ordering: pinctrl is on the root, so it needn't wait for /data's fsck.
+Description=DadBox power-on light: the rainbow on Play until the service takes over
+# ADR 0024 §7. config.txt lights Play from the firmware on; this runs the
+# colour-balanced rainbow (systemd/bootlight.py, installed as
+# /usr/local/lib/dadbox/bootlight.py) from when systemd starts until the
+# service's light driver creates /run/dadbox/bootlight-stop.
+# No ordering: everything it needs is on the root, so it needn't wait for /data.
 DefaultDependencies=no
 
 [Service]
 Type=simple
-# Play: red 23, green 24, blue 25. Each step lists the pins that are on.
-ExecStart=/bin/sh -c 'while :; do for on in 23 24 25; do [ -e /run/dadbox/bootlight-stop ] && break 2; /usr/bin/pinctrl set 23,24,25 op dl; /usr/bin/pinctrl set $$on op dh; sleep 0.5; done; done; /usr/bin/pinctrl set 23,24,25 op dl'
+Environment=LG_WD=/run
+ExecStart=/usr/bin/python3 /usr/local/lib/dadbox/bootlight.py
 
 [Install]
 WantedBy=sysinit.target

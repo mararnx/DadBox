@@ -362,7 +362,7 @@ class Core:
         return Link.DOWN_QUEUED if self.s.outbox else Link.DOWN
 
     def ready(self, now: float) -> bool:
-        """Record's steady dim blue (ADR 0024): the server answered recently and nothing
+        """Record's dim blue–green drift (ADR 0024 §8): the server answered recently and nothing
         is faulty. Otherwise Record blinks blue — the box's only fault light."""
         return self.link(now) is Link.OK and self.fault() is Fault.NONE
 

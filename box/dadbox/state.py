@@ -2,7 +2,7 @@
 
 The two button lights are the box's only lights (ADR 0016, ADR 0024).
 `Lights` is their priority order, highest wins. On top of it, Record says
-whether the box is ready: steady dim blue when the server answered recently
+whether the box is ready: a dim blue–green drift when the server answered recently
 and nothing is faulty, a slow blue blink when not. There are no status LEDs.
 """
 from __future__ import annotations

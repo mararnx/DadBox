@@ -5,7 +5,7 @@
 (two vocabularies become one), [ADR 0016](0016-two-buttons-no-lid.md) §4
 (the lock blink) and [ADR 0020](0020-no-mute-replay-green-link.md) §3–5
 and §7
-— revised 2026-10-06 (user decision): powering on is shown on Play, see §7
+— revised 2026-10-06 (user decision): powering on is shown on Play, see §7; ready drifts blue–green, see §8
 
 ## Context
 
@@ -35,7 +35,7 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
    | --- | --- |
    | unplugged | dark |
    | powering on, not yet ready (§7) | dark; Play runs through the colours |
-   | ready: the server answered within 2 × the check-in interval, and no fault | **steady dim blue** (30 % of the brightness setting) |
+   | ready: the server answered within 2 × the check-in interval, and no fault | **dim blue–green drift** (30 % of the brightness setting; §8) |
    | not ready: no network, no server, or a fault (storage, capture, modem) | **slow dim blue blink**, 1 s on, 2 s off |
    | playing a message (a Record press is ignored then) | dark |
    | travel lock on | dark |
@@ -58,7 +58,7 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
 7. **Powering on (2026-10-06).** The box was dark for ~36 s after the plug
    went in, which looked like a dead box. Now Play runs through the colours,
    mixed ones included, from about a second after power-on until the box is
-   first ready; then Play goes dark and Record shows steady dim blue. In
+   first ready; then Play goes dark and Record shows its ready glow. In
    three layers, because nothing of ours runs at first:
    - `gpio=25=op,dh` in `config.txt`: Play blue from the firmware on.
    - `dadbox-bootlight.service` (early boot, `pinctrl`): steps Play through
@@ -78,6 +78,12 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
 
    Play's colours otherwise mean messages (green) and the lock (white); the
    rainbow is only ever seen right after plugging in.
+8. **Ready drifts (2026-10-06).** Steady dim blue becomes a dim glow that
+   drifts slowly through the colours blue and green make — blue, cyan,
+   green, cyan, blue, once every 20 s (`READY_DRIFT_S`), balanced like every
+   mix. Never red: Record's red is the mic. Not ready is unchanged: the slow
+   blue blink, on and off. Ready is never dark, so the two stay apart; the
+   got-it pulse is bright green and short, the drift is dim and slow.
 
 ## Alternatives considered
 

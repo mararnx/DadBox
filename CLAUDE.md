@@ -57,8 +57,8 @@ before making assumptions about the design.
 
 - **The buttons' lights are the box's only lights, and they have one "not
   ready" state** ([ADR 0024](docs/decisions/0024-no-status-leds-record-says-ready.md)).
-  They say waiting, recording, playing, got-it and, on Record, ready (steady
-  dim blue) or not ready (slow blue blink). There are no status LEDs. Why the box is not
+  They say waiting, recording, playing, got-it and, on Record, ready (a dim,
+  slow blue–green drift) or not ready (slow blue blink). There are no status LEDs. Why the box is not
   ready (link, server, fault) is the app's to explain. A child never
   interprets a fault.
 - **Nothing a child recorded is ever lost.** The got-it pulse comes only after
