@@ -37,7 +37,7 @@ BALANCE: RGB = (0.25, 0.63, 1.0)
 GOT_IT_S = 0.6                    # one green pulse (ARCHITECTURE.md § Indication)
 LOCK_BLINK_S = 1.2                # lock on: both buttons flash white twice (ADR 0016, ADR 0024 §9)
 UNLOCK_FLASH_S = 0.5              # lock off: one white flash, then back to normal
-LOCKED_PRESS_S = 0.3              # a press while locked: one brief white flash, "still locked"
+LOCKED_PRESS_S = 0.9              # a press while locked: three quick white flashes, "still locked"
 BREATHE_PERIOD_S = 4.0
 RESTING_LEVEL = 0.15              # *resting*: dim, not off
 QUIET_CAP = 0.3                   # quiet hours: the glow is capped, so it doesn't light a bedroom
@@ -54,7 +54,7 @@ class Cue(Enum):
     GOT_IT = "got_it"             # one green pulse on Record after the message is fsynced
     LOCK = "lock"                 # travel lock engaged: both buttons flash white twice
     UNLOCK = "unlock"             # travel lock released: one white flash
-    LOCKED_PRESS = "locked_press" # a press while locked: one brief white flash
+    LOCKED_PRESS = "locked_press" # a press while locked: three quick white flashes
 
 
 @dataclass(frozen=True)
@@ -174,7 +174,8 @@ def render(plan: LightsPlan, t: float) -> Frame:
         else:
             flash = ((plan.cue is Cue.LOCK and 0 <= x < LOCK_BLINK_S and _lock_blink(x))
                      or (plan.cue is Cue.UNLOCK and 0 <= x < UNLOCK_FLASH_S * 0.7)
-                     or (plan.cue is Cue.LOCKED_PRESS and 0 <= x < LOCKED_PRESS_S * 0.8))
+                     or (plan.cue is Cue.LOCKED_PRESS and 0 <= x < LOCKED_PRESS_S
+                         and (x / (LOCKED_PRESS_S / 3)) % 1.0 < 0.5))
             if flash:
                 rw, pw = _lock_white()
                 record, play = _scale(rw, k), _scale(pw, k)

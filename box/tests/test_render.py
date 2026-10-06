@@ -113,10 +113,13 @@ def test_unlock_flashes_once_then_normal():
     assert after.play == (0.0, 0.0, 0.0) and max(after.record) > 0           # back to the ready glow
 
 
-def test_a_press_while_locked_flashes_briefly():
+def test_a_press_while_locked_flashes_three_times():
     from dadbox.lights import BALANCE, LOCKED_PRESS_S
     plan = LightsPlan(cue=Cue.LOCKED_PRESS, cue_at=0.0, brightness=100, locked=True)
-    assert render(plan, 0.1).play == BALANCE
+    step = LOCKED_PRESS_S / 3
+    for n in range(3):                                                    # three flashes, dark between
+        assert render(plan, n * step + 0.05).play == BALANCE
+        assert render(plan, n * step + step * 0.75).play == (0.0, 0.0, 0.0)
     assert render(plan, LOCKED_PRESS_S + 0.05).play == (0.0, 0.0, 0.0)
 
 
