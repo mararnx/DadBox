@@ -21,7 +21,7 @@ as PROTOCOL.md says. Checked live: settings hold no mute, a mute PATCH gets
 **Learned:** The app had silently kept a mute toggle the box had ignored
 since ADR 0020 — a contract change needs a sweep of all three streams, not
 only the one that prompted it.
-**Next:** Look at the Box screen in build 12 on the phone. APNs key, the
+**Next:** Look at the Box screen in build 12 on the phone. The
 doorbell bench measurements (ADR 0021), and the new loudness on more takes.
 Answered from the evening entry: the firmware stage of power-on (all three
 of Play's colours on, which looks red at 3.3 V) is fine as it is.
