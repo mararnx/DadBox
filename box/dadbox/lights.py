@@ -28,6 +28,12 @@ BLUE: RGB = (0.0, 0.0, 1.0)       # Record: steady dim = ready, slow blink = not
 WHITE: RGB = (1.0, 1.0, 1.0)      # the lock blink, on Play only
 GREEN: RGB = (0.0, 1.0, 0.0)      # Play: pulsing = a new message, steady = playing (ADR 0020)
 
+# The buttons' resistors are sized for 5 V and we drive them at 3.3 V: red gets far
+# more current than green, green more than blue, and any mix looks red (or green).
+# Mixes are scaled by this balance, then lifted so the strongest channel is full.
+# White = (0.25, 0.63, 1.0), tuned by eye on the bench, 2026-10-06. Pure colours unchanged.
+BALANCE: RGB = (0.25, 0.63, 1.0)
+
 GOT_IT_S = 0.6                    # one green pulse (ARCHITECTURE.md § Indication)
 LOCK_BLINK_S = 1.2                # Play blinks white twice on lock and unlock (ADR 0016, ADR 0024)
 BREATHE_PERIOD_S = 4.0
@@ -71,8 +77,15 @@ def _breathe(t: float, period: float = BREATHE_PERIOD_S) -> float:
     return 0.5 - 0.5 * math.cos(2 * math.pi * t / period)
 
 
+def balanced(c: RGB) -> RGB:
+    """A colour as the eye should see it on these buttons (BALANCE)."""
+    m = (c[0] * BALANCE[0], c[1] * BALANCE[1], c[2] * BALANCE[2])
+    top = max(m)
+    return DARK if top == 0 else (m[0] / top, m[1] / top, m[2] / top)
+
+
 def _rainbow(t: float) -> RGB:
-    return colorsys.hsv_to_rgb((t / RAINBOW_PERIOD_S) % 1.0, 1.0, 1.0)
+    return balanced(colorsys.hsv_to_rgb((t / RAINBOW_PERIOD_S) % 1.0, 1.0, 1.0))
 
 
 def _lock_blink(x: float) -> bool:
@@ -120,7 +133,7 @@ def render(plan: LightsPlan, t: float) -> Frame:
         if plan.cue is Cue.GOT_IT and 0 <= x < GOT_IT_S:
             record = _scale(GREEN, k * math.sin(math.pi * x / GOT_IT_S))    # replaces the blue
         elif plan.cue is Cue.LOCK and 0 <= x < LOCK_BLINK_S and _lock_blink(x):
-            play = _scale(WHITE, k)
+            play = _scale(balanced(WHITE), k)
 
     assert record[0] == 0.0, "the record button's red is the mic's supply: only RECORDING lights it"
     return Frame(record=record, play=play)

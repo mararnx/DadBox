@@ -62,7 +62,14 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
    three layers, because nothing of ours runs at first:
    - `gpio=25=op,dh` in `config.txt`: Play blue from the firmware on.
    - `dadbox-bootlight.service` (early boot, `pinctrl`): steps Play through
-     red, yellow, green, cyan, blue, magenta, white, 0.4 s each.
+     red, green, blue, 0.5 s each, from when systemd starts (~10.6 s) until
+     the light driver takes the pins (it creates `/run/dadbox/bootlight-stop`).
+   - **Mixes are colour-balanced.** The buttons' built-in resistors are sized
+     for 5 V; at 3.3 V red outshines green and green outshines blue, so on/off
+     mixes all looked red or green. The service scales mixes by a white point
+     tuned by eye on the bench (red 25 %, green 63 %, blue 100 %, `BALANCE` in
+     `lights.py`); pure colours stay full. The lock's white uses it too. The
+     shell stage cannot dim, so it shows the three pure colours only.
    - The service stops that unit as it starts and carries a smooth rainbow
      (`booting` in the lights plan) until it is first ready. It ends for good
      at the first ready, at any press or lock, if a message is waiting (its

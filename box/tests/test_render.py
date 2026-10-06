@@ -71,7 +71,8 @@ def test_got_it_is_one_green_pulse_on_record():
 
 def test_lock_blinks_play_white_twice():
     plan = LightsPlan(cue=Cue.LOCK, cue_at=0.0, brightness=100, locked=True)
-    assert render(plan, 0.1).play == (1.0, 1.0, 1.0) and render(plan, 0.3).play == (0.0, 0.0, 0.0)
+    from dadbox.lights import BALANCE
+    assert render(plan, 0.1).play == BALANCE and render(plan, 0.3).play == (0.0, 0.0, 0.0)   # white, balanced
     assert render(plan, 0.1).record == (0.0, 0.0, 0.0)
 
 
@@ -79,8 +80,19 @@ def test_powering_on_runs_play_through_the_colours_and_record_is_dark():
     plan = LightsPlan(booting=True, brightness=100)
     frames = [render(plan, i * 0.1) for i in range(30)]
     assert all(f.record == (0.0, 0.0, 0.0) for f in frames)
-    seen = {tuple(round(x) for x in f.play) for f in frames}
-    assert {(1, 0, 0), (1, 1, 0), (0, 1, 0), (0, 1, 1), (0, 0, 1), (1, 0, 1)} <= seen    # mixed ones too
+    for f in frames:
+        assert max(f.play) == 1.0                                # every hue at full strength
+    hues = {tuple(round(x) for x in f.play) for f in frames}
+    assert {(1, 0, 0), (0, 1, 0), (0, 0, 1)} <= hues
+
+
+def test_mixes_are_balanced_for_the_buttons_pure_colours_are_not():
+    from dadbox.lights import BALANCE, balanced
+    assert balanced((1.0, 0.0, 0.0)) == (1.0, 0.0, 0.0)
+    assert balanced((0.0, 1.0, 0.0)) == (0.0, 1.0, 0.0)
+    assert balanced((1.0, 1.0, 1.0)) == BALANCE                  # white as judged on the bench
+    r, g, b = balanced((0.0, 1.0, 1.0))                          # cyan: green held back for blue
+    assert b == 1.0 and g == BALANCE[1]
 
 
 def test_powering_on_gives_way_to_what_the_child_does():
