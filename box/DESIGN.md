@@ -338,7 +338,7 @@ HTTP API in about two minutes (a 20× clock, every step from a clean world).
 | Inbox removal after play | on the server's `played` ack, except the newest played message |
 | Quiet-hours glow | capped at 30 % of `led_brightness` |
 | Message chime | a marimba pair (G5, C6), once on arrival and once more 10 s later if still unplayed, idle and no press since; never in quiet hours |
-| Record tones | rising two-note "bee-boo" (660 → 990 Hz) before the mic, the same falling after; `volume`, half in quiet hours (they answer a press; the message chime stays silent then) |
+| Record tones | the lock pair: falling marimba (G4 → C4) before the mic, rising after; `volume`, half in quiet hours (they answer a press; the message chime stays silent then) |
 | Ready (blue–cyan flow on Record, 4 s, Play dark; Record dark while a message waits) | the server answered within 2 × the interval and no fault (ADR 0024) |
 | Silence threshold / auto-stop | RMS 400 per 100 ms block, 20 s — tune on real audio |
 | Raw capture lifetime | unlinked right after the sealed container is fsynced |
