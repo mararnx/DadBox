@@ -136,16 +136,22 @@ class AudioWorker:
         if stop:
             stop()
 
-    def chime(self, volume: int) -> None:
-        if not self._chiming.acquire(blocking=False):
-            return                                   # one is already sounding
+    def chime(self, volume: int, kind: str = "message", wait: bool = False) -> None:
+        """`wait`: sound it now and return only when the amp is off again — the
+        record-start tone, which must be over before the mic gets power."""
         def run():
             self.amp.set(True)
             try:
-                self.backend.chime(volume)
+                self.backend.chime(volume, kind)
             finally:
                 self.amp.set(False)
                 self._chiming.release()
+        if wait:
+            if self._chiming.acquire(timeout=3.0):   # a chime still sounding: let it end first
+                run()
+            return
+        if not self._chiming.acquire(blocking=False):
+            return                                   # one is already sounding
         threading.Thread(target=run, name="chime", daemon=True).start()
 
     def mark_played(self, message_id: str, ok: bool) -> None:

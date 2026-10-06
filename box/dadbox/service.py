@@ -220,7 +220,7 @@ class Service:
         elif isinstance(a, c.StopPlay):
             self.audio.stop_play()
         elif isinstance(a, c.Chime):
-            self.audio.chime(a.volume)
+            self.audio.chime(a.volume, a.kind, a.wait)
         elif isinstance(a, c.PersistLock):
             self.store.set_locked(a.locked)
         elif isinstance(a, c.MarkPlayed):

@@ -281,9 +281,9 @@ class PiAudio:
                     p.terminate()
         return stop
 
-    def chime(self, volume: int) -> None:
+    def chime(self, volume: int, kind: str = "message") -> None:
         gain = max(0, min(100, volume)) / 100.0
-        pcm = chime_pcm()
+        pcm = chime_pcm(kind)
         if gain < 1.0:
             import array
             a = array.array("h"); a.frombytes(pcm)

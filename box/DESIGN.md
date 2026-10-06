@@ -94,7 +94,7 @@ Three modes: `IDLE`, `RECORDING`, `PLAYING`. Everything else is overlay
 
 | Press | Idle | Recording | Playing |
 | --- | --- | --- | --- |
-| Record | mic on, capture starts, steady red | stop: **mic off first**, then `StopCapture` | ignored — mic and amp are never on together |
+| Record | start tone, played **to the end** (amp off), then mic on, capture starts, steady red | stop: **mic off first**, then `StopCapture`, then the "done" tone | ignored — mic and amp are never on together |
 | Play | oldest unheard plays; with nothing new, the last one again | ignored | ignored (no restart, no skip) |
 | Both, 3 s | travel lock toggles; Play blinks white twice | stops the recording, then locks | stops playback (not counted as heard), then locks |
 
@@ -337,6 +337,7 @@ HTTP API in about two minutes (a 20× clock, every step from a clean world).
 | Play with nothing new | repeats the last message (ADR 0020) |
 | Inbox removal after play | on the server's `played` ack, except the newest played message |
 | Quiet-hours glow | capped at 30 % of `led_brightness` |
+| Record tones | rising blip before the mic, falling "done" after; `volume`, half in quiet hours (they answer a press; the message chime stays silent then) |
 | Ready (blue–cyan flow, 4 s, Play half a round behind; Record dark while a message waits) | the server answered within 2 × the interval and no fault (ADR 0024) |
 | Silence threshold / auto-stop | RMS 400 per 100 ms block, 20 s — tune on real audio |
 | Raw capture lifetime | unlinked right after the sealed container is fsynced |

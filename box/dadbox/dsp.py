@@ -76,8 +76,14 @@ def tone(freq: float, seconds: float, amp: float = 0.3, rate: int = RATE) -> byt
     return a.tobytes()
 
 
-def chime_pcm() -> bytes:
-    """Two soft notes. Short, gentle, the only sound the box makes unbidden."""
+def chime_pcm(kind: str = "message") -> bytes:
+    """The box's few sounds. "message": two soft notes, the only sound it makes
+    unbidden. "record_start": a quick rising blip before the mic comes on.
+    "record_end": a falling "done" after the mic is off."""
+    if kind == "record_start":
+        return tone(523, 0.06, 0.22) + tone(659, 0.06, 0.22) + tone(784, 0.10, 0.22)
+    if kind == "record_end":
+        return tone(784, 0.09, 0.22) + tone(523, 0.16, 0.2)
     return tone(660, 0.18, 0.25) + tone(880, 0.28, 0.22)
 
 

@@ -343,3 +343,23 @@ def test_power_on_rainbow_ends_when_the_child_records_or_a_message_waits():
     assert not core.booting(clock.now())
     clock, core = make(inbox=(MID,))
     assert not core.booting(clock.now())                         # the green pulse matters more
+
+
+def test_record_tones_bracket_the_mic_and_never_overlap_it():
+    clock, core = make()
+    out = press(clock, core, Button.RECORD)
+    kinds = [type(a).__name__ for a in out if isinstance(a, (c.Chime, c.MicPower))]
+    assert kinds == ["Chime", "MicPower"]                         # the start tone first…
+    start = of(out, c.Chime)[0]
+    assert start.kind == "record_start" and start.wait            # …and over before the mic gets power
+    assert of(out, c.MicPower)[0].on
+    out = press(clock, core, Button.RECORD)
+    seq = [a for a in out if isinstance(a, (c.Chime, c.MicPower))]
+    assert isinstance(seq[0], c.MicPower) and not seq[0].on       # mic off first…
+    assert isinstance(seq[1], c.Chime) and seq[1].kind == "record_end" and not seq[1].wait   # …then "done"
+
+
+def test_record_tones_are_half_volume_in_quiet_hours():
+    clock, core = make(settings=Settings(volume=80, quiet_hours=QuietHours("00:00", "23:59", "UTC")))
+    out = press(clock, core, Button.RECORD)
+    assert of(out, c.Chime)[0].volume == 40

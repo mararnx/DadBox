@@ -112,8 +112,8 @@ class SimAudio:
         threading.Thread(target=run, daemon=True).start()
         return stop.set
 
-    def chime(self, volume: int) -> None:
-        self.clock.sleep(0.5)
+    def chime(self, volume: int, kind: str = "message") -> None:
+        self.clock.sleep(0.5 if kind == "message" else 0.25)
 
 
 def _duration_s(audio: bytes, codec: int) -> float:

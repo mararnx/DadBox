@@ -217,6 +217,8 @@ class StopPlay(Action):
 @dataclass(frozen=True)
 class Chime(Action):
     volume: int
+    kind: str = "message"         # dsp.chime_pcm: message, record_start, record_end
+    wait: bool = False            # sound it to the end before the next action (record start)
 
 
 @dataclass(frozen=True)
@@ -515,7 +517,8 @@ class Core:
             s.recording_id = ulid(self.clock.wall())
             s.recording_since = now
             s.silence_s = 0.0
-            out.append(MicPower(True))                  # red light and mic supply: one pin, first
+            out.append(Chime(self._tone_volume(), "record_start", wait=True))   # over, amp off, before the mic
+            out.append(MicPower(True))                  # red light and mic supply: one pin
             out.append(StartCapture(s.recording_id, self.clock.wall(), s.time_ok))
             out.append(Log(f"recording {s.recording_id}"))
 
@@ -525,8 +528,15 @@ class Core:
         out.append(MicPower(False))                     # mic dead before anything else
         if mid:
             out.append(StopCapture(mid))
+        out.append(Chime(self._tone_volume(), "record_end"))   # the mic is already off
         s.mode = Mode.IDLE
         s.recording_id = None
+
+    def _tone_volume(self) -> int:
+        """The record tones answer the child's own press, so they sound in quiet
+        hours too — at half volume. The unbidden message chime does not."""
+        v = self.s.settings.volume
+        return v // 2 if self.quiet() else v
 
     def _play_press(self, now: float, out: List[Action]) -> None:
         s = self.s

@@ -75,7 +75,8 @@ class AudioBackend(Protocol):
         """Decode and play; returns a stop function. `duration_ms` is the header's
         word on the length — the simulator paces itself by it."""
 
-    def chime(self, volume: int) -> None: ...
+    def chime(self, volume: int, kind: str = "message") -> None:
+        """Play one of dsp.chime_pcm's sounds; returns when it has finished."""
 
 
 class Hardware:
