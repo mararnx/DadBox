@@ -25,7 +25,7 @@ RGB = Tuple[float, float, float]
 DARK: RGB = (0.0, 0.0, 0.0)
 RED: RGB = (1.0, 0.0, 0.0)
 BLUE: RGB = (0.0, 0.0, 1.0)       # Record: steady dim = ready, slow blink = not ready (ADR 0024)
-WHITE: RGB = (1.0, 1.0, 1.0)      # the lock blink, on Play only
+WHITE: RGB = (1.0, 1.0, 1.0)      # the lock flashes, on both buttons (Record without its red)
 GREEN: RGB = (0.0, 1.0, 0.0)      # Play: pulsing = a new message, steady = playing (ADR 0020)
 
 # The buttons' resistors are sized for 5 V and we drive them at 3.3 V: red gets far
@@ -35,7 +35,9 @@ GREEN: RGB = (0.0, 1.0, 0.0)      # Play: pulsing = a new message, steady = play
 BALANCE: RGB = (0.25, 0.63, 1.0)
 
 GOT_IT_S = 0.6                    # one green pulse (ARCHITECTURE.md § Indication)
-LOCK_BLINK_S = 1.2                # Play blinks white twice on lock and unlock (ADR 0016, ADR 0024)
+LOCK_BLINK_S = 1.2                # lock on: both buttons flash white twice (ADR 0016, ADR 0024 §9)
+UNLOCK_FLASH_S = 0.5              # lock off: one white flash, then back to normal
+LOCKED_PRESS_S = 0.3              # a press while locked: one brief white flash, "still locked"
 BREATHE_PERIOD_S = 4.0
 RESTING_LEVEL = 0.15              # *resting*: dim, not off
 QUIET_CAP = 0.3                   # quiet hours: the glow is capped, so it doesn't light a bedroom
@@ -50,7 +52,9 @@ RAINBOW_PERIOD_S = 3.0           # powering on: Play runs through every colour, 
 
 class Cue(Enum):
     GOT_IT = "got_it"             # one green pulse on Record after the message is fsynced
-    LOCK = "lock"                 # Play blinks white twice: travel lock engaged or released
+    LOCK = "lock"                 # travel lock engaged: both buttons flash white twice
+    UNLOCK = "unlock"             # travel lock released: one white flash
+    LOCKED_PRESS = "locked_press" # a press while locked: one brief white flash
 
 
 @dataclass(frozen=True)
@@ -112,6 +116,13 @@ def ready_colour(t: float) -> RGB:
     return (0.0, x * c[1], (1 - x) + x * c[2])
 
 
+def _lock_white() -> Tuple[RGB, RGB]:
+    """(Record, Play) white. Record's red is the mic's pin, so its "white" is the
+    balanced green and blue alone — a bright cyan-white."""
+    w = balanced(WHITE)
+    return (0.0, w[1], w[2]), w
+
+
 def _lock_blink(x: float) -> bool:
     """Two blinks in LOCK_BLINK_S: on–off–on–off."""
     phase = x / LOCK_BLINK_S
@@ -160,8 +171,13 @@ def render(plan: LightsPlan, t: float) -> Frame:
         x = t - plan.cue_at
         if plan.cue is Cue.GOT_IT and 0 <= x < GOT_IT_S:
             record = _scale(GREEN, k * math.sin(math.pi * x / GOT_IT_S))    # replaces the blue
-        elif plan.cue is Cue.LOCK and 0 <= x < LOCK_BLINK_S and _lock_blink(x):
-            play = _scale(balanced(WHITE), k)
+        else:
+            flash = ((plan.cue is Cue.LOCK and 0 <= x < LOCK_BLINK_S and _lock_blink(x))
+                     or (plan.cue is Cue.UNLOCK and 0 <= x < UNLOCK_FLASH_S * 0.7)
+                     or (plan.cue is Cue.LOCKED_PRESS and 0 <= x < LOCKED_PRESS_S * 0.8))
+            if flash:
+                rw, pw = _lock_white()
+                record, play = _scale(rw, k), _scale(pw, k)
 
     assert record[0] == 0.0, "the record button's red is the mic's supply: only RECORDING lights it"
     return Frame(record=record, play=play)
@@ -170,5 +186,6 @@ def render(plan: LightsPlan, t: float) -> Frame:
 def cue_active(plan: LightsPlan, t: float) -> bool:
     if plan.cue is None:
         return False
-    length = GOT_IT_S if plan.cue is Cue.GOT_IT else LOCK_BLINK_S
+    length = {Cue.GOT_IT: GOT_IT_S, Cue.LOCK: LOCK_BLINK_S, Cue.UNLOCK: UNLOCK_FLASH_S,
+              Cue.LOCKED_PRESS: LOCKED_PRESS_S}[plan.cue]
     return 0 <= t - plan.cue_at < length

@@ -218,7 +218,7 @@ class StopPlay(Action):
 @dataclass(frozen=True)
 class Chime(Action):
     volume: int
-    kind: str = "message"         # dsp.chime_pcm: message, record_start, record_end
+    kind: str = "message"         # dsp.chime_pcm: message, record_start, record_end, lock_on, lock_off
     wait: bool = False            # sound it to the end before the next action (record start)
 
 
@@ -496,6 +496,7 @@ class Core:
             self._set_lock(not self.s.locked, now, out)
             return
         if self.s.locked:
+            self.s.cue, self.s.cue_at = Cue.LOCKED_PRESS, now   # a brief white flash: still locked
             out.append(Log(f"{g.button.value} press ignored: travel lock"))
             return
         if g.button is Button.RECORD:
@@ -505,12 +506,15 @@ class Core:
 
     def _set_lock(self, locked: bool, now: float, out: List[Action]) -> None:
         if self.s.mode is Mode.RECORDING:
+            mark = len(out)
             self._stop_recording(now, out)
+            out[mark:] = [a for a in out[mark:] if not (isinstance(a, Chime) and a.kind == "record_end")]  # the lock tone says it
         if self.s.mode is Mode.PLAYING:
             out.append(StopPlay())
             self._playback_over(now, out, heard=False)
         self.s.locked = locked
-        self.s.cue, self.s.cue_at = Cue.LOCK, now
+        self.s.cue, self.s.cue_at = (Cue.LOCK if locked else Cue.UNLOCK), now
+        out.append(Chime(self._tone_volume(), "lock_on" if locked else "lock_off"))
         out.append(PersistLock(locked))
         out.append(Log("travel lock " + ("on" if locked else "off")))
 
@@ -541,8 +545,8 @@ class Core:
         s.recording_id = None
 
     def _tone_volume(self) -> int:
-        """The record tones answer the child's own press, so they sound in quiet
-        hours too — at half volume. The unbidden message chime does not."""
+        """The record and lock tones answer the child's own press, so they sound in
+        quiet hours too — at half volume. The unbidden message chime does not."""
         v = self.s.settings.volume
         return v // 2 if self.quiet() else v
 

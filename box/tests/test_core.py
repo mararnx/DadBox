@@ -383,3 +383,31 @@ def test_no_repeat_once_the_child_pressed_or_the_message_was_heard():
     out = press(clock, core, Button.PLAY)
     clock.skip(11)
     assert not [a for a in core.handle(c.Tick()) if isinstance(a, c.Chime) and a.kind == "message"]
+
+
+def test_lock_and_unlock_sound_a_tone_and_a_press_while_locked_flashes():
+    clock, core = make()
+    def hold_both():
+        out = core.handle(c.Contact(Button.RECORD, True)) + core.handle(c.Contact(Button.PLAY, True))
+        clock.skip(3.0)
+        out += core.handle(c.Tick())
+        core.handle(c.Contact(Button.RECORD, False)); core.handle(c.Contact(Button.PLAY, False))
+        return out
+    out = hold_both()
+    assert [a.kind for a in of(out, c.Chime)] == ["lock_on"] and core.s.cue is Cue.LOCK
+    clock.skip(2)
+    out = press(clock, core, Button.RECORD)
+    assert core.s.cue is Cue.LOCKED_PRESS and not of(out, c.Chime) and not of(out, c.StartCapture)
+    clock.skip(2)
+    out = hold_both()
+    assert [a.kind for a in of(out, c.Chime)] == ["lock_off"] and core.s.cue is Cue.UNLOCK
+
+
+def test_locking_mid_recording_gives_the_lock_tone_not_the_done_tone():
+    clock, core = make()
+    press(clock, core, Button.RECORD)
+    out = core.handle(c.Contact(Button.RECORD, True)) + core.handle(c.Contact(Button.PLAY, True))
+    clock.skip(3.0)
+    out += core.handle(c.Tick())
+    assert [a.kind for a in of(out, c.Chime)] == ["lock_on"]
+    assert of(out, c.MicPower) and not of(out, c.MicPower)[0].on

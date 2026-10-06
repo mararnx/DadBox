@@ -105,6 +105,10 @@ def chime_pcm(kind: str = "message") -> bytes:
     sound it makes unbidden. "record_start": a rising two-note "bee-boo" before the mic comes on.
     "record_end": the same falling, after the mic is off. Chosen by ear on the
     bench from five styles, 2026-10-06."""
+    if kind == "lock_on":                            # two low marimba notes, falling: "closed"
+        return _mix([(0.0, marimba(392, 0.25)), (0.13, marimba(262, 0.4))])
+    if kind == "lock_off":                           # the same, rising: "open"
+        return _mix([(0.0, marimba(262, 0.25)), (0.13, marimba(392, 0.4))])
     if kind == "record_start":                       # rising "bee-boo", 0.25 s: it delays the mic
         return tone(660, 0.11, 0.28) + tone(990, 0.14, 0.28)
     if kind == "record_end":                         # the same, falling

@@ -5,7 +5,7 @@
 (two vocabularies become one), [ADR 0016](0016-two-buttons-no-lid.md) §4
 (the lock blink) and [ADR 0020](0020-no-mute-replay-green-link.md) §3–5
 and §7
-— revised 2026-10-06 (user decision): powering on is shown on Play, see §7; ready drifts blue–green, see §8
+— revised 2026-10-06 (user decision): powering on is shown on Play, see §7; ready drifts blue–green, see §8; the lock flashes both buttons with a tone, see §9
 
 ## Context
 
@@ -97,6 +97,16 @@ second, diode-isolated feed to the red LED; the user rejected the diodes.
    at 30 Hz — 90 Hz looked no different once the duty was fine-grained. Cost:
    lgpio's software PWM is ~0.85 % of one core per 100 Hz for two pins; the
    whole service runs at ~8 % of one core.
+
+9. **The lock, seen and heard (2026-10-06).** §4's two white blinks on Play
+   become, on both buttons: **lock on** — two white flashes and a falling
+   two-note marimba tone (G4 → C4); **lock off** — one white flash and the
+   same tone rising, then back to normal; **a press while locked** — one brief
+   white flash, no sound, so a child learns the box is locked rather than
+   broken. Record has no white: its red is the mic's pin, so it flashes the
+   balanced green and blue alone, a bright cyan-white. The lock tones answer a
+   press, so they sound in quiet hours at half volume, like the record tones;
+   locking mid-recording stops the recording and sounds only the lock tone.
 
 ## Alternatives considered
 
