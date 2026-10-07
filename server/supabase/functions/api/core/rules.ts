@@ -238,3 +238,12 @@ export function doorbellFor(supabaseUrl: string | undefined, apikey: string | un
   const base = supabaseUrl.replace(/^http/, 'ws').replace(/\/+$/, '')
   return { url: `${base}/realtime/v1/websocket?apikey=${encodeURIComponent(apikey)}&vsn=1.0.0`, topic }
 }
+
+// --- Live Activity (ADR 0027) -------------------------------------------------
+// One "message waiting" on the lock screen at a time: a start is sent only if no
+// other message to that parent is unplayed and young enough for its activity to
+// still be showing. `othersUploadedAt` are the unplayed ones, this message excluded.
+
+export function shouldStartActivity(othersUploadedAt: (string | null)[], nowMs: number, lifeS: number): boolean {
+  return !othersUploadedAt.some((at) => at !== null && nowMs - Date.parse(at) < lifeS * 1000)
+}

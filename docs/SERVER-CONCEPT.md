@@ -80,7 +80,7 @@ crc32    =  over header + payload, as today — the server checks it without a k
 
 ```
 identities      id 'box'|'parent-a'|'parent-b' · token_hash
-push_devices    identity · apns_token · environment · updated_at
+push_devices    identity · apns_token · environment · live_activity_token · updated_at
 messages        id (ULID, client-minted) · seq · from · to · created_at · time_ok · duration_ms
                 codec · key_id · bytes · chunk_total · crc32 · state · blob_key
                 uploaded_at · delivered_at · played_at                         unique (from, seq)

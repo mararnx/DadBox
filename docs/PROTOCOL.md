@@ -4,6 +4,11 @@
 > mute); the box keeps its last played message so Play can repeat it. Server
 > and app: drop `mute` from `PATCH /settings` and from the settings object.
 >
+> **2026-10-07, ADR 0027:** the `message` push is Time Sensitive, and a
+> message to a parent also starts a Live Activity on the phone. `PUT
+> /push-token` gains the optional `live_activity`; § Push gains the Live
+> Activity start. Nothing changes for the box.
+>
 > **2026-09-22, ADR 0021:** the doorbell, on mains only. The check-in response
 > gains `doorbell`, telemetry gains `doorbell`, `poll` gains
 > `backstop_minutes`. A box or server that ignores all three is still correct.
@@ -202,7 +207,8 @@ GET    /messages/{id}                    one message object — refresh its stat
 GET    /device/status                    → { "telemetry": {…}, "last_checkin_at": "…", "late": false,
                                              "settings": {…}, "settings_meta": { "volume": { "by": "parent-a", "at": "…" } } }
 PATCH  /settings                         partial settings object → the same shape as /device/status returns
-PUT    /push-token                       { "apns": "<hex>", "environment": "production" | "sandbox" }
+PUT    /push-token                       { "apns": "<hex>", "environment": "production" | "sandbox",
+                                           "live_activity": "<hex>" | null }      (optional)
 ```
 
 - `GET /messages` returns the caller's thread **in order of last change** —
@@ -215,6 +221,9 @@ PUT    /push-token                       { "apns": "<hex>", "environment": "prod
 - `PATCH /settings`: a parent may set `poll` (including `backstop_minutes`, 5-30), `quiet_hours`, `led_brightness`
   and `volume`. Anything else → 403. Every field records who set it and when.
 - `PUT /push-token` is idempotent per identity and device token.
+  `live_activity` is that device's ActivityKit push-to-start token
+  ([ADR 0027](decisions/0027-time-sensitive-and-live-activity.md)): absent
+  leaves what the server holds, `null` clears it.
 
 The app keeps its own copy of every message it fetches
 ([ADR 0018](decisions/0018-archive-forever.md)); `GET /messages` is how it
@@ -298,7 +307,7 @@ content, never a name** ([ADR 0017](decisions/0017-managed-hosting-e2ee.md)).
 
 | `kind` | Sent when | Carries | APNs |
 | --- | --- | --- | --- |
-| `message` | `complete` succeeds for a message to this parent | `id` | alert, `mutable-content: 1` — the phone fetches, verifies and retitles it |
+| `message` | `complete` succeeds for a message to this parent | `id` | alert, **`interruption-level: time-sensitive`**, `mutable-content: 1` — the phone fetches, verifies and retitles it |
 | `played` | the box posts `played` for this parent's message | `id` | background, `content-available: 1` |
 | `box_late` | now > 2 × `next_checkin_s` since the last check-in; once per outage | — | alert |
 | `fault` | telemetry `fault` becomes non-null; once per fault | `fault` | alert |
@@ -307,6 +316,31 @@ content, never a name** ([ADR 0017](decisions/0017-managed-hosting-e2ee.md)).
 
 Pushes are hints. The truth is whatever `GET /messages` and
 `GET /device/status` say when the app next asks.
+
+### Live Activity (server → iPhone lock screen)
+
+A message that waits should be seen waiting
+([ADR 0027](decisions/0027-time-sensitive-and-live-activity.md)). With the
+`message` push, the server sends each of that parent's devices holding a
+`live_activity` token one ActivityKit **start**:
+
+```
+apns-push-type: liveactivity     apns-topic: <bundle id>.push-type.liveactivity     apns-priority: 10
+{ "aps": { "timestamp": 1791375060, "event": "start",
+           "attributes-type": "WaitingAttributes", "attributes": { "id": "<message id>" },
+           "content-state": { "since": 1791375060 },
+           "alert": { "title": "New message", "body": "Waiting to be heard" } } }
+```
+
+- It carries the message id and the second it was uploaded — never content,
+  never a name, like every other push.
+- **One at a time.** No start is sent while another message to that parent,
+  uploaded within the last 8 h, is still unplayed: its activity is taken to be
+  on the lock screen already (iOS ends an activity after 8 h).
+- **The server only starts.** The app ends the activity when nothing from
+  the box is left unheard; otherwise iOS ends it at 8 h. There is no update
+  and no end push, so the server holds no per-activity token.
+- A 410 clears that device's `live_activity` token; the device stays.
 
 ## Telemetry
 

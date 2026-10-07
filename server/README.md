@@ -44,6 +44,9 @@ npm run supabase -- functions deploy api --use-api   # --use-api: no Docker need
 npm run supabase -- secrets set TICK_SECRET=<random>
 ```
 
+Migration before function: the function reads `push_devices.live_activity_token`
+(ADR 0027) and simply starts no Live Activity until the column exists.
+
 Then, once, in the SQL editor — the clock's address and its secret go into Vault:
 
 ```sql

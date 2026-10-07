@@ -3,10 +3,11 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 
+import { activityStartPayload, payloadFor } from '../apns.ts'
 import { concat, crc32, crcOk, fromBytea, parseHeader, toBytea } from './container.ts'
 import {
   canFetchAudio, chunkTotalFor, decodeCursor, DEFAULT_SETTINGS, doorbellFor, encodeCursor, headerMatches,
-  type MessageRow, missingChunks, parseRange, patchSettings, validateMetadata,
+  type MessageRow, missingChunks, parseRange, patchSettings, shouldStartActivity, validateMetadata,
 } from './rules.ts'
 
 type Vector = { name: string; id: string; codec: number; key_id: number; duration_ms: number; sample_rate: number; container_hex: string }
@@ -134,4 +135,34 @@ test('settings: the backstop is a parent setting within 5-30 minutes', () => {
   assert.ok('settings' in ok && ok.settings.poll.backstop_minutes === 15)
   const bad = patchSettings('parent-a', DEFAULT_SETTINGS, {}, { poll: { backstop_minutes: 1 } }, now)
   assert.ok('status' in bad && bad.status === 400)
+})
+
+test('push: a message is time sensitive; the rest keep their levels; nothing carries content', () => {
+  const m = payloadFor('message', { id: 'X' })
+  assert.deepEqual(m, {
+    aps: { alert: { body: 'New message' }, 'mutable-content': 1, 'interruption-level': 'time-sensitive', sound: 'message.caf' },
+    kind: 'message', id: 'X',
+  })
+  assert.equal((payloadFor('box_late', {}).aps as Record<string, unknown>)['interruption-level'], undefined)
+  assert.equal((payloadFor('unplayed_48h', { id: 'X' }).aps as Record<string, unknown>)['interruption-level'], 'passive')
+  assert.deepEqual(payloadFor('played', { id: 'X' }), { aps: { 'content-available': 1 }, kind: 'played', id: 'X' })
+})
+
+test('live activity: a start carries an id and a second, in the shape ActivityKit decodes', () => {
+  assert.deepEqual(activityStartPayload('01JAYZ3K7QW9E8RVX2M4N6P8TD', 1791375060, 1791375062), {
+    aps: {
+      timestamp: 1791375062, event: 'start',
+      'attributes-type': 'WaitingAttributes', attributes: { id: '01JAYZ3K7QW9E8RVX2M4N6P8TD' },
+      'content-state': { since: 1791375060 },
+      alert: { title: 'New message', body: 'Waiting to be heard' },
+    },
+  })
+})
+
+test('live activity: one at a time — no start while a younger unplayed message is already waiting', () => {
+  const now = Date.parse('2026-10-07T14:00:00Z'), life = 8 * 3600
+  assert.equal(shouldStartActivity([], now, life), true)
+  assert.equal(shouldStartActivity(['2026-10-07T12:14:00Z'], now, life), false)
+  assert.equal(shouldStartActivity(['2026-10-07T05:59:00Z', null], now, life), true)     // its activity has ended
+  assert.equal(shouldStartActivity(['2026-10-06T09:00:00Z', '2026-10-07T13:59:00Z'], now, life), false)
 })

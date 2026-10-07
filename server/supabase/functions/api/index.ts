@@ -11,12 +11,12 @@
 import { type Context, Hono } from 'hono'
 import { createClient } from '@supabase/supabase-js'
 
-import { type Device, push, type PushKind } from './apns.ts'
+import { ACTIVITY_LIFE_S, type Device, push, type PushKind, startActivity } from './apns.ts'
 import { concat, crc32, crcOk, fromBytea, parseHeader, toBytea } from './core/container.ts'
 import {
   canFetchAudio, canSeeMessage, CHUNK_BYTES, chunkTotalFor, decodeCursor, doorbellFor, encodeCursor,
   headerMatches, type Identity, isParent, isUlid, type MessageRow, missingChunks, PARENTS,
-  parseRange, patchSettings, sameMetadata, type Settings, type SettingsMeta, toWire,
+  parseRange, patchSettings, sameMetadata, type Settings, type SettingsMeta, shouldStartActivity, toWire,
   validateMetadata,
 } from './core/rules.ts'
 
@@ -59,6 +59,26 @@ async function notify(to: Identity[], kind: PushKind, data: Record<string, unkno
   const results = await push((devices ?? []) as Device[], kind, data)
   const gone = results.filter((r) => r.gone).map((r) => r.token)
   if (gone.length) await db.from('push_devices').delete().in('apns_token', gone)
+}
+
+// A message to a parent: the alert, and — unless one is already there — the lock screen's
+// "message waiting" (PROTOCOL.md § Live Activity). The alert never waits on the activity.
+async function announce(m: MessageRow) {
+  const to = m.recipient as Identity
+  await Promise.all([notify([to], 'message', { id: m.id }), waitOnLockScreen(to, m)])
+}
+
+async function waitOnLockScreen(to: Identity, m: MessageRow) {
+  const { data: devices } = await db.from('push_devices')
+    .select('apns_token, environment, live_activity_token').eq('identity', to).not('live_activity_token', 'is', null)
+  if (!devices?.length) return
+  const { data: others } = await db.from('messages').select('uploaded_at')
+    .eq('recipient', to).in('state', ['uploaded', 'delivered']).neq('id', m.id)
+  if (!shouldStartActivity((others ?? []).map((o) => o.uploaded_at as string | null), Date.now(), ACTIVITY_LIFE_S)) return
+  const since = Math.floor(Date.parse(m.uploaded_at ?? '') / 1000) || Math.floor(Date.now() / 1000)
+  const results = await startActivity(devices as Device[], m.id, since)
+  const gone = results.filter((r) => r.gone).map((r) => r.token)
+  if (gone.length) await db.from('push_devices').update({ live_activity_token: null }).in('live_activity_token', gone)
 }
 
 async function loadMessage(id: string): Promise<MessageRow | null> {
@@ -203,7 +223,7 @@ app.post('/messages/:id/complete', async (c) => {
   const final = ((done as MessageRow[] | null)?.[0]) ?? await loadMessage(row.id)  // a racing retry may have won
   if (!final || final.state === 'uploading') return fail(c, 503, 'could not commit')
 
-  if (isParent(final.recipient)) later(notify([final.recipient], 'message', { id: final.id }))
+  if (isParent(final.recipient)) later(announce(final))
   return c.json(toWire(final))
 })
 
@@ -320,11 +340,17 @@ app.patch('/settings', parentsOnly, async (c) => {
 })
 
 app.put('/push-token', parentsOnly, async (c) => {
-  const b = await c.req.json().catch(() => null) as { apns?: unknown; environment?: unknown } | null
+  const b = await c.req.json().catch(() => null) as { apns?: unknown; environment?: unknown; live_activity?: unknown } | null
   if (typeof b?.apns !== 'string' || !/^[0-9a-fA-F]{32,200}$/.test(b.apns)) return fail(c, 400, 'apns')
   if (b.environment !== 'production' && b.environment !== 'sandbox') return fail(c, 400, 'environment')
+  // Absent leaves what is stored; null clears it (PROTOCOL.md § Archive and state).
+  const live = b.live_activity
+  if (live !== undefined && live !== null && (typeof live !== 'string' || !/^[0-9a-fA-F]{32,400}$/.test(live))) {
+    return fail(c, 400, 'live_activity')
+  }
   const { error } = await db.from('push_devices').upsert({
     identity: c.get('who'), apns_token: b.apns.toLowerCase(), environment: b.environment,
+    ...(live !== undefined ? { live_activity_token: typeof live === 'string' ? live.toLowerCase() : null } : {}),
     updated_at: new Date().toISOString(),
   }, { onConflict: 'identity,apns_token' })
   if (error) return fail(c, 503, 'could not store token')
