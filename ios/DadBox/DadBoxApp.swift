@@ -22,6 +22,8 @@ struct DadBoxApp: App {
                 delegate.model = model
                 await model.start()
             }
+            .task { await model.watchLiveActivityToken() }
+            .onOpenURL { url in Task { await model.open(url) } }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { Task { await model.refresh() } }
             }

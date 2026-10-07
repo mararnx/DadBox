@@ -29,6 +29,7 @@ final class AppModel {
     private var keys: KeyProvider = Keychain()
     private var pumping = false
     private var pushToken: String?
+    private var liveActivityToken: String?   // ActivityKit push-to-start (ADR 0027)
     private var ticker: Task<Void, Never>?
 
     var health: BoxHealth { BoxHealth(status: status, now: now, readAt: statusReadAt) }
@@ -149,6 +150,15 @@ final class AppModel {
         } catch {
             // Offline is not an event. The chip goes amber by itself when the news gets old.
         }
+        await settleWaiting()
+    }
+
+    /// The server puts "message waiting" on the lock screen; the phone takes it off once nothing
+    /// from the box is left unheard (ADR 0027). Only for messages this phone already knows, so
+    /// one that arrived a moment ago keeps its place until the thread has caught up with it.
+    private func settleWaiting() async {
+        guard !isDemo, unheardCount == 0 else { return }
+        await WaitingActivity.end(for: Set(thread.map(\.id)))
     }
 
     /// The phone keeps its own copy of every message (ADR 0018). Newest first, so what you want to hear is there first.
@@ -282,7 +292,23 @@ final class AppModel {
         #else
         let sandbox = false
         #endif
-        try? await backend?.putPushToken(apnsHex: hex, sandbox: sandbox)
+        try? await backend?.putPushToken(apnsHex: hex, sandbox: sandbox, liveActivityHex: liveActivityToken)
+    }
+
+    /// iOS hands out the token that lets the server start "message waiting", and rotates it when
+    /// it likes. It travels with the device token; until there is one, it waits here.
+    func watchLiveActivityToken() async {
+        for await hex in WaitingActivity.startTokens() where hex != liveActivityToken {
+            liveActivityToken = hex
+            if let pushToken { await register(pushToken: pushToken) }
+        }
+    }
+
+    /// A tap on "message waiting" (`dadbox://message/<id>`): the conversation, at the message.
+    func open(_ url: URL) async {
+        guard let id = MessageLink.messageID(from: url) else { return }
+        await refresh()
+        focusMessageID = id
     }
 
     func handle(push: PushPayload, tapped: Bool) async {

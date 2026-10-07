@@ -52,6 +52,8 @@ Two, and it should be hard to add a third. Full design: [DESIGN.md](DESIGN.md).
 ## Push
 
 - APNs, with the alert loud enough to be noticed. Consider a distinct sound.
+- A message is Time Sensitive and stays on the lock screen as a Live Activity
+  until it is heard ([ADR 0027](../docs/decisions/0027-time-sensitive-and-live-activity.md)).
 - Critical alerts are tempting and almost certainly wrong here — they need an
   Apple entitlement and would wake you at 3am for a voice message.
 - Ship the "box hasn't checked in for N hours" alert early. It is the most

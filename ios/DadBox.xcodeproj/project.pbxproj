@@ -8,17 +8,49 @@
 
 /* Begin PBXBuildFile section */
 		DB0000000000000000000A01 /* DadBoxKit in Frameworks */ = {isa = PBXBuildFile; productRef = DB0000000000000000000B02 /* DadBoxKit */; };
+		DB0000000000000000000A02 /* DadBoxKit in Frameworks */ = {isa = PBXBuildFile; productRef = DB0000000000000000000B03 /* DadBoxKit */; };
+		DB0000000000000000000A03 /* DadBoxLive.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DB0000000000000000000103 /* DadBoxLive.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		DB0000000000000000000C01 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DB0000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DB0000000000000000000502;
+			remoteInfo = DadBoxLive;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		DB0000000000000000000D01 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				DB0000000000000000000A03 /* DadBoxLive.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		DB0000000000000000000101 /* DadBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DadBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB0000000000000000000102 /* Config */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Config; sourceTree = "<group>"; };
+		DB0000000000000000000103 /* DadBoxLive.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DadBoxLive.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		DB0000000000000000000201 /* DadBox */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = DadBox;
+			sourceTree = "<group>";
+		};
+		DB0000000000000000000202 /* DadBoxLive */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DadBoxLive;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -32,6 +64,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DB0000000000000000000302 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DB0000000000000000000A02 /* DadBoxKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -39,6 +79,7 @@
 			isa = PBXGroup;
 			children = (
 				DB0000000000000000000201 /* DadBox */,
+				DB0000000000000000000202 /* DadBoxLive */,
 				DB0000000000000000000102 /* Config */,
 				DB0000000000000000000402 /* Products */,
 			);
@@ -48,6 +89,7 @@
 			isa = PBXGroup;
 			children = (
 				DB0000000000000000000101 /* DadBox.app */,
+				DB0000000000000000000103 /* DadBoxLive.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -62,10 +104,12 @@
 				DB0000000000000000000601 /* Sources */,
 				DB0000000000000000000301 /* Frameworks */,
 				DB0000000000000000000701 /* Resources */,
+				DB0000000000000000000D01 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				DB0000000000000000000E01 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				DB0000000000000000000201 /* DadBox */,
@@ -78,6 +122,29 @@
 			productReference = DB0000000000000000000101 /* DadBox.app */;
 			productType = "com.apple.product-type.application";
 		};
+		DB0000000000000000000502 /* DadBoxLive */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DB0000000000000000000903 /* Build configuration list for PBXNativeTarget "DadBoxLive" */;
+			buildPhases = (
+				DB0000000000000000000602 /* Sources */,
+				DB0000000000000000000302 /* Frameworks */,
+				DB0000000000000000000702 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				DB0000000000000000000202 /* DadBoxLive */,
+			);
+			name = DadBoxLive;
+			packageProductDependencies = (
+				DB0000000000000000000B03 /* DadBoxKit */,
+			);
+			productName = DadBoxLive;
+			productReference = DB0000000000000000000103 /* DadBoxLive.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -89,6 +156,9 @@
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					DB0000000000000000000501 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					DB0000000000000000000502 = {
 						CreatedOnToolsVersion = 26.0;
 					};
 				};
@@ -111,12 +181,20 @@
 			projectRoot = "";
 			targets = (
 				DB0000000000000000000501 /* DadBox */,
+				DB0000000000000000000502 /* DadBoxLive */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		DB0000000000000000000701 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DB0000000000000000000702 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -133,7 +211,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DB0000000000000000000602 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DB0000000000000000000E01 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DB0000000000000000000502 /* DadBoxLive */;
+			targetProxy = DB0000000000000000000C01 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		DB0000000000000000000801 /* Debug */ = {
@@ -248,6 +341,58 @@
 			};
 			name = Release;
 		};
+		DB0000000000000000000805 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N94V936YCU;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/DadBoxLive-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = DadBox;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ma.arnold.dadbox.app.live;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		DB0000000000000000000806 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N94V936YCU;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/DadBoxLive-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = DadBox;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ma.arnold.dadbox.app.live;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -269,6 +414,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		DB0000000000000000000903 /* Build configuration list for PBXNativeTarget "DadBoxLive" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DB0000000000000000000805 /* Debug */,
+				DB0000000000000000000806 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -280,6 +434,10 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		DB0000000000000000000B02 /* DadBoxKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DadBoxKit;
+		};
+		DB0000000000000000000B03 /* DadBoxKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DadBoxKit;
 		};

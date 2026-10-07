@@ -123,7 +123,7 @@ Recovery without iCloud: scan the paper copy.
 
 | Kind | Level | Text | Tap |
 | --- | --- | --- | --- |
-| `message` | active, **own sound** | "New message" *(title rewritten on the phone with the child's name — the server never learns it)* | conversation, at the message |
+| `message` | **time sensitive**, **own sound**, and a Live Activity until heard | "New message" *(title rewritten on the phone with the child's name — the server never learns it)* | conversation, at the message |
 | `box_late` | active, default sound | "The box has been silent for 3 h" | Box |
 | `fault` | active, default sound | "The box reports a problem: storage" | Box |
 | `battery_low` | passive, once per discharge | "Box battery at 18 %" | Box |
@@ -137,8 +137,13 @@ Recovery without iCloud: scan the paper copy.
 - Background pushes are best-effort by Apple's design. The truth is
   re-fetched whenever the app comes to the front; `played` pushes only make
   it feel live.
-- No Critical Alerts, no Time Sensitive. A voice message must not beat a
-  Sleep focus.
+- `message` is Time Sensitive and pins a Live Activity to the lock screen
+  until it is heard ([ADR 0027](../docs/decisions/0027-time-sensitive-and-live-activity.md);
+  Marco, 2026-10-07 — messages were being noticed hours late on a silent
+  phone). This reverses "no Time Sensitive". A Focus that should still win
+  says so itself: *Settings → Focus → Sleep → Apps → Time Sensitive
+  Notifications* off.
+- Still no Critical Alerts. The box's own alerts keep their levels.
 
 ## Audio
 
@@ -204,6 +209,7 @@ ios/
                     `swift test` on the Mac; needs no Xcode and no hardware.
   DadBox/           app target — SwiftUI views, recorder, player, store, push
   DadBoxNotify/     notification service extension
+  DadBoxLive/       widget extension — the "message waiting" Live Activity (ADR 0027)
 ```
 
 Minimum iOS 26: one family, one current phone, and native Ogg Opus. A second
@@ -219,6 +225,7 @@ build.
 | App: conversation, recorder (tap-tap-review-send, draft survives a kill), player, Box screen with settings and Record-light legend, setup + key sheet, Keychain, push registration and routing | builds; verified in the simulator against `DemoBackend` — play, send, *On the box → Played 20:39*, Box screen |
 | `LiveBackend` (PROTOCOL v0.3 over HTTPS) | written, **untested** — there is no server yet. The uploader is tested against an in-memory fake of § Upload |
 | Notification service extension (pre-fetch, retitle with the child's name) | not started — M1 |
+| Time Sensitive `message` push; Live Activity (`DadBoxLive`, push-to-start, ended by the app once heard) | written 2026-10-07, **not yet built or run** — written without Xcode; the server side is tested but not deployed |
 | Background `URLSession` upload | not started — see § Network |
 | On a real iPhone: app icon, microphone, earpiece, iCloud Keychain sync | signing set (team `N94V936YCU`, `ma.arnold.dadbox.app`); the rest not done |
 

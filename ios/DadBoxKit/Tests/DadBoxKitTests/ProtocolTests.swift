@@ -183,3 +183,15 @@ final class FakeServer: HTTPTransport, @unchecked Sendable {
         #expect(!APIError.status(503, "").isPermanent)
     }
 }
+
+@Suite struct WaitingLinkTests {
+    @Test func aTapOnMessageWaitingNamesItsMessageAndNothingElseDoes() throws {
+        let id = "01JAYZ3K7QW9E8RVX2M4N6P8TD"
+        let url = MessageLink.url(id: id)
+        #expect(url.absoluteString == "dadbox://message/\(id)")
+        #expect(MessageLink.messageID(from: url) == id)
+        #expect(MessageLink.messageID(from: try #require(URL(string: "dadbox://message/not-a-ulid"))) == nil)
+        #expect(MessageLink.messageID(from: try #require(URL(string: "dadbox://box/\(id)"))) == nil)
+        #expect(MessageLink.messageID(from: try #require(URL(string: "https://message/\(id)"))) == nil)
+    }
+}

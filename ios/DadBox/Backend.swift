@@ -12,7 +12,7 @@ protocol Backend: Sendable {
     func played(id: String) async throws
     func deviceStatus() async throws -> DeviceStatus
     func patchSettings(_ patch: SettingsPatch) async throws -> DeviceStatus
-    func putPushToken(apnsHex: String, sandbox: Bool) async throws
+    func putPushToken(apnsHex: String, sandbox: Bool, liveActivityHex: String?) async throws
     func upload(_ message: Message, container: Data, progress: @escaping @Sendable (Double) -> Void) async throws
 }
 
@@ -25,8 +25,8 @@ nonisolated struct LiveBackend: Backend {
     func played(id: String) async throws { try await api.played(id: id) }
     func deviceStatus() async throws -> DeviceStatus { try await api.deviceStatus() }
     func patchSettings(_ patch: SettingsPatch) async throws -> DeviceStatus { try await api.patchSettings(patch) }
-    func putPushToken(apnsHex: String, sandbox: Bool) async throws {
-        try await api.putPushToken(apnsHex: apnsHex, sandbox: sandbox)
+    func putPushToken(apnsHex: String, sandbox: Bool, liveActivityHex: String?) async throws {
+        try await api.putPushToken(apnsHex: apnsHex, sandbox: sandbox, liveActivityHex: liveActivityHex)
     }
     func upload(_ message: Message, container: Data, progress: @escaping @Sendable (Double) -> Void) async throws {
         try await Uploader(api: api).upload(message, container: container, progress: progress)
@@ -113,7 +113,7 @@ actor DemoBackend: Backend {
         return try await deviceStatus()
     }
 
-    func putPushToken(apnsHex: String, sandbox: Bool) async throws {}
+    func putPushToken(apnsHex: String, sandbox: Bool, liveActivityHex: String?) async throws {}
 
     func upload(_ message: Message, container: Data, progress: @escaping @Sendable (Double) -> Void) async throws {
         _ = try Container(decoding: container)

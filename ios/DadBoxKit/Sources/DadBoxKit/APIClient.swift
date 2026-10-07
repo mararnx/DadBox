@@ -96,8 +96,10 @@ public struct APIClient: Sendable {
         try decode(DeviceStatus.self, try await call("PATCH", "settings", json: WireJSON.encoder().encode(patch)))
     }
 
-    public func putPushToken(apnsHex: String, sandbox: Bool) async throws {
-        let body = ["apns": apnsHex, "environment": sandbox ? "sandbox" : "production"]
+    /// `liveActivityHex` is the ActivityKit push-to-start token; nil leaves what the server holds.
+    public func putPushToken(apnsHex: String, sandbox: Bool, liveActivityHex: String? = nil) async throws {
+        var body = ["apns": apnsHex, "environment": sandbox ? "sandbox" : "production"]
+        if let liveActivityHex { body["live_activity"] = liveActivityHex }
         _ = try await call("PUT", "push-token", json: JSONEncoder().encode(body))
     }
 
